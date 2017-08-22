@@ -1,3 +1,18 @@
+# C/AL Open Library
+
+The purpose of this repository is to build a C/AL library based on community contributions that will serve as an accelerator for adoption of the Extensions V2 technology. The source code from this library will be included in the base application of 'Dynamics 365 for Financials' on a monthly basis. 
+
+The primary goal is to enable creation of .NET type wrappers written in C/AL that can be subsequently used from Extensions V2. DotNet types cannot be part of the definition of public functions in the submitted code to be callable by Extensions V2.
+
+All contributions will be reviewed by Microsoft and assessed for the overall fit into the product, for reusability and for following the general coding style that is present in the other base application objects.
+
+# Process
+
+1. Code for this library should be written using the existing development environment (C/SIDE)
+2. Object IDs should be created within the range 50K-99K
+3. Microsoft will review the contribution and decide whether it wants to make it part of the product
+4. If the contribution is accepted Microsoft will modify the object IDs to fit within the base Microsoft range and apply any code fixes resulting from internal best practice checks.
+5. The code will be included in the next monthly update that is shipped after the contribution was accepted.
 
 # Contributing
 
