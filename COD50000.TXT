@@ -1,0 +1,55 @@
+OBJECT Codeunit 50000 MD5 Generator
+{
+  OBJECT-PROPERTIES
+  {
+    Date=08/22/17;
+    Time=11:51:39 AM;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+
+    PROCEDURE GenerateMD5Hash@50000(SourceString@50007 : Text) : Text;
+    VAR
+      MD5@50000 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Security.Cryptography.MD5";
+      inputBytes@50001 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Array";
+      hashBytes@50002 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Array";
+      Byte@50003 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Byte";
+      StringBuilder@50004 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.StringBuilder";
+      Encoding@50005 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.Encoding";
+      i@50006 : Integer;
+    BEGIN
+      IF SourceString = '' THEN
+        EXIT;
+
+      MD5 := MD5.Create();
+
+      Encoding := Encoding.UTF8();
+      inputBytes := Encoding.GetBytes(SourceString);
+      hashBytes := MD5.ComputeHash(inputBytes);
+
+      StringBuilder := StringBuilder.StringBuilder();
+
+      FOR i := 0 TO hashBytes.Length - 1 DO BEGIN
+        Byte := hashBytes.GetValue(i);
+        StringBuilder.Append(Byte.ToString('X2'));
+      END;
+
+      EXIT(StringBuilder.ToString());
+    END;
+
+    BEGIN
+	{
+	  MD5 Hash wrapper. 
+	    Function Call: Hash := GenerateMD5Hash(SourceString);
+	}
+    END.
+  }
+}
+
