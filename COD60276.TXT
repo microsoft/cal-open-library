@@ -1,0 +1,237 @@
+OBJECT Codeunit 60276 Api Mgt.
+{
+  OBJECT-PROPERTIES
+  {
+    Date=01-09-17;
+    Time=12:34:41;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+
+    LOCAL PROCEDURE "--- Init Request"@6014407();
+    BEGIN
+    END;
+
+    PROCEDURE InitWebRequest@9(Uri@6014403 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Uri";Username@6014400 : Text;Password@6014401 : Text;Domain@6014402 : Text;VAR HttpWebRequest@1000 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Net.HttpWebRequest");
+    BEGIN
+      IF NOT ISNULL(HttpWebRequest) THEN
+        CLEAR(HttpWebRequest);
+
+      HttpWebRequest := HttpWebRequest.Create(Uri);
+    END;
+
+    PROCEDURE AddHeader@6014429(HeaderName@6014401 : Text;HeaderValue@6014402 : Text;VAR HttpWebRequest@6014400 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Net.HttpWebRequest");
+    BEGIN
+      HttpWebRequest.Headers.Add(HeaderName,HeaderValue);
+    END;
+
+    PROCEDURE SetAccept@6014424(Accept@6014401 : Text;VAR HttpWebRequest@6014400 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Net.HttpWebRequest");
+    BEGIN
+      HttpWebRequest.Accept(Accept);
+    END;
+
+    PROCEDURE SetAuthorization@6014419(Authorization@6014401 : Text;VAR HttpWebRequest@6014400 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Net.HttpWebRequest");
+    BEGIN
+      HttpWebRequest.Headers.Add('Authorization',Authorization);
+    END;
+
+    LOCAL PROCEDURE SetBasicAuthorization@6014433(Username@6014400 : Text;Password@6014401 : Text;VAR HttpWebRequest@6014403 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Net.HttpWebRequest");
+    VAR
+      Hash@6014402 : Text;
+    BEGIN
+      Hash := ToHash(Username + ':' + Password,'MD5');
+      SetAuthorization('Basic ' + Hash,HttpWebRequest);
+    END;
+
+    PROCEDURE SetContentType@6014422(ContentType@6014401 : Text;VAR HttpWebRequest@6014400 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Net.HttpWebRequest");
+    BEGIN
+      HttpWebRequest.ContentType(ContentType);
+    END;
+
+    PROCEDURE SetCredentials@6014417(Username@6014400 : Text;Password@6014401 : Text;Domain@6014402 : Text;Uri@6014404 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Uri";AuthenticationType@6014403 : Text;VAR HttpWebRequest@1000 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Net.HttpWebRequest");
+    VAR
+      CredentialCache@1003 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Net.CredentialCache";
+      NetworkCredential@1002 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Net.NetworkCredential";
+    BEGIN
+      HttpWebRequest.UseDefaultCredentials(Username = '');
+      IF Username = '' THEN
+        EXIT;
+
+      NetworkCredential := NetworkCredential.NetworkCredential(Username,Password);
+      CredentialCache := CredentialCache.CredentialCache;
+      CredentialCache.Add(Uri,AuthenticationType,NetworkCredential);
+      CredentialCache.Add(Uri,AuthenticationType,NetworkCredential);
+      HttpWebRequest.Credentials(CredentialCache);
+    END;
+
+    LOCAL PROCEDURE SetMethod@6014431(Method@6014401 : Text;VAR HttpWebRequest@6014400 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Net.HttpWebRequest");
+    BEGIN
+      HttpWebRequest.Method := Method;
+    END;
+
+    PROCEDURE SetTimeout@6014427(Timeout@6014401 : Integer;VAR HttpWebRequest@6014400 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Net.HttpWebRequest");
+    BEGIN
+      HttpWebRequest.Timeout(Timeout);
+    END;
+
+    PROCEDURE SetTrustedCertificateValidation@6150618(VAR HttpWebRequest@6150614 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Net.HttpWebRequest");
+    BEGIN
+      //C# code - overwrite ServerCertificateValidationCallback to trust any ssl certificate
+      {
+        HttpWebRequest.ServerCertificateValidationCallback = delegate { return (true); };
+      }
+    END;
+
+    LOCAL PROCEDURE "--- Send Request"@6014409();
+    BEGIN
+    END;
+
+    PROCEDURE SendWebRequest@6150696(VAR XmlDoc@6150613 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlDocument";HttpWebRequest@6150617 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Net.HttpWebRequest";VAR HttpWebResponse@6150619 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Net.HttpWebResponse";VAR WebException@6150615 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Net.WebException") : Boolean;
+    BEGIN
+      IF TrySendWebRequest(XmlDoc,HttpWebRequest,HttpWebResponse) THEN
+        EXIT(TRUE);
+
+      WebException := GETLASTERROROBJECT;
+      IF ISNULL(WebException) THEN
+        EXIT(FALSE);
+
+      IF TryGetWebExceptionResponse(WebException,HttpWebResponse) THEN;
+
+      EXIT(FALSE);
+    END;
+
+    PROCEDURE SendWebRequestText@6014400(VAR Request@6150613 : Text;HttpWebRequest@6150617 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Net.HttpWebRequest";VAR HttpWebResponse@6150619 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Net.HttpWebResponse";VAR WebException@6150615 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Net.WebException") : Boolean;
+    BEGIN
+      IF TrySendWebRequestText(Request,HttpWebRequest,HttpWebResponse) THEN
+        EXIT(TRUE);
+
+      WebException := GETLASTERROROBJECT;
+      IF ISNULL(WebException) THEN
+        EXIT(FALSE);
+
+      IF TryGetWebExceptionResponse(WebException,HttpWebResponse) THEN;
+
+      EXIT(FALSE);
+    END;
+
+    [TryFunction]
+    LOCAL PROCEDURE TrySendWebRequest@6151407(VAR XmlDoc@50002 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlDocument";HttpWebRequest@6151401 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Net.HttpWebRequest";VAR HttpWebResponse@6151400 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Net.HttpWebResponse");
+    VAR
+      MemoryStream@6151402 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.IO.MemoryStream";
+    BEGIN
+      MemoryStream := HttpWebRequest.GetRequestStream;
+      XmlDoc.Save(MemoryStream);
+      MemoryStream.Flush;
+      MemoryStream.Close;
+      CLEAR(MemoryStream);
+      HttpWebResponse := HttpWebRequest.GetResponse;
+    END;
+
+    [TryFunction]
+    LOCAL PROCEDURE TrySendWebRequestText@6014401(VAR Request@50002 : Text;HttpWebRequest@6151401 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Net.HttpWebRequest";VAR HttpWebResponse@6151400 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Net.HttpWebResponse");
+    VAR
+      StreamWriter@6151403 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.IO.StreamWriter";
+      Stream@6151402 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.IO.Stream";
+    BEGIN
+      Stream := HttpWebRequest.GetRequestStream;
+      StreamWriter := StreamWriter.StreamWriter(Stream);
+      StreamWriter.Write(Request);
+      StreamWriter.Close;
+      Stream.Close;
+      HttpWebResponse := HttpWebRequest.GetResponse;
+    END;
+
+    [TryFunction]
+    LOCAL PROCEDURE TryGetWebExceptionResponse@6151406(VAR WebException@50000 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Net.WebException";VAR HttpWebResponse@6151400 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Net.HttpWebResponse");
+    BEGIN
+      HttpWebResponse := WebException.Response;
+    END;
+
+    LOCAL PROCEDURE "--- Get Response"@6014408();
+    BEGIN
+    END;
+
+    PROCEDURE GetWebExceptionMessage@6151403(VAR WebException@6151400 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Net.WebException") ExceptionMessage : Text;
+    VAR
+      HttpWebResponse@6151401 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Net.HttpWebResponse";
+      InnerWebException@6014400 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Net.WebException";
+    BEGIN
+      IF ISNULL(WebException) THEN
+        EXIT('');
+
+      IF TryGetInnerWebException(WebException,InnerWebException) THEN BEGIN
+        ExceptionMessage := GetWebExceptionMessage(InnerWebException);
+        EXIT(ExceptionMessage);
+      END;
+
+      IF TryGetWebExceptionResponse(WebException,HttpWebResponse) THEN BEGIN
+        ExceptionMessage := GetWebResponseText(HttpWebResponse);
+        EXIT(ExceptionMessage);
+      END;
+
+      EXIT(WebException.Message);
+    END;
+
+    PROCEDURE GetWebResponseText@6151400(VAR HttpWebResponse@6151418 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Net.HttpWebResponse") ResponseText : Text;
+    VAR
+      HttpWebException@6151417 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Net.WebException";
+      BinaryReader@6151407 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.IO.BinaryReader";
+      Stream@6151404 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.IO.Stream";
+      StreamReader@6151403 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.IO.StreamReader";
+      APIUsername@6151402 : Text;
+      ElementName@6151401 : Text;
+      Response@6151400 : Text;
+    BEGIN
+      IF TryReadResponseText(HttpWebResponse,ResponseText) THEN
+        EXIT(ResponseText);
+
+      EXIT('');
+    END;
+
+    [TryFunction]
+    LOCAL PROCEDURE TryGetInnerWebException@6151405(VAR WebException@50002 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Net.WebException";VAR InnerWebException@6151400 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Net.WebException");
+    BEGIN
+      InnerWebException := WebException.InnerException;
+    END;
+
+    [TryFunction]
+    LOCAL PROCEDURE TryReadResponseText@6151408(VAR HttpWebResponse@50000 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Net.HttpWebResponse";VAR ResponseText@6151400 : Text);
+    VAR
+      Stream@6151402 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.IO.Stream";
+      StreamReader@6151401 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.IO.StreamReader";
+    BEGIN
+      Stream := HttpWebResponse.GetResponseStream;
+      StreamReader := StreamReader.StreamReader(Stream);
+      ResponseText := StreamReader.ReadToEnd;
+      Stream.Flush;
+      Stream.Close;
+      CLEAR(Stream);
+    END;
+
+    PROCEDURE ToBase64String@6014402(String@6014403 : Text;EncodingName@6014402 : Text) : Text;
+    VAR
+      Convert@6014404 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Convert";
+      Encoding@6014400 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.Encoding";
+    BEGIN
+      EXIT(Convert.ToBase64String(Encoding.GetEncoding(EncodingName).GetBytes(String)));
+    END;
+
+    PROCEDURE ToHash@6014405(String@6014401 : Text;Format@6014402 : Text) : Text;
+    VAR
+      FormsAuthentication@6014400 : DotNet "'System.Web, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a'.System.Web.Security.FormsAuthentication";
+    BEGIN
+      EXIT(FormsAuthentication.HashPasswordForStoringInConfigFile(String,Format));
+    END;
+
+    BEGIN
+    END.
+  }
+}
+
