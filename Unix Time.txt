@@ -1,0 +1,51 @@
+OBJECT Codeunit 50100 Unix Time
+{
+  OBJECT-PROPERTIES
+  {
+    Date=04-09-17;
+    Time=11:02:59;
+    Modified=Yes;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+            MESSAGE(FORMAT(GetUnixTime(CURRENTDATETIME)));
+          END;
+
+  }
+  CODE
+  {
+
+    LOCAL PROCEDURE GetUnixTime@6150645(FromDateTime@6150614 : DateTime) UnixTimeStamp : Integer;
+    VAR
+      SystemDateTime@6150615 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.DateTime";
+      TypeOfDateTime@6150623 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Type";
+      TypeOfTimeSpan@6150628 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Type";
+      DotNetArray@6150625 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Array";
+      SystemObject@6150626 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Object";
+      Convert@6150627 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Convert";
+      MethodInfo@6150629 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Reflection.MethodInfo";
+      DateTimeKind@6150631 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.DateTimeKind";
+      Dur@6150613 : Duration;
+    BEGIN
+      TypeOfDateTime := GETDOTNETTYPE(SystemDateTime);
+
+      DotNetArray := DotNetArray.CreateInstance(GETDOTNETTYPE(GETDOTNETTYPE('')),1);
+      DotNetArray.SetValue(TypeOfDateTime,0);
+      MethodInfo := TypeOfDateTime.GetMethod('Subtract', DotNetArray);
+
+      DotNetArray := DotNetArray.CreateInstance(GETDOTNETTYPE(SystemObject),1);
+      DotNetArray.SetValue(SystemDateTime.DateTime(1970,1,1,0,0,0,DateTimeKind.Utc),0);
+
+      Dur := MethodInfo.Invoke(FromDateTime,DotNetArray);
+
+      TypeOfTimeSpan := GETDOTNETTYPE(Dur);
+      UnixTimeStamp := Convert.ToInt32(TypeOfTimeSpan.GetProperty('TotalSeconds').GetValue(Dur));
+    END;
+
+    BEGIN
+    END.
+  }
+}
+
