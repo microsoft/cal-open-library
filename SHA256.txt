@@ -1,0 +1,60 @@
+OBJECT Codeunit 50101 SHA256
+{
+  OBJECT-PROPERTIES
+  {
+    Date=04-09-17;
+    Time=11:35:52;
+    Modified=Yes;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+            MESSAGE(CalcPaymentHMAC());
+          END;
+
+  }
+  CODE
+  {
+
+    LOCAL PROCEDURE CalcPaymentHMAC@6150652() : Text[100];
+    VAR
+      Encoding@6150616 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.Encoding";
+      HMACString@6150615 : Text[1024];
+      MerchantKey@6150617 : Text[50];
+      HashValue@6150614 : Text[100];
+      CharSet@6150619 : Text[30];
+    BEGIN
+      CharSet := 'iso-8859-1';
+      HMACString := 'SHA256 HASH Generator';
+
+      Encoding := Encoding.GetEncoding(CharSet);
+      MerchantKey := '123456789';
+      HashValue := GetHmacSha256Hash(GetSha256Hash(MerchantKey,Encoding),HMACString,Encoding);
+
+      EXIT(HashValue);
+    END;
+
+    LOCAL PROCEDURE GetHmacSha256Hash@6150617(Key@6150614 : Text;Value@6150615 : Text;Encoding@6150616 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.Encoding") : Text;
+    VAR
+      HmacSha256@6150613 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Security.Cryptography.HMACSHA256";
+      Convert@6150617 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Convert";
+    BEGIN
+      HmacSha256 := HmacSha256.HMACSHA256(Encoding.GetBytes(Key));
+      EXIT(Convert.ToBase64String(HmacSha256.ComputeHash(Encoding.GetBytes(Value))));
+    END;
+
+    LOCAL PROCEDURE GetSha256Hash@6150648(Value@6150615 : Text;Encoding@6150616 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.Encoding") : Text;
+    VAR
+      Sha256@6150613 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Security.Cryptography.SHA256Managed";
+      Convert@6150617 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Convert";
+    BEGIN
+      Sha256 := Sha256.SHA256Managed();
+      EXIT(Encoding.GetString(Sha256.ComputeHash(Encoding.GetBytes(Value))));
+    END;
+
+    BEGIN
+    END.
+  }
+}
+
