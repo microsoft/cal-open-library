@@ -1,0 +1,52 @@
+OBJECT Codeunit 50000 XSLT
+{
+  OBJECT-PROPERTIES
+  {
+    Date=09/05/17;
+    Time=[ 8:38:37 AM];
+    Modified=Yes;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+
+    PROCEDURE XSLT@1000000000(VAR XmlIStream@1000000007 : InStream;VAR XslIStream@1000000000 : InStream;VAR XmlOStream@1000000006 : OutStream);
+    VAR
+      DNXsl@1000000005 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.Xsl.XslCompiledTransform";
+      DNXslReader@1000000004 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlReader";
+      DNXmlWriter@1000000003 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlWriter";
+      DNXslReaderSettings@1000000002 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlReaderSettings";
+      DNDtdProcessing@1000000001 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.DtdProcessing";
+      DNXmlReader@1000000009 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlReader";
+      DNXmlReaderSettings@1000000008 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlReaderSettings";
+      DNXmlIn@1000000010 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlDocument";
+    BEGIN
+      DNXmlIn := DNXmlIn.XmlDocument();
+      DNXmlIn.PreserveWhitespace(FALSE);
+      DNXmlReaderSettings := DNXmlReaderSettings.XmlReaderSettings();
+      DNXmlReaderSettings.DtdProcessing := DNDtdProcessing.Ignore;
+
+      DNXmlReader := DNXmlReader.Create(XmlIStream, DNXmlReaderSettings);
+      DNXmlIn.Load(DNXmlReader);
+
+      DNXsl := DNXsl.XslCompiledTransform();
+      DNXslReaderSettings := DNXslReaderSettings.XmlReaderSettings();
+      DNXslReaderSettings.DtdProcessing := DNDtdProcessing.Ignore;
+      DNXslReader := DNXslReader.Create(XslIStream, DNXslReaderSettings);
+      DNXmlWriter := DNXmlWriter.Create(XmlOStream);
+      DNXsl.Load(DNXslReader);
+      DNXsl.Transform(DNXmlIn.CreateNavigator(), DNXmlWriter);
+      DNXmlWriter.Flush();
+    END;
+
+    BEGIN
+    END.
+  }
+}
+
