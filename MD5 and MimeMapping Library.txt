@@ -1,0 +1,53 @@
+OBJECT Codeunit 60222 MD5 and MimeMapping Library
+{
+  OBJECT-PROPERTIES
+  {
+    Date=06.09.17;
+    Time=17:05:19;
+    Modified=Yes;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+
+    PROCEDURE GetMD5@1(VAR TempBlob@1000 : Record 99008535) : Text;
+    VAR
+      MemoryStream@1002 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.IO.MemoryStream";
+      Byte@1100408005 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Byte";
+      MD5@1100408000 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Security.Cryptography.MD5";
+      MD5Bytes@1100408002 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Array";
+      StringBuilder@1100408003 : DotNet "'mscorlib'.System.Text.StringBuilder";
+      InStr@1001 : InStream;
+      i@1100408004 : Integer;
+    BEGIN
+      TempBlob.Blob.CREATEINSTREAM(InStr);
+      MemoryStream := MemoryStream.MemoryStream;
+      COPYSTREAM(MemoryStream,InStr);
+      MD5 := MD5.Create;
+      MD5Bytes := MD5.ComputeHash(MemoryStream.ToArray);
+      StringBuilder := StringBuilder.StringBuilder;
+      FOR i := 0 TO MD5Bytes.Length - 1 DO BEGIN
+        Byte := MD5Bytes.GetValue(i);
+        StringBuilder.Append(Byte.ToString('x2'));
+      END;
+      EXIT(StringBuilder.ToString);
+    END;
+
+    PROCEDURE GetMimeMapping@2(FileName@1200050000 : Text[1024]) : Text;
+    VAR
+      MimeMapping@1000 : DotNet "'System.Web, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a'.System.Web.MimeMapping";
+    BEGIN
+      EXIT(MimeMapping.GetMimeMapping(FileName));
+    END;
+
+    BEGIN
+    END.
+  }
+}
+
