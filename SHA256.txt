@@ -2,32 +2,27 @@ OBJECT Codeunit 50101 SHA256
 {
   OBJECT-PROPERTIES
   {
-    Date=04-09-17;
-    Time=11:35:52;
+    Date=06-09-17;
+    Time=06:27:38;
     Modified=Yes;
     Version List=;
   }
   PROPERTIES
   {
     OnRun=BEGIN
-            MESSAGE(CalcPaymentHMAC());
+            MESSAGE(CalcHMAC('SHA256 HASH Generator','iso-8859-1'));
           END;
 
   }
   CODE
   {
 
-    LOCAL PROCEDURE CalcPaymentHMAC@6150652() : Text[100];
+    PROCEDURE CalcHMAC@6150652(HMACString@6150613 : Text[1024];CharSet@6150615 : Text[30]) : Text[100];
     VAR
       Encoding@6150616 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.Encoding";
-      HMACString@6150615 : Text[1024];
       MerchantKey@6150617 : Text[50];
       HashValue@6150614 : Text[100];
-      CharSet@6150619 : Text[30];
     BEGIN
-      CharSet := 'iso-8859-1';
-      HMACString := 'SHA256 HASH Generator';
-
       Encoding := Encoding.GetEncoding(CharSet);
       MerchantKey := '123456789';
       HashValue := GetHmacSha256Hash(GetSha256Hash(MerchantKey,Encoding),HMACString,Encoding);
@@ -57,4 +52,3 @@ OBJECT Codeunit 50101 SHA256
     END.
   }
 }
-
