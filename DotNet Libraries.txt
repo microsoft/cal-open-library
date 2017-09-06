@@ -1,0 +1,272 @@
+OBJECT Codeunit 50500 DateTime Formatting  Library
+{
+  OBJECT-PROPERTIES
+  {
+    Date=06.09.17;
+    Time=16:33:04;
+    Modified=Yes;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+
+    PROCEDURE GetStandardDateTimeString@1(CurrentDateTime@1001 : DateTime;Pattern@1000 : Text) : Text;
+    VAR
+      DateTime@1100408000 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.DateTime";
+      CultureInfo@1100408001 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Globalization.CultureInfo";
+    BEGIN
+      DateTime := CurrentDateTime;
+      EXIT(DateTime.ToString(Pattern, CultureInfo.InvariantCulture));
+    END;
+
+    PROCEDURE EvaluateStandardDateTimeString@2(DateTimeString@1100408000 : Text;Pattern@1000 : Text) : DateTime;
+    VAR
+      DateTimeOffset@1100408002 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.DateTimeOffset";
+      CultureInfo@1100408001 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Globalization.CultureInfo";
+      Convert@1100408004 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Convert";
+    BEGIN
+      DateTimeOffset := DateTimeOffset.ParseExact(DateTimeString,Pattern,CultureInfo.InvariantCulture);
+      DateTimeOffset := DateTimeOffset.ToLocalTime;
+      EXIT(DateTimeOffset.DateTime);
+    END;
+
+    PROCEDURE GetUTCDateTimeString@3() : Text;
+    VAR
+      DateTime@1000 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.DateTime";
+    BEGIN
+      EXIT(GetStandardDateTimeString(GetUTCDateTime,'R'));
+    END;
+
+    PROCEDURE EvaluateUTCDateTimeString@4(DateTimeString@1100408000 : Text) : DateTime;
+    BEGIN
+      EXIT(EvaluateStandardDateTimeString(DateTimeString,'R'));
+    END;
+
+    PROCEDURE GetUTCDateTime@5() : DateTime;
+    VAR
+      DateTime@1000 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.DateTime";
+    BEGIN
+      DateTime := DateTime.Now;
+      EXIT(DateTime)
+    END;
+
+    BEGIN
+    END.
+  }
+}
+
+OBJECT Codeunit 50501 JwtSecurityToken Library
+{
+  OBJECT-PROPERTIES
+  {
+    Date=06.09.17;
+    Time=16:37:40;
+    Modified=Yes;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+
+    PROCEDURE HasTokenExpired@10017291(AccessToken@10017292 : Text) : Boolean;
+    VAR
+      TempStandardText@10017290 : TEMPORARY Record 7;
+    BEGIN
+      IF AccessToken = '' THEN EXIT(TRUE);
+      GetTokenDetails(AccessToken,TempStandardText);
+      EXIT(GetTokenDateTimeValue(TempStandardText,'EXP') < CURRENTDATETIME);
+    END;
+
+    PROCEDURE GetTokenValue@10017290(VAR TempStandardText@10017293 : TEMPORARY Record 7;Id@10017291 : Text) : Text;
+    BEGIN
+      IF TempStandardText.GET(Id) THEN
+        EXIT(TempStandardText.Description);
+    END;
+
+    PROCEDURE GetTokenDateTimeValue@10017292(VAR TempStandardText@10017292 : TEMPORARY Record 7;Id@10017291 : Text) : DateTime;
+    VAR
+      Timestamp@10017293 : Decimal;
+    BEGIN
+      IF NOT EVALUATE(Timestamp,GetTokenValue(TempStandardText,Id)) THEN EXIT;
+      EXIT(EvaluateUnixTimestamp(Timestamp));
+    END;
+
+    PROCEDURE GetTokenDetails@10017293(AccessToken@10017294 : Text;VAR TempStandardText@10017290 : TEMPORARY Record 7);
+    VAR
+      JwtSecurityTokenHandler@10017293 : DotNet "'System.IdentityModel.Tokens.Jwt, Version=5.1.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler";
+      JwtSecurityToken@10017292 : DotNet "'System.IdentityModel.Tokens.Jwt, Version=5.1.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.System.IdentityModel.Tokens.Jwt.JwtSecurityToken";
+      Claim@10017295 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Security.Claims.Claim";
+    BEGIN
+      IF AccessToken = '' THEN EXIT;
+      JwtSecurityTokenHandler := JwtSecurityTokenHandler.JwtSecurityTokenHandler;
+      JwtSecurityToken := JwtSecurityTokenHandler.ReadToken(AccessToken);
+
+      WITH TempStandardText DO
+        FOREACH Claim IN JwtSecurityToken.Claims DO BEGIN
+          Code := Claim.Type;
+          Description := Claim.Value;
+          INSERT;
+        END;
+    END;
+
+    LOCAL PROCEDURE EvaluateUnixTimestamp@19(Timestamp@1002 : BigInteger) : DateTime;
+    VAR
+      ResultDateTime@1000 : DateTime;
+      EpochDateTime@1001 : DateTime;
+      TimezoneOffset@1003 : Duration;
+      TimestampInMilliseconds@1004 : BigInteger;
+    BEGIN
+      IF NOT GetUserTimezoneOffset(TimezoneOffset) THEN
+        TimezoneOffset := 0;
+
+      EpochDateTime := CREATEDATETIME(DMY2DATE(1,1,1970),0T);
+      TimestampInMilliseconds := Timestamp * 1000;
+      ResultDateTime := EpochDateTime + TimestampInMilliseconds + TimezoneOffset;
+      EXIT(ResultDateTime);
+    END;
+
+    [TryFunction]
+    LOCAL PROCEDURE GetUserTimezoneOffset@5(VAR Duration@1001 : Duration);
+    VAR
+      UserPersonalization@1004 : Record 2000000073;
+      TimeZoneInfo@1003 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.TimeZoneInfo";
+      TimeZone@1000 : Text;
+    BEGIN
+      UserPersonalization.GET(USERSECURITYID);
+      TimeZone := UserPersonalization."Time Zone";
+      TimeZoneInfo := TimeZoneInfo.FindSystemTimeZoneById(TimeZone);
+      Duration := TimeZoneInfo.BaseUtcOffset;
+    END;
+
+    BEGIN
+    END.
+  }
+}
+
+OBJECT Codeunit 55986 Json/Xml Conversion Library
+{
+  OBJECT-PROPERTIES
+  {
+    Date=06.09.17;
+    Time=16:41:35;
+    Modified=Yes;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+
+    PROCEDURE XmlToJson@94(Xml@10035985 : Text) Json : Text;
+    VAR
+      JsonConvert@10017292 : DotNet "'Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed'.Newtonsoft.Json.JsonConvert";
+      JsonFormatting@10017296 : DotNet "'Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed'.Newtonsoft.Json.Formatting";
+      XmlDocument@10017291 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlDocument";
+    BEGIN
+      XmlDocument := XmlDocument.XmlDocument;
+      XmlDocument.LoadXml(Xml);
+      Json := JsonConvert.SerializeXmlNode(XmlDocument.DocumentElement,JsonFormatting.Indented,TRUE);
+    END;
+
+    PROCEDURE JsonToXml@95(Json@10035985 : Text;DocumentElementName@1000 : Text) Xml : Text;
+    VAR
+      JsonConvert@10017293 : DotNet "'Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed'.Newtonsoft.Json.JsonConvert";
+      JsonFormatting@10017292 : DotNet "'Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed'.Newtonsoft.Json.Formatting";
+      XmlDocument@10017291 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlDocument";
+    BEGIN
+      XmlDocument := JsonConvert.DeserializeXmlNode(Json,DocumentElementName);
+      Xml := XmlDocument.OuterXml;
+    END;
+
+    BEGIN
+    END.
+  }
+}
+
+OBJECT Codeunit 60200 HmacSH Library
+{
+  OBJECT-PROPERTIES
+  {
+    Date=06.09.17;
+    Time=16:52:19;
+    Modified=Yes;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    Permissions=TableData 1260=r;
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+
+    PROCEDURE GetHmacSHA1Signature@1(Signature@60200 : Text;SecretKey@60209 : Text) HmacSHA1Signature : Text;
+    VAR
+      Encoding@60208 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.ASCIIEncoding";
+      DatatoHmac@60207 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Array";
+      Convert@60205 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Convert";
+      Crypto@60204 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Security.Cryptography.HMACSHA1";
+    BEGIN
+      DatatoHmac := Encoding.UTF8.GetBytes(Signature);
+      Crypto := Crypto.HMACSHA1(Encoding.UTF8.GetBytes(SecretKey));
+      HmacSHA1Signature := Convert.ToBase64String(Crypto.ComputeHash(DatatoHmac));
+    END;
+
+    PROCEDURE GetHmacSHA256Signature@2(Signature@1001 : Text;SecretKey@1000 : Text) HmacSHA256Signature : Text;
+    VAR
+      Encoding@1005 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.ASCIIEncoding";
+      DatatoHmac@1004 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Array";
+      Convert@1003 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Convert";
+      Crypto@1002 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Security.Cryptography.HMACSHA256";
+    BEGIN
+      DatatoHmac := Encoding.UTF8.GetBytes(Signature);
+      Crypto := Crypto.HMACSHA256(Encoding.UTF8.GetBytes(SecretKey));
+      HmacSHA256Signature := Convert.ToBase64String(Crypto.ComputeHash(DatatoHmac));
+    END;
+
+    PROCEDURE GetHmacSHA384Signature@3(Signature@1001 : Text;SecretKey@1000 : Text) HmacSHA384Signature : Text;
+    VAR
+      Encoding@1005 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.ASCIIEncoding";
+      DatatoHmac@1004 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Array";
+      Convert@1003 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Convert";
+      Crypto@1002 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Security.Cryptography.HMACSHA384";
+    BEGIN
+      DatatoHmac := Encoding.UTF8.GetBytes(Signature);
+      Crypto := Crypto.HMACSHA384(Encoding.UTF8.GetBytes(SecretKey));
+      HmacSHA384Signature := Convert.ToBase64String(Crypto.ComputeHash(DatatoHmac));
+    END;
+
+    PROCEDURE GetHmacSHA512Signature@4(Signature@1001 : Text;SecretKey@1000 : Text) HmacSHA512Signature : Text;
+    VAR
+      Encoding@1005 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.ASCIIEncoding";
+      DatatoHmac@1004 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Array";
+      Convert@1003 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Convert";
+      Crypto@1002 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Security.Cryptography.HMACSHA512";
+    BEGIN
+      DatatoHmac := Encoding.UTF8.GetBytes(Signature);
+      Crypto := Crypto.HMACSHA512(Encoding.UTF8.GetBytes(SecretKey));
+      HmacSHA512Signature := Convert.ToBase64String(Crypto.ComputeHash(DatatoHmac));
+    END;
+
+    BEGIN
+    END.
+  }
+}
+
