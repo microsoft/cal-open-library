@@ -2,8 +2,8 @@ OBJECT Codeunit 50100 Unix Time
 {
   OBJECT-PROPERTIES
   {
-    Date=04-09-17;
-    Time=11:02:59;
+    Date=06-09-17;
+    Time=06:32:28;
     Modified=Yes;
     Version List=;
   }
@@ -17,7 +17,7 @@ OBJECT Codeunit 50100 Unix Time
   CODE
   {
 
-    LOCAL PROCEDURE GetUnixTime@6150645(FromDateTime@6150614 : DateTime) UnixTimeStamp : Integer;
+    PROCEDURE GetUnixTime@6150645(FromDateTime@6150614 : DateTime) UnixTimeStamp : Integer;
     VAR
       SystemDateTime@6150615 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.DateTime";
       TypeOfDateTime@6150623 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Type";
@@ -48,4 +48,3 @@ OBJECT Codeunit 50100 Unix Time
     END.
   }
 }
-
