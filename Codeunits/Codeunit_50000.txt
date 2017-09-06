@@ -3,7 +3,7 @@ OBJECT Codeunit 50000 Encryption
   OBJECT-PROPERTIES
   {
     Date=06.09.17;
-    Time=08:10:04;
+    Time=08:16:41;
     Modified=Yes;
     Version List=NAVCOMMUNITY10.00;
   }
@@ -45,6 +45,40 @@ OBJECT Codeunit 50000 Encryption
       END;
 
       EXIT(StringBuilder.ToString());
+    END;
+
+    PROCEDURE CalcHMAC@6150652(HMACString@6150613 : Text[1024];CharSet@6150615 : Text[30]) : Text[100];
+    VAR
+      Encoding@6150616 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.Encoding";
+      MerchantKey@6150617 : Text[50];
+      HashValue@6150614 : Text[100];
+    BEGIN
+
+      Encoding := Encoding.GetEncoding(CharSet);
+      MerchantKey := '123456789';
+      HashValue := GetHmacSha256Hash(GetSha256Hash(MerchantKey, Encoding), HMACString, Encoding);
+
+      EXIT(HashValue);
+    END;
+
+    PROCEDURE GetHmacSha256Hash@6150617(Key@6150614 : Text;Value@6150615 : Text;Encoding@6150616 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.Encoding") : Text;
+    VAR
+      HmacSha256@6150613 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Security.Cryptography.HMACSHA256";
+      Convert@6150617 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Convert";
+    BEGIN
+      HmacSha256 := HmacSha256.HMACSHA256(Encoding.GetBytes(Key));
+
+      EXIT(Convert.ToBase64String(HmacSha256.ComputeHash(Encoding.GetBytes(Value))));
+    END;
+
+    PROCEDURE GetSha256Hash@6150648(Value@6150615 : Text;Encoding@6150616 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.Encoding") : Text;
+    VAR
+      Sha256@6150613 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Security.Cryptography.SHA256Managed";
+      Convert@6150617 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Convert";
+    BEGIN
+
+      Sha256 := Sha256.SHA256Managed();
+      EXIT(Encoding.GetString(Sha256.ComputeHash(Encoding.GetBytes(Value))));
     END;
 
     BEGIN
