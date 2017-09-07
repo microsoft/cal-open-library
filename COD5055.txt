@@ -1,0 +1,67 @@
+OBJECT Codeunit 50555 Misc. functions
+{
+  OBJECT-PROPERTIES
+  {
+    Date=07.09.17;
+    Time=10:53:27;
+    Modified=Yes;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+
+    [TryFunction]
+    [External]
+    PROCEDURE TryGetXml@1(TempBlob@1000 : Record 99008535;VAR Xml@1003 : Text);
+    VAR
+      XmlDoc@1002 : DotNet "'System.Xml, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlDocument";
+      InStr@1001 : InStream;
+    BEGIN
+      TempBlob.Blob.CREATEINSTREAM(InStr);
+      XmlDoc := XmlDoc.XmlDocument;
+      XmlDoc.PreserveWhitespace := FALSE;
+      XmlDoc.Load(InStr);
+      Xml := XmlDoc.OuterXml;
+    END;
+
+    [TryFunction]
+    [External]
+    PROCEDURE FindImageType@2(TempBlob@1000 : Record 99008535;VAR FileExtension@1001 : Text);
+    VAR
+      Bytes@10000201 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Array";
+      Byte@10000202 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Byte";
+      MemoryStream@10000204 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.IO.MemoryStream";
+      InStr@10000203 : InStream;
+      UnknownFileTypeErr@1002 : TextConst 'ENU=Unknown file type';
+      NoContentErr@1003 : TextConst 'ENU=No content in file';
+    BEGIN
+      IF NOT TempBlob.Blob.HASVALUE THEN ERROR(NoContentErr);
+
+      TempBlob.Blob.CREATEINSTREAM(InStr);
+      MemoryStream := MemoryStream.MemoryStream;
+      COPYSTREAM(MemoryStream,InStr);
+      Bytes := MemoryStream.ToArray;
+      Byte := Bytes.GetValue(0);
+      CASE Byte.ToString OF
+        '66' : FileExtension := 'bmp';
+        '71' : FileExtension := 'gif';
+        '0'  : FileExtension := 'ico';
+        '255': FileExtension := 'jpg';
+        '73' : FileExtension := 'tiff';
+        '137': FileExtension := 'png';
+        ELSE
+          ERROR(UnknownFileTypeErr);
+      END;
+    END;
+
+    BEGIN
+    END.
+  }
+}
+
