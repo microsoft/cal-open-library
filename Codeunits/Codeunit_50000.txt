@@ -28,12 +28,10 @@ OBJECT Codeunit 50000 Encryption
       IF SourceString = '' THEN
         EXIT;
 
-      //--- Using BEGIN
       MD5 := MD5.Create();
       hashBytes := MD5.ComputeHash(
                     Encoding.UTF8().GetBytes(SourceString));
       MD5.Dispose();
-      //+++ Using END
 
       stringBuilder := stringBuilder.StringBuilder();
 
@@ -55,11 +53,9 @@ OBJECT Codeunit 50000 Encryption
     BEGIN
       Encoding := Encoding.GetEncoding(CharSet);
 
-      //--- Using BEGIN
       cRNG := cRNG.Create();
       cRNG.GetBytes(ByteArray);
       cRNG.Dispose();
-      //+++ Using END
 
       HashValue := GetHmacSha256Hash(ByteArray, HMACString, Encoding);
 
@@ -72,12 +68,11 @@ OBJECT Codeunit 50000 Encryption
       Convert@6150617 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Convert";
       ByteArray@1112500000 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Array";
     BEGIN
-      //--- Using BEGIN
+      
       HmacSha256 := HmacSha256.HMACSHA256(Key);
       ByteArray := HmacSha256.ComputeHash(Encoding.GetBytes(Value));
       HmacSha256.Dispose();
-      //+++ Using END
-
+      
       EXIT(Convert.ToBase64String(ByteArray));
     END;
 
@@ -86,12 +81,11 @@ OBJECT Codeunit 50000 Encryption
       Sha256@6150613 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Security.Cryptography.SHA256Managed";
       ByteArray@1112500000 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Array";
     BEGIN
-      //--- Using BEGIN
+      
       Sha256 := Sha256.SHA256Managed();
       ByteArray := Sha256.ComputeHash(Encoding.GetBytes(Value));
       Sha256.Dispose();
-      //+++ Using END
-
+      
       EXIT(Encoding.GetString(ByteArray));
     END;
 
