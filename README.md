@@ -10,9 +10,11 @@ All contributions will be reviewed by Microsoft and assessed for the overall fit
 
 1. Code for this library should be written using the existing development environment (C/SIDE).
 2. Object IDs should be created within the range 50K-99K.
-3. Microsoft will review the contribution and decide whether it wants to make it part of the product.
-4. If the contribution is accepted Microsoft will modify the object IDs to fit within the base Microsoft range and apply any code fixes resulting from internal best practice checks.
-5. The code will be included in the next monthly update that is shipped after the contribution was accepted.
+3. In general we only accept codeunit objects. If you have a  strong reason for another object type it is recommended to discuss it with Microsoft through an Issue first, before submitting the code.
+4. **All code needs to be submitted with accompanying unit tests.**
+5. Microsoft will review the contribution and decide whether it wants to make it part of the product.
+6. If the contribution is accepted Microsoft will modify the object IDs to fit within the base Microsoft range and apply any code fixes resulting from internal best practice checks.
+7. The code will be included in the next monthly update that is shipped after the contribution was accepted.
 
 # Contributing
 
