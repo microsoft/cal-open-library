@@ -1,0 +1,99 @@
+OBJECT Codeunit 50000 Encryption
+{
+  OBJECT-PROPERTIES
+  {
+    Date=06.09.17;
+    Time=09:14:13;
+    Modified=Yes;
+    Version List=NAVCOMMUNITY10.00;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+
+    PROCEDURE GenerateMD5Hash@50000(SourceString@50007 : Text) : Text;
+    VAR
+      MD5@50000 : DotNet "'System.Core, Version=3.5.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Security.Cryptography.MD5Cng";
+      hashBytes@50002 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Array";
+      byte@50003 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Byte";
+      stringBuilder@50004 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.StringBuilder";
+      Encoding@50005 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.Encoding";
+      i@50006 : Integer;
+    BEGIN
+      IF SourceString = '' THEN
+        EXIT;
+
+      MD5 := MD5.Create();
+      hashBytes := MD5.ComputeHash(
+                    Encoding.UTF8().GetBytes(SourceString));
+      MD5.Dispose();
+
+      stringBuilder := stringBuilder.StringBuilder();
+
+      FOR i := 0 TO hashBytes.Length - 1 DO BEGIN
+        byte := hashBytes.GetValue(i);
+        stringBuilder.Append(byte.ToString('X2'));
+      END;
+
+      EXIT(stringBuilder.ToString());
+    END;
+
+    PROCEDURE CalcHMAC@6150652(HMACString@6150613 : Text[1024];CharSet@6150615 : Text[30]) : Text[100];
+    VAR
+      Encoding@6150616 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.Encoding";
+      cRNG@1112500000 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Security.Cryptography.RNGCryptoServiceProvider";
+      Key@1112500001 : ARRAY [64] OF DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Byte";
+      HashValue@6150614 : Text[100];
+      ByteArray@1112500002 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Array";
+    BEGIN
+      Encoding := Encoding.GetEncoding(CharSet);
+
+      cRNG := cRNG.Create();
+      cRNG.GetBytes(ByteArray);
+      cRNG.Dispose();
+
+      HashValue := GetHmacSha256Hash(ByteArray, HMACString, Encoding);
+
+      EXIT(HashValue);
+    END;
+
+    PROCEDURE GetHmacSha256Hash@6150617(Key@6150614 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Array";Value@6150615 : Text;Encoding@6150616 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.Encoding") : Text;
+    VAR
+      HmacSha256@6150613 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Security.Cryptography.HMACSHA256";
+      Convert@6150617 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Convert";
+      ByteArray@1112500000 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Array";
+    BEGIN
+      
+      HmacSha256 := HmacSha256.HMACSHA256(Key);
+      ByteArray := HmacSha256.ComputeHash(Encoding.GetBytes(Value));
+      HmacSha256.Dispose();
+      
+      EXIT(Convert.ToBase64String(ByteArray));
+    END;
+
+    PROCEDURE GetSha256Hash@6150648(Value@6150615 : Text;Encoding@6150616 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.Encoding") : Text;
+    VAR
+      Sha256@6150613 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Security.Cryptography.SHA256Managed";
+      ByteArray@1112500000 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Array";
+    BEGIN
+      
+      Sha256 := Sha256.SHA256Managed();
+      ByteArray := Sha256.ComputeHash(Encoding.GetBytes(Value));
+      Sha256.Dispose();
+      
+      EXIT(Encoding.GetString(ByteArray));
+    END;
+
+    BEGIN
+    {
+      Provides wrappers for cryptographic functions from System.Security
+    }
+    END.
+  }
+}
+
