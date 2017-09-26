@@ -1,0 +1,672 @@
+OBJECT Codeunit 132569 Data Encryption Mgmt. Tests
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=Test,License,ERM,All;
+  }
+  PROPERTIES
+  {
+    Permissions=TableData 1261=rimd;
+    Subtype=Test;
+    TestPermissions=Disabled;
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      EncryptionManagement@1000 : Codeunit 1266;
+      LibraryUtility@1001 : Codeunit 131000;
+      Assert@1002 : Codeunit 130000;
+      InsufficientPassLngthErr@1003 : TextConst 'ENU=The password must contain at least 8 characters.';
+      InputStringTxt@1004 : TextConst 'ENU=Test string';
+      KeyTxt@1005 : TextConst 'ENU=key';
+      WrongHashErr@1006 : TextConst 'ENU=Wrong hash generated';
+      SHA512Txt@1007 : TextConst 'ENU=811AA0C53C0039B6EAD0CA878B096EED1D39ED873FD2D2D270ABFB9CA620D3ED561C565D6DBD1114C323D38E3F59C00DF475451FC9B30074F2ABDA3529DF2FA7';
+      HMACSHA512Txt@1008 : TextConst 'ENU=A4C31E9B1E4F224A437888B35856A8E914E0A6562317A52763ECEA0CF96CDBF6AC5C7D777F42BBD5AD41AEF425D7EDA429ED1C1D8EA080B436F4A7FEEC1DC238';
+      HashAlgorithmType@1009 : 'MD5,SHA1,SHA256,SHA384,SHA512';
+      KeyedHashAlgorithmType@1010 : 'HMACMD5,HMACSHA1,HMACSHA256,HMACSHA384,HMACSHA512';
+
+    [Test]
+    PROCEDURE EncryptThrowsErrorWhenEncryptionIsNotEnabled@3();
+    VAR
+      TextToEncrypt@1000 : Text;
+    BEGIN
+      // [SCENARIO 1] Call to the Encrypt function throws an error when the encryption is not enabled.
+      // [GIVEN] A text to encrypt.
+      // [GIVEN] Encryption is not set.
+      // [WHEN] Encrypt method on the "Encryption Management" codeunit is called.
+      // [THEN] An error is thrown suggesting that the encryption is not enabled.
+      IF EncryptionManagement.IsEncryptionEnabled THEN
+        EncryptionManagement.DisableEncryption(TRUE);
+      TextToEncrypt := LibraryUtility.GenerateRandomText(10);
+      ASSERTERROR EncryptionManagement.Encrypt(TextToEncrypt);
+      Assert.ExpectedError('Encryption is either not enabled or the encryption key cannot be found.');
+    END;
+
+    [Test]
+    PROCEDURE DecryptThrowsErrorWhenEncryptionIsNotEnabled@7();
+    VAR
+      TextToEncrypt@1000 : Text;
+    BEGIN
+      // [SCENARIO 2] Call to the Decrypt function throws an error when the encryption is not enabled.
+      // [GIVEN] A text to be decrypted.
+      // [GIVEN] Encryption is not set.
+      // [WHEN] Decrypt method on the "Encryption Management" codeunit is called.
+      // [THEN] An error is thrown suggesting that the encryption is not enabled.
+      IF EncryptionManagement.IsEncryptionEnabled THEN
+        EncryptionManagement.DisableEncryption(TRUE);
+      TextToEncrypt := LibraryUtility.GenerateRandomText(10);
+      ASSERTERROR EncryptionManagement.Decrypt(TextToEncrypt);
+      Assert.ExpectedError('Encryption is either not enabled or the encryption key cannot be found.');
+    END;
+
+    [Test]
+    [HandlerFunctions(HandleConfirm1)]
+    PROCEDURE EncryptDecryptText@6();
+    VAR
+      TextToEncrypt@1000 : Text;
+      EncryptedText@1001 : Text;
+    BEGIN
+      // [SCENARIO 3] Text data can be encrypted and decrypted when the encryption is ON.
+      // [GIVEN] A text to be encrypted.
+      // [GIVEN] Encryption is turned ON.
+      // [WHEN] Encrypt is called on the text data.
+      // [THEN] Encrypted text is returned.
+      // [WHEN] Decrypt is called on the encrypted text data.
+      // [THEN] Decrypted text is returned.
+      IF NOT EncryptionManagement.IsEncryptionEnabled THEN
+        EncryptionManagement.EnableEncryption;
+
+      TextToEncrypt := LibraryUtility.GenerateRandomText(100);
+      EncryptedText := EncryptionManagement.Encrypt(TextToEncrypt);
+      Assert.AreNotEqual(TextToEncrypt,EncryptedText,'Encrypted data seem to be same as the original text.');
+      Assert.AreEqual(TextToEncrypt,EncryptionManagement.Decrypt(EncryptedText),'Decrypted text different from the original text');
+    END;
+
+    [Test]
+    [HandlerFunctions(HandleConfirm1)]
+    PROCEDURE EnablingDisablingEncryptionEncryptsDecryptsServicePasswordTableData@10();
+    VAR
+      ServicePassword@1000 : Record 1261;
+      KeyBackup@1001 : GUID;
+      UnencryptedPassword@1002 : Text;
+    BEGIN
+      // [SCENARIO 4a] Enabling encryption, enables the encryption and also encrypts the Service Password table's Value field.
+      // [GIVEN] Records in the Service Password table.
+      // [GIVEN] Encryption is not ON.
+      // [WHEN] Encryption is enabled through the Data Encryption Management page.
+      // [THEN] Encryption is turned ON.
+      // [THEN] Value field in the Service Password table is encrypted.
+      // [WHEN] Encryption is disabled through the Data Encryption Management page.
+      // [THEN] Encryption is turned OFF.
+      // [THEN] Value field in the Service Password table is decrypted.
+      IF EncryptionManagement.IsEncryptionEnabled THEN
+        EncryptionManagement.DisableEncryption(TRUE);
+
+      ServicePassword.INIT;
+      ServicePassword.Key := CREATEGUID;
+      ServicePassword.SavePassword(LibraryUtility.GenerateRandomText(100));
+      ServicePassword.INSERT(TRUE);
+
+      KeyBackup := ServicePassword.Key;
+      UnencryptedPassword := ReadServicePassword(ServicePassword);
+
+      EncryptionManagement.EnableEncryption;
+
+      ServicePassword.GET(KeyBackup);
+      Assert.AreNotEqual(UnencryptedPassword,ReadServicePassword(ServicePassword),'Password does not seem to be encrypted');
+
+      EncryptionManagement.DisableEncryption(TRUE);
+      ServicePassword.GET(KeyBackup);
+      Assert.AreEqual(UnencryptedPassword,ReadServicePassword(ServicePassword),'Password does not seem to be decrypted');
+    END;
+
+    [Test]
+    [HandlerFunctions(HandleConfirm1)]
+    PROCEDURE EnablingDisablingEncryptionEncryptsDecryptsServicePasswordTableDataMultiCompany@11();
+    VAR
+      ServicePassword@1000 : Record 1261;
+      Company@1003 : Record 2000000006;
+      KeyBackup@1001 : GUID;
+      UnencryptedPassword@1002 : Text;
+      ActualPassword@1005 : Text;
+      TheOtherCompanyName@1004 : Text[30];
+    BEGIN
+      // [SCENARIO 4b] Enabling encryption, enables the encryption and also encrypts the Service Password table's Value field
+      // in all companies.
+      // [GIVEN] Records in the Service Password table.
+      // [GIVEN] 2 companies with password data.
+      // [GIVEN] Encryption is not ON.
+      // [WHEN] Encryption is enabled through the Data Encryption Management page.
+      // [THEN] Encryption is turned ON.
+      // [THEN] Value field in the Service Password table is encrypted.
+      // [WHEN] Encryption is disabled through the Data Encryption Management page.
+      // [THEN] Encryption is turned OFF.
+      // [THEN] Value field in the Service Password table is decrypted.
+      IF EncryptionManagement.IsEncryptionEnabled THEN
+        EncryptionManagement.DisableEncryption(TRUE);
+
+      ServicePassword.INIT;
+      ServicePassword.Key := CREATEGUID;
+      ServicePassword.SavePassword(LibraryUtility.GenerateRandomText(100));
+      ServicePassword.INSERT(TRUE);
+
+      TheOtherCompanyName := COPYSTR(LibraryUtility.GenerateRandomText(MAXSTRLEN(Company.Name)),1,MAXSTRLEN(Company.Name));
+      Company.Name := TheOtherCompanyName;
+      Company.INSERT(TRUE);
+
+      ServicePassword.INIT;
+      ServicePassword.CHANGECOMPANY(TheOtherCompanyName);
+      ServicePassword.Key := CREATEGUID;
+      ServicePassword.SavePassword(LibraryUtility.GenerateRandomText(100));
+      ServicePassword.INSERT(TRUE);
+
+      KeyBackup := ServicePassword.Key;
+      UnencryptedPassword := ReadServicePassword(ServicePassword);
+
+      EncryptionManagement.EnableEncryption;
+
+      ServicePassword.GET(KeyBackup);
+      ActualPassword := ReadServicePassword(ServicePassword);
+
+      EncryptionManagement.DisableEncryption(TRUE);
+      Assert.AreNotEqual(UnencryptedPassword,ActualPassword,'Password does not seem to be encrypted');
+
+      ServicePassword.GET(KeyBackup);
+      Assert.AreEqual(UnencryptedPassword,ReadServicePassword(ServicePassword),'Password does not seem to be decrypted');
+    END;
+
+    [Test]
+    [HandlerFunctions(HandleConfirmYes,HandlePasswordDlgOK,MessageHandler)]
+    PROCEDURE EncryptionKeyCanBeExportedImported@13();
+    VAR
+      ExportedKey@1000 : Text;
+    BEGIN
+      // [SCENARIO 5] Encryption Key can be imported to a file.
+      // [GIVEN] Encryption is not enabled.
+      // [WHEN] Import Encryption Key action is invoked.
+      // [THEN] Encryption key can be uploaded to the server.
+
+      EncryptionManagement.SetSilentFileUploadDownload(TRUE,'');
+      IF NOT EncryptionManagement.IsEncryptionPossible THEN
+        EncryptionManagement.EnableEncryption;
+
+      EncryptionManagement.ExportKey;
+
+      ExportedKey := EncryptionManagement.GetGlblTempClientFileName;
+      Assert.AreNotEqual('',ExportedKey,'Encryption key is not exported to the client location');
+
+      EncryptionManagement.SetSilentFileUploadDownload(TRUE,ExportedKey);
+      EncryptionManagement.ImportKey;
+      Assert.IsTrue(EncryptionManagement.IsEncryptionPossible,'Encryption should be possible');
+    END;
+
+    [Test]
+    [HandlerFunctions(HandleConfirmYes,HandlePasswordDlgOK,MessageHandler)]
+    PROCEDURE OverwritingEncryptionKeyReencryptsServicePasswordTableData@16();
+    VAR
+      ServicePassword@1001 : Record 1261;
+      ExportedKey1@1000 : Text;
+      TableKeyBackup@1003 : GUID;
+      UnencryptedPassword@1002 : Text;
+      EncryptedPassword1@1005 : Text;
+      EncryptedPassword2@1006 : Text;
+    BEGIN
+      // [SCENARIO 6] Encryption Key can be imported to a file.
+      // [GIVEN] Encryption is enabled.
+      // [WHEN] Importing Encryption Key action is invoked.
+      // [THEN] Encryption key can uploaded to the server and The encrypted data is re-encrypted with the new key.
+      IF EncryptionManagement.IsEncryptionEnabled THEN
+        EncryptionManagement.DisableEncryption(TRUE);
+
+      // Create data in the Service Password table
+      ServicePassword.INIT;
+      ServicePassword.Key := CREATEGUID;
+      ServicePassword.SavePassword(LibraryUtility.GenerateRandomText(100));
+      ServicePassword.INSERT(TRUE);
+
+      TableKeyBackup := ServicePassword.Key;
+      UnencryptedPassword := ReadServicePassword(ServicePassword);
+
+      // Enable Encryption
+      EncryptionManagement.SetSilentFileUploadDownload(TRUE,'');
+      EncryptionManagement.EnableEncryption;
+
+      ServicePassword.GET(TableKeyBackup);
+      EncryptedPassword1 := ReadServicePassword(ServicePassword);
+
+      // Export Encryption Key
+      EncryptionManagement.ExportKey;
+      ExportedKey1 := EncryptionManagement.GetGlblTempClientFileName;
+
+      // Disable Encryption Key
+      EncryptionManagement.DisableEncryption(TRUE);
+
+      ServicePassword.GET(TableKeyBackup);
+      UnencryptedPassword := ReadServicePassword(ServicePassword);
+
+      // Enable to create a new key
+      EncryptionManagement.EnableEncryption;
+
+      ServicePassword.GET(TableKeyBackup);
+      EncryptedPassword2 := ReadServicePassword(ServicePassword);
+
+      Assert.AreNotEqual(EncryptedPassword1,EncryptedPassword2,'Passwords encrypted with differnet keys appears to be the same');
+
+      EncryptionManagement.SetSilentFileUploadDownload(TRUE,ExportedKey1);
+      EncryptionManagement.ChangeKey;
+
+      EncryptionManagement.DisableEncryption(TRUE);
+
+      ServicePassword.GET(TableKeyBackup);
+      Assert.AreEqual(UnencryptedPassword,ReadServicePassword(ServicePassword),
+        'The data is not intact after reimportng the encryption key');
+    END;
+
+    [Test]
+    PROCEDURE TestEncryptionMgmtPageOpenWhenEncryptionIsDisabled@52();
+    VAR
+      DataEncryptionManagement@1000 : TestPage 9905;
+    BEGIN
+      IF EncryptionManagement.IsEncryptionEnabled THEN
+        EncryptionManagement.DisableEncryption(TRUE);
+
+      DataEncryptionManagement.OPENVIEW;
+      Assert.IsFalse(DataEncryptionManagement.EncryptionEnabledState.EDITABLE,'Enabled checkbox expected to be non editable');
+      Assert.AreEqual('No',DataEncryptionManagement.EncryptionEnabledState.VALUE,'Enabled checkbox expected to be unchecked');
+      Assert.IsFalse(DataEncryptionManagement.EncryptionKeyExistsState.EDITABLE,'Key Exists checkbox expected to be non editable');
+      Assert.AreEqual('No',DataEncryptionManagement.EncryptionKeyExistsState.VALUE,'Key Exists checkbox expected to be unchecked');
+      Assert.IsTrue(DataEncryptionManagement."Enable Encryption".ENABLED,'Enable action is expected to be enabled');
+      Assert.IsTrue(DataEncryptionManagement."Import Encryption Key".ENABLED,'Import action is expected to be enabled');
+      Assert.IsFalse(DataEncryptionManagement."Export Encryption Key".ENABLED,'Export action is expected to be disabled');
+      Assert.IsFalse(DataEncryptionManagement."Disable Encryption".ENABLED,'Disable Encryption action is expected to be disabled');
+    END;
+
+    [Test]
+    [HandlerFunctions(HandleConfirm1)]
+    PROCEDURE TestEncryptionMgmtPageOpenWhenEncryptionIsEnabled@69();
+    VAR
+      DataEncryptionManagement@1000 : TestPage 9905;
+    BEGIN
+      IF NOT EncryptionManagement.IsEncryptionPossible THEN
+        EncryptionManagement.EnableEncryption;
+
+      DataEncryptionManagement.OPENVIEW;
+      Assert.IsFalse(DataEncryptionManagement.EncryptionEnabledState.EDITABLE,'Enabled checkbox expected to be non editable');
+      Assert.AreEqual('Yes',DataEncryptionManagement.EncryptionEnabledState.VALUE,'Enabled checkbox expected to be checked');
+      Assert.IsFalse(DataEncryptionManagement.EncryptionKeyExistsState.EDITABLE,'Key Exists checkbox expected to be non editable');
+      Assert.AreEqual('Yes',DataEncryptionManagement.EncryptionKeyExistsState.VALUE,'Key Exists checkbox expected to be checked');
+      Assert.IsFalse(DataEncryptionManagement."Enable Encryption".ENABLED,'Enable action is expected to be disabled');
+      Assert.IsTrue(DataEncryptionManagement."Import Encryption Key".ENABLED,'Import action is expected to be enabled');
+      Assert.IsTrue(DataEncryptionManagement."Export Encryption Key".ENABLED,'Export action is expected to be enabled');
+      Assert.IsTrue(DataEncryptionManagement."Disable Encryption".ENABLED,'Disable Encryption action is expected to be enabled');
+    END;
+
+    [Test]
+    [HandlerFunctions(HandleConfirm1)]
+    PROCEDURE TestEnableEncryptionInEncryptionMgmtPage@78();
+    VAR
+      DataEncryptionManagement@1000 : TestPage 9905;
+    BEGIN
+      IF EncryptionManagement.IsEncryptionEnabled THEN
+        EncryptionManagement.DisableEncryption(TRUE);
+
+      DataEncryptionManagement.OPENVIEW;
+      DataEncryptionManagement."Enable Encryption".INVOKE;
+
+      Assert.IsTrue(EncryptionManagement.IsEncryptionPossible,'Encryption is not possible');
+      Assert.IsFalse(DataEncryptionManagement.EncryptionEnabledState.EDITABLE,'Enabled checkbox expected to be non editable');
+      Assert.AreEqual('Yes',DataEncryptionManagement.EncryptionEnabledState.VALUE,'Enabled checkbox expected to be unchecked');
+      Assert.IsFalse(DataEncryptionManagement.EncryptionKeyExistsState.EDITABLE,'Key Exists checkbox expected to be non editable');
+      Assert.AreEqual('Yes',DataEncryptionManagement.EncryptionKeyExistsState.VALUE,'Key Exists checkbox expected to be unchecked');
+      Assert.IsFalse(DataEncryptionManagement."Enable Encryption".ENABLED,'Enable action is expected to be disabled');
+      Assert.IsTrue(DataEncryptionManagement."Import Encryption Key".ENABLED,'Import action is expected to be enabled');
+      Assert.IsTrue(DataEncryptionManagement."Export Encryption Key".ENABLED,'Export action is expected to be enabled');
+      Assert.IsTrue(DataEncryptionManagement."Disable Encryption".ENABLED,'Disable Encryption action is expected to be enabled');
+    END;
+
+    [Test]
+    [HandlerFunctions(HandleConfirm1)]
+    PROCEDURE TestDisableEncryptionInEncryptionMgmtPage@84();
+    VAR
+      DataEncryptionManagement@1000 : TestPage 9905;
+    BEGIN
+      IF NOT EncryptionManagement.IsEncryptionPossible THEN
+        EncryptionManagement.EnableEncryption;
+
+      DataEncryptionManagement.OPENVIEW;
+      DataEncryptionManagement."Disable Encryption".INVOKE;
+
+      Assert.IsFalse(EncryptionManagement.IsEncryptionEnabled,'Encryption is enabled');
+      Assert.IsFalse(DataEncryptionManagement.EncryptionEnabledState.EDITABLE,'Enabled checkbox expected to be non editable');
+      Assert.AreEqual('No',DataEncryptionManagement.EncryptionEnabledState.VALUE,'Enabled checkbox expected to be unchecked');
+      Assert.IsFalse(DataEncryptionManagement.EncryptionKeyExistsState.EDITABLE,'Key Exists checkbox expected to be non editable');
+      Assert.AreEqual('No',DataEncryptionManagement.EncryptionKeyExistsState.VALUE,'Key Exists checkbox expected to be unchecked');
+      Assert.IsTrue(DataEncryptionManagement."Enable Encryption".ENABLED,'Enable action is expected to be enabled');
+      Assert.IsTrue(DataEncryptionManagement."Import Encryption Key".ENABLED,'Import action is expected to be enabled');
+      Assert.IsFalse(DataEncryptionManagement."Export Encryption Key".ENABLED,'Export action is expected to be disabled');
+      Assert.IsFalse(DataEncryptionManagement."Disable Encryption".ENABLED,'Disable Encryption action is expected to be disabled');
+    END;
+
+    [Test]
+    [HandlerFunctions(HandleConfirm1)]
+    PROCEDURE TestExportActionCancelledInEncryptionMgmtPage@126();
+    VAR
+      DataEncryptionManagement@1000 : TestPage 9905;
+    BEGIN
+      EncryptionManagement.SetSilentFileUploadDownload(TRUE,'');
+      IF NOT EncryptionManagement.IsEncryptionPossible THEN
+        EncryptionManagement.EnableEncryption;
+
+      DataEncryptionManagement.OPENVIEW;
+      DataEncryptionManagement."Export Encryption Key".INVOKE;
+      Assert.AreEqual('',EncryptionManagement.GetGlblTempClientFileName,'Encryption key is created');
+    END;
+
+    [Test]
+    [HandlerFunctions(HandleConfirmYes)]
+    PROCEDURE TestDeleteEncryptedData@2();
+    VAR
+      ServicePassword@1001 : Record 1261;
+      EncryptionManagement@1002 : Codeunit 1266;
+      BankDataConvServiceSetup@1000 : TestPage 1260;
+    BEGIN
+      IF NOT ENCRYPTIONENABLED THEN
+        CREATEENCRYPTIONKEY;
+
+      BankDataConvServiceSetup.OPENVIEW;
+      BankDataConvServiceSetup.Password.SETVALUE('Testing');
+      BankDataConvServiceSetup.OK.INVOKE;
+
+      EncryptionManagement.DeleteEncryptedDataInAllCompanies;
+
+      IF ServicePassword.FINDSET THEN
+        REPEAT
+          Assert.AreEqual('',ServicePassword.GetPassword,'The service password was not deleted');
+        UNTIL ServicePassword.NEXT = 0;
+    END;
+
+    [Test]
+    PROCEDURE TestGenerateShortPassword@4();
+    VAR
+      PasswordHelper@1002 : Codeunit 1267;
+      NumberOfIterations@1000 : Integer;
+      I@1001 : Integer;
+      Length@1003 : Integer;
+    BEGIN
+      NumberOfIterations := 10000;
+      Length := 8;
+      FOR I := 1 TO NumberOfIterations DO
+        VerifyStrongPasswordGenerated(PasswordHelper.GeneratePassword(Length),Length);
+    END;
+
+    [Test]
+    PROCEDURE TestGeneratingLongPassword@5();
+    VAR
+      PasswordHelper@1003 : Codeunit 1267;
+      NumberOfIterations@1002 : Integer;
+      I@1001 : Integer;
+      Length@1000 : Integer;
+    BEGIN
+      NumberOfIterations := 1000;
+      Length := 100;
+      FOR I := 1 TO NumberOfIterations DO
+        VerifyStrongPasswordGenerated(PasswordHelper.GeneratePassword(Length),Length);
+    END;
+
+    [Test]
+    PROCEDURE TestPasswordIsTooShort@33();
+    VAR
+      PasswordHelper@1003 : Codeunit 1267;
+      Length@1000 : Integer;
+    BEGIN
+      Length := 7;
+      ASSERTERROR VerifyStrongPasswordGenerated(PasswordHelper.GeneratePassword(Length),Length);
+      Assert.ExpectedError(InsufficientPassLngthErr);
+    END;
+
+    [Test]
+    PROCEDURE UT_MD5HashGeneration@8();
+    VAR
+      EncryptionManagement@1000 : Codeunit 1266;
+    BEGIN
+      // [FEATURE] [Hash]
+      // [SCENARIO 228632] Generate hash using MD5 algorithm
+
+      // [WHEN] GenerateHash is invoked with input string
+      // [THEN] Correct MD5 hash is generated
+      Assert.AreEqual(
+        '0FD3DBEC9730101BFF92ACC820BEFC34',
+        EncryptionManagement.GenerateHash(InputStringTxt,HashAlgorithmType::MD5),WrongHashErr);
+
+      // [WHEN] GenerateHash is invoked with input string and key
+      // [THEN] Correct HMACMD5 hash is generated
+      Assert.AreEqual(
+        '9BE0525D61D151628E90A9B41ACA7C38',
+        EncryptionManagement.GenerateKeyedHash(InputStringTxt,KeyTxt,KeyedHashAlgorithmType::HMACMD5),WrongHashErr);
+    END;
+
+    [Test]
+    PROCEDURE UT_SHA1HashGeneration@15();
+    VAR
+      EncryptionManagement@1000 : Codeunit 1266;
+    BEGIN
+      // [FEATURE] [Hash]
+      // [SCENARIO 228632] Generate hash using SHA1 algorithm
+
+      // [WHEN] GenerateHash is invoked with input string
+      // [THEN] Correct SHA1 hash is generated
+      Assert.AreEqual(
+        '18AF819125B70879D36378431C4E8D9BFA6A2599',
+        EncryptionManagement.GenerateHash(InputStringTxt,HashAlgorithmType::SHA1),WrongHashErr);
+
+      // [WHEN] GenerateHash is invoked with input string and key
+      // [THEN] Correct HMACSHA1 hash is generated
+      Assert.AreEqual(
+        '8D9FD1B063F9C22DF573382B210B581DB67A333D',
+        EncryptionManagement.GenerateKeyedHash(InputStringTxt,KeyTxt,KeyedHashAlgorithmType::HMACSHA1),WrongHashErr);
+    END;
+
+    [Test]
+    PROCEDURE UT_TestSHA256HashGeneration@23();
+    VAR
+      EncryptionManagement@1000 : Codeunit 1266;
+    BEGIN
+      // [FEATURE] [Hash]
+      // [SCENARIO 228632] Generate hash using SHA256 algorithm
+
+      // [WHEN] GenerateHash is invoked with input string
+      // [THEN] Correct SHA256 hash is generated
+      Assert.AreEqual(
+        'A3E49D843DF13C2E2A7786F6ECD7E0D184F45D718D1AC1A8A63E570466E489DD',
+        EncryptionManagement.GenerateHash(InputStringTxt,HashAlgorithmType::SHA256),WrongHashErr);
+
+      // [WHEN] GenerateHash is invoked with input string and key
+      // [THEN] Correct HMACSHA256 hash is generated
+      Assert.AreEqual(
+        '696BB89AEBCD37E936A8FC339345733C1434FA9577B8E6D1A75A29CCE0037C58',
+        EncryptionManagement.GenerateKeyedHash(InputStringTxt,KeyTxt,KeyedHashAlgorithmType::HMACSHA256),WrongHashErr);
+    END;
+
+    [Test]
+    PROCEDURE UT_TestSHA384HashGeneration@24();
+    VAR
+      EncryptionManagement@1000 : Codeunit 1266;
+    BEGIN
+      // [FEATURE] [Hash]
+      // [SCENARIO 228632] Generate hash using SHA384 algorithm
+
+      // [WHEN] GenerateHash is invoked with input string
+      // [THEN] Correct SHA384 hash is generated
+      Assert.AreEqual(
+        '83CA14EBF3005A10F50839742BDA82AA607D972A03B1E6A3086E29195CEAF05F038FECDFF02AFF6E9DCDD273268875F7',
+        EncryptionManagement.GenerateHash(InputStringTxt,HashAlgorithmType::SHA384),WrongHashErr);
+
+      // [WHEN] GenerateHash is invoked with input string and key
+      // [THEN] Correct HMACSHA384 hash is generated
+      Assert.AreEqual(
+        'EF021136E20A1AA760C803BE21163772BAB48A53EF178A8F5BEB4CEB2E66830E1BBEE5DE26632CFF325352B80B52BB6F',
+        EncryptionManagement.GenerateKeyedHash(InputStringTxt,KeyTxt,KeyedHashAlgorithmType::HMACSHA384),WrongHashErr);
+    END;
+
+    [Test]
+    PROCEDURE UT_TestSHA512HashGeneration@25();
+    VAR
+      EncryptionManagement@1000 : Codeunit 1266;
+    BEGIN
+      // [FEATURE] [Hash]
+      // [SCENARIO 228632] Generate hash using SHA512 algorithm
+
+      // [WHEN] GenerateHash is invoked with input string
+      // [THEN] Correct SHA512 hash is generated
+      Assert.AreEqual(
+        SHA512Txt,
+        EncryptionManagement.GenerateHash(InputStringTxt,HashAlgorithmType::SHA512),WrongHashErr);
+
+      // [WHEN] GenerateHash is invoked with input string and key
+      // [THEN] Correct HMACSHA512 hash is generated
+      Assert.AreEqual(
+        HMACSHA512Txt,
+        EncryptionManagement.GenerateKeyedHash(InputStringTxt,KeyTxt,KeyedHashAlgorithmType::HMACSHA512),WrongHashErr);
+    END;
+
+    [Test]
+    PROCEDURE UT_TestEmptyParametersHashGeneration@12();
+    BEGIN
+      // [FEATURE] [Hash]
+      // [SCENARIO 228632] Test hash generation with empty input parameters
+
+      // [WHEN] Input string is empty for hash generation function
+      // [THEN] Result is empty string
+      Assert.AreEqual(
+        '',
+        EncryptionManagement.GenerateHash('',HashAlgorithmType::MD5),WrongHashErr);
+
+      // [WHEN] Input string is empty for hash with key generation function
+      // [THEN] Result is empty string
+      Assert.AreEqual(
+        '',
+        EncryptionManagement.GenerateKeyedHash('','X',KeyedHashAlgorithmType::HMACMD5),WrongHashErr);
+
+      // [WHEN] Key is empty for hash with key generation function
+      // [THEN] Result is empty string
+      Assert.AreEqual(
+        '',
+        EncryptionManagement.GenerateKeyedHash('X','',KeyedHashAlgorithmType::HMACMD5),WrongHashErr);
+
+      // [WHEN] Both input parameters are empty for hash with key generation function
+      // [THEN] Result is empty string
+      Assert.AreEqual(
+        '',
+        EncryptionManagement.GenerateKeyedHash('','',KeyedHashAlgorithmType::HMACMD5),WrongHashErr);
+    END;
+
+    LOCAL PROCEDURE VerifyStrongPasswordGenerated@9(PasswordText@1000 : Text;Length@1001 : Integer);
+    VAR
+      Characters@1004 : Text;
+      Numbers@1005 : Text;
+      SpecialCharacters@1006 : Text;
+      NewText@1003 : Text;
+      I@1002 : Integer;
+    BEGIN
+      Characters := 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+      Numbers := '0123456789';
+      SpecialCharacters := '!@#$*';
+
+      Assert.AreEqual(Length,STRLEN(PasswordText),'Wrong password length');
+
+      NewText := DELCHR(PasswordText,'=',Characters);
+      Assert.IsTrue(STRLEN(NewText) < STRLEN(PasswordText),'Password must contain Uppercase Characters');
+
+      NewText := DELCHR(PasswordText,'=',LOWERCASE(Characters));
+      Assert.IsTrue(STRLEN(NewText) < STRLEN(PasswordText),'Password must contain Lowercase Characters');
+
+      NewText := DELCHR(PasswordText,'=',Numbers);
+      Assert.IsTrue(STRLEN(NewText) < STRLEN(PasswordText),'Password must contain Numbers');
+
+      NewText := DELCHR(PasswordText,'=',SpecialCharacters);
+      Assert.IsTrue(STRLEN(NewText) < STRLEN(PasswordText),'Password must contain Special Characters');
+
+      FOR I := 3 TO Length DO BEGIN
+        Assert.IsFalse(
+          (PasswordText[I] = PasswordText[I - 1]) AND (PasswordText[I] = PasswordText[I - 2]),
+          'Password contains too many duplicate values');
+
+        // If the last 3 characters do not contain specical characters we should check for a sequence.
+        IF STRLEN(DELCHR(COPYSTR(PasswordText,I - 2,3),'=',SpecialCharacters)) = 3 THEN BEGIN
+          Assert.IsFalse(
+            (PasswordText[I] = PasswordText[I - 1] + 1) AND (PasswordText[I] = PasswordText[I - 2] + 2),
+            'Password contains a ascending sequential run of characters');
+          Assert.IsFalse(
+            (PasswordText[I] = PasswordText[I - 1] - 1) AND (PasswordText[I] = PasswordText[I - 2] - 2),
+            'Password contains a descending sequential run of characters');
+        END;
+      END;
+    END;
+
+    [Test]
+    PROCEDURE Cleanup@1();
+    BEGIN
+      IF EncryptionManagement.IsEncryptionEnabled THEN
+        EncryptionManagement.DisableEncryption(TRUE);
+    END;
+
+    [ConfirmHandler]
+    PROCEDURE HandleConfirm1@103(Message@1000 : Text[1024];VAR Reply@1001 : Boolean);
+    BEGIN
+      CASE TRUE OF
+        STRPOS(Message,'Do you want to save the encryption key?') <> 0:
+          Reply := FALSE;
+        STRPOS(Message,'Enabling encryption will generate an encryption key') <> 0:
+          Reply := TRUE;
+        STRPOS(Message,'Disabling encryption will decrypt the encrypted data') <> 0:
+          Reply := TRUE;
+        ELSE
+          Reply := FALSE;
+      END;
+    END;
+
+    [ConfirmHandler]
+    PROCEDURE HandleConfirmYes@22(Message@1000 : Text[1024];VAR Reply@1001 : Boolean);
+    BEGIN
+      Reply := TRUE;
+      EXIT;
+    END;
+
+    [MessageHandler]
+    PROCEDURE MessageHandler@14(Msg@1000 : Text[1024]);
+    BEGIN
+    END;
+
+    [ModalPageHandler]
+    PROCEDURE HandlePasswordDlgOK@30(VAR StdPasswordDialog@1000 : TestPage 9815);
+    BEGIN
+      StdPasswordDialog.SetPassword.SETVALUE := 'Password123';
+      StdPasswordDialog.ConfirmPassword.SETVALUE := 'Password123';
+      StdPasswordDialog.OK.INVOKE;
+    END;
+
+    LOCAL PROCEDURE ReadServicePassword@21(VAR ServicePassword@1000 : Record 1261) : Text;
+    VAR
+      InStream@1001 : InStream;
+      PasswordText@1002 : Text;
+    BEGIN
+      ServicePassword.CALCFIELDS(Value);
+      ServicePassword.Value.CREATEINSTREAM(InStream);
+
+      InStream.READTEXT(PasswordText);
+      EXIT(PasswordText);
+    END;
+
+    BEGIN
+    {
+      // [FEATURE] [Encryption Management]
+    }
+    END.
+  }
+}
+
