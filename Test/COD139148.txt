@@ -1,0 +1,338 @@
+OBJECT Codeunit 139148 UT REST
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=Test,W1,All;
+  }
+  PROPERTIES
+  {
+    Subtype=Test;
+    TestPermissions=Disabled;
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      Assert@1000 : Codeunit 130000;
+      NoContentErr@1005 : TextConst 'ENU=The BLOB field is empty.';
+      UnknownImageTypeErr@1003 : TextConst 'ENU=Unknown image type.';
+      XmlCannotBeLoadedErr@1002 : TextConst 'ENU=The XML cannot be loaded.';
+      InvalidValueErr@1001 : TextConst 'ENU=Invalid returned value';
+      XMLDOMMgt@1004 : Codeunit 6224;
+      InvalidTokenFormatErr@1006 : TextConst 'ENU=The token must be in JWS or JWE Compact Serialization Format.';
+
+    [Test]
+    PROCEDURE ExpiredToken@3();
+    VAR
+      SOAPWebServiceRequestMgt@1001 : Codeunit 1290;
+      AccessToken@1000 : Text;
+    BEGIN
+      // [SCENARIO 227335] SOAPWebServiceRequestMgt.HasJWTExpired function returns TRUE in case of expired token
+
+      // [GIVEN] Mock token with exprired date less than current
+      AccessToken := MockTokenWithExpDate(CURRENTDATETIME - 1000);
+
+      // [WHEN] Function SOAPWebServiceRequestMgt.HasJWTExpired is being run
+      // [THEN] It returns TRUE
+      Assert.IsTrue(SOAPWebServiceRequestMgt.HasJWTExpired(AccessToken),InvalidValueErr);
+    END;
+
+    [Test]
+    PROCEDURE NotExpiredToken@2();
+    VAR
+      SOAPWebServiceRequestMgt@1001 : Codeunit 1290;
+      AccessToken@1000 : Text;
+    BEGIN
+      // [SCENARIO 227335] SOAPWebServiceRequestMgt.HasJWTExpired function returns FALSE in case of not expired token
+
+      // [GIVEN] Mock token with exprired date less than current
+      AccessToken := MockTokenWithExpDate(CURRENTDATETIME + 1000);
+
+      // [WHEN] Function SOAPWebServiceRequestMgt.HasJWTExpired is being run
+      // [THEN] It returns TRUE
+      Assert.IsFalse(SOAPWebServiceRequestMgt.HasJWTExpired(AccessToken),InvalidValueErr);
+    END;
+
+    [Test]
+    PROCEDURE InvalidTokenFormat@10();
+    VAR
+      SOAPWebServiceRequestMgt@1001 : Codeunit 1290;
+      AccessToken@1000 : Text;
+    BEGIN
+      // [SCENARIO 227335] SOAPWebServiceRequestMgt.HasJWTExpired function throws the error in case of invalid token format
+
+      // [GIVEN] Mock token with invalid format
+      AccessToken := FORMAT(CREATEGUID);
+
+      // [WHEN] Function SOAPWebServiceRequestMgt.HasJWTExpired is being run
+      ASSERTERROR SOAPWebServiceRequestMgt.HasJWTExpired(AccessToken);
+
+      // [THEN] Error 'The token needs to be in JWS or JWE Compact Serialization Format.' displayed
+      Assert.ExpectedError(InvalidTokenFormatErr);
+    END;
+
+    [Test]
+    PROCEDURE XmlText2JsonText@1();
+    VAR
+      JSONMgt@1000 : Codeunit 5459;
+      XmlText@1001 : Text;
+      JsonText@1003 : Text;
+    BEGIN
+      // [SCENARIO 227335] Function JSONMgt.XmTextlToJsonText converts XML text to Json text
+
+      // [GIVEN] Xml as text
+      XmlText := MockXMLText;
+
+      // [WHEN] Function JSONMgt.XmTextlToJsonText is being run
+      JsonText := JSONMgt.XMLTextToJSONText(XmlText);
+
+      // [THEN] Resulted Json text has appropriate content
+      VerifyJsonText(JsonText,MockJsonText);
+    END;
+
+    [Test]
+    PROCEDURE JsonText2XmlText@30();
+    VAR
+      JSONMgt@1000 : Codeunit 5459;
+      XmlText@1001 : Text;
+      JsonText@1003 : Text;
+    BEGIN
+      // [SCENARIO 227335] Function JSONMgt.XmTextlToJsonText converts Json text to XML text
+
+      // [GIVEN] Xml as text
+      JsonText := MockJsonText;
+
+      // [WHEN] Function JSONMgt.JsonTextToXmlText is being run
+      XmlText := JSONMgt.JSONTextToXMLText(JsonText,'transform');
+
+      // [THEN] Resulted XML text has appropriate content
+      VerifyXMLText(XmlText,MockXMLText);
+    END;
+
+    [Test]
+    PROCEDURE GetImageTypeJpeg@9();
+    VAR
+      TempBlob@1000 : TEMPORARY Record 99008535;
+      ImageType@1001 : Text;
+    BEGIN
+      // [SCENARIO 227335] TempBlob.GetImageType function returns 'Jpeg' for jpeg file imported into Blob
+      // The rest of image types scenarios covered in the codeunit 138929
+
+      // [GIVEN] TempBlob with jpeg image
+      CreateTempBLOBImageJpeg(TempBlob);
+
+      // [WHEN] Function GetImageType is being used
+      ImageType := TempBlob.GetImageType;
+
+      // [THEN] Returned value equal to 'Jpeg'
+      Assert.AreEqual('Jpeg',ImageType,InvalidValueErr);
+    END;
+
+    [Test]
+    PROCEDURE GetImageTypeEmptyBlob@8();
+    VAR
+      TempBlob@1000 : TEMPORARY Record 99008535;
+    BEGIN
+      // [SCENARIO 227335] TempBlob.GetImageType function throws the error in case of empty Blob
+
+      // [GIVEN] Empty TempBlob
+      TempBlob.INIT;
+
+      // [WHEN] Function GetImageType is being used
+      ASSERTERROR TempBlob.GetImageType;
+
+      // [THEN] Error 'The Blob field is empty.' displayed
+      Assert.ExpectedError(NoContentErr);
+    END;
+
+    [Test]
+    PROCEDURE GetImageTypeNonImageBlob@12();
+    VAR
+      TempBlob@1000 : TEMPORARY Record 99008535;
+    BEGIN
+      // [SCENARIO 227335] TempBlob.GetImageType function throws the error in case of Blob containing non-image file
+
+      // [GIVEN] TempBlob with XML file
+      CreateTempBLOBXML(TempBlob);
+
+      // [WHEN] Function GetImageType is being used
+      ASSERTERROR TempBlob.GetImageType;
+
+      // [THEN] Error 'Unknown image type.' displayed
+      Assert.ExpectedError(UnknownImageTypeErr);
+    END;
+
+    [Test]
+    PROCEDURE GetXMLAsTextSunshine@22();
+    VAR
+      TempBlob@1000 : TEMPORARY Record 99008535;
+      ExpectedXmlText@1002 : Text;
+      XmlText@1001 : Text;
+    BEGIN
+      // [SCENARIO 227335] TempBlob.GetXMLAsText function returns loaded XML as text
+
+      // [GIVEN] TempBlob with XML file
+      ExpectedXmlText := CreateTempBLOBXML(TempBlob);
+
+      // [WHEN] Function GetXMLAsText is being used
+      XmlText := TempBlob.GetXMLAsText;
+
+      // [THEN] Return value the same with initial XML
+      Assert.AreEqual(ExpectedXmlText,XmlText,InvalidValueErr);
+    END;
+
+    [Test]
+    PROCEDURE GetXMLAsTextEmptyBlob@31();
+    VAR
+      TempBlob@1000 : TEMPORARY Record 99008535;
+    BEGIN
+      // [SCENARIO 227335] TempBlob.GetXMLAsText function throws the error in case of empty Blob
+
+      // [GIVEN] Empty TempBlob
+      TempBlob.INIT;
+
+      // [WHEN] Function GetXMLAsText is being used
+      ASSERTERROR TempBlob.GetXMLAsText;
+
+      // [THEN] Error 'The Blob field is empty.' displayed
+      Assert.ExpectedError(NoContentErr);
+    END;
+
+    [Test]
+    PROCEDURE GetXMLAsTextNonXMLBlob@29();
+    VAR
+      TempBlob@1000 : TEMPORARY Record 99008535;
+    BEGIN
+      // [SCENARIO 227335] TempBlob.GetXMLAsText function throws the error in case of Blob containing non-XML file
+
+      // [GIVEN] TempBlob with image file
+      CreateTempBLOBImageJpeg(TempBlob);
+
+      // [WHEN] Function GetXMLAsText is being used
+      ASSERTERROR TempBlob.GetXMLAsText;
+
+      // [THEN] Error 'XML cannot be loaded.' displayed
+      Assert.ExpectedError(XmlCannotBeLoadedErr);
+    END;
+
+    LOCAL PROCEDURE CreateTempBLOBImageJpeg@32(VAR TempBlob@1000 : Record 99008535);
+    VAR
+      ImageFormat@1003 : DotNet "'System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a'.System.Drawing.Imaging.ImageFormat";
+      Bitmap@1006 : DotNet "'System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a'.System.Drawing.Bitmap";
+      InStr@1004 : InStream;
+    BEGIN
+      TempBlob.INIT;
+      TempBlob.Blob.CREATEINSTREAM(InStr);
+      Bitmap := Bitmap.Bitmap(1,1);
+      Bitmap.Save(InStr,ImageFormat.Jpeg);
+      Bitmap.Dispose;
+    END;
+
+    LOCAL PROCEDURE CreateTempBLOBXML@13(VAR TempBlob@1000 : Record 99008535) : Text;
+    VAR
+      OutStr@1002 : OutStream;
+      Xml@1001 : Text;
+    BEGIN
+      Xml := MockXMLText;
+      TempBlob.Blob.CREATEOUTSTREAM(OutStr);
+      OutStr.WRITETEXT(Xml);
+      EXIT(Xml);
+    END;
+
+    LOCAL PROCEDURE MockTokenWithExpDate@4(ExpirationDateTime@1000 : DateTime) : Text;
+    VAR
+      Encoding@1002 : DotNet "'mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.Encoding";
+      Convert@1001 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Convert";
+      Payload@1003 : Text;
+    BEGIN
+      Payload :=
+        STRSUBSTNO(
+          '{"iss": "scotch.io","exp": %1,"name": "Chris Sevilleja","admin": true}',
+          FORMAT(GetUnixTime(ExpirationDateTime),0,9));
+      EXIT(
+        STRSUBSTNO(
+          'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.%1.03f329983b86f7d9a9f5fef85305880101d5e302afafa20154d094b229f75773',
+          Convert.ToBase64String(
+            Encoding.UTF8.GetBytes(
+              Payload))));
+    END;
+
+    LOCAL PROCEDURE MockXMLText@5() : Text;
+    BEGIN
+      EXIT(
+        '<?xml version="1.0" encoding="utf-8"?>' +
+        '<transform>' +
+        '<record>' +
+        '<username>MP123456</username>' +
+        '<fullname>Annette Hill</fullname>' +
+        '</record>' +
+        '<record>' +
+        '<username>PK123456</username>' +
+        '<fullname>Bart Duncan</fullname>' +
+        '</record>' +
+        '</transform>');
+    END;
+
+    LOCAL PROCEDURE MockJsonText@6() : Text;
+    BEGIN
+      EXIT(
+        '{' +
+        '"record": [' +
+        '{' +
+        '"username": "MP123456",' +
+        '"fullname": "Annette Hill"' +
+        '},' +
+        '{' +
+        '"username": "PK123456",' +
+        '"fullname": "Bart Duncan"' +
+        '}' +
+        ']' +
+        '}');
+    END;
+
+    LOCAL PROCEDURE GetUnixTime@7(DateTimeValue@1000 : DateTime) : Decimal;
+    VAR
+      TypeHelper@1001 : Codeunit 10;
+      TimeZoneOffset@1002 : Duration;
+    BEGIN
+      IF NOT TypeHelper.GetUserTimezoneOffset(TimeZoneOffset) THEN
+        TimeZoneOffset := 0;
+      EXIT(
+        ROUND(
+          (DateTimeValue - CREATEDATETIME(DMY2DATE(1,1,1970),0T) - TimeZoneOffset) / 1000,
+          1));
+    END;
+
+    LOCAL PROCEDURE VerifyJsonText@25(JsonText@1001 : Text;ExpectedJsonText@1000 : Text);
+    VAR
+      CrLf@1002 : Text[2];
+    BEGIN
+      CrLf[1] := 13;
+      CrLf[2] := 10;
+      ExpectedJsonText := DELCHR(ExpectedJsonText,'=',' ');
+      JsonText := DELCHR(JsonText,'=',CrLf + ' ');
+      Assert.AreEqual(ExpectedJsonText,JsonText,InvalidValueErr);
+    END;
+
+    LOCAL PROCEDURE VerifyXMLText@33(XMLText@1001 : Text;ExpectedXMLText@1000 : Text);
+    VAR
+      XMLRootNode@1003 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlNode";
+    BEGIN
+      XMLDOMMgt.LoadXMLNodeFromText(ExpectedXMLText,XMLRootNode);
+      ExpectedXMLText := XMLRootNode.OuterXml;
+      Assert.AreEqual(ExpectedXMLText,XMLText,InvalidValueErr);
+    END;
+
+    BEGIN
+    {
+      // [FEATURE] [UT] [REST]
+      // Unit tests for REST handling related functions
+    }
+    END.
+  }
+}
+

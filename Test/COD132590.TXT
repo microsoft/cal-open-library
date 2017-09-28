@@ -1,0 +1,1347 @@
+OBJECT Codeunit 132590 Type Helper Unit Tests
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=Test,Dev,ERM,W1,All;
+  }
+  PROPERTIES
+  {
+    Subtype=Test;
+    TestPermissions=Disabled;
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      Assert@1002 : Codeunit 130000;
+      LibraryUtility@1000 : Codeunit 131000;
+      LibraryRandom@1001 : Codeunit 130440;
+      SkipBlob@1003 : Boolean;
+      WrongDateFormatErr@1004 : TextConst 'ENU=Wrong date format';
+      WrongDateTimeFormatErr@1005 : TextConst 'ENU=Wrong date format';
+
+    LOCAL PROCEDURE Initialize@7();
+    VAR
+      ComparisonType@1000 : Record 132590;
+      AllKeysType@1002 : Record 132591;
+    BEGIN
+      ComparisonType.DELETEALL;
+      AllKeysType.DELETEALL;
+
+      SkipBlob := TRUE;
+    END;
+
+    [Test]
+    PROCEDURE BasicRecordsAreIdentical@1();
+    VAR
+      ComparisonType1@1000 : Record 132590;
+      ComparisonType2@1001 : Record 132590;
+      TypeHelper@1002 : Codeunit 10;
+      RecRef1@1003 : RecordRef;
+      RecRef2@1004 : RecordRef;
+      Result@1005 : Boolean;
+    BEGIN
+      Initialize;
+
+      // Pre-Setup
+      ComparisonType1.Create(1L,TRUE,LibraryUtility.GenerateGUID,LibraryRandom.RandDate(100),'<CM>',CURRENTDATETIME,
+        LibraryRandom.RandDec(1000,2),CREATEDATETIME(WORKDATE - 1,TIME) - CREATEDATETIME(WORKDATE + 1,TIME),
+        LibraryRandom.RandInt(1000),ComparisonType1."Option Field"::First,COPYSTR(LibraryUtility.GenerateRandomText(30),1,30),
+        TIME,LibraryUtility.GenerateRandomText(1024),CREATEGUID,ComparisonType1.RECORDID);
+
+      // Setup
+      ComparisonType2.Clone(ComparisonType1);
+
+      // Post-Setup
+      RecRef1.GETTABLE(ComparisonType1);
+      RecRef2.GETTABLE(ComparisonType2);
+
+      // Exercise
+      Result := TypeHelper.Equals(RecRef1,RecRef2,NOT SkipBlob);
+
+      // Verify
+      Assert.IsTrue(Result,'');
+    END;
+
+    [Test]
+    PROCEDURE BasicRecordsDifferentBigIntegers@2();
+    VAR
+      ComparisonType1@1005 : Record 132590;
+      ComparisonType2@1004 : Record 132590;
+      TypeHelper@1003 : Codeunit 10;
+      RecRef1@1002 : RecordRef;
+      RecRef2@1001 : RecordRef;
+      Result@1000 : Boolean;
+    BEGIN
+      Initialize;
+
+      // Pre-Setup
+      ComparisonType1.Create(1L,TRUE,LibraryUtility.GenerateGUID,LibraryRandom.RandDate(100),'<CM>',CURRENTDATETIME,
+        LibraryRandom.RandDec(1000,2),CREATEDATETIME(WORKDATE - 1,TIME) - CREATEDATETIME(WORKDATE + 1,TIME),
+        LibraryRandom.RandInt(1000),ComparisonType1."Option Field"::First,COPYSTR(LibraryUtility.GenerateRandomText(30),1,30),
+        TIME,LibraryUtility.GenerateRandomText(1024),CREATEGUID,ComparisonType1.RECORDID);
+
+      // Setup
+      ComparisonType2.Clone(ComparisonType1);
+      ComparisonType2."Big Integer Field" := 100L;
+      ComparisonType2.MODIFY;
+
+      // Post-Setup
+      RecRef1.GETTABLE(ComparisonType1);
+      RecRef2.GETTABLE(ComparisonType2);
+
+      // Exercise
+      Result := TypeHelper.Equals(RecRef1,RecRef2,NOT SkipBlob);
+
+      // Verify
+      Assert.IsFalse(Result,'');
+    END;
+
+    [Test]
+    PROCEDURE BasicRecordsDifferentBooleans@8();
+    VAR
+      ComparisonType1@1000 : Record 132590;
+      ComparisonType2@1001 : Record 132590;
+      TypeHelper@1002 : Codeunit 10;
+      RecRef1@1003 : RecordRef;
+      RecRef2@1004 : RecordRef;
+      Result@1005 : Boolean;
+    BEGIN
+      Initialize;
+
+      // Pre-Setup
+      ComparisonType1.Create(1L,TRUE,LibraryUtility.GenerateGUID,LibraryRandom.RandDate(100),'<CM>',CURRENTDATETIME,
+        LibraryRandom.RandDec(1000,2),CREATEDATETIME(WORKDATE - 1,TIME) - CREATEDATETIME(WORKDATE + 1,TIME),
+        LibraryRandom.RandInt(1000),ComparisonType1."Option Field"::First,COPYSTR(LibraryUtility.GenerateRandomText(30),1,30),
+        TIME,LibraryUtility.GenerateRandomText(1024),CREATEGUID,ComparisonType1.RECORDID);
+
+      // Setup
+      ComparisonType2.Clone(ComparisonType1);
+      ComparisonType2."Boolean Field" := FALSE;
+      ComparisonType2.MODIFY;
+
+      // Post-Setup
+      RecRef1.GETTABLE(ComparisonType1);
+      RecRef2.GETTABLE(ComparisonType2);
+
+      // Exercise
+      Result := TypeHelper.Equals(RecRef1,RecRef2,NOT SkipBlob);
+
+      // Verify
+      Assert.IsFalse(Result,'');
+    END;
+
+    [Test]
+    PROCEDURE BasicRecordsDifferentCodes@4();
+    VAR
+      ComparisonType1@1000 : Record 132590;
+      ComparisonType2@1001 : Record 132590;
+      TypeHelper@1002 : Codeunit 10;
+      RecRef1@1003 : RecordRef;
+      RecRef2@1004 : RecordRef;
+      Result@1005 : Boolean;
+    BEGIN
+      Initialize;
+
+      // Pre-Setup
+      ComparisonType1.Create(1L,TRUE,LibraryUtility.GenerateGUID,LibraryRandom.RandDate(100),'<CM>',CURRENTDATETIME,
+        LibraryRandom.RandDec(1000,2),CREATEDATETIME(WORKDATE - 1,TIME) - CREATEDATETIME(WORKDATE + 1,TIME),
+        LibraryRandom.RandInt(1000),ComparisonType1."Option Field"::First,COPYSTR(LibraryUtility.GenerateRandomText(30),1,30),
+        TIME,LibraryUtility.GenerateRandomText(1024),CREATEGUID,ComparisonType1.RECORDID);
+
+      // Setup
+      ComparisonType2.Clone(ComparisonType1);
+      ComparisonType2."Code Field" := LibraryUtility.GenerateGUID;
+      ComparisonType2.MODIFY;
+
+      // Post-Setup
+      RecRef1.GETTABLE(ComparisonType1);
+      RecRef2.GETTABLE(ComparisonType2);
+
+      // Exercise
+      Result := TypeHelper.Equals(RecRef1,RecRef2,NOT SkipBlob);
+
+      // Verify
+      Assert.IsFalse(Result,'');
+    END;
+
+    [Test]
+    PROCEDURE BasicRecordsDifferentDates@14();
+    VAR
+      ComparisonType1@1000 : Record 132590;
+      ComparisonType2@1001 : Record 132590;
+      TypeHelper@1002 : Codeunit 10;
+      RecRef1@1003 : RecordRef;
+      RecRef2@1004 : RecordRef;
+      Result@1005 : Boolean;
+    BEGIN
+      Initialize;
+
+      // Pre-Setup
+      ComparisonType1.Create(1L,TRUE,LibraryUtility.GenerateGUID,LibraryRandom.RandDate(100),'<CM>',CURRENTDATETIME,
+        LibraryRandom.RandDec(1000,2),CREATEDATETIME(WORKDATE - 1,TIME) - CREATEDATETIME(WORKDATE + 1,TIME),
+        LibraryRandom.RandInt(1000),ComparisonType1."Option Field"::First,COPYSTR(LibraryUtility.GenerateRandomText(30),1,30),
+        TIME,LibraryUtility.GenerateRandomText(1024),CREATEGUID,ComparisonType1.RECORDID);
+
+      // Setup
+      ComparisonType2.Clone(ComparisonType1);
+      ComparisonType2."Date Field" := LibraryRandom.RandDate(100);
+      ComparisonType2.MODIFY;
+
+      // Post-Setup
+      RecRef1.GETTABLE(ComparisonType1);
+      RecRef2.GETTABLE(ComparisonType2);
+
+      // Exercise
+      Result := TypeHelper.Equals(RecRef1,RecRef2,NOT SkipBlob);
+
+      // Verify
+      Assert.IsFalse(Result,'');
+    END;
+
+    [Test]
+    PROCEDURE BasicRecordsDifferentDateTimeFormulas@16();
+    VAR
+      ComparisonType1@1000 : Record 132590;
+      ComparisonType2@1001 : Record 132590;
+      TypeHelper@1002 : Codeunit 10;
+      RecRef1@1003 : RecordRef;
+      RecRef2@1004 : RecordRef;
+      Result@1005 : Boolean;
+    BEGIN
+      Initialize;
+
+      // Pre-Setup
+      ComparisonType1.Create(1L,TRUE,LibraryUtility.GenerateGUID,LibraryRandom.RandDate(100),'<CM>',CURRENTDATETIME,
+        LibraryRandom.RandDec(1000,2),CREATEDATETIME(WORKDATE - 1,TIME) - CREATEDATETIME(WORKDATE + 1,TIME),
+        LibraryRandom.RandInt(1000),ComparisonType1."Option Field"::First,COPYSTR(LibraryUtility.GenerateRandomText(30),1,30),
+        TIME,LibraryUtility.GenerateRandomText(1024),CREATEGUID,ComparisonType1.RECORDID);
+
+      // Setup
+      ComparisonType2.Clone(ComparisonType1);
+      EVALUATE(ComparisonType2."Date Formula Field",'<CY>');
+      ComparisonType2.MODIFY;
+
+      // Post-Setup
+      RecRef1.GETTABLE(ComparisonType1);
+      RecRef2.GETTABLE(ComparisonType2);
+
+      // Exercise
+      Result := TypeHelper.Equals(RecRef1,RecRef2,NOT SkipBlob);
+
+      // Verify
+      Assert.IsFalse(Result,'');
+    END;
+
+    [Test]
+    PROCEDURE BasicRecordsDifferentDateTimes@17();
+    VAR
+      ComparisonType1@1000 : Record 132590;
+      ComparisonType2@1001 : Record 132590;
+      TypeHelper@1002 : Codeunit 10;
+      RecRef1@1003 : RecordRef;
+      RecRef2@1004 : RecordRef;
+      Result@1005 : Boolean;
+    BEGIN
+      Initialize;
+
+      // Pre-Setup
+      ComparisonType1.Create(1L,TRUE,LibraryUtility.GenerateGUID,LibraryRandom.RandDate(100),'<CM>',CREATEDATETIME(WORKDATE,TIME),
+        LibraryRandom.RandDec(1000,2),CREATEDATETIME(WORKDATE - 1,TIME) - CREATEDATETIME(WORKDATE + 1,TIME),
+        LibraryRandom.RandInt(1000),ComparisonType1."Option Field"::First,COPYSTR(LibraryUtility.GenerateRandomText(30),1,30),
+        TIME,LibraryUtility.GenerateRandomText(1024),CREATEGUID,ComparisonType1.RECORDID);
+
+      // Setup
+      ComparisonType2.Clone(ComparisonType1);
+      ComparisonType2."Date / Time Field" := CREATEDATETIME(LibraryRandom.RandDate(100),TIME);
+      ComparisonType2.MODIFY;
+
+      // Post-Setup
+      RecRef1.GETTABLE(ComparisonType1);
+      RecRef2.GETTABLE(ComparisonType2);
+
+      // Exercise
+      Result := TypeHelper.Equals(RecRef1,RecRef2,NOT SkipBlob);
+
+      // Verify
+      Assert.IsFalse(Result,'');
+    END;
+
+    [Test]
+    PROCEDURE BasicRecordsDifferentDecimals@18();
+    VAR
+      ComparisonType1@1000 : Record 132590;
+      ComparisonType2@1001 : Record 132590;
+      TypeHelper@1002 : Codeunit 10;
+      RecRef1@1003 : RecordRef;
+      RecRef2@1004 : RecordRef;
+      Result@1005 : Boolean;
+    BEGIN
+      Initialize;
+
+      // Pre-Setup
+      ComparisonType1.Create(1L,TRUE,LibraryUtility.GenerateGUID,LibraryRandom.RandDate(100),'<CM>',CURRENTDATETIME,
+        LibraryRandom.RandDec(1000,2),CREATEDATETIME(WORKDATE - 1,TIME) - CREATEDATETIME(WORKDATE + 1,TIME),
+        LibraryRandom.RandInt(1000),ComparisonType1."Option Field"::First,COPYSTR(LibraryUtility.GenerateRandomText(30),1,30),
+        TIME,LibraryUtility.GenerateRandomText(1024),CREATEGUID,ComparisonType1.RECORDID);
+
+      // Setup
+      ComparisonType2.Clone(ComparisonType1);
+      ComparisonType2."Decimal Field" := LibraryRandom.RandDec(1000,2);
+      ComparisonType2.MODIFY;
+
+      // Post-Setup
+      RecRef1.GETTABLE(ComparisonType1);
+      RecRef2.GETTABLE(ComparisonType2);
+
+      // Exercise
+      Result := TypeHelper.Equals(RecRef1,RecRef2,NOT SkipBlob);
+
+      // Verify
+      Assert.IsFalse(Result,'');
+    END;
+
+    [Test]
+    PROCEDURE BasicRecordsDifferentDurations@19();
+    VAR
+      ComparisonType1@1000 : Record 132590;
+      ComparisonType2@1001 : Record 132590;
+      TypeHelper@1002 : Codeunit 10;
+      RecRef1@1003 : RecordRef;
+      RecRef2@1004 : RecordRef;
+      Result@1005 : Boolean;
+    BEGIN
+      Initialize;
+
+      // Pre-Setup
+      ComparisonType1.Create(1L,TRUE,LibraryUtility.GenerateGUID,LibraryRandom.RandDate(100),'<CM>',CURRENTDATETIME,
+        LibraryRandom.RandDec(1000,2),CREATEDATETIME(WORKDATE - 1,TIME) - CREATEDATETIME(WORKDATE + 1,TIME),
+        LibraryRandom.RandInt(1000),ComparisonType1."Option Field"::First,COPYSTR(LibraryUtility.GenerateRandomText(30),1,30),
+        TIME,LibraryUtility.GenerateRandomText(1024),CREATEGUID,ComparisonType1.RECORDID);
+
+      // Setup
+      ComparisonType2.Clone(ComparisonType1);
+      ComparisonType2."Duration Field" :=
+        CREATEDATETIME(LibraryRandom.RandDate(100),TIME) - CREATEDATETIME(LibraryRandom.RandDate(100),TIME);
+      ComparisonType2.MODIFY;
+
+      // Post-Setup
+      RecRef1.GETTABLE(ComparisonType1);
+      RecRef2.GETTABLE(ComparisonType2);
+
+      // Exercise
+      Result := TypeHelper.Equals(RecRef1,RecRef2,NOT SkipBlob);
+
+      // Verify
+      Assert.IsFalse(Result,'');
+    END;
+
+    [Test]
+    PROCEDURE BasicRecordsDifferentIntegers@20();
+    VAR
+      ComparisonType1@1000 : Record 132590;
+      ComparisonType2@1001 : Record 132590;
+      TypeHelper@1002 : Codeunit 10;
+      RecRef1@1003 : RecordRef;
+      RecRef2@1004 : RecordRef;
+      Result@1005 : Boolean;
+    BEGIN
+      Initialize;
+
+      // Pre-Setup
+      ComparisonType1.Create(1L,TRUE,LibraryUtility.GenerateGUID,LibraryRandom.RandDate(100),'<CM>',CURRENTDATETIME,
+        LibraryRandom.RandDec(1000,2),CREATEDATETIME(WORKDATE - 1,TIME) - CREATEDATETIME(WORKDATE + 1,TIME),
+        LibraryRandom.RandInt(1000),ComparisonType1."Option Field"::First,COPYSTR(LibraryUtility.GenerateRandomText(30),1,30),
+        TIME,LibraryUtility.GenerateRandomText(1024),CREATEGUID,ComparisonType1.RECORDID);
+
+      // Setup
+      ComparisonType2.Clone(ComparisonType1);
+      ComparisonType2."Integer Field" := LibraryRandom.RandInt(1000);
+      ComparisonType2.MODIFY;
+
+      // Post-Setup
+      RecRef1.GETTABLE(ComparisonType1);
+      RecRef2.GETTABLE(ComparisonType2);
+
+      // Exercise
+      Result := TypeHelper.Equals(RecRef1,RecRef2,NOT SkipBlob);
+
+      // Verify
+      Assert.IsFalse(Result,'');
+    END;
+
+    [Test]
+    PROCEDURE BasicRecordsDifferentOptions@21();
+    VAR
+      ComparisonType1@1000 : Record 132590;
+      ComparisonType2@1001 : Record 132590;
+      TypeHelper@1002 : Codeunit 10;
+      RecRef1@1003 : RecordRef;
+      RecRef2@1004 : RecordRef;
+      Result@1005 : Boolean;
+    BEGIN
+      Initialize;
+
+      // Pre-Setup
+      ComparisonType1.Create(1L,TRUE,LibraryUtility.GenerateGUID,LibraryRandom.RandDate(100),'<CM>',CURRENTDATETIME,
+        LibraryRandom.RandDec(1000,2),CREATEDATETIME(WORKDATE - 1,TIME) - CREATEDATETIME(WORKDATE + 1,TIME),
+        LibraryRandom.RandInt(1000),ComparisonType1."Option Field"::First,COPYSTR(LibraryUtility.GenerateRandomText(30),1,30),
+        TIME,LibraryUtility.GenerateRandomText(1024),CREATEGUID,ComparisonType1.RECORDID);
+
+      // Setup
+      ComparisonType2.Clone(ComparisonType1);
+      ComparisonType2."Option Field" := ComparisonType1."Option Field"::Second;
+      ComparisonType2.MODIFY;
+
+      // Post-Setup
+      RecRef1.GETTABLE(ComparisonType1);
+      RecRef2.GETTABLE(ComparisonType2);
+
+      // Exercise
+      Result := TypeHelper.Equals(RecRef1,RecRef2,NOT SkipBlob);
+
+      // Verify
+      Assert.IsFalse(Result,'');
+    END;
+
+    [Test]
+    PROCEDURE BasicRecordsDifferentTexts@22();
+    VAR
+      ComparisonType1@1000 : Record 132590;
+      ComparisonType2@1001 : Record 132590;
+      TypeHelper@1002 : Codeunit 10;
+      RecRef1@1003 : RecordRef;
+      RecRef2@1004 : RecordRef;
+      Result@1005 : Boolean;
+    BEGIN
+      Initialize;
+
+      // Pre-Setup
+      ComparisonType1.Create(1L,TRUE,LibraryUtility.GenerateGUID,LibraryRandom.RandDate(100),'<CM>',CURRENTDATETIME,
+        LibraryRandom.RandDec(1000,2),CREATEDATETIME(WORKDATE - 1,TIME) - CREATEDATETIME(WORKDATE + 1,TIME),
+        LibraryRandom.RandInt(1000),ComparisonType1."Option Field"::First,COPYSTR(LibraryUtility.GenerateRandomText(30),1,30),
+        TIME,LibraryUtility.GenerateRandomText(1024),CREATEGUID,ComparisonType1.RECORDID);
+
+      // Setup
+      ComparisonType2.Clone(ComparisonType1);
+      ComparisonType2."Text Field" := COPYSTR(LibraryUtility.GenerateRandomText(30),1,30);
+      ComparisonType2.MODIFY;
+
+      // Post-Setup
+      RecRef1.GETTABLE(ComparisonType1);
+      RecRef2.GETTABLE(ComparisonType2);
+
+      // Exercise
+      Result := TypeHelper.Equals(RecRef1,RecRef2,NOT SkipBlob);
+
+      // Verify
+      Assert.IsFalse(Result,'');
+    END;
+
+    [Test]
+    PROCEDURE BasicRecordsDifferentTimes@23();
+    VAR
+      ComparisonType1@1000 : Record 132590;
+      ComparisonType2@1001 : Record 132590;
+      TypeHelper@1002 : Codeunit 10;
+      RecRef1@1003 : RecordRef;
+      RecRef2@1004 : RecordRef;
+      Result@1005 : Boolean;
+    BEGIN
+      Initialize;
+
+      // Pre-Setup
+      ComparisonType1.Create(1L,TRUE,LibraryUtility.GenerateGUID,LibraryRandom.RandDate(100),'<CM>',CURRENTDATETIME,
+        LibraryRandom.RandDec(1000,2),CREATEDATETIME(WORKDATE - 1,TIME) - CREATEDATETIME(WORKDATE + 1,TIME),
+        LibraryRandom.RandInt(1000),ComparisonType1."Option Field"::First,COPYSTR(LibraryUtility.GenerateRandomText(30),1,30),
+        TIME,LibraryUtility.GenerateRandomText(1024),CREATEGUID,ComparisonType1.RECORDID);
+
+      // Setup
+      ComparisonType2.Clone(ComparisonType1);
+      ComparisonType2."Time Field" := TIME + 1;
+      ComparisonType2.MODIFY;
+
+      // Post-Setup
+      RecRef1.GETTABLE(ComparisonType1);
+      RecRef2.GETTABLE(ComparisonType2);
+
+      // Exercise
+      Result := TypeHelper.Equals(RecRef1,RecRef2,NOT SkipBlob);
+
+      // Verify
+      Assert.IsFalse(Result,'');
+    END;
+
+    [Test]
+    PROCEDURE BasicRecordsDifferentBlobs@6();
+    VAR
+      ComparisonType1@1000 : Record 132590;
+      ComparisonType2@1001 : Record 132590;
+      TypeHelper@1002 : Codeunit 10;
+      RecRef1@1003 : RecordRef;
+      RecRef2@1004 : RecordRef;
+      OutStream@1006 : OutStream;
+      Result@1005 : Boolean;
+    BEGIN
+      Initialize;
+
+      // Pre-Setup
+      ComparisonType1.Create(1L,TRUE,LibraryUtility.GenerateGUID,LibraryRandom.RandDate(100),'<CM>',CURRENTDATETIME,
+        LibraryRandom.RandDec(1000,2),CREATEDATETIME(WORKDATE - 1,TIME) - CREATEDATETIME(WORKDATE + 1,TIME),
+        LibraryRandom.RandInt(1000),ComparisonType1."Option Field"::First,COPYSTR(LibraryUtility.GenerateRandomText(30),1,30),
+        TIME,LibraryUtility.GenerateRandomText(1024),CREATEGUID,ComparisonType1.RECORDID);
+
+      // Setup
+      ComparisonType2.Clone(ComparisonType1);
+      ComparisonType2."Blob Field".CREATEOUTSTREAM(OutStream);
+      OutStream.WRITETEXT(LibraryUtility.GenerateRandomText(1024));
+      ComparisonType2.MODIFY;
+
+      // Post-Setup
+      RecRef1.GETTABLE(ComparisonType1);
+      RecRef2.GETTABLE(ComparisonType2);
+
+      // Exercise
+      Result := TypeHelper.Equals(RecRef1,RecRef2,NOT SkipBlob);
+
+      // Verify
+      Assert.IsFalse(Result,'');
+    END;
+
+    [Test]
+    PROCEDURE BasicRecordsDifferentGUIDs@9();
+    VAR
+      ComparisonType1@1000 : Record 132590;
+      ComparisonType2@1001 : Record 132590;
+      TypeHelper@1002 : Codeunit 10;
+      RecRef1@1003 : RecordRef;
+      RecRef2@1004 : RecordRef;
+      Result@1005 : Boolean;
+    BEGIN
+      Initialize;
+
+      // Pre-Setup
+      ComparisonType1.Create(1L,TRUE,LibraryUtility.GenerateGUID,LibraryRandom.RandDate(100),'<CM>',CURRENTDATETIME,
+        LibraryRandom.RandDec(1000,2),CREATEDATETIME(WORKDATE - 1,TIME) - CREATEDATETIME(WORKDATE + 1,TIME),
+        LibraryRandom.RandInt(1000),ComparisonType1."Option Field"::First,COPYSTR(LibraryUtility.GenerateRandomText(30),1,30),
+        TIME,LibraryUtility.GenerateRandomText(1024),CREATEGUID,ComparisonType1.RECORDID);
+
+      // Setup
+      ComparisonType2.Clone(ComparisonType1);
+      ComparisonType2."GUID Field" := CREATEGUID;
+      ComparisonType2.MODIFY;
+
+      // Post-Setup
+      RecRef1.GETTABLE(ComparisonType1);
+      RecRef2.GETTABLE(ComparisonType2);
+
+      // Exercise
+      Result := TypeHelper.Equals(RecRef1,RecRef2,NOT SkipBlob);
+
+      // Verify
+      Assert.IsFalse(Result,'');
+    END;
+
+    [Test]
+    PROCEDURE BasicRecordsDifferentRecordIDs@11();
+    VAR
+      ComparisonType1@1000 : Record 132590;
+      ComparisonType2@1001 : Record 132590;
+      TypeHelper@1002 : Codeunit 10;
+      RecRef1@1003 : RecordRef;
+      RecRef2@1004 : RecordRef;
+      Result@1005 : Boolean;
+    BEGIN
+      Initialize;
+
+      // Pre-Setup
+      ComparisonType1.Create(1L,TRUE,LibraryUtility.GenerateGUID,LibraryRandom.RandDate(100),'<CM>',CURRENTDATETIME,
+        LibraryRandom.RandDec(1000,2),CREATEDATETIME(WORKDATE - 1,TIME) - CREATEDATETIME(WORKDATE + 1,TIME),
+        LibraryRandom.RandInt(1000),ComparisonType1."Option Field"::First,COPYSTR(LibraryUtility.GenerateRandomText(30),1,30),
+        TIME,LibraryUtility.GenerateRandomText(1024),CREATEGUID,ComparisonType1.RECORDID);
+
+      // Setup
+      ComparisonType2.Clone(ComparisonType1);
+      ComparisonType2."Record ID Field" := ComparisonType2.RECORDID;
+      ComparisonType2.MODIFY;
+
+      // Post-Setup
+      RecRef1.GETTABLE(ComparisonType1);
+      RecRef2.GETTABLE(ComparisonType2);
+
+      // Exercise
+      Result := TypeHelper.Equals(RecRef1,RecRef2,NOT SkipBlob);
+
+      // Verify
+      Assert.IsFalse(Result,'');
+    END;
+
+    [Test]
+    PROCEDURE AllKeysRecordsAreDifferent@10();
+    VAR
+      AllKeysType1@1000 : Record 132591;
+      AllKeysType2@1001 : Record 132591;
+      TypeHelper@1005 : Codeunit 10;
+      RecRef1@1002 : RecordRef;
+      RecRef2@1003 : RecordRef;
+      Result@1004 : Boolean;
+    BEGIN
+      Initialize;
+
+      // Pre-Setup
+      AllKeysType1.Create(1,'1',AllKeysType1.Key3::First);
+
+      // Setup
+      AllKeysType2.Create(2,'2',AllKeysType1.Key3::Second);
+
+      // Post-Setup
+      RecRef1.GETTABLE(AllKeysType1);
+      RecRef2.GETTABLE(AllKeysType2);
+
+      // Exercise
+      Result := TypeHelper.Equals(RecRef1,RecRef2,NOT SkipBlob);
+
+      // Verify
+      Assert.IsFalse(Result,'');
+    END;
+
+    [Test]
+    PROCEDURE WriteTextBLOBIfChangedEmptyBLOB@3();
+    VAR
+      IncomingDocumentAttachment@1004 : Record 133;
+      TypeHelper@1000 : Codeunit 10;
+      BlobFieldRef@1001 : FieldRef;
+      Encoding@1002 : TextEncoding;
+      NewText@1003 : Text;
+      FieldValueWasChanged@1006 : Boolean;
+    BEGIN
+      // [SCENARIO] WriteTextBLOBIfChanged: write a text on an empty BLOB
+      // [GIVEN] A BLOB field ref (empty)
+      IncomingDocumentAttachment.INIT;
+
+      // [WHEN] WriteTextToBlobIfChanged is invoked with a non-empty text value
+      Encoding := TEXTENCODING::UTF16;
+      NewText := 'Fish day :/';
+      FieldValueWasChanged := WriteTextToBLOBFieldRef(IncomingDocumentAttachment,BlobFieldRef,NewText,Encoding);
+
+      // [THEN] The function returns TRUE, meaning it had changed the value of the BLOB
+      Assert.IsTrue(FieldValueWasChanged,'Incorrect return value of function WriteTextToBlobIfChanged.');
+
+      // [THEN] The BLOB contains the new value
+      Assert.AreEqual(NewText,TypeHelper.ReadTextBlobWithTextEncoding(BlobFieldRef,Encoding),'Incorrect text value.');
+    END;
+
+    [Test]
+    PROCEDURE WriteTextBLOBIfChangedIdenticalText@26();
+    VAR
+      IncomingDocumentAttachment@1004 : Record 133;
+      TypeHelper@1000 : Codeunit 10;
+      BlobFieldRef@1001 : FieldRef;
+      Encoding@1002 : TextEncoding;
+      NewText@1003 : Text;
+      FieldValueWasChanged@1006 : Boolean;
+    BEGIN
+      // [SCENARIO] WriteTextBLOBIfChanged: attempt to write an identical text
+      // [GIVEN] A BLOB field ref containing a value
+      IncomingDocumentAttachment.INIT;
+      Encoding := TEXTENCODING::UTF16;
+      NewText := 'Fish day :/';
+      FieldValueWasChanged := WriteTextToBLOBFieldRef(IncomingDocumentAttachment,BlobFieldRef,NewText,Encoding);
+
+      // [WHEN] WriteTextToBlobIfChanged is invoked with the same value
+      FieldValueWasChanged := WriteTextToBLOBFieldRef(IncomingDocumentAttachment,BlobFieldRef,NewText,Encoding);
+
+      // [THEN] The function returns FALSE
+      Assert.IsFalse(FieldValueWasChanged,'Incorrect return value of function WriteTextToBlobIfChanged.');
+
+      // [THEN] The BLOB contains the correct value
+      Assert.AreEqual(NewText,TypeHelper.ReadTextBlobWithTextEncoding(BlobFieldRef,Encoding),'Incorrect text value.');
+    END;
+
+    [Test]
+    PROCEDURE WriteTextBLOBIfChangedNewText@25();
+    VAR
+      IncomingDocumentAttachment@1004 : Record 133;
+      TypeHelper@1000 : Codeunit 10;
+      BlobFieldRef@1001 : FieldRef;
+      Encoding@1002 : TextEncoding;
+      NewText@1003 : Text;
+      FieldValueWasChanged@1006 : Boolean;
+    BEGIN
+      // [SCENARIO] WriteTextBLOBIfChanged: overwrite an existing text with a different text
+      // [GIVEN] A BLOB field ref containing a value
+      IncomingDocumentAttachment.INIT;
+      Encoding := TEXTENCODING::UTF16;
+      NewText := 'Fish day :/';
+      FieldValueWasChanged := WriteTextToBLOBFieldRef(IncomingDocumentAttachment,BlobFieldRef,NewText,Encoding);
+
+      // [WHEN] WriteTextToBlobIfChanged is invoked with a second value
+      NewText := 'Burger day!';
+      FieldValueWasChanged := WriteTextToBLOBFieldRef(IncomingDocumentAttachment,BlobFieldRef,NewText,Encoding);
+
+      // [THEN] The function returns TRUE
+      Assert.IsTrue(FieldValueWasChanged,'Incorrect return value of function WriteTextToBlobIfChanged.');
+
+      // [THEN] The BLOB contains the correct value
+      Assert.AreEqual(NewText,TypeHelper.ReadTextBlobWithTextEncoding(BlobFieldRef,Encoding),'Incorrect text value.');
+    END;
+
+    [Test]
+    PROCEDURE EvaluateDateWithoutTimeShift@12();
+    VAR
+      TypeHelper@1000 : Codeunit 10;
+      Value@1002 : Variant;
+      Date@1001 : Date;
+      Day@1003 : Integer;
+      Month@1004 : Integer;
+      Year@1005 : Integer;
+      String@1006 : Text;
+    BEGIN
+      // [FEATURE] [Date]
+      // [SCENARIO 375640] TypeHelper.Evaluate() correctly evaluates DateString to Day, Month, Year when there is no time shift
+
+      // [GIVEN] DateString '2015-08-18T00:00:00'
+      GenerateDateString(String,Day,Month,Year,'');
+
+      // [WHEN] Evaluate DateString TypeHelper.Evaluate(...) into Date
+      Value := Date;
+      TypeHelper.Evaluate(Value,String,'','');
+      Date := Value;
+
+      // [THEN] Date.Day=18, Date.Month=08, Date.Year=2015
+      VerifyDateValues(Date,Day,Month,Year);
+    END;
+
+    [Test]
+    PROCEDURE EvaluateDateWithZeroTimeShift@13();
+    VAR
+      TypeHelper@1006 : Codeunit 10;
+      Value@1004 : Variant;
+      Date@1005 : Date;
+      Day@1003 : Integer;
+      Month@1002 : Integer;
+      Year@1001 : Integer;
+      String@1000 : Text;
+    BEGIN
+      // [FEATURE] [Date]
+      // [SCENARIO 375640] TypeHelper.Evaluate() correctly evaluates DateString to Day, Month, Year when there is zero time shift
+
+      // [GIVEN] DateString '2015-08-18T00:00:00+00:00'
+      GenerateDateString(String,Day,Month,Year,'+00:00');
+
+      // [WHEN] Evaluate DateString TypeHelper.Evaluate(...) into Date
+      Value := Date;
+      TypeHelper.Evaluate(Value,String,'','');
+      Date := Value;
+
+      // [THEN] Date.Day=18, Date.Month=08, Date.Year=2015
+      VerifyDateValues(Date,Day,Month,Year);
+    END;
+
+    [Test]
+    PROCEDURE EvaluateDateWithPositiveTimeShift@15();
+    VAR
+      TypeHelper@1006 : Codeunit 10;
+      Value@1004 : Variant;
+      Date@1005 : Date;
+      Day@1003 : Integer;
+      Month@1002 : Integer;
+      Year@1001 : Integer;
+      String@1000 : Text;
+    BEGIN
+      // [FEATURE] [Date]
+      // [SCENARIO 375640] TypeHelper.Evaluate() correctly evaluates DateString to Day, Month, Year when there is positive time shift
+
+      // [GIVEN] DateString '2015-08-18T00:00:00+12:00'
+      GenerateDateString(String,Day,Month,Year,'+12:00');
+
+      // [WHEN] Evaluate DateString TypeHelper.Evaluate(...) into Date
+      Value := Date;
+      TypeHelper.Evaluate(Value,String,'','');
+      Date := Value;
+
+      // [THEN] Date.Day=18, Date.Month=08, Date.Year=2015
+      VerifyDateValues(Date,Day,Month,Year);
+    END;
+
+    [Test]
+    PROCEDURE EvaluateDateWithNegativeTimeShift@24();
+    VAR
+      TypeHelper@1006 : Codeunit 10;
+      Value@1004 : Variant;
+      Date@1005 : Date;
+      Day@1003 : Integer;
+      Month@1002 : Integer;
+      Year@1001 : Integer;
+      String@1000 : Text;
+    BEGIN
+      // [FEATURE] [Date]
+      // [SCENARIO 375640] TypeHelper.Evaluate() correctly evaluates DateString to Day, Month, Year when there is negative time shift
+
+      // [GIVEN] DateString '2015-08-18T00:00:00-12:00'
+      GenerateDateString(String,Day,Month,Year,'-12:00');
+
+      // [WHEN] Evaluate DateString TypeHelper.Evaluate(...) into Date
+      Value := Date;
+      TypeHelper.Evaluate(Value,String,'','');
+      Date := Value;
+
+      // [THEN] Date.Day=18, Date.Month=08, Date.Year=2015
+      VerifyDateValues(Date,Day,Month,Year);
+    END;
+
+    [Test]
+    PROCEDURE EvaluateDateTimeWithoutFormatAndCulture@38();
+    VAR
+      TypeHelper@1000 : Codeunit 10;
+      Value@1002 : Variant;
+      DateTime@1001 : DateTime;
+      Day@1003 : Integer;
+      Month@1004 : Integer;
+      Year@1005 : Integer;
+      Hour@1009 : Integer;
+      Minute@1008 : Integer;
+      Second@1007 : Integer;
+      Milisecond@1010 : Integer;
+      String@1006 : Text;
+    BEGIN
+      // [FEATURE] [Date] [UT]
+      // [SCENARIO 227335] TypeHelper.Evaluate() correctly evaluates DateTimeString to Day, Month, Year, Hour, Minute, Second and Millisecond with empty format and culture
+
+      // [GIVEN] DateTimeString '2001-09-02T22:54:31.78'
+      GenerateDateTimeParts(Day,Month,Year,Hour,Minute,Second,Milisecond);
+      String :=
+        STRSUBSTNO('%1-%2-%3T%4:%5:%6.%7',
+          FORMAT(Year),
+          FORMAT(Month,0,'<Integer,2><Filler Character,0>'),
+          FORMAT(Day,0,'<Integer,2><Filler Character,0>'),
+          FORMAT(Hour,0,'<Integer,2><Filler Character,0>'),
+          FORMAT(Minute,0,'<Integer,2><Filler Character,0>'),
+          FORMAT(Second,0,'<Integer,2><Filler Character,0>'),
+          FORMAT(Milisecond,0,'<Integer,3><Filler Character,0>'));
+
+      // [WHEN] Evaluate DateTimeString TypeHelper.Evaluate(...) into DateTime
+      Value := DateTime;
+      TypeHelper.Evaluate(Value,String,'','');
+      DateTime := Value;
+
+      // [THEN] Day=2, Month=09, Year=2001, Hour=22, Minute=54, Second=31, Milisecond=780
+      VerifyDateTimeValues(DateTime,Day,Month,Year,Hour,Minute,Second,Milisecond);
+    END;
+
+    [Test]
+    PROCEDURE EvaluateDateTimeWithFormat@49();
+    VAR
+      TypeHelper@1000 : Codeunit 10;
+      Value@1002 : Variant;
+      EvaluatedDateTime@1001 : DateTime;
+      Day@1003 : Integer;
+      Month@1004 : Integer;
+      Year@1005 : Integer;
+      Hour@1009 : Integer;
+      Minute@1008 : Integer;
+      Second@1007 : Integer;
+      Milisecond@1010 : Integer;
+      TimeShift@1011 : Integer;
+      String@1006 : Text;
+    BEGIN
+      // [FEATURE] [Date] [UT]
+      // [SCENARIO 227335] TypeHelper.Evaluate() correctly evaluates DateTimeString to Day, Month, Year, Hour, Minute, Second and Millisecond using custom format value
+
+      // [GIVEN] DateTimeString '02.09.2001 22:54:31.78 +01:00'
+      GenerateDateTimeParts(Day,Month,Year,Hour,Minute,Second,Milisecond);
+      TimeShift := LibraryRandom.RandIntInRange(1,5);
+      String :=
+        STRSUBSTNO('%1.%2.%3 %4:%5:%6.%7 +0%8:00',
+          FORMAT(Day,0,'<Integer,2><Filler Character,0>'),
+          FORMAT(Month,0,'<Integer,2><Filler Character,0>'),
+          FORMAT(Year),
+          FORMAT(Hour,0,'<Integer,2><Filler Character,0>'),
+          FORMAT(Minute,0,'<Integer,2><Filler Character,0>'),
+          FORMAT(Second,0,'<Integer,2><Filler Character,0>'),
+          FORMAT(Milisecond,0,'<Integer,3><Filler Character,0>'),
+          TimeShift);
+
+      // [WHEN] Evaluate DateTimeString TypeHelper.Evaluate(...) into DateTime
+      Value := EvaluatedDateTime;
+      TypeHelper.Evaluate(Value,String,'dd.MM.yyyy HH:mm:ss.fff zzz','');
+      EvaluatedDateTime := Value;
+
+      // [THEN] Date.Day=2, Date.Month=09, Date.Year=2001, Hour=21, Minute=54, Second=31, Milisecond=780
+      VerifyDateTimeValues(EvaluatedDateTime,Day,Month,Year,Hour - TimeShift,Minute,Second,Milisecond);
+    END;
+
+    [Test]
+    PROCEDURE EvaluateDateTimeWithCultureAndFormat@39();
+    VAR
+      Language@1011 : Record 8;
+      TypeHelper@1000 : Codeunit 10;
+      Value@1002 : Variant;
+      EvaluatedDateTime@1001 : DateTime;
+      Day@1003 : Integer;
+      Month@1004 : Integer;
+      Year@1005 : Integer;
+      Hour@1009 : Integer;
+      Minute@1008 : Integer;
+      Second@1007 : Integer;
+      Milisecond@1010 : Integer;
+      String@1006 : Text;
+    BEGIN
+      // [FEATURE] [Date] [UT]
+      // [SCENARIO 227335] TypeHelper.Evaluate() correctly evaluates DateTimeString to Day, Month, Year, Hour, Minute, Second and Millisecond using Danish culture and format
+
+      // [GIVEN] Danish DateTimeString '02 sen 2001 22:54:31.78'
+      GenerateDateTimeParts(Day,Month,Year,Hour,Minute,Second,Milisecond);
+      Language.GET('DAN');
+      String :=
+        STRSUBSTNO('%1 %2 %3 %4:%5:%6.%7',
+          FORMAT(Day,0,'<Integer,2><Filler Character,0>'),
+          GetTranslatedMonth(DMY2DATE(Day,Month,Year),Language."Windows Language ID"),
+          FORMAT(Year),
+          FORMAT(Hour,0,'<Integer,2><Filler Character,0>'),
+          FORMAT(Minute,0,'<Integer,2><Filler Character,0>'),
+          FORMAT(Second,0,'<Integer,2><Filler Character,0>'),
+          FORMAT(Milisecond,0,'<Integer,3><Filler Character,0>'));
+
+      // [WHEN] Evaluate DateTimeString TypeHelper.Evaluate(...) into DateTime
+      Value := EvaluatedDateTime;
+      TypeHelper.Evaluate(Value,String,'dd MMM yyyy HH:mm:ss.fff','da-DK');
+      EvaluatedDateTime := Value;
+
+      // [THEN] Date.Day=2, Date.Month=09, Date.Year=2001, Hour=22, Minute=54, Second=31, Milisecond=780
+      VerifyDateTimeValues(EvaluatedDateTime,Day,Month,Year,Hour,Minute,Second,Milisecond);
+    END;
+
+    [Test]
+    PROCEDURE EvaluateUTCDateTime@40();
+    VAR
+      TypeHelper@1000 : Codeunit 10;
+      DateTime@1001 : DateTime;
+      Day@1003 : Integer;
+      Month@1004 : Integer;
+      Year@1005 : Integer;
+      Hour@1009 : Integer;
+      Minute@1008 : Integer;
+      Second@1007 : Integer;
+      Milisecond@1010 : Integer;
+      String@1006 : Text;
+    BEGIN
+      // [FEATURE] [Date] [UT]
+      // [SCENARIO 227335] TypeHelper.Evaluate() correctly evaluates UTC DateTimeString to Day, Month, Year, Hour, Minute, Second and Millisecond
+
+      // [GIVEN] DateTimeString 'Sun, 02 Sep 2001 22:54:31 GMT'
+      GenerateDateTimeParts(Day,Month,Year,Hour,Minute,Second,Milisecond);
+      String :=
+        STRSUBSTNO('%1, %2 %3 %4 %5:%6:%7 GMT',
+          FORMAT(DMY2DATE(Day,Month,Year),0,'<Weekday Text,3>'),
+          FORMAT(Day,0,'<Integer,2><Filler Character,0>'),
+          FORMAT(DMY2DATE(Day,Month,Year),0,'<Month Text,3>'),
+          FORMAT(Year),
+          FORMAT(Hour,0,'<Integer,2><Filler Character,0>'),
+          FORMAT(Minute,0,'<Integer,2><Filler Character,0>'),
+          FORMAT(Second,0,'<Integer,2><Filler Character,0>'));
+
+      // [WHEN] Evaluate DateTimeString TypeHelper.Evaluate(...) into DateTime
+      DateTime := TypeHelper.EvaluateUTCDateTime(String);
+
+      // [THEN] Day=2, Month=09, Year=2001, Hour=22, Minute=54, Second=31, Milisecond=780
+      VerifyDateTimeValues(DateTime,Day,Month,Year,Hour,Minute,Second,0);
+    END;
+
+    [Test]
+    PROCEDURE FormatDateTimeWithCultureAndFormat@41();
+    VAR
+      TypeHelper@1002 : Codeunit 10;
+      DateTime@1000 : DateTime;
+      FormattedDateTime@1001 : Text;
+    BEGIN
+      // [FEATURE] [Date] [UT]
+      // [SCENARIO 227335] TypeHelper.FormatDateTime correctly formats DateTime using custom format and Danish culture
+
+      // [GIVEN] DateTime '01.10.2017 22:54:31.123'
+      DateTime := CREATEDATETIME(DMY2DATE(1,10,2017),CreateTime(22,54,31,123));
+
+      // [WHEN] Formatting DateTime with Danish culture and format 'dd MMM yyyy HH:mm:ss.fff'
+      FormattedDateTime := TypeHelper.FormatDateTime(DateTime,'dd MMM yyyy HH:mm:ss.fff','da-DK');
+
+      // [THEN] Result is equalt to '01 okt 2017 22:54:31.123'
+      Assert.AreEqual('01 okt 2017 22:54:31.123',FormattedDateTime,WrongDateTimeFormatErr);
+    END;
+
+    [Test]
+    PROCEDURE FormatDateToSpecificDateFormat_ENU@31();
+    VAR
+      Language@1000 : Record 8;
+      TypeHelper@1006 : Codeunit 10;
+      Date@1004 : Date;
+      ConvertedDateText@1007 : Text;
+    BEGIN
+      // [FEATURE] [Date]
+      // [SCENARIO 377566] TypeHelper.FormatDate() correctly converts Date to ENU Date Format
+
+      // [GIVEN] Date '01/10/2016'
+      Date := DMY2DATE(1,10,2016);
+
+      // [WHEN] Format Date to 'ENU' English (United States) Language Date Format
+      Language.GET('ENU');
+      ConvertedDateText := TypeHelper.FormatDate(Date,Language."Windows Language ID");
+
+      // [THEN] Date is equal to '10/1/2016'
+      Assert.AreEqual('10/1/2016',ConvertedDateText,WrongDateFormatErr);
+    END;
+
+    [Test]
+    PROCEDURE FormatDateToSpecificDateFormat_DEU@30();
+    VAR
+      Language@1000 : Record 8;
+      TypeHelper@1006 : Codeunit 10;
+      Date@1004 : Date;
+      ConvertedDateText@1007 : Text;
+    BEGIN
+      // [FEATURE] [Date]
+      // [SCENARIO 377566] TypeHelper.FormatDate() correctly converts Date to DEU Date Format
+
+      // [GIVEN] Date '01/10/2016'
+      Date := DMY2DATE(1,10,2016);
+
+      // [WHEN] Format Date to 'DEU' German (Germany) Language Date Format
+      Language.GET('DEU');
+      ConvertedDateText := TypeHelper.FormatDate(Date,Language."Windows Language ID");
+
+      // [THEN] Date is equal to '01.10.2016'
+      Assert.AreEqual('01.10.2016',ConvertedDateText,WrongDateFormatErr);
+    END;
+
+    [Test]
+    PROCEDURE FormatDateToSpecificDateFormat_ESP@43();
+    VAR
+      Language@1000 : Record 8;
+      TypeHelper@1006 : Codeunit 10;
+      Date@1004 : Date;
+      ConvertedDateText@1007 : Text;
+    BEGIN
+      // [FEATURE] [Date]
+      // [SCENARIO 377566] TypeHelper.FormatDate() correctly converts Date to ESP Date Format
+
+      // [GIVEN] Date '01/10/2016'
+      Date := DMY2DATE(1,10,2016);
+
+      // [WHEN] Format Date to 'ESP' Spanish (Spain) Language Date Format
+      Language.GET('ESP');
+      ConvertedDateText := TypeHelper.FormatDate(Date,Language."Windows Language ID");
+
+      // [THEN] Date is equal to '01/10/2016'
+      Assert.AreEqual('01/10/2016',ConvertedDateText,WrongDateFormatErr);
+    END;
+
+    [Test]
+    PROCEDURE TestLevenshteinDistance@32();
+    VAR
+      TypeHelper@1000 : Codeunit 10;
+      LongText@1001 : Text;
+      i@1002 : Integer;
+    BEGIN
+      // Assert that the Levenshtein distance is calculated correctly in codeunit 10 (Type Helper)
+      Assert.AreEqual(11,TypeHelper.TextDistance('Hello World',''),'Test - edge case 1');
+      Assert.AreEqual(11,TypeHelper.TextDistance('','Hello World'),'Test - edge case 2');
+      Assert.AreEqual(0,TypeHelper.TextDistance('',''),'Test - edge case 3');
+      Assert.AreEqual(0,TypeHelper.TextDistance('Hello World','Hello World'),'Test 1');
+      Assert.AreEqual(1,TypeHelper.TextDistance('Hello Word','Hello World'),'Test 2');
+      Assert.AreEqual(1,TypeHelper.TextDistance('Hello World','Hello Word'),'Test 3');
+      Assert.AreEqual(1,TypeHelper.TextDistance('Hallo World','Hello World'),'Test 4');
+      Assert.AreEqual(2,TypeHelper.TextDistance('Hallo World','Hell World'),'Test 5');
+      Assert.AreEqual(8,TypeHelper.TextDistance('Hard','Hello World'),'Test 6');
+      FOR i := 1 TO 100 DO
+        LongText += 'Hello World ';
+      ASSERTERROR i := TypeHelper.TextDistance(LongText,'Hello World');
+      ASSERTERROR i := TypeHelper.TextDistance('Hello World',LongText);
+      LongText := COPYSTR(LongText,1,1023);
+      Assert.AreEqual(2,TypeHelper.TextDistance('X' + LongText,LongText + 'Y'),'Test 7');
+    END;
+
+    [Test]
+    PROCEDURE TestIsPhoneNumber@33();
+    VAR
+      TypeHelper@1008 : Codeunit 10;
+      ValidPhoneNb1@1007 : Text;
+      ValidPhoneNb2@1006 : Text;
+      ValidPhoneNb3@1005 : Text;
+      ValidPhoneNb4@1004 : Text;
+      InvalidPhoneNb1@1003 : Text;
+      InvalidPhoneNb2@1002 : Text;
+      InvalidPhoneNb3@1001 : Text;
+      InvalidPhoneNb4@1000 : Text;
+      InvalidPhoneNb5@1009 : Text;
+      InvalidPhoneNb6@1010 : Text;
+    BEGIN
+      // [SCENARIO] Test different phone numbers (valid and invalid ones) and check the results are as expected.
+
+      // [GIVEN] Different phone numbers
+      ValidPhoneNb1 := '+45 12345678';
+      ValidPhoneNb2 := '12 34 56 78';
+      ValidPhoneNb3 := '(512) 736-1777';
+      ValidPhoneNb4 := ''; // if mandatory field, we assume the test is performed elsewhere
+      InvalidPhoneNb1 := 'WRONG';
+      InvalidPhoneNb2 := '12.345.678';
+      InvalidPhoneNb3 := '#123456789';
+      InvalidPhoneNb4 := '1337!';
+      InvalidPhoneNb5 := 'bad123';
+      InvalidPhoneNb6 := '3615 *';
+
+      // [WHEN] We test them
+      // [THEN] The function gives us the correct result (valid phone number or not)
+      Assert.IsTrue(TypeHelper.IsPhoneNumber(ValidPhoneNb1),'Should be true: ' + ValidPhoneNb1 + ' is a valid phone number.');
+      Assert.IsTrue(TypeHelper.IsPhoneNumber(ValidPhoneNb2),'Should be true: ' + ValidPhoneNb2 + ' is a valid phone number.');
+      Assert.IsTrue(TypeHelper.IsPhoneNumber(ValidPhoneNb3),'Should be true: ' + ValidPhoneNb3 + ' is a valid phone number.');
+      Assert.IsTrue(TypeHelper.IsPhoneNumber(ValidPhoneNb4),'Should be true: ' + ValidPhoneNb4 + ' is a valid phone number.');
+      Assert.IsFalse(TypeHelper.IsPhoneNumber(InvalidPhoneNb1),'Should be false: ' + InvalidPhoneNb1 + ' is an invalid phone number.');
+      Assert.IsFalse(TypeHelper.IsPhoneNumber(InvalidPhoneNb2),'Should be false: ' + InvalidPhoneNb2 + ' is an invalid phone number.');
+      Assert.IsFalse(TypeHelper.IsPhoneNumber(InvalidPhoneNb3),'Should be false: ' + InvalidPhoneNb3 + ' is an invalid phone number.');
+      Assert.IsFalse(TypeHelper.IsPhoneNumber(InvalidPhoneNb4),'Should be false: ' + InvalidPhoneNb4 + ' is an invalid phone number.');
+      Assert.IsFalse(TypeHelper.IsPhoneNumber(InvalidPhoneNb5),'Should be false: ' + InvalidPhoneNb5 + ' is an invalid phone number.');
+      Assert.IsFalse(TypeHelper.IsPhoneNumber(InvalidPhoneNb6),'Should be false: ' + InvalidPhoneNb6 + ' is an invalid phone number.');
+    END;
+
+    [Test]
+    PROCEDURE TestBitwiseAnd@34();
+    VAR
+      TypeHelper@1000 : Codeunit 10;
+      Zero@1003 : Integer;
+      Max@1001 : Integer;
+      Sequence10@1005 : Integer;
+      Sequence01@1006 : Integer;
+      Positive@1002 : Integer;
+      Negative@1004 : Integer;
+    BEGIN
+      // [SCENARIO] BitwiseAnd() implements a bitwise AND operator
+
+      // [GIVEN] Different numbers
+      Zero := 0; // 0000 0000 0000 0000 0000 0000 0000 0000
+      Max := 2147483647; // 0111 1111 1111 1111 1111 1111 1111 1111
+      Sequence10 := 715827882; // 0010 1010 1010 1010 1010 1010 1010 1010
+      Sequence01 := 1431655765; // 0101 0101 0101 0101 0101 0101 0101 0101
+      Positive := LibraryRandom.RandInt(Max);
+      Negative := -LibraryRandom.RandInt(Max);
+
+      // [WHEN] We test them
+      // [THEN] The function gives us the correct result
+      ASSERTERROR TypeHelper.BitwiseAnd(Negative,Positive);
+      ASSERTERROR TypeHelper.BitwiseAnd(Positive,Negative);
+      Assert.AreEqual(TypeHelper.BitwiseAnd(Zero,Zero),Zero,STRSUBSTNO('%1 & %2 <> %3',Zero,Zero,Zero));
+      Assert.AreEqual(TypeHelper.BitwiseAnd(Max,Max),Max,STRSUBSTNO('%1 & %2 <> %3',Max,Max,Max));
+      Assert.AreEqual(TypeHelper.BitwiseAnd(Positive,Positive),Positive,STRSUBSTNO('%1 & %2 <> %3',Positive,Positive,Positive));
+      Assert.AreEqual(TypeHelper.BitwiseAnd(Positive,Zero),Zero,STRSUBSTNO('%1 & %2 <> %3',Positive,Zero,Zero));
+      Assert.AreEqual(TypeHelper.BitwiseAnd(Zero,Positive),Zero,STRSUBSTNO('%1 & %2 <> %3',Zero,Positive,Zero));
+      Assert.AreEqual(TypeHelper.BitwiseAnd(Positive,Max),Positive,STRSUBSTNO('%1 & %2 <> %3',Positive,Max,Positive));
+      Assert.AreEqual(TypeHelper.BitwiseAnd(Max,Positive),Positive,STRSUBSTNO('%1 & %2 <> %3',Max,Positive,Positive));
+      Assert.AreEqual(TypeHelper.BitwiseAnd(Sequence01,Sequence10),Zero,STRSUBSTNO('%1 & %2 <> %3',Sequence01,Sequence10,Zero));
+      Assert.AreEqual(TypeHelper.BitwiseAnd(Sequence10,Sequence01),Zero,STRSUBSTNO('%1 & %2 <> %3',Sequence10,Sequence01,Zero));
+    END;
+
+    [Test]
+    PROCEDURE TestBitwiseOr@35();
+    VAR
+      TypeHelper@1006 : Codeunit 10;
+      Zero@1005 : Integer;
+      Max@1004 : Integer;
+      Sequence10@1003 : Integer;
+      Sequence01@1002 : Integer;
+      Positive@1001 : Integer;
+      Negative@1000 : Integer;
+    BEGIN
+      // [SCENARIO] BitwiseOr() implements a bitwise OR operator
+
+      // [GIVEN] Different numbers
+      Zero := 0; // 0000 0000 0000 0000 0000 0000 0000 0000
+      Max := 2147483647; // 0111 1111 1111 1111 1111 1111 1111 1111
+      Sequence10 := 715827882; // 0010 1010 1010 1010 1010 1010 1010 1010
+      Sequence01 := 1431655765; // 0101 0101 0101 0101 0101 0101 0101 0101
+      Positive := LibraryRandom.RandInt(Max);
+      Negative := -LibraryRandom.RandInt(Max);
+
+      // [WHEN] We test them
+      // [THEN] The function gives us the correct result
+      ASSERTERROR TypeHelper.BitwiseOr(Negative,Positive);
+      ASSERTERROR TypeHelper.BitwiseOr(Positive,Negative);
+      Assert.AreEqual(TypeHelper.BitwiseOr(Zero,Zero),Zero,STRSUBSTNO('%1 | %2 <> %3',Zero,Zero,Zero));
+      Assert.AreEqual(TypeHelper.BitwiseOr(Max,Max),Max,STRSUBSTNO('%1 | %2 <> %3',Max,Max,Max));
+      Assert.AreEqual(TypeHelper.BitwiseOr(Positive,Positive),Positive,STRSUBSTNO('%1 | %2 <> %3',Positive,Positive,Positive));
+      Assert.AreEqual(TypeHelper.BitwiseOr(Positive,Zero),Positive,STRSUBSTNO('%1 | %2 <> %3',Positive,Zero,Positive));
+      Assert.AreEqual(TypeHelper.BitwiseOr(Zero,Positive),Positive,STRSUBSTNO('%1 | %2 <> %3',Zero,Positive,Positive));
+      Assert.AreEqual(TypeHelper.BitwiseOr(Positive,Max),Max,STRSUBSTNO('%1 | %2 <> %3',Positive,Max,Max));
+      Assert.AreEqual(TypeHelper.BitwiseOr(Max,Positive),Max,STRSUBSTNO('%1 | %2 <> %3',Max,Positive,Max));
+      Assert.AreEqual(TypeHelper.BitwiseOr(Sequence01,Sequence10),Max,STRSUBSTNO('%1 | %2 <> %3',Sequence01,Sequence10,Max));
+      Assert.AreEqual(TypeHelper.BitwiseOr(Sequence10,Sequence01),Max,STRSUBSTNO('%1 | %2 <> %3',Sequence10,Sequence01,Max));
+    END;
+
+    [Test]
+    PROCEDURE TestBitwiseXor@36();
+    VAR
+      TypeHelper@1006 : Codeunit 10;
+      Zero@1005 : Integer;
+      Max@1004 : Integer;
+      Sequence10@1003 : Integer;
+      Sequence01@1002 : Integer;
+      Positive@1001 : Integer;
+      Negative@1000 : Integer;
+    BEGIN
+      // [SCENARIO] BitwiseXor() implements a bitwise XOR operator
+
+      // [GIVEN] Different numbers
+      Zero := 0; // 0000 0000 0000 0000 0000 0000 0000 0000
+      Max := 2147483647; // 0111 1111 1111 1111 1111 1111 1111 1111
+      Sequence10 := 715827882; // 0010 1010 1010 1010 1010 1010 1010 1010
+      Sequence01 := 1431655765; // 0101 0101 0101 0101 0101 0101 0101 0101
+      Positive := LibraryRandom.RandInt(Max);
+      Negative := -LibraryRandom.RandInt(Max);
+
+      // [WHEN] We test them
+      // [THEN] The function gives us the correct result
+      ASSERTERROR TypeHelper.BitwiseXor(Negative,Positive);
+      ASSERTERROR TypeHelper.BitwiseXor(Positive,Negative);
+      Assert.AreEqual(TypeHelper.BitwiseXor(Zero,Zero),Zero,STRSUBSTNO('%1 ^ %2 <> %3',Zero,Zero,Zero));
+      Assert.AreEqual(TypeHelper.BitwiseXor(Max,Max),Zero,STRSUBSTNO('%1 ^ %2 <> %3',Max,Max,Zero));
+      Assert.AreEqual(TypeHelper.BitwiseXor(Positive,Positive),Zero,STRSUBSTNO('%1 ^ %2 <> %3',Positive,Positive,Zero));
+      Assert.AreEqual(TypeHelper.BitwiseXor(Positive,Zero),Positive,STRSUBSTNO('%1 ^ %2 <> %3',Positive,Zero,Positive));
+      Assert.AreEqual(TypeHelper.BitwiseXor(Zero,Positive),Positive,STRSUBSTNO('%1 ^ %2 <> %3',Zero,Positive,Positive));
+      Assert.AreEqual(TypeHelper.BitwiseXor(Sequence01,Sequence10),Max,STRSUBSTNO('%1 ^ %2 <> %3',Sequence01,Sequence10,Max));
+      Assert.AreEqual(TypeHelper.BitwiseXor(Sequence10,Sequence01),Max,STRSUBSTNO('%1 ^ %2 <> %3',Sequence10,Sequence01,Max));
+    END;
+
+    [Test]
+    PROCEDURE TestDateTimeComparison@37();
+    VAR
+      TypeHelper@1002 : Codeunit 10;
+      DateTimeA@1000 : DateTime;
+      DateTimeB@1001 : DateTime;
+      Threshold@1003 : Integer;
+    BEGIN
+      // Threshold for equality when comparing DateTime values. If the difference
+      // is less than this value, then we treat them as equal values.
+      Threshold := 10;
+
+      Assert.IsTrue(TypeHelper.CompareDateTime(DateTimeA,DateTimeB) = 0,'Return value should be 0 for two null values.');
+
+      DateTimeA := CURRENTDATETIME;
+      Assert.IsTrue(TypeHelper.CompareDateTime(DateTimeA,DateTimeB) > 0,'Return value should be > 0 if second value is null.');
+      Assert.IsTrue(TypeHelper.CompareDateTime(DateTimeB,DateTimeA) < 0,'Return value should be < 0 if first value is null.');
+
+      DateTimeB := DateTimeA;
+      Assert.IsTrue(TypeHelper.CompareDateTime(DateTimeA,DateTimeB) = 0,'Return value should be 0 for equal values.');
+
+      DateTimeB := DateTimeA + LibraryRandom.RandIntInRange(0,Threshold - 1);
+      Assert.IsTrue(TypeHelper.CompareDateTime(DateTimeA,DateTimeB) = 0,'Return value should be 0 for values within threshold.');
+      Assert.IsTrue(TypeHelper.CompareDateTime(DateTimeB,DateTimeA) = 0,'Return value should be 0 for values within threshold.');
+
+      DateTimeB := DateTimeA + Threshold;
+      Assert.IsTrue(TypeHelper.CompareDateTime(DateTimeA,DateTimeB) < 0,'Return value should be < 0.');
+      Assert.IsTrue(TypeHelper.CompareDateTime(DateTimeB,DateTimeA) > 0,'Return value should be > 0.');
+
+      DateTimeB := DateTimeA + LibraryRandom.RandIntInRange(Threshold + 1,500);
+      Assert.IsTrue(TypeHelper.CompareDateTime(DateTimeA,DateTimeB) < 0,'Return value should be < 0.');
+      Assert.IsTrue(TypeHelper.CompareDateTime(DateTimeB,DateTimeA) > 0,'Return value should be > 0.');
+    END;
+
+    LOCAL PROCEDURE WriteTextToBLOBFieldRef@28(VAR IncomingDocumentAttachment@1002 : Record 133;VAR BlobFieldRef@1005 : FieldRef;NewText@1003 : Text;Encoding@1004 : TextEncoding) FieldValueWasChanged : Boolean;
+    VAR
+      TypeHelper@1001 : Codeunit 10;
+      RecordRef@1000 : RecordRef;
+    BEGIN
+      RecordRef.GETTABLE(IncomingDocumentAttachment);
+      BlobFieldRef := RecordRef.FIELD(IncomingDocumentAttachment.FIELDNO(Content));
+
+      FieldValueWasChanged := TypeHelper.WriteTextToBlobIfChanged(BlobFieldRef,NewText,Encoding);
+
+      RecordRef.SETTABLE(IncomingDocumentAttachment);
+      IF IncomingDocumentAttachment."Created Date-Time" = 0DT THEN BEGIN
+        IncomingDocumentAttachment."Created Date-Time" := CURRENTDATETIME;
+        IncomingDocumentAttachment."Incoming Document Entry No." := FindLastIncomingDocumentEntryNo + 1;
+        IncomingDocumentAttachment.INSERT
+      END ELSE
+        IncomingDocumentAttachment.MODIFY;
+      RecordRef.GETTABLE(IncomingDocumentAttachment);
+      BlobFieldRef := RecordRef.FIELD(IncomingDocumentAttachment.FIELDNO(Content));
+    END;
+
+    LOCAL PROCEDURE CreateTime@44(Hour@1003 : Integer;Minute@1002 : Integer;Second@1001 : Integer;Milisecond@1000 : Integer) : Time;
+    VAR
+      NewTime@1004 : Time;
+    BEGIN
+      EVALUATE(
+        NewTime,
+        STRSUBSTNO('%1:%2:%3.%4',Hour,Minute,Second,Milisecond));
+      EXIT(NewTime);
+    END;
+
+    LOCAL PROCEDURE FindLastIncomingDocumentEntryNo@5() : Integer;
+    VAR
+      IncomingDocumentAttachment@1000 : Record 133;
+    BEGIN
+      IncomingDocumentAttachment.RESET;
+      IF IncomingDocumentAttachment.FINDLAST THEN
+        EXIT(IncomingDocumentAttachment."Incoming Document Entry No.");
+    END;
+
+    LOCAL PROCEDURE GenerateDateString@27(VAR String@1003 : Text;VAR Day@1000 : Integer;VAR Month@1001 : Integer;VAR Year@1002 : Integer;TimeShift@1004 : Text);
+    BEGIN
+      Day := LibraryRandom.RandIntInRange(1,28);
+      Month := LibraryRandom.RandIntInRange(1,12);
+      Year := LibraryRandom.RandIntInRange(2000,2050);
+      String :=
+        FORMAT(Year) + '-' +
+        FORMAT(Month,0,'<Integer,2><Filler Character,0>') + '-' +
+        FORMAT(Day,0,'<Integer,2><Filler Character,0>') + 'T00:00:00' +
+        TimeShift;
+    END;
+
+    LOCAL PROCEDURE GenerateDateTimeParts@52(VAR Day@1000 : Integer;VAR Month@1001 : Integer;VAR Year@1002 : Integer;VAR Hour@1005 : Integer;VAR Minute@1006 : Integer;VAR Second@1007 : Integer;VAR Milisecond@1003 : Integer);
+    BEGIN
+      Day := LibraryRandom.RandIntInRange(1,28);
+      Month := LibraryRandom.RandIntInRange(1,12);
+      Year := LibraryRandom.RandIntInRange(2000,2050);
+      Hour := LibraryRandom.RandIntInRange(0,23);
+      Minute := LibraryRandom.RandIntInRange(0,59);
+      Second := LibraryRandom.RandIntInRange(0,59);
+      Milisecond := LibraryRandom.RandIntInRange(0,999);
+    END;
+
+    LOCAL PROCEDURE GetTranslatedMonth@46(Date@1000 : Date;LanguageId@1001 : Integer) Month : Text;
+    VAR
+      SavedLanguage@1002 : Integer;
+    BEGIN
+      SavedLanguage := GLOBALLANGUAGE;
+      GLOBALLANGUAGE(LanguageId);
+      Month := FORMAT(Date,0,'<Month Text,3>');
+      GLOBALLANGUAGE(SavedLanguage);
+    END;
+
+    LOCAL PROCEDURE VerifyDateValues@29(Date@1000 : Date;ExpectedDay@1001 : Integer;ExpectedMonth@1002 : Integer;ExpectedYear@1003 : Integer);
+    BEGIN
+      Assert.AreEqual(ExpectedDay,DATE2DMY(Date,1),'');
+      Assert.AreEqual(ExpectedMonth,DATE2DMY(Date,2),'');
+      Assert.AreEqual(ExpectedYear,DATE2DMY(Date,3),'');
+    END;
+
+    LOCAL PROCEDURE VerifyDateTimeValues@42(DateTime@1000 : DateTime;ExpectedDay@1001 : Integer;ExpectedMonth@1002 : Integer;ExpectedYear@1003 : Integer;ExpectedHour@1006 : Integer;ExpectedMinute@1005 : Integer;ExpectedSecond@1004 : Integer;ExpectedMilisecond@1009 : Integer);
+    VAR
+      Date@1007 : Date;
+      ExpectedTime@1008 : Time;
+    BEGIN
+      Date := DT2DATE(DateTime);
+      VerifyDateValues(Date,ExpectedDay,ExpectedMonth,ExpectedYear);
+      ExpectedTime := CreateTime(ExpectedHour,ExpectedMinute,ExpectedSecond,ExpectedMilisecond);
+      Assert.AreEqual(ExpectedTime,DT2TIME(DateTime),'Invalid time');
+    END;
+
+    BEGIN
+    {
+      // [FEATURE] [Type Helper] [UT]
+    }
+    END.
+  }
+}
+

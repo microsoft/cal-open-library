@@ -1,0 +1,506 @@
+OBJECT Codeunit 5459 JSON Management
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      JsonArray@1000 : DotNet "'Newtonsoft.Json'.Newtonsoft.Json.Linq.JArray";
+      JsonObject@1001 : DotNet "'Newtonsoft.Json'.Newtonsoft.Json.Linq.JObject";
+
+    [External]
+    PROCEDURE InitializeCollection@25(JSONString@1000 : Text);
+    BEGIN
+      InitializeCollectionFromString(JSONString);
+    END;
+
+    [External]
+    PROCEDURE InitializeEmptyCollection@7();
+    BEGIN
+      JsonArray := JsonArray.JArray;
+    END;
+
+    [External]
+    PROCEDURE InitializeObject@36(JSONString@1000 : Text);
+    BEGIN
+      InitializeObjectFromString(JSONString);
+    END;
+
+    [External]
+    PROCEDURE InitializeObjectFromJObject@12(NewJsonObject@1000 : DotNet "'Newtonsoft.Json'.Newtonsoft.Json.Linq.JObject");
+    BEGIN
+      JsonObject := NewJsonObject;
+    END;
+
+    [External]
+    PROCEDURE InitializeCollectionFromJArray@15(NewJsonArray@1000 : DotNet "'Newtonsoft.Json, Version=9.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed'.Newtonsoft.Json.Linq.JArray");
+    BEGIN
+      JsonArray := NewJsonArray;
+    END;
+
+    [External]
+    PROCEDURE InitializeEmptyObject@62();
+    BEGIN
+      JsonObject := JsonObject.JObject;
+    END;
+
+    LOCAL PROCEDURE InitializeCollectionFromString@11(JSONString@1000 : Text);
+    BEGIN
+      CLEAR(JsonArray);
+      IF JSONString <> '' THEN
+        JsonArray := JsonArray.Parse(JSONString)
+      ELSE
+        InitializeEmptyCollection;
+    END;
+
+    LOCAL PROCEDURE InitializeObjectFromString@37(JSONString@1000 : Text);
+    BEGIN
+      CLEAR(JsonObject);
+      IF JSONString <> '' THEN
+        JsonObject := JsonObject.Parse(JSONString)
+      ELSE
+        InitializeEmptyObject;
+    END;
+
+    [External]
+    PROCEDURE GetJSONObject@1(VAR JObject@1000 : DotNet "'Newtonsoft.Json'.Newtonsoft.Json.Linq.JObject");
+    BEGIN
+      JObject := JsonObject;
+    END;
+
+    [External]
+    PROCEDURE GetJsonArray@20(VAR JArray@1000 : DotNet "'Newtonsoft.Json, Version=9.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed'.Newtonsoft.Json.Linq.JArray");
+    BEGIN
+      JArray := JsonArray;
+    END;
+
+    [External]
+    PROCEDURE GetJObjectFromCollectionByIndex@13(VAR JObject@1001 : DotNet "'Newtonsoft.Json'.Newtonsoft.Json.Linq.JObject";Index@1002 : Integer) : Boolean;
+    BEGIN
+      IF (GetCollectionCount = 0) OR (GetCollectionCount <= Index) THEN
+        EXIT(FALSE);
+
+      JObject := JsonArray.Item(Index);
+      EXIT(NOT ISNULL(JObject))
+    END;
+
+    [External]
+    PROCEDURE GetJObjectFromCollectionByPropertyValue@2(VAR JObject@1001 : DotNet "'Newtonsoft.Json'.Newtonsoft.Json.Linq.JObject";propertyName@1002 : Text;value@1003 : Text) : Boolean;
+    VAR
+      IEnumerable@1000 : DotNet "'mscorlib'.System.Collections.Generic.IEnumerable`1";
+      IEnumerator@1004 : DotNet "'mscorlib'.System.Collections.Generic.IEnumerator`1";
+    BEGIN
+      CLEAR(JObject);
+      IEnumerable := JsonArray.SelectTokens(STRSUBSTNO('$[?(@.%1 == ''%2'')]',propertyName,value),FALSE);
+      IEnumerator := IEnumerable.GetEnumerator;
+
+      IF IEnumerator.MoveNext THEN BEGIN
+        JObject := IEnumerator.Current;
+        EXIT(TRUE);
+      END;
+    END;
+
+    [External]
+    PROCEDURE GetPropertyValueFromJObjectByName@14(JObject@1002 : DotNet "'Newtonsoft.Json'.Newtonsoft.Json.Linq.JObject";propertyName@1000 : Text;VAR value@1003 : Variant) : Boolean;
+    VAR
+      JProperty@1001 : DotNet "'Newtonsoft.Json'.Newtonsoft.Json.Linq.JProperty";
+      JToken@1004 : DotNet "'Newtonsoft.Json'.Newtonsoft.Json.Linq.JToken";
+    BEGIN
+      CLEAR(value);
+      IF JObject.TryGetValue(propertyName,JToken) THEN BEGIN
+        JProperty := JObject.Property(propertyName);
+        value := JProperty.Value;
+        EXIT(TRUE);
+      END;
+    END;
+
+    [External]
+    PROCEDURE GetPropertyValueFromJObjectByPathSetToFieldRef@28(JObject@1002 : DotNet "'Newtonsoft.Json'.Newtonsoft.Json.Linq.JObject";propertyPath@1001 : Text;VAR FieldRef@1000 : FieldRef) : Boolean;
+    VAR
+      OutlookSynchTypeConv@1011 : Codeunit 5302;
+      JProperty@1003 : DotNet "'Newtonsoft.Json'.Newtonsoft.Json.Linq.JProperty";
+      Value@1005 : Variant;
+      DecimalVal@1004 : Decimal;
+      BoolVal@1007 : Boolean;
+      GuidVal@1008 : GUID;
+      DateVal@1009 : Date;
+      Success@1006 : Boolean;
+      IntVar@1010 : Integer;
+    BEGIN
+      Success := FALSE;
+      JProperty := JObject.SelectToken(propertyPath);
+
+      IF ISNULL(JProperty) THEN
+        EXIT(FALSE);
+
+      Value := FORMAT(JProperty.Value);
+
+      CASE FORMAT(FieldRef.TYPE) OF
+        'Integer',
+        'Decimal':
+          BEGIN
+            Success := EVALUATE(DecimalVal,Value,9);
+            FieldRef.VALUE(DecimalVal);
+          END;
+        'Date':
+          BEGIN
+            Success := EVALUATE(DateVal,Value,9);
+            FieldRef.VALUE(DateVal);
+          END;
+        'Boolean':
+          BEGIN
+            Success := EVALUATE(BoolVal,Value,9);
+            FieldRef.VALUE(BoolVal);
+          END;
+        'GUID':
+          BEGIN
+            Success := EVALUATE(GuidVal,Value);
+            FieldRef.VALUE(GuidVal);
+          END;
+        'Text',
+        'Code':
+          BEGIN
+            FieldRef.VALUE(COPYSTR(Value,1,FieldRef.LENGTH));
+            Success := TRUE;
+          END;
+        'Option':
+          BEGIN
+            IF NOT EVALUATE(IntVar,Value) THEN
+              IntVar := OutlookSynchTypeConv.TextToOptionValue(Value,FieldRef.OPTIONCAPTION);
+            IF IntVar >= 0 THEN BEGIN
+              FieldRef.VALUE := IntVar;
+              Success := TRUE;
+            END;
+          END;
+      END;
+
+      EXIT(Success);
+    END;
+
+    [External]
+    PROCEDURE GetPropertyValueFromJObjectByPath@6(JObject@1002 : DotNet "'Newtonsoft.Json'.Newtonsoft.Json.Linq.JObject";fullyQualifiedPropertyName@1000 : Text;VAR value@1003 : Variant) : Boolean;
+    VAR
+      containerJObject@1004 : DotNet "'Newtonsoft.Json'.Newtonsoft.Json.Linq.JObject";
+      propertyName@1001 : Text;
+    BEGIN
+      CLEAR(value);
+      DecomposeQualifiedPathToContainerObjectAndPropertyName(JObject,fullyQualifiedPropertyName,containerJObject,propertyName);
+      IF ISNULL(containerJObject) THEN
+        EXIT(FALSE);
+
+      EXIT(GetPropertyValueFromJObjectByName(containerJObject,propertyName,value));
+    END;
+
+    [External]
+    PROCEDURE GetStringPropertyValueFromJObjectByName@16(JObject@1002 : DotNet "'Newtonsoft.Json'.Newtonsoft.Json.Linq.JObject";propertyName@1000 : Text;VAR value@1003 : Text) : Boolean;
+    VAR
+      VariantValue@1001 : Variant;
+    BEGIN
+      CLEAR(value);
+      IF GetPropertyValueFromJObjectByName(JObject,propertyName,VariantValue) THEN BEGIN
+        value := FORMAT(VariantValue);
+        EXIT(TRUE);
+      END;
+      EXIT(FALSE);
+    END;
+
+    [External]
+    PROCEDURE GetStringPropertyValueFromJObjectByPath@10(JObject@1002 : DotNet "'Newtonsoft.Json'.Newtonsoft.Json.Linq.JObject";fullyQualifiedPropertyName@1000 : Text;VAR value@1003 : Text) : Boolean;
+    VAR
+      VariantValue@1001 : Variant;
+    BEGIN
+      CLEAR(value);
+      IF GetPropertyValueFromJObjectByPath(JObject,fullyQualifiedPropertyName,VariantValue) THEN BEGIN
+        value := FORMAT(VariantValue);
+        EXIT(TRUE);
+      END;
+      EXIT(FALSE);
+    END;
+
+    [External]
+    PROCEDURE GetEnumPropertyValueFromJObjectByName@32(JObject@1002 : DotNet "'Newtonsoft.Json'.Newtonsoft.Json.Linq.JObject";propertyName@1001 : Text;VAR value@1000 : Option);
+    VAR
+      StringValue@1004 : Text;
+    BEGIN
+      GetStringPropertyValueFromJObjectByName(JObject,propertyName,StringValue);
+      EVALUATE(value,StringValue,0);
+    END;
+
+    [External]
+    PROCEDURE GetBoolPropertyValueFromJObjectByName@93(JObject@1002 : DotNet "'Newtonsoft.Json'.Newtonsoft.Json.Linq.JObject";propertyName@1001 : Text;VAR value@1000 : Boolean) : Boolean;
+    VAR
+      StringValue@1004 : Text;
+    BEGIN
+      IF GetStringPropertyValueFromJObjectByName(JObject,propertyName,StringValue) THEN BEGIN
+        EVALUATE(value,StringValue,2);
+        EXIT(TRUE);
+      END;
+      EXIT(FALSE);
+    END;
+
+    [External]
+    PROCEDURE GetArrayPropertyValueFromJObjectByName@18(JObject@1002 : DotNet "'Newtonsoft.Json'.Newtonsoft.Json.Linq.JObject";propertyName@1001 : Text;VAR JArray@1000 : DotNet "'Newtonsoft.Json'.Newtonsoft.Json.Linq.JArray") : Boolean;
+    VAR
+      JProperty@1004 : DotNet "'Newtonsoft.Json'.Newtonsoft.Json.Linq.JProperty";
+      JToken@1003 : DotNet "'Newtonsoft.Json'.Newtonsoft.Json.Linq.JToken";
+    BEGIN
+      CLEAR(JArray);
+      IF JObject.TryGetValue(propertyName,JToken) THEN BEGIN
+        JProperty := JObject.Property(propertyName);
+        JArray := JProperty.Value;
+        EXIT(TRUE);
+      END;
+      EXIT(FALSE);
+    END;
+
+    [External]
+    PROCEDURE GetObjectPropertyValueFromJObjectByName@30(JObject@1002 : DotNet "'Newtonsoft.Json'.Newtonsoft.Json.Linq.JObject";propertyName@1001 : Text;VAR JSubObject@1000 : DotNet "'Newtonsoft.Json'.Newtonsoft.Json.Linq.JObject") : Boolean;
+    VAR
+      JProperty@1004 : DotNet "'Newtonsoft.Json'.Newtonsoft.Json.Linq.JProperty";
+      JToken@1003 : DotNet "'Newtonsoft.Json'.Newtonsoft.Json.Linq.JToken";
+    BEGIN
+      CLEAR(JSubObject);
+      IF JObject.TryGetValue(propertyName,JToken) THEN BEGIN
+        JProperty := JObject.Property(propertyName);
+        JSubObject := JProperty.Value;
+        EXIT(TRUE);
+      END;
+      EXIT(FALSE);
+    END;
+
+    [External]
+    PROCEDURE GetDecimalPropertyValueFromJObjectByName@23(JObject@1002 : DotNet "'Newtonsoft.Json'.Newtonsoft.Json.Linq.JObject";propertyName@1001 : Text;VAR value@1000 : Decimal) : Boolean;
+    VAR
+      StringValue@1003 : Text;
+    BEGIN
+      IF GetStringPropertyValueFromJObjectByName(JObject,propertyName,StringValue) THEN BEGIN
+        EVALUATE(value,StringValue);
+        EXIT(TRUE);
+      END;
+      EXIT(FALSE);
+    END;
+
+    [External]
+    PROCEDURE GetGuidPropertyValueFromJObjectByName@27(JObject@1002 : DotNet "'Newtonsoft.Json'.Newtonsoft.Json.Linq.JObject";propertyName@1001 : Text;VAR value@1000 : GUID) : Boolean;
+    VAR
+      StringValue@1003 : Text;
+    BEGIN
+      IF GetStringPropertyValueFromJObjectByName(JObject,propertyName,StringValue) THEN BEGIN
+        EVALUATE(value,StringValue);
+        EXIT(TRUE);
+      END;
+      EXIT(FALSE);
+    END;
+
+    LOCAL PROCEDURE GetValueFromJObject@19(JObject@1001 : DotNet "'Newtonsoft.Json'.Newtonsoft.Json.Linq.JObject";VAR value@1000 : Variant);
+    VAR
+      JValue@1002 : DotNet "'Newtonsoft.Json'.Newtonsoft.Json.Linq.JValue";
+    BEGIN
+      CLEAR(value);
+      JValue := JObject;
+      value := JValue.Value;
+    END;
+
+    [External]
+    PROCEDURE GetStringValueFromJObject@21(JObject@1001 : DotNet "'Newtonsoft.Json'.Newtonsoft.Json.Linq.JObject";VAR value@1000 : Text);
+    VAR
+      VariantValue@1002 : Variant;
+    BEGIN
+      CLEAR(value);
+      GetValueFromJObject(JObject,VariantValue);
+      value := FORMAT(VariantValue);
+    END;
+
+    [External]
+    PROCEDURE AddJArrayToJObject@51(VAR JObject@1002 : DotNet "'Newtonsoft.Json'.Newtonsoft.Json.Linq.JObject";propertyName@1001 : Text;value@1000 : Variant);
+    VAR
+      JArray2@1003 : DotNet "'Newtonsoft.Json'.Newtonsoft.Json.Linq.JArray";
+      JProperty@1004 : DotNet "'Newtonsoft.Json'.Newtonsoft.Json.Linq.JProperty";
+    BEGIN
+      JArray2 := value;
+      JObject.Add(JProperty.JProperty(propertyName,JArray2));
+    END;
+
+    [External]
+    PROCEDURE AddJObjectToJObject@35(VAR JObject@1002 : DotNet "'Newtonsoft.Json'.Newtonsoft.Json.Linq.JObject";propertyName@1000 : Text;value@1003 : Variant);
+    VAR
+      JObject2@1004 : DotNet "'Newtonsoft.Json'.Newtonsoft.Json.Linq.JObject";
+      JToken@1005 : DotNet "'Newtonsoft.Json'.Newtonsoft.Json.Linq.JToken";
+      ValueText@1006 : Text;
+    BEGIN
+      JObject2 := value;
+      ValueText := FORMAT(value);
+      JObject.Add(propertyName,JToken.Parse(ValueText));
+    END;
+
+    [External]
+    PROCEDURE AddJObjectToJArray@26(VAR JArray@1000 : DotNet "'Newtonsoft.Json, Version=9.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed'.Newtonsoft.Json.Linq.JArray";value@1001 : Variant);
+    VAR
+      JObject@1002 : DotNet "'Newtonsoft.Json, Version=9.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed'.Newtonsoft.Json.Linq.JObject";
+    BEGIN
+      JObject := value;
+      JArray.Add(JObject.DeepClone);
+    END;
+
+    [External]
+    PROCEDURE AddJPropertyToJObject@3(VAR JObject@1002 : DotNet "'Newtonsoft.Json'.Newtonsoft.Json.Linq.JObject";propertyName@1000 : Text;value@1003 : Variant);
+    VAR
+      JProperty@1001 : DotNet "'Newtonsoft.Json'.Newtonsoft.Json.Linq.JProperty";
+      ValueText@1004 : Text;
+    BEGIN
+      IF value.ISINTEGER THEN
+        JProperty := JProperty.JProperty(propertyName,value)
+      ELSE BEGIN
+        ValueText := FORMAT(value,0,9);
+        JProperty := JProperty.JProperty(propertyName,ValueText);
+      END;
+
+      JObject.Add(JProperty);
+    END;
+
+    [External]
+    PROCEDURE AddJValueToJObject@22(VAR JObject@1002 : DotNet "'Newtonsoft.Json'.Newtonsoft.Json.Linq.JObject";value@1003 : Variant);
+    VAR
+      JValue@1001 : DotNet "'Newtonsoft.Json'.Newtonsoft.Json.Linq.JValue";
+    BEGIN
+      JObject := JValue.JValue(value);
+    END;
+
+    [External]
+    PROCEDURE AddJObjectToCollection@4(JObject@1001 : DotNet "'Newtonsoft.Json'.Newtonsoft.Json.Linq.JObject");
+    BEGIN
+      JsonArray.Add(JObject.DeepClone);
+    END;
+
+    [External]
+    PROCEDURE AddJArrayContentToCollection@17(JArray@1001 : DotNet "'Newtonsoft.Json'.Newtonsoft.Json.Linq.JArray");
+    BEGIN
+      JsonArray.Merge(JArray.DeepClone);
+    END;
+
+    [External]
+    PROCEDURE ReplaceOrAddJPropertyInJObject@44(VAR JObject@1000 : DotNet "'Newtonsoft.Json'.Newtonsoft.Json.Linq.JObject";propertyName@1001 : Text;value@1002 : Variant) : Boolean;
+    VAR
+      JProperty@1003 : DotNet "'Newtonsoft.Json'.Newtonsoft.Json.Linq.JProperty";
+      OldProperty@1005 : DotNet "'Newtonsoft.Json'.Newtonsoft.Json.Linq.JProperty";
+      oldValue@1004 : Variant;
+    BEGIN
+      JProperty := JObject.Property(propertyName);
+      IF NOT ISNULL(JProperty) THEN BEGIN
+        OldProperty := JObject.Property(propertyName);
+        oldValue := OldProperty.Value;
+        JProperty.Replace(JProperty.JProperty(propertyName,value));
+        EXIT(FORMAT(oldValue) <> FORMAT(value));
+      END;
+
+      AddJPropertyToJObject(JObject,propertyName,value);
+      EXIT(TRUE);
+    END;
+
+    [External]
+    PROCEDURE ReplaceOrAddDescendantJPropertyInJObject@5(VAR JObject@1002 : DotNet "'Newtonsoft.Json'.Newtonsoft.Json.Linq.JObject";fullyQualifiedPropertyName@1003 : Text;value@1000 : Variant) : Boolean;
+    VAR
+      containerJObject@1005 : DotNet "'Newtonsoft.Json'.Newtonsoft.Json.Linq.JObject";
+      propertyName@1006 : Text;
+    BEGIN
+      DecomposeQualifiedPathToContainerObjectAndPropertyName(JObject,fullyQualifiedPropertyName,containerJObject,propertyName);
+      EXIT(ReplaceOrAddJPropertyInJObject(containerJObject,propertyName,value));
+    END;
+
+    [External]
+    PROCEDURE GetCollectionCount@24() : Integer;
+    BEGIN
+      EXIT(JsonArray.Count);
+    END;
+
+    [External]
+    PROCEDURE WriteCollectionToString@9() : Text;
+    BEGIN
+      EXIT(JsonArray.ToString);
+    END;
+
+    [External]
+    PROCEDURE WriteObjectToString@63() : Text;
+    BEGIN
+      EXIT(JsonObject.ToString);
+    END;
+
+    LOCAL PROCEDURE GetLastIndexOfPeriod@31(String@1000 : Text) LastIndex : Integer;
+    VAR
+      Index@1001 : Integer;
+    BEGIN
+      Index := STRPOS(String,'.');
+      LastIndex := Index;
+      WHILE Index > 0 DO BEGIN
+        String := COPYSTR(String,Index + 1);
+        Index := STRPOS(String,'.');
+        LastIndex += Index;
+      END;
+    END;
+
+    LOCAL PROCEDURE GetSubstringToLastPeriod@33(String@1000 : Text) : Text;
+    VAR
+      Index@1001 : Integer;
+    BEGIN
+      Index := GetLastIndexOfPeriod(String);
+      IF Index > 0 THEN
+        EXIT(COPYSTR(String,1,Index - 1));
+    END;
+
+    LOCAL PROCEDURE DecomposeQualifiedPathToContainerObjectAndPropertyName@8(VAR JObject@1003 : DotNet "'Newtonsoft.Json'.Newtonsoft.Json.Linq.JObject";fullyQualifiedPropertyName@1000 : Text;VAR containerJObject@1002 : DotNet "'Newtonsoft.Json'.Newtonsoft.Json.Linq.JObject";VAR propertyName@1001 : Text);
+    VAR
+      containerJToken@1004 : DotNet "'Newtonsoft.Json'.Newtonsoft.Json.Linq.JToken";
+      containingPath@1005 : Text;
+    BEGIN
+      CLEAR(containerJObject);
+      propertyName := '';
+
+      containingPath := GetSubstringToLastPeriod(fullyQualifiedPropertyName);
+      containerJToken := JObject.SelectToken(containingPath);
+      IF ISNULL(containerJToken) THEN
+        EXIT;
+
+      containerJObject := containerJToken;
+      IF containingPath <> '' THEN
+        propertyName := COPYSTR(fullyQualifiedPropertyName,STRLEN(containingPath) + 2)
+      ELSE
+        propertyName := fullyQualifiedPropertyName;
+    END;
+
+    [External]
+    PROCEDURE XMLTextToJSONText@29(Xml@1000 : Text) Json : Text;
+    VAR
+      XMLDOMMgt@1004 : Codeunit 6224;
+      JsonConvert@1003 : DotNet "'Newtonsoft.Json, Version=9.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed'.Newtonsoft.Json.JsonConvert";
+      JsonFormatting@1002 : DotNet "'Newtonsoft.Json, Version=9.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed'.Newtonsoft.Json.Formatting";
+      XmlDocument@1001 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlDocument";
+    BEGIN
+      XMLDOMMgt.LoadXMLDocumentFromText(Xml,XmlDocument);
+      Json := JsonConvert.SerializeXmlNode(XmlDocument.DocumentElement,JsonFormatting.Indented,TRUE);
+    END;
+
+    [External]
+    PROCEDURE JSONTextToXMLText@34(Json@1001 : Text;DocumentElementName@1000 : Text) Xml : Text;
+    VAR
+      JsonConvert@1004 : DotNet "'Newtonsoft.Json, Version=9.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed'.Newtonsoft.Json.JsonConvert";
+      XmlDocument@1002 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlDocument";
+    BEGIN
+      XmlDocument := JsonConvert.DeserializeXmlNode(Json,DocumentElementName);
+      Xml := XmlDocument.OuterXml;
+    END;
+
+    BEGIN
+    END.
+  }
+}
+
