@@ -1,0 +1,549 @@
+OBJECT Codeunit 50047 ClosedXML Management
+{
+  OBJECT-PROPERTIES
+  {
+    Date=29.09.17;
+    Time=15:07:43;
+    Version List=Navision.Guru;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      XlWrkBkDotNet@1015 : DotNet "'ClosedXML, Version=0.89.0.0, Culture=neutral, PublicKeyToken=fd1eb21b62ae805b'.ClosedXML.Excel.XLWorkbook";
+      XlWrkShtDotNet@1014 : DotNet "'ClosedXML, Version=0.89.0.0, Culture=neutral, PublicKeyToken=fd1eb21b62ae805b'.ClosedXML.Excel.IXLWorksheet";
+      BlankNoteInText@1017 : BigText;
+      GlobalColumnNo@1002 : Integer;
+      GlobalRowNo@1001 : Integer;
+      NotCreatedErr@1008 : TextConst 'ENU=Please use Start and AddSheet functions to initialize the workbook.';
+      EnumValueErr@1000 : TextConst 'ENU=Value %1 is not valid.  Valid values are %2';
+
+    [External]
+    PROCEDURE Start@1();
+    BEGIN
+      XlWrkBkDotNet := XlWrkBkDotNet.XLWorkbook();
+    END;
+
+    [External]
+    PROCEDURE AddSheet@6(SheetName@1000 : Text[50]);
+    BEGIN
+      IF NOT ISNULL(XlWrkBkDotNet) THEN
+        XlWrkShtDotNet := XlWrkBkDotNet.Worksheets.Add(SheetName);
+    END;
+
+    [External]
+    PROCEDURE AddCell@16(CurrentRow@1011 : Integer;CurrentCol@1010 : Integer;Value@1000 : Variant;IsFormula@1001 : Boolean;CommentText@1002 : BigText;IsBold@1003 : Boolean;IsItalics@1004 : Boolean;IsUnderline@1005 : Boolean;NumFormat@1006 : Text[30];Attention@1012 : Boolean;Alignment@1016 : 'General,Left,Right,Center';BlankZero@1018 : Boolean);
+    VAR
+      XlColor@1028 : DotNet "'ClosedXML, Version=0.89.0.0, Culture=neutral, PublicKeyToken=fd1eb21b62ae805b'.ClosedXML.Excel.XLColor";
+      XlFondUnderlineValues@1007 : DotNet "'ClosedXML, Version=0.89.0.0, Culture=neutral, PublicKeyToken=fd1eb21b62ae805b'.ClosedXML.Excel.XLFontUnderlineValues";
+      CellValueAsText@1027 : Text[1024];
+      CommentLine@1023 : Text[1024];
+      CommentPosition@1024 : Integer;
+      CommentLength@1025 : Integer;
+    BEGIN
+      CheckWorkbook;
+      IF CurrentRow = 0 THEN
+        GlobalRowNo := GlobalRowNo + 1
+      ELSE
+        GlobalRowNo := CurrentRow;
+      IF CurrentCol = 0 THEN
+        GlobalColumnNo := GlobalColumnNo + 1
+      ELSE
+        GlobalColumnNo := CurrentCol;
+
+      CommentLength := CommentText.LENGTH;
+      IF CommentLength > 0 THEN BEGIN
+        CommentPosition := 1;
+        WHILE CommentPosition < CommentLength DO BEGIN
+          CommentPosition := CommentPosition  + CommentText.GETSUBTEXT(CommentLine,CommentPosition,MAXSTRLEN(CommentLine));
+          XlWrkShtDotNet.Cell(GlobalRowNo,GlobalColumnNo).Comment.AddText := CommentLine;
+        END;
+      END;
+
+      XlWrkShtDotNet.Cell(GlobalRowNo,GlobalColumnNo).Style.Font.Bold := IsBold;
+      XlWrkShtDotNet.Cell(GlobalRowNo,GlobalColumnNo).Style.Font.Italic := IsItalics;
+      XlWrkShtDotNet.Cell(GlobalRowNo,GlobalColumnNo).Style.Font.Underline := XlFondUnderlineValues.Single;
+      XlWrkShtDotNet.Cell(GlobalRowNo,GlobalColumnNo).Style.NumberFormat.SetFormat := NumFormat;
+
+      IF Attention THEN BEGIN
+        XlColor := XlColor.FromName('Red');
+        XlWrkShtDotNet.Cell(GlobalRowNo,GlobalColumnNo).Style.Font.SetFontColor := XlColor;
+      END;
+
+      IF IsFormula THEN
+        XlWrkShtDotNet.Cell(GlobalRowNo,GlobalColumnNo).FormulaA1 := Value
+      ELSE
+        CASE TRUE OF
+          Value.ISTEXT,Value.ISCHAR,Value.ISCODE :
+            BEGIN
+              CellValueAsText := FORMAT(Value);
+              XlWrkShtDotNet.Cell(GlobalRowNo,GlobalColumnNo).Value := CellValueAsText;
+            END;
+          ELSE IF (FORMAT(Value) <> '0') OR NOT BlankZero THEN
+            XlWrkShtDotNet.Cell(GlobalRowNo,GlobalColumnNo).Value := FORMAT(Value,0,9);
+        END;
+
+      CASE Alignment OF
+        Alignment::General:
+          XlWrkShtDotNet.Cell(GlobalRowNo,GlobalColumnNo).Style.Alignment.SetHorizontal :=
+            GetEnumValue(XlWrkShtDotNet.Cell(GlobalRowNo,GlobalColumnNo).Style.Alignment.Horizontal,'General');
+        Alignment::Center:
+          XlWrkShtDotNet.Cell(GlobalRowNo,GlobalColumnNo).Style.Alignment.SetHorizontal :=
+            GetEnumValue(XlWrkShtDotNet.Cell(GlobalRowNo,GlobalColumnNo).Style.Alignment.Horizontal,'Center');
+        Alignment::Right:
+          XlWrkShtDotNet.Cell(GlobalRowNo,GlobalColumnNo).Style.Alignment.SetHorizontal :=
+            GetEnumValue(XlWrkShtDotNet.Cell(GlobalRowNo,GlobalColumnNo).Style.Alignment.Horizontal,'Right');
+        Alignment::Left:
+          XlWrkShtDotNet.Cell(GlobalRowNo,GlobalColumnNo).Style.Alignment.SetHorizontal :=
+            GetEnumValue(XlWrkShtDotNet.Cell(GlobalRowNo,GlobalColumnNo).Style.Alignment.Horizontal,'Left');
+      END;
+    END;
+
+    [External]
+    PROCEDURE AddCommentLines@14(VAR CurrentRow@1001 : Integer;CurrentCol@1000 : Integer;Width@1002 : Integer;CommentText@1003 : BigText);
+    VAR
+      CommentLine@1013 : Text[120];
+      CommentLineSplit@1006 : Text[120];
+      LinePos@1009 : Integer;
+      LineLength@1008 : Integer;
+      SplitPosition@1007 : Integer;
+      CommentPosition@1004 : Integer;
+      CommentLength@1005 : Integer;
+    BEGIN
+      CheckWorkbook;
+      CommentLength := CommentText.LENGTH;
+      IF CommentLength > 0 THEN BEGIN
+        CommentPosition := 1;
+        WHILE CommentPosition < CommentLength DO BEGIN
+          CommentPosition :=
+            CommentPosition  +
+            CommentText.GETSUBTEXT(CommentLine,CommentPosition,MAXSTRLEN(CommentLine) - STRLEN(CommentLineSplit));
+          CommentLine := CommentLineSplit + CommentLine;
+          LineLength := STRLEN(CommentLine);
+          SplitPosition := LineLength;
+          IF CommentPosition < CommentLength THEN BEGIN
+            LinePos := 1;
+            WHILE (LinePos < LineLength) AND (CommentLine[LinePos] <> 10) DO BEGIN
+              IF CommentLine[LinePos] IN [13,10,32,44,45] THEN
+                SplitPosition := LinePos - 1;
+              LinePos := LinePos + 1;
+            END;
+          END;
+
+          WHILE CommentLine[SplitPosition] IN [13,10] DO BEGIN
+            CommentLine := COPYSTR(CommentLine,1,SplitPosition - 1);
+            SplitPosition := SplitPosition - 1;
+          END;
+
+          AddCell(
+            CurrentRow,CurrentCol,
+            COPYSTR(CommentLine,1,SplitPosition),
+            FALSE,BlankNoteInText,FALSE,FALSE,FALSE,'@',FALSE,0,FALSE);
+
+          IF SplitPosition = LineLength THEN
+            CommentLineSplit := ''
+          ELSE BEGIN
+            CommentLineSplit := COPYSTR(CommentLine,SplitPosition + 1);
+            WHILE CommentLineSplit[1] IN [13,10,32] DO
+              CommentLineSplit := COPYSTR(CommentLineSplit,2);
+          END;
+
+          MergeCells(GlobalRowNo,GlobalColumnNo,GlobalRowNo,GlobalColumnNo + Width - 1);
+          IF CurrentRow > 0 THEN
+            CurrentRow := CurrentRow + 1;
+        END;
+        IF CurrentRow > 0 THEN
+          CurrentRow := CurrentRow + 1;
+      END ELSE BEGIN
+        GlobalRowNo := CurrentRow;
+        GlobalColumnNo := CurrentCol;
+      END;
+    END;
+
+    [External]
+    PROCEDURE MergeCells@21(RangeStartRowNo@1000 : Integer;RangeStartColNo@1001 : Integer;RangeEndRowNo@1002 : Integer;RangeEndColNo@1003 : Integer);
+    BEGIN
+      CheckWorkbook;
+      XlWrkShtDotNet.Range(RangeStartRowNo,RangeStartColNo,RangeEndRowNo,RangeEndColNo).Merge;
+    END;
+
+    [External]
+    PROCEDURE MergeAndCenterCells@18(RangeStartRowNo@1000 : Integer;RangeStartColNo@1001 : Integer;RangeEndRowNo@1002 : Integer;RangeEndColNo@1003 : Integer);
+    BEGIN
+      CheckWorkbook;
+      MergeCells(RangeStartRowNo,RangeStartColNo,RangeEndRowNo,RangeEndColNo);
+      XlWrkShtDotNet.Range(RangeStartRowNo,RangeStartColNo,RangeEndRowNo,RangeEndColNo).Style.Alignment.SetHorizontal :=
+        GetEnumValue(XlWrkShtDotNet.Range(RangeStartRowNo,RangeStartColNo,RangeEndRowNo,RangeEndColNo).Style.Alignment.Horizontal,
+                     'Center');
+      XlWrkShtDotNet.Range(RangeStartRowNo,RangeStartColNo,RangeEndRowNo,RangeEndColNo).Style.Alignment.SetVertical :=
+        GetEnumValue(XlWrkShtDotNet.Range(RangeStartRowNo,RangeStartColNo,RangeEndRowNo,RangeEndColNo).Style.Alignment.Vertical,
+                     'Bottom');
+      XlWrkShtDotNet.Range(RangeStartRowNo,RangeStartColNo,RangeEndRowNo,RangeEndColNo).Style.Alignment.WrapText := TRUE;
+    END;
+
+    [External]
+    PROCEDURE WrapText@2(RangeStartRowNo@1000 : Integer;RangeStartColNo@1001 : Integer;RangeEndRowNo@1002 : Integer;RangeEndColNo@1003 : Integer);
+    BEGIN
+      CheckWorkbook;
+      XlWrkShtDotNet.Range(RangeStartRowNo,RangeStartColNo,RangeEndRowNo,RangeEndColNo).Style.Alignment.WrapText := TRUE;
+    END;
+
+    [External]
+    PROCEDURE SetFontSize@1020(RowNo@1002 : Integer;ColNo@1001 : Integer;FontSize@1000 : Integer);
+    BEGIN
+      CheckWorkbook;
+      XlWrkShtDotNet.Range(RowNo,ColNo,RowNo,ColNo).Style.Font.SetFontSize := FontSize
+    END;
+
+    [External]
+    PROCEDURE SetCellsThinBorder@124(RangeStartRowNo@1007 : Integer;RangeStartColNo@1006 : Integer;RangeEndRowNo@1005 : Integer;RangeEndColNo@1004 : Integer;Left@1000 : Boolean;Top@1001 : Boolean;Right@1002 : Boolean;Bottom@1003 : Boolean);
+    BEGIN
+      CheckWorkbook;
+      IF Left THEN
+        XlWrkShtDotNet.Range(RangeStartRowNo,RangeStartColNo,RangeEndRowNo,RangeEndColNo).Style.Border.SetLeftBorder :=
+          GetEnumValue(XlWrkShtDotNet.Range(RangeStartRowNo,RangeStartColNo,RangeEndRowNo,RangeEndColNo).Style.Border.LeftBorder,
+                       'Thin');
+      IF Top THEN
+        XlWrkShtDotNet.Range(RangeStartRowNo,RangeStartColNo,RangeEndRowNo,RangeEndColNo).Style.Border.SetTopBorder :=
+          GetEnumValue(XlWrkShtDotNet.Range(RangeStartRowNo,RangeStartColNo,RangeEndRowNo,RangeEndColNo).Style.Border.TopBorder,
+                       'Thin');
+      IF Right THEN
+        XlWrkShtDotNet.Range(RangeStartRowNo,RangeStartColNo,RangeEndRowNo,RangeEndColNo).Style.Border.SetRightBorder :=
+          GetEnumValue(XlWrkShtDotNet.Range(RangeStartRowNo,RangeStartColNo,RangeEndRowNo,RangeEndColNo).Style.Border.RightBorder,
+                       'Thin');
+      IF Bottom THEN
+        XlWrkShtDotNet.Range(RangeStartRowNo,RangeStartColNo,RangeEndRowNo,RangeEndColNo).Style.Border.SetBottomBorder :=
+          GetEnumValue(XlWrkShtDotNet.Range(RangeStartRowNo,RangeStartColNo,RangeEndRowNo,RangeEndColNo).Style.Border.BottomBorder,
+                       'Thin');
+    END;
+
+    [External]
+    PROCEDURE SetCellsThickBorder@139(RangeStartRowNo@1007 : Integer;RangeStartColNo@1006 : Integer;RangeEndRowNo@1005 : Integer;RangeEndColNo@1004 : Integer;Left@1000 : Boolean;Top@1001 : Boolean;Right@1002 : Boolean;Bottom@1003 : Boolean);
+    BEGIN
+      CheckWorkbook;
+      IF Left THEN
+        XlWrkShtDotNet.Range(RangeStartRowNo,RangeStartColNo,RangeEndRowNo,RangeEndColNo).Style.Border.SetLeftBorder :=
+          GetEnumValue(XlWrkShtDotNet.Range(RangeStartRowNo,RangeStartColNo,RangeEndRowNo,RangeEndColNo).Style.Border.LeftBorder,
+                       'Thick');
+      IF Top THEN
+        XlWrkShtDotNet.Range(RangeStartRowNo,RangeStartColNo,RangeEndRowNo,RangeEndColNo).Style.Border.SetTopBorder :=
+          GetEnumValue(XlWrkShtDotNet.Range(RangeStartRowNo,RangeStartColNo,RangeEndRowNo,RangeEndColNo).Style.Border.TopBorder,
+                       'Thick');
+      IF Right THEN
+        XlWrkShtDotNet.Range(RangeStartRowNo,RangeStartColNo,RangeEndRowNo,RangeEndColNo).Style.Border.SetRightBorder :=
+          GetEnumValue(XlWrkShtDotNet.Range(RangeStartRowNo,RangeStartColNo,RangeEndRowNo,RangeEndColNo).Style.Border.RightBorder,
+                       'Thick');
+      IF Bottom THEN
+        XlWrkShtDotNet.Range(RangeStartRowNo,RangeStartColNo,RangeEndRowNo,RangeEndColNo).Style.Border.SetBottomBorder :=
+          GetEnumValue(XlWrkShtDotNet.Range(RangeStartRowNo,RangeStartColNo,RangeEndRowNo,RangeEndColNo).Style.Border.BottomBorder,
+                       'Thick');
+    END;
+
+    [External]
+    PROCEDURE SetCellsDoubleBorder@140(RangeStartRowNo@1007 : Integer;RangeStartColNo@1006 : Integer;RangeEndRowNo@1005 : Integer;RangeEndColNo@1004 : Integer;Left@1000 : Boolean;Top@1001 : Boolean;Right@1002 : Boolean;Bottom@1003 : Boolean);
+    BEGIN
+      CheckWorkbook;
+      IF Left THEN
+        XlWrkShtDotNet.Range(RangeStartRowNo,RangeStartColNo,RangeEndRowNo,RangeEndColNo).Style.Border.SetLeftBorder :=
+          GetEnumValue(XlWrkShtDotNet.Range(RangeStartRowNo,RangeStartColNo,RangeEndRowNo,RangeEndColNo).Style.Border.LeftBorder,
+                       'Double');
+      IF Top THEN
+        XlWrkShtDotNet.Range(RangeStartRowNo,RangeStartColNo,RangeEndRowNo,RangeEndColNo).Style.Border.SetTopBorder :=
+          GetEnumValue(XlWrkShtDotNet.Range(RangeStartRowNo,RangeStartColNo,RangeEndRowNo,RangeEndColNo).Style.Border.TopBorder,
+                       'Double');
+      IF Right THEN
+        XlWrkShtDotNet.Range(RangeStartRowNo,RangeStartColNo,RangeEndRowNo,RangeEndColNo).Style.Border.SetRightBorder :=
+          GetEnumValue(XlWrkShtDotNet.Range(RangeStartRowNo,RangeStartColNo,RangeEndRowNo,RangeEndColNo).Style.Border.RightBorder,
+                       'Double');
+      IF Bottom THEN
+        XlWrkShtDotNet.Range(RangeStartRowNo,RangeStartColNo,RangeEndRowNo,RangeEndColNo).Style.Border.SetBottomBorder :=
+          GetEnumValue(XlWrkShtDotNet.Range(RangeStartRowNo,RangeStartColNo,RangeEndRowNo,RangeEndColNo).Style.Border.BottomBorder,
+                       'Double');
+    END;
+
+    [External]
+    PROCEDURE SetCellsFillColorByName@109(RangeStartRowNo@1007 : Integer;RangeStartColNo@1006 : Integer;RangeEndRowNo@1005 : Integer;RangeEndColNo@1004 : Integer;ColorName@1000 : Text[30]);
+    VAR
+      XlColor@1001 : DotNet "'ClosedXML, Version=0.89.0.0, Culture=neutral, PublicKeyToken=fd1eb21b62ae805b'.ClosedXML.Excel.XLColor";
+    BEGIN
+      CheckWorkbook;
+      XlColor := XlColor.FromName(ColorName);
+      XlWrkShtDotNet.Range(RangeStartRowNo,RangeStartColNo,RangeEndRowNo,RangeEndColNo).Style.Fill.BackgroundColor := XlColor;
+    END;
+
+    [External]
+    PROCEDURE SetCellsFillColorAntiqueWhite@117(RangeStartRowNo@1007 : Integer;RangeStartColNo@1006 : Integer;RangeEndRowNo@1005 : Integer;RangeEndColNo@1004 : Integer);
+    VAR
+      XlColor@1001 : DotNet "'ClosedXML, Version=0.89.0.0, Culture=neutral, PublicKeyToken=fd1eb21b62ae805b'.ClosedXML.Excel.XLColor";
+    BEGIN
+      CheckWorkbook;
+      XlColor := XlColor.AntiqueWhite;
+      XlWrkShtDotNet.Range(RangeStartRowNo,RangeStartColNo,RangeEndRowNo,RangeEndColNo).Style.Fill.BackgroundColor := XlColor;
+    END;
+
+    [External]
+    PROCEDURE SetCellsFillColorYellow@137(RangeStartRowNo@1007 : Integer;RangeStartColNo@1006 : Integer;RangeEndRowNo@1005 : Integer;RangeEndColNo@1004 : Integer);
+    VAR
+      XlColor@1001 : DotNet "'ClosedXML, Version=0.89.0.0, Culture=neutral, PublicKeyToken=fd1eb21b62ae805b'.ClosedXML.Excel.XLColor";
+    BEGIN
+      CheckWorkbook;
+      XlColor := XlColor.Yellow;
+      XlWrkShtDotNet.Range(RangeStartRowNo,RangeStartColNo,RangeEndRowNo,RangeEndColNo).Style.Fill.BackgroundColor := XlColor;
+    END;
+
+    [External]
+    PROCEDURE SetColumnWidth@127(ColumnNo@1000 : Integer;Width@1001 : Integer);
+    BEGIN
+      CheckWorkbook;
+      XlWrkShtDotNet.Column(ColumnNo).Width := Width;
+    END;
+
+    [External]
+    PROCEDURE SetRowHeight@129(RowNo@1000 : Integer;Height@1001 : Integer);
+    BEGIN
+      CheckWorkbook;
+      XlWrkShtDotNet.Rows(STRSUBSTNO('%1:%1',RowNo)).Height := Height;
+    END;
+
+    [External]
+    PROCEDURE SetPageBreak@125(RowNo@1000 : Integer);
+    BEGIN
+      CheckWorkbook;
+      XlWrkShtDotNet.PageSetup.AddHorizontalPageBreak(RowNo);
+    END;
+
+    [External]
+    PROCEDURE SetTabColorByName@144(ColorName@1001 : Text[30]);
+    VAR
+      XlColor@1000 : DotNet "'ClosedXML, Version=0.89.0.0, Culture=neutral, PublicKeyToken=fd1eb21b62ae805b'.ClosedXML.Excel.XLColor";
+    BEGIN
+      CheckWorkbook;
+      XlColor := XlColor.FromName(ColorName);
+      XlWrkShtDotNet.SetTabColor := XlColor;
+    END;
+
+    [External]
+    PROCEDURE SetFreezeRow@104(FreezeRow@1000 : Integer);
+    BEGIN
+      CheckWorkbook;
+      XlWrkShtDotNet.SheetView.FreezeRows(FreezeRow);
+    END;
+
+    [External]
+    PROCEDURE SetFreezeColumn@1019(FreezeCol@1000 : Integer);
+    BEGIN
+      CheckWorkbook;
+      XlWrkShtDotNet.SheetView.FreezeColumns(FreezeCol);
+    END;
+
+    [External]
+    PROCEDURE SetRowsToRepeatAtTop@135(StartRow@1000 : Integer;EndRow@1001 : Integer);
+    BEGIN
+      CheckWorkbook;
+      XlWrkShtDotNet.PageSetup.SetRowsToRepeatAtTop(STRSUBSTNO('$%1:$%2',StartRow,EndRow));
+    END;
+
+    [External]
+    PROCEDURE SetColumnsToRepeatAtLeft@108(StartCol@1000 : Integer;EndCol@1001 : Integer);
+    VAR
+      pageSetup@1002 : DotNet "'ClosedXML, Version=0.89.0.0, Culture=neutral, PublicKeyToken=fd1eb21b62ae805b'.ClosedXML.Excel.IXLPageSetup";
+    BEGIN
+      CheckWorkbook;
+      XlWrkShtDotNet.PageSetup.SetColumnsToRepeatAtLeft(STRSUBSTNO('$%1:$%2',StartCol,EndCol));
+    END;
+
+    [External]
+    PROCEDURE SetPrintArea@147(PrintAreaStartRow@1003 : Integer;PrintAreaStartCol@1002 : Integer;PrintAreaEndRow@1001 : Integer;PrintAreaEndCol@1000 : Integer);
+    BEGIN
+      CheckWorkbook;
+      XlWrkShtDotNet.PageSetup.PrintAreas.Add(PrintAreaStartRow,PrintAreaStartCol,PrintAreaEndRow,PrintAreaEndCol);
+    END;
+
+    [External]
+    PROCEDURE SetPageSetup@103(PaperSize@1000 : Text[30];PageOrientation@1003 : Text;PagesTall@1001 : Integer;PagesWide@1002 : Integer;ZoomLevel@1004 : Integer);
+    BEGIN
+      CheckWorkbook;
+      XlWrkShtDotNet.PageSetup.SetPaperSize := GetEnumValue(XlWrkShtDotNet.PageSetup.PaperSize,PaperSize);
+      XlWrkShtDotNet.PageSetup.SetPagesTall := 1;
+      XlWrkShtDotNet.PageSetup.SetPagesWide := 1;
+      XlWrkShtDotNet.PageSetup.SetPageOrientation := GetEnumValue(XlWrkShtDotNet.PageSetup.PageOrientation,PageOrientation);
+      XlWrkShtDotNet.PageSetup.AdjustTo := ZoomLevel;
+    END;
+
+    [External]
+    PROCEDURE GetXlsx@111(VAR TempBlob@1000 : Record 99008535);
+    VAR
+      MemoryStream@1001 : DotNet "'mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.IO.MemoryStream";
+      OutStr@1002 : OutStream;
+    BEGIN
+      CheckWorkbook;
+      MemoryStream := MemoryStream.MemoryStream();
+      XlWrkBkDotNet.SaveAs(MemoryStream);
+      TempBlob.Blob.CREATEOUTSTREAM(OutStr);
+      COPYSTREAM(OutStr,MemoryStream);
+    END;
+
+    LOCAL PROCEDURE GetEnumValue@34(Enum@1024 : DotNet "'mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Enum";Value@1026 : Text[30]) ReturnValue : Integer;
+    VAR
+      ResultEnum@1000 : DotNet "'mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Enum";
+      EnumNames@1001 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Array";
+      EnumName@1004 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.String";
+      EnumValues@1002 : Text;
+      i@1003 : Integer;
+    BEGIN
+      IF TryGetEnumValue(Enum,Value,ReturnValue) THEN
+        EXIT
+      ELSE BEGIN
+        EnumNames := Enum.GetValues(Enum.GetType);
+        FOR i := 1 TO EnumNames.Length DO BEGIN
+          EnumName := EnumNames.GetValue(i - 1);
+          IF EnumValues = '' THEN
+            EnumValues := EnumName.ToString
+          ELSE
+            EnumValues += ',' + EnumName.ToString;
+        END;
+        ERROR(EnumValueErr,Value,EnumValues);
+      END;
+    END;
+
+    [TryFunction]
+    LOCAL PROCEDURE TryGetEnumValue@66(Enum@1001 : DotNet "'mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Enum";Value@1000 : Text[30];VAR ReturnValue@1002 : Integer);
+    VAR
+      Convert@1003 : DotNet "'mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Convert";
+    BEGIN
+      ReturnValue := Convert.ToInt32(Enum.Parse(Enum.GetType,Value));
+    END;
+
+    LOCAL PROCEDURE CheckWorkbook@36();
+    BEGIN
+      IF ISNULL(XlWrkBkDotNet) OR ISNULL(XlWrkShtDotNet) THEN
+        ERROR(NotCreatedErr);
+    END;
+
+    BEGIN
+    END.
+  }
+}
+
+OBJECT Codeunit 50048 ClosedXML Management Test
+{
+  OBJECT-PROPERTIES
+  {
+    Date=29.09.17;
+    Time=15:09:50;
+    Version List=Navision.Guru,Test;
+  }
+  PROPERTIES
+  {
+    Subtype=Test;
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      Assert@1000 : Codeunit 130000;
+
+    [Test]
+    PROCEDURE TestXlsxDocCreate@1100408001();
+    VAR
+      SheetName@1000 : TextConst 'ENU=Test Sheet Name';
+      CellValue@1001 : TextConst 'ENU=Value for row %1, column %2';
+      TempBlob@1002 : Record 99008535;
+      ExcelBuffer@1003 : TEMPORARY Record 370;
+      FileMgt@1004 : Codeunit 419;
+      ClosedXMLMgt@1005 : Codeunit 50047;
+      NoteInText@1006 : BigText;
+      ServerTempFileNamePath@1007 : Text;
+      Row@1008 : Integer;
+      Column@1009 : Integer;
+      Alignment@1011 : 'General,Left,Right,Center';
+      CellValueErr@1012 : TextConst 'ENU=Incorrect Cell value found in row %1, column %2';
+      CommentTestValue@1010 : TextConst 'ENU=Comment Text from Big Text variable';
+    BEGIN
+      WITH ClosedXMLMgt DO BEGIN
+        // Expect an error if we try to get the Excel document from uninitialized object
+        ASSERTERROR GetXlsx(TempBlob);
+
+        Start;
+        AddSheet(SheetName);
+        NoteInText.ADDTEXT(SheetName);
+        FOR Row := 1 TO 20 DO
+          FOR Column := 1 TO 20 DO
+            AddCell(
+              Row,
+              Column,
+              STRSUBSTNO(CellValue,Row,Column),
+              FALSE,
+              NoteInText,
+              (Row MOD 2) = 0,
+              (Row MOD 3) = 0,
+              (Row MOD 4) = 0,
+              '0.0',
+              (Row MOD 5) = 0,
+              Alignment::Right,
+              TRUE);
+        MergeCells(1,20,1,22);
+        MergeAndCenterCells(2,20,2,22);
+        WrapText(20,1,20,1);
+        SetFontSize(20,1,36);
+        SetCellsThinBorder(1,1,2,2,TRUE,TRUE,TRUE,TRUE);
+        SetCellsThickBorder(3,3,4,4,TRUE,TRUE,TRUE,TRUE);
+        SetCellsDoubleBorder(5,5,6,6,TRUE,TRUE,TRUE,TRUE);
+        SetCellsFillColorByName(2,1,2,4,'Yellow');
+        SetCellsFillColorAntiqueWhite(6,1,8,9);
+        SetCellsFillColorYellow(10,2,10,4);
+        SetColumnWidth(1,66);
+        SetRowHeight(10,33);
+        SetPageBreak(7);
+        SetTabColorByName('Red');
+        SetFreezeRow(2);
+        SetFreezeColumn(2);
+        SetRowsToRepeatAtTop(1,2);
+        SetColumnsToRepeatAtLeft(1,2);
+        SetPrintArea(1,1,20,20);
+        SetPageSetup('A4Paper','Portrait',0,0,88);
+
+        Row := 30;
+        Column := 1;
+        CLEAR(NoteInText);
+        NoteInText.ADDTEXT(CommentTestValue);
+        AddCommentLines(Row,Column,60,NoteInText);
+
+        GetXlsx(TempBlob);
+      END;
+
+      // Save Xlsx file in a temporary file
+      WITH FileMgt DO BEGIN
+        ServerTempFileNamePath := ServerTempFileName('xlsx');
+        BLOBExportToServerFile(TempBlob,ServerTempFileNamePath);
+
+        // Import Xlsx file and verify values
+        WITH ExcelBuffer DO BEGIN
+          OpenBook(ServerTempFileNamePath,SheetName);
+          ReadSheet;
+          FIND('-');
+          REPEAT
+            IF "Row No." <= 20 THEN
+              Assert.AreEqual(STRSUBSTNO(CellValue,"Row No.","Column No."),"Cell Value as Text",STRSUBSTNO(CellValueErr,"Row No.","Column No."))
+            ELSE
+              Assert.AreEqual(CommentTestValue,"Cell Value as Text",STRSUBSTNO(CellValueErr,"Row No.","Column No."))
+          UNTIL NEXT = 0;
+        END;
+
+        // Remove the test file from server temporary folder
+        DeleteServerFile(ServerTempFileNamePath);
+      END;
+    END;
+
+    BEGIN
+    END.
+  }
+}
+
