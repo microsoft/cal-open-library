@@ -1,0 +1,67 @@
+OBJECT Codeunit 50060 JwtSecurityToken Test
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    Subtype=Test;
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      Assert@1000 : Codeunit 130000;
+
+    [Test]
+    PROCEDURE TestJwtToken@1();
+    VAR
+      JObject@1000 : DotNet "'Newtonsoft.Json'.Newtonsoft.Json.Linq.JObject";
+      JwtMgt@1001 : Codeunit 1290;
+      ExampleJwtToken@1010 : TextConst 'ENU=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhdWQiOiJodHRwOi8vd3d3LmV4YW1wbGUuY29tIiwiaXNzIjoic2VsZiIsIm5iZiI6MTM1Mzk3NDczNiwiZXhwIjoxMzUzOTc0ODU2LCJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1lIjoiUGVkcm8iLCJodHRwOi8vc2NoZW1hcy5taWNyb3NvZnQuY29tL3dzLzIwMDgvMDYvaWRlbnRpdHkvY2xhaW1zL3JvbGUiOiJBdXRob3IifQ.a-Tu5ojQSyiGSzTb9E5QbEYxyhomywzh2wqKs4El7lc';
+      UnableToParseJwtObject@1011 : TextConst 'ENU=Unable to parse Jwt object.  Missing JwtSecurityTokenHandler ?';
+      NotBefore@1002 : DateTime;
+      Expires@1003 : DateTime;
+      NotBeforeErr@1012 : TextConst 'ENU=Not Before timestamp not evaluated correctly';
+      ExpiresErr@1013 : TextConst 'ENU=Expires timestamp not evaluated correctly';
+      HasJWTExpiredErr@1100408000 : TextConst 'ENU=HasJWTExpired function returns incorrect results for token expire date';
+    BEGIN
+      IF JwtMgt.GetTokenDetailsAsJObject(ExampleJwtToken,JObject) THEN BEGIN
+        TestJObjectValues(JObject,'aud', 'http://www.example.com');
+        TestJObjectValues(JObject,'iss', 'self');
+        TestJObjectValues(JObject,'nbf', '1353974736');
+        TestJObjectValues(JObject,'exp', '1353974856');
+        TestJObjectValues(JObject,'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name', 'Pedro');
+        TestJObjectValues(JObject,'http://schemas.microsoft.com/ws/2008/06/identity/claims/role', 'Author');
+
+        NotBefore := JwtMgt.GetTokenDateTimeValue(JObject,'nbf');
+        Expires := JwtMgt.GetTokenDateTimeValue(JObject,'exp');
+        Assert.AreEqual(CREATEDATETIME(DMY2DATE(27,11,2012),000500T),NotBefore,NotBeforeErr);
+        Assert.AreEqual(CREATEDATETIME(DMY2DATE(27,11,2012),000700T),Expires,ExpiresErr);
+        Assert.AreEqual(Expires < CURRENTDATETIME,JwtMgt.HasJWTExpired(ExampleJwtToken),HasJWTExpiredErr);
+      END ELSE
+        ERROR(UnableToParseJwtObject);
+    END;
+
+    LOCAL PROCEDURE TestJObjectValues@2(JObject@1000 : DotNet "'Newtonsoft.Json'.Newtonsoft.Json.Linq.JObject";ClaimType@1001 : Text;ClaimValue@1002 : Variant);
+    VAR
+      ClaimTypeErr@1004 : TextConst 'ENU=Claim Type %1 has incorrect value.';
+      JwtMgt@1003 : Codeunit 1290;
+    BEGIN
+      Assert.AreEqual(
+        ClaimValue,
+        JwtMgt.GetTokenValue(JObject,ClaimType),
+        STRSUBSTNO(ClaimTypeErr,ClaimType)
+      );
+    END;
+
+    BEGIN
+    END.
+  }
+}
+
