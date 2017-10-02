@@ -1,0 +1,77 @@
+OBJECT Codeunit 704 MemoryStream Wrapper
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      MemoryStream@1000 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.IO.MemoryStream";
+      StreamWriter@1001 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.IO.StreamWriter";
+      StreamReader@1002 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.IO.StreamReader";
+
+    PROCEDURE Create@1(Capacity@1000 : Integer);
+    BEGIN
+      MemoryStream := MemoryStream.MemoryStream(Capacity);
+    END;
+
+    PROCEDURE SetPosition@2(Position@1000 : Integer);
+    BEGIN
+      MemoryStream.Position := Position;
+    END;
+
+    PROCEDURE GetPosition@3() : Integer;
+    BEGIN
+      EXIT(MemoryStream.Position);
+    END;
+
+    PROCEDURE CopyTo@4(OutStream@1000 : OutStream);
+    BEGIN
+      MemoryStream.CopyTo(OutStream);
+    END;
+
+    PROCEDURE GetInStream@5(VAR InStream@1000 : InStream);
+    BEGIN
+      InStream := MemoryStream;
+    END;
+
+    PROCEDURE ReadFrom@6(VAR InStream@1000 : InStream);
+    BEGIN
+      COPYSTREAM(MemoryStream,InStream);
+    END;
+
+    PROCEDURE ToText@7() : Text;
+    BEGIN
+      MemoryStream.Position := 0;
+      IF ISNULL(StreamReader) THEN
+        StreamReader := StreamReader.StreamReader(MemoryStream);
+      EXIT(StreamReader.ReadToEnd());
+    END;
+
+    PROCEDURE AddText@8(Txt@1000 : Text);
+    BEGIN
+      IF ISNULL(StreamWriter) THEN
+        StreamWriter := StreamWriter.StreamWriter(MemoryStream);
+      StreamWriter.Write(Txt);
+      StreamWriter.Flush();
+    END;
+
+    PROCEDURE Length@9() : Integer;
+    BEGIN
+      EXIT(MemoryStream.Length);
+    END;
+
+    BEGIN
+    END.
+  }
+}
+
