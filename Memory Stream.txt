@@ -1,0 +1,147 @@
+OBJECT Codeunit 50777 MemoryStream
+{
+  OBJECT-PROPERTIES
+  {
+    Date=20-09-17;
+    Time=[ 7:32:02 PM];
+    Modified=Yes;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+            UnitTest();
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      MemoryStream@1160530000 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.IO.MemoryStream";
+      StreamWriter@1160530001 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.IO.StreamWriter";
+      StreamReader@1160530002 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.IO.StreamReader";
+
+    PROCEDURE Create@1160530001(InitialSize@1160530000 : Integer);
+    BEGIN
+      MemoryStream := MemoryStream.MemoryStream(InitialSize);
+    END;
+
+    PROCEDURE SetPosition@1160530000(Position@1160530000 : Integer);
+    BEGIN
+      CheckConstructor();
+      MemoryStream.Position := Position;
+    END;
+
+    PROCEDURE GetPosition@1160530005() : Integer;
+    BEGIN
+      CheckConstructor();
+      EXIT(MemoryStream.Position);
+    END;
+
+    PROCEDURE CopyTo@1160530002(OutStream@1160530000 : OutStream);
+    BEGIN
+      CheckConstructor();
+      MemoryStream.CopyTo(OutStream);
+    END;
+
+    PROCEDURE GetInStream@1160530003(VAR InStream@1160530000 : InStream);
+    BEGIN
+      CheckConstructor();
+      InStream := MemoryStream;
+    END;
+
+    PROCEDURE ReadFrom@1160530004(VAR InStream@1160530000 : InStream);
+    VAR
+      Stream@1160530001 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.IO.Stream";
+    BEGIN
+      CheckConstructor();
+      COPYSTREAM(MemoryStream,InStream);
+    END;
+
+    PROCEDURE ToText@1160530008() : Text;
+    BEGIN
+      CheckConstructor();
+      MemoryStream.Position := 0;
+      IF ISNULL(StreamReader) THEN
+        StreamReader := StreamReader.StreamReader(MemoryStream);
+      EXIT(StreamReader.ReadToEnd());
+    END;
+
+    PROCEDURE AddText@1160530012(Txt@1160530001 : Text);
+    BEGIN
+      CheckConstructor();
+      IF ISNULL(StreamWriter) THEN
+        StreamWriter := StreamWriter.StreamWriter(MemoryStream);
+      StreamWriter.Write(Txt);
+      StreamWriter.Flush();
+    END;
+
+    PROCEDURE Length@1160530015() : Integer;
+    BEGIN
+      CheckConstructor();
+      EXIT(MemoryStream.Length);
+    END;
+
+    LOCAL PROCEDURE CheckConstructor@1160530006();
+    VAR
+      NotCreatedError@1160530000 : TextConst 'DAN=MemoryStream has not been created.';
+    BEGIN
+      IF ISNULL(MemoryStream) THEN
+        ERROR(NotCreatedError);
+    END;
+
+    LOCAL PROCEDURE UnitTest@1160530013();
+    VAR
+      MemStream@1160530000 : Codeunit 50777;
+      InStream@1160530001 : InStream;
+      OutStream@1160530002 : OutStream;
+      CompanyInfo@1160530003 : Record 79;
+      Txt@1160530004 : Text;
+    BEGIN
+      // Unittest requirement: CompanyInfo should have a picture in CompanyInfo.Picture
+
+      MemStream.Create(100);
+      MemStream.AddText('TEST');
+      IF MemStream.GetPosition() <> 4 THEN
+        ERROR('Unittest failed, GetPosition returned %1, should have been %2',MemStream.GetPosition(),4);
+      IF MemStream.ToText() <> 'TEST' THEN
+        ERROR('Unittest failed, AddText+ToText');
+
+      IF MemStream.Length <> 4 THEN
+        ERROR('Unittest failed, Length returned %1, should have been %2',MemStream.Length,4);
+
+      MemStream.SetPosition(0);
+      MemStream.GetInStream(InStream);
+      InStream.READTEXT(Txt);
+      IF Txt <> 'TEST' THEN
+        ERROR('Unittest failed, GetInStream did not return a usable InStream');
+
+
+      // Test Read from
+      CompanyInfo.GET;
+      CompanyInfo.CALCFIELDS(Picture);
+      CompanyInfo.Picture.CREATEINSTREAM(InStream);
+      MemStream.Create(1000);
+      MemStream.ReadFrom(InStream);
+      IF MemStream.Length = 0 THEN
+        ERROR('Unittest failed, ReadFrom resulted in empty MemoryStream (Possible cause, Company Info does not have a picture in the blob field');
+
+      CLEAR(CompanyInfo.Picture);
+      CompanyInfo.MODIFY;
+      CompanyInfo.CALCFIELDS(Picture);
+      CompanyInfo.Picture.CREATEOUTSTREAM(OutStream);
+      MemStream.SetPosition(0);
+      MemStream.CopyTo(OutStream);
+      CompanyInfo.MODIFY;
+      CompanyInfo.CALCFIELDS(Picture);
+      IF NOT CompanyInfo.Picture.HASVALUE THEN
+        ERROR('Unittest failed, CopyTo failed');
+
+      MESSAGE('Unittests complete successfully');
+    END;
+
+    BEGIN
+    END.
+  }
+}
+
