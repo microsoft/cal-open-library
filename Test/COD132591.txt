@@ -1,0 +1,147 @@
+OBJECT Codeunit 132591 MemoryStream Wrapper Tests
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=Test,W1,All;
+  }
+  PROPERTIES
+  {
+    Subtype=Test;
+    TestPermissions=Disabled;
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      Assert@1000 : Codeunit 130000;
+
+    [Test]
+    PROCEDURE TestUninitialzed@1();
+    VAR
+      MemoryStreamWrapper@1000 : Codeunit 704;
+    BEGIN
+      // Exercise and verify
+      ASSERTERROR MemoryStreamWrapper.AddText('Test');
+      Assert.ExpectedError('Cannot create an instance of the following .NET Framework');
+    END;
+
+    [Test]
+    PROCEDURE TestGetPosition@2();
+    VAR
+      MemoryStreamWrapper@1000 : Codeunit 704;
+    BEGIN
+      // Setup
+      MemoryStreamWrapper.Create(20);
+      MemoryStreamWrapper.AddText('TestGetPos');
+
+      // Exercise and verify
+      Assert.AreEqual(10,MemoryStreamWrapper.GetPosition,'GetPosition returned wrong value');
+    END;
+
+    [Test]
+    PROCEDURE TestToText@3();
+    VAR
+      MemoryStreamWrapper@1000 : Codeunit 704;
+    BEGIN
+      // Setup
+      MemoryStreamWrapper.Create(10);
+      MemoryStreamWrapper.AddText('TestToText');
+
+      // Exercise and verify
+      Assert.AreEqual('TestToText',MemoryStreamWrapper.ToText,'ToText returned wrong value');
+    END;
+
+    [Test]
+    PROCEDURE TestLength@4();
+    VAR
+      MemoryStreamWrapper@1000 : Codeunit 704;
+    BEGIN
+      // Setup
+      MemoryStreamWrapper.Create(20);
+      MemoryStreamWrapper.AddText('LengthTest');
+
+      // Exercise and verify
+      Assert.AreEqual(10,MemoryStreamWrapper.Length,'Length returend wrong value');
+    END;
+
+    [Test]
+    PROCEDURE TestGetInStream@5();
+    VAR
+      MemoryStreamWrapper@1000 : Codeunit 704;
+      InStream@1001 : InStream;
+      Txt@1003 : Text;
+    BEGIN
+      // Setup
+      MemoryStreamWrapper.Create(10);
+      MemoryStreamWrapper.AddText('InStreamTest');
+
+      // Exercise
+      MemoryStreamWrapper.SetPosition(0);
+      MemoryStreamWrapper.GetInStream(InStream);
+      InStream.READTEXT(Txt);
+
+      // Verify
+      Assert.AreEqual('InStreamTest',Txt,'GetInStream did not return a usable InStream');
+    END;
+
+    [Test]
+    PROCEDURE TestReadFrom@6();
+    VAR
+      CompanyInformation@1000 : Record 79;
+      MemoryStreamWrapper@1001 : Codeunit 704;
+      InStream@1002 : InStream;
+    BEGIN
+      // Setup
+      CompanyInformation.GET;
+      CompanyInformation.CALCFIELDS(Picture);
+      CompanyInformation.Picture.CREATEINSTREAM(InStream);
+      MemoryStreamWrapper.Create(1000);
+
+      // Exercise
+      MemoryStreamWrapper.ReadFrom(InStream);
+
+      // Verify
+      Assert.AreNotEqual(0,MemoryStreamWrapper.Length,'ReadFrom resulted in empty MemoryStream');
+    END;
+
+    [Test]
+    PROCEDURE TestCopyTo@7();
+    VAR
+      CompanyInformation@1000 : Record 79;
+      MemoryStreamWrapper@1001 : Codeunit 704;
+      InStream@1002 : InStream;
+      OutStream@1003 : OutStream;
+    BEGIN
+      // Pre-Setup: store picture in MemoryStream
+      CompanyInformation.GET;
+      CompanyInformation.CALCFIELDS(Picture);
+      CompanyInformation.Picture.CREATEINSTREAM(InStream);
+      MemoryStreamWrapper.Create(1000);
+      MemoryStreamWrapper.ReadFrom(InStream);
+
+      // Setup: delete picture
+      CLEAR(CompanyInformation.Picture);
+      CompanyInformation.MODIFY;
+      CompanyInformation.CALCFIELDS(Picture);
+      Assert.IsFalse(CompanyInformation.Picture.HASVALUE,'Precondition failed');
+
+      // Excercise: copy picture from memory stream
+      CompanyInformation.Picture.CREATEOUTSTREAM(OutStream);
+      MemoryStreamWrapper.SetPosition(0);
+      MemoryStreamWrapper.CopyTo(OutStream);
+      CompanyInformation.MODIFY;
+      CompanyInformation.CALCFIELDS(Picture);
+
+      // Verify
+      Assert.IsTrue(CompanyInformation.Picture.HASVALUE,'CopyTo failed');
+    END;
+
+    BEGIN
+    END.
+  }
+}
+
