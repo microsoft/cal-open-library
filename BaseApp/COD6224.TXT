@@ -1,0 +1,632 @@
+OBJECT Codeunit 6224 XML DOM Management
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      EmptyPrefixErr@1000 : TextConst 'ENU=Retrieval of an XML element cannot be done with an empty prefix.';
+      SeparatorTxt@1004 : TextConst '@@@={Locked};ENU=/';
+      DotDotTxt@1003 : TextConst '@@@={Locked};ENU=..';
+      NodePathErr@1002 : TextConst 'ENU=Node path cannot be empty.';
+      BasePathErr@1001 : TextConst 'ENU=Base path cannot be empty.';
+      XMLTransformErr@1005 : TextConst 'ENU=The XML cannot be transformed.';
+
+    PROCEDURE AddElement@1(VAR XMLNode@1001 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlNode";NodeName@1002 : Text;NodeText@1003 : Text;NameSpace@1004 : Text;VAR CreatedXMLNode@1005 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlNode") : Integer;
+    VAR
+      NewChildNode@1006 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlNode";
+    BEGIN
+      NewChildNode := XMLNode.OwnerDocument.CreateNode('element',NodeName,NameSpace);
+      EXIT(AddElementToNode(XMLNode,NewChildNode,NodeText,CreatedXMLNode));
+    END;
+
+    PROCEDURE AddRootElement@21(VAR XMLDoc@1000 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlDocument";NodeName@1002 : Text;VAR CreatedXMLNode@1005 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlNode");
+    BEGIN
+      CreatedXMLNode := XMLDoc.CreateElement(NodeName);
+      XMLDoc.AppendChild(CreatedXMLNode);
+    END;
+
+    PROCEDURE AddRootElementWithPrefix@18(VAR XMLDoc@1000 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlDocument";NodeName@1002 : Text;Prefix@1007 : Text;NameSpace@1004 : Text;VAR CreatedXMLNode@1005 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlNode");
+    BEGIN
+      CreatedXMLNode := XMLDoc.CreateElement(Prefix,NodeName,NameSpace);
+      XMLDoc.AppendChild(CreatedXMLNode);
+    END;
+
+    PROCEDURE AddElementWithPrefix@9(VAR XMLNode@1001 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlNode";NodeName@1002 : Text;NodeText@1003 : Text;Prefix@1007 : Text;NameSpace@1004 : Text;VAR CreatedXMLNode@1005 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlNode") : Integer;
+    VAR
+      NewChildNode@1006 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlNode";
+    BEGIN
+      NewChildNode := XMLNode.OwnerDocument.CreateElement(Prefix,NodeName,NameSpace);
+      EXIT(AddElementToNode(XMLNode,NewChildNode,NodeText,CreatedXMLNode));
+    END;
+
+    LOCAL PROCEDURE AddElementToNode@10(VAR XMLNode@1002 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlNode";VAR NewChildNode@1000 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlNode";NodeText@1001 : Text;VAR CreatedXMLNode@1003 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlNode") ExitStatus : Integer;
+    BEGIN
+      IF ISNULL(NewChildNode) THEN BEGIN
+        ExitStatus := 50;
+        EXIT;
+      END;
+
+      IF NodeText <> '' THEN
+        NewChildNode.InnerText := NodeText;
+
+      XMLNode.AppendChild(NewChildNode);
+      CreatedXMLNode := NewChildNode;
+
+      ExitStatus := 0;
+    END;
+
+    PROCEDURE AddAttribute@2(VAR XMLNode@1001 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlNode";Name@1002 : Text;NodeValue@1003 : Text) : Integer;
+    VAR
+      XMLNewAttributeNode@1004 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlNode";
+    BEGIN
+      XMLNewAttributeNode := XMLNode.OwnerDocument.CreateAttribute(Name);
+      EXIT(AddAttributeToNode(XMLNode,XMLNewAttributeNode,NodeValue));
+    END;
+
+    PROCEDURE AddAttributeWithPrefix@12(VAR XMLNode@1001 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlNode";Name@1002 : Text;Prefix@1005 : Text;NameSpace@1006 : Text;NodeValue@1003 : Text) : Integer;
+    VAR
+      XMLNewAttributeNode@1004 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlNode";
+    BEGIN
+      XMLNewAttributeNode := XMLNode.OwnerDocument.CreateAttribute(Prefix,Name,NameSpace);
+      EXIT(AddAttributeToNode(XMLNode,XMLNewAttributeNode,NodeValue));
+    END;
+
+    LOCAL PROCEDURE AddAttributeToNode@14(VAR XMLNode@1002 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlNode";VAR XMLNewAttributeNode@1000 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlNode";NodeValue@1001 : Text) ExitStatus : Integer;
+    BEGIN
+      IF ISNULL(XMLNewAttributeNode) THEN BEGIN
+        ExitStatus := 60;
+        EXIT(ExitStatus)
+      END;
+
+      IF NodeValue <> '' THEN
+        XMLNewAttributeNode.Value := NodeValue;
+
+      XMLNode.Attributes.SetNamedItem(XMLNewAttributeNode);
+    END;
+
+    PROCEDURE FindNode@3(XMLRootNode@1000 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlNode";NodePath@1001 : Text;VAR FoundXMLNode@1002 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlNode") : Boolean;
+    BEGIN
+      IF ISNULL(XMLRootNode) THEN
+        EXIT(FALSE);
+
+      FoundXMLNode := XMLRootNode.SelectSingleNode(NodePath);
+
+      IF ISNULL(FoundXMLNode) THEN
+        EXIT(FALSE);
+
+      EXIT(TRUE);
+    END;
+
+    PROCEDURE FindNodeWithNamespace@13(XMLRootNode@1000 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlNode";NodePath@1001 : Text;Prefix@1004 : Text;NameSpace@1005 : Text;VAR FoundXMLNode@1002 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlNode") : Boolean;
+    VAR
+      XMLNamespaceMgr@1003 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlNamespaceManager";
+    BEGIN
+      IF ISNULL(XMLRootNode) THEN
+        EXIT(FALSE);
+
+      XMLNamespaceMgr := XMLNamespaceMgr.XmlNamespaceManager(XMLRootNode.OwnerDocument.NameTable);
+      XMLNamespaceMgr.AddNamespace(Prefix,NameSpace);
+      FoundXMLNode := XMLRootNode.SelectSingleNode(NodePath,XMLNamespaceMgr);
+
+      IF ISNULL(FoundXMLNode) THEN
+        EXIT(FALSE);
+
+      EXIT(TRUE);
+    END;
+
+    PROCEDURE FindNodesWithNamespace@17(XMLRootNode@1000 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlNode";XPath@1001 : Text;Prefix@1004 : Text;NameSpace@1005 : Text;VAR FoundXMLNodeList@1002 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlNodeList") : Boolean;
+    VAR
+      XMLNamespaceMgr@1003 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlNamespaceManager";
+    BEGIN
+      XMLNamespaceMgr := XMLNamespaceMgr.XmlNamespaceManager(XMLRootNode.OwnerDocument.NameTable);
+      XMLNamespaceMgr.AddNamespace(Prefix,NameSpace);
+      EXIT(FindNodesWithNamespaceManager(XMLRootNode,XPath,XMLNamespaceMgr,FoundXMLNodeList));
+    END;
+
+    PROCEDURE FindNodesWithNamespaceManager@20(XMLRootNode@1000 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlNode";XPath@1001 : Text;XMLNamespaceMgr@1003 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlNamespaceManager";VAR FoundXMLNodeList@1002 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlNodeList") : Boolean;
+    BEGIN
+      IF ISNULL(XMLRootNode) THEN
+        EXIT(FALSE);
+
+      FoundXMLNodeList := XMLRootNode.SelectNodes(XPath,XMLNamespaceMgr);
+
+      IF ISNULL(FoundXMLNodeList) THEN
+        EXIT(FALSE);
+
+      IF FoundXMLNodeList.Count = 0 THEN
+        EXIT(FALSE);
+
+      EXIT(TRUE);
+    END;
+
+    PROCEDURE FindNodeXML@34(XMLRootNode@1000 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlNode";NodePath@1001 : Text) : Text;
+    VAR
+      FoundXMLNode@1002 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlNode";
+    BEGIN
+      IF ISNULL(XMLRootNode) THEN
+        EXIT('');
+
+      FoundXMLNode := XMLRootNode.SelectSingleNode(NodePath);
+
+      IF ISNULL(FoundXMLNode) THEN
+        EXIT('');
+
+      EXIT(FoundXMLNode.InnerXml);
+    END;
+
+    PROCEDURE FindNodeText@5(XMLRootNode@1000 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlNode";NodePath@1001 : Text) : Text;
+    VAR
+      FoundXMLNode@1002 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlNode";
+    BEGIN
+      IF ISNULL(XMLRootNode) THEN
+        EXIT('');
+
+      FoundXMLNode := XMLRootNode.SelectSingleNode(NodePath);
+
+      IF ISNULL(FoundXMLNode) THEN
+        EXIT('');
+
+      EXIT(FoundXMLNode.InnerText);
+    END;
+
+    PROCEDURE FindNodeTextWithNamespace@16(XMLRootNode@1000 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlNode";NodePath@1001 : Text;Prefix@1005 : Text;NameSpace@1004 : Text) : Text;
+    VAR
+      XMLNamespaceMgr@1003 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlNamespaceManager";
+    BEGIN
+      IF Prefix = '' THEN
+        ERROR(EmptyPrefixErr);
+
+      IF ISNULL(XMLRootNode) THEN
+        EXIT('');
+
+      XMLNamespaceMgr := XMLNamespaceMgr.XmlNamespaceManager(XMLRootNode.OwnerDocument.NameTable);
+      XMLNamespaceMgr.AddNamespace(Prefix,NameSpace);
+
+      EXIT(FindNodeTextNs(XMLRootNode,NodePath,XMLNamespaceMgr));
+    END;
+
+    PROCEDURE FindNodeTextNs@15(XMLRootNode@1000 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlNode";NodePath@1001 : Text;XmlNsMgr@1002 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlNamespaceManager") : Text;
+    VAR
+      FoundXMLNode@1003 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlNode";
+    BEGIN
+      FoundXMLNode := XMLRootNode.SelectSingleNode(NodePath,XmlNsMgr);
+
+      IF ISNULL(FoundXMLNode) THEN
+        EXIT('');
+
+      EXIT(FoundXMLNode.InnerText);
+    END;
+
+    PROCEDURE FindNodes@4(XMLRootNode@1000 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlNode";NodePath@1001 : Text;VAR ReturnedXMLNodeList@1002 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlNodeList") : Boolean;
+    BEGIN
+      ReturnedXMLNodeList := XMLRootNode.SelectNodes(NodePath);
+
+      IF ISNULL(ReturnedXMLNodeList) THEN
+        EXIT(FALSE);
+
+      IF ReturnedXMLNodeList.Count = 0 THEN
+        EXIT(FALSE);
+
+      EXIT(TRUE);
+    END;
+
+    PROCEDURE FindAttribute@22(VAR XmlNode@1000 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlNode";VAR XmlAttribute@1003 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlAttribute";AttributeName@1002 : Text) : Boolean;
+    BEGIN
+      XmlAttribute := XmlNode.Attributes.GetNamedItem(AttributeName);
+      EXIT(NOT ISNULL(XmlAttribute));
+    END;
+
+    PROCEDURE GetAttributeValue@23(xmlNode@1001 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlNode";attributeName@1002 : Text) : Text;
+    VAR
+      xmlAttribute@1000 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlAttribute";
+    BEGIN
+      xmlAttribute := xmlNode.Attributes.GetNamedItem(attributeName);
+      IF ISNULL(xmlAttribute) THEN
+        EXIT('');
+
+      EXIT(xmlAttribute.Value)
+    END;
+
+    PROCEDURE AddDeclaration@11(VAR XMLDoc@1001 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlDocument";Version@1002 : Text;Encoding@1003 : Text;Standalone@1004 : Text);
+    VAR
+      XMLDeclaration@1000 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlDeclaration";
+    BEGIN
+      XMLDeclaration := XMLDoc.CreateXmlDeclaration(Version,Encoding,Standalone);
+      XMLDoc.InsertBefore(XMLDeclaration,XMLDoc.DocumentElement);
+    END;
+
+    PROCEDURE AddGroupNode@6(VAR XMLNode@1001 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlNode";NodeName@1002 : Text);
+    VAR
+      XMLNewChild@1003 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlDocument";
+    BEGIN
+      AddElement(XMLNode,NodeName,'','',XMLNewChild);
+      XMLNode := XMLNewChild;
+    END;
+
+    PROCEDURE AddNode@7(VAR XMLNode@1001 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlNode";NodeName@1002 : Text;NodeText@1003 : Text);
+    VAR
+      XMLNewChild@1004 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlNode";
+    BEGIN
+      AddElement(XMLNode,NodeName,NodeText,'',XMLNewChild);
+    END;
+
+    PROCEDURE AddLastNode@8(VAR XMLNode@1001 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlNode";NodeName@1002 : Text;NodeText@1003 : Text);
+    VAR
+      XMLNewChild@1004 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlNode";
+    BEGIN
+      AddElement(XMLNode,NodeName,NodeText,'',XMLNewChild);
+      XMLNode := XMLNode.ParentNode;
+    END;
+
+    PROCEDURE AddNamespaces@19(VAR XmlNamespaceManager@1000 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlNamespaceManager";XmlDocument@1005 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlDocument");
+    VAR
+      XmlAttributeCollection@1003 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlAttributeCollection";
+      XmlAttribute@1004 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlAttribute";
+    BEGIN
+      XmlNamespaceManager := XmlNamespaceManager.XmlNamespaceManager(XmlDocument.NameTable);
+      XmlAttributeCollection := XmlDocument.DocumentElement.Attributes;
+
+      IF XmlDocument.DocumentElement.NamespaceURI <> '' THEN
+        XmlNamespaceManager.AddNamespace('',XmlDocument.DocumentElement.NamespaceURI);
+
+      FOREACH XmlAttribute IN XmlAttributeCollection DO
+        IF STRPOS(XmlAttribute.Name,'xmlns:') = 1 THEN
+          XmlNamespaceManager.AddNamespace(DELSTR(XmlAttribute.Name,1,6),XmlAttribute.Value);
+    END;
+
+    PROCEDURE IsValidXMLNameStartCharacter@38(InputChar@1000 : Char) : Boolean;
+    VAR
+      CharCode@1001 : Integer;
+    BEGIN
+      IF IsXMLRestrictedCharacter(InputChar) THEN
+        EXIT(FALSE);
+
+      // NameStartChar ::= ":" | [A-Z] | "_" | [a-z] | [#xC0-#xD6] | [#xD8-#xF6] | [#xF8-#x2FF] | [#x370-#x37D] | [#x37F-#x1FFF] | [#x200C-#x200D] | [#x2070-#x218F] | [#x2C00-#x2FEF] | [#x3001-#xD7FF] | [#xF900-#xFDCF] | [#xFDF0-#xFFFD] | [#x10000-#xEFFF
+      IF InputChar IN [':','_','A'..'Z','a'..'z'] THEN
+        EXIT(TRUE);
+
+      CharCode := InputChar;
+      EXIT(CharCode IN [192..214,216..246,248..767,880..893,895..8191,8204..8205,
+                        8304..8591,11264..12271,12289..55259,63744..64975,65008..65533,65536..983039]);
+    END;
+
+    PROCEDURE IsValidXMLNameCharacter@39(InputChar@1000 : Char) : Boolean;
+    VAR
+      CharCode@1001 : Integer;
+    BEGIN
+      // NameChar ::= NameStartChar | "-" | "." | [0-9] | #xB7 | [#x0300-#x036F] | [#x203F-#x2040]
+      IF IsValidXMLNameStartCharacter(InputChar) THEN
+        EXIT(TRUE);
+
+      IF InputChar IN ['-','.','0'..'9'] THEN
+        EXIT(TRUE);
+
+      CharCode := InputChar;
+      EXIT(CharCode IN [183,768..879,8255..8256]);
+    END;
+
+    PROCEDURE IsXMLRestrictedCharacter@41(InputChar@1000 : Char) : Boolean;
+    VAR
+      CharCode@1001 : Integer;
+    BEGIN
+      // RestrictedChar ::= [#x1-#x8] | [#xB-#xC] | [#xE-#x1F] | [#x7F-#x84] | [#x86-#x9F]
+      CharCode := InputChar;
+      EXIT(CharCode IN [1..8,11..12,14..31,127..132,134..159]);
+    END;
+
+    PROCEDURE XMLEscape@93(Text@1001 : Text) : Text;
+    VAR
+      XMLDocument@1002 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlDocument";
+      XMLNode@1004 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlNode";
+    BEGIN
+      XMLDocument := XMLDocument.XmlDocument;
+      XMLNode := XMLDocument.CreateElement('XMLEscape');
+
+      XMLNode.InnerText(Text);
+      EXIT(XMLNode.InnerXml);
+    END;
+
+    [TryFunction]
+    PROCEDURE LoadXMLDocumentFromText@24(XmlText@1000 : Text;VAR XmlDocument@1002 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlDocument");
+    VAR
+      XmlReaderSettings@1005 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlReaderSettings";
+    BEGIN
+      LoadXmlDocFromText(XmlText,XmlDocument,XmlReaderSettings.XmlReaderSettings);
+    END;
+
+    PROCEDURE LoadXMLNodeFromText@26(XmlText@1000 : Text;VAR XmlNode@1002 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlNode");
+    VAR
+      XmlDocument@1001 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlDocument";
+      XmlReaderSettings@1005 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlReaderSettings";
+    BEGIN
+      LoadXmlDocFromText(XmlText,XmlDocument,XmlReaderSettings.XmlReaderSettings);
+      XmlNode := XmlDocument.DocumentElement;
+    END;
+
+    [TryFunction]
+    PROCEDURE LoadXMLDocumentFromInStream@25(InStream@1000 : InStream;VAR XmlDocument@1001 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlDocument");
+    BEGIN
+      XmlDocument := XmlDocument.XmlDocument;
+      XmlDocument.Load(InStream);
+    END;
+
+    [TryFunction]
+    PROCEDURE LoadXMLNodeFromInStream@30(InStream@1000 : InStream;VAR XmlNode@1001 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlNode");
+    VAR
+      XmlDocument@1002 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlDocument";
+    BEGIN
+      LoadXMLDocumentFromInStream(InStream,XmlDocument);
+      XmlNode := XmlDocument.DocumentElement;
+    END;
+
+    PROCEDURE LoadXMLDocumentFromOutStream@32(OutStream@1001 : OutStream;VAR XmlDocument@1000 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlDocument");
+    BEGIN
+      XmlDocument := XmlDocument.XmlDocument;
+      XmlDocument.Load(OutStream);
+    END;
+
+    PROCEDURE LoadXMLDocumentFromFile@28(FileName@1000 : Text;VAR XmlDocument@1001 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlDocument");
+    VAR
+      File@1002 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.IO.File";
+    BEGIN
+      LoadXMLDocumentFromText(File.ReadAllText(FileName),XmlDocument);
+    END;
+
+    PROCEDURE LoadXMLDocumentFromFileWithXmlReaderSettings@33(FileName@1000 : Text;VAR XmlDocument@1003 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlDocument";XmlReaderSettings@1002 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlReaderSettings");
+    VAR
+      File@1004 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.IO.File";
+      XmlDocumentTypeOld@1001 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlDocumentType";
+      XmlDocumentTypeNew@1005 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlDocumentType";
+      DoctypeParams@1006 : ARRAY [4] OF DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.String";
+    BEGIN
+      LoadXmlDocFromText(File.ReadAllText(FileName),XmlDocument,XmlReaderSettings);
+      XmlDocumentTypeOld := XmlDocument.DocumentType;
+      IF NOT ISNULL(XmlDocumentTypeOld) THEN BEGIN
+        IF XmlDocumentTypeOld.Name <> '' THEN
+          DoctypeParams[1] := XmlDocumentTypeOld.Name;
+        IF XmlDocumentTypeOld.PublicId <> '' THEN
+          DoctypeParams[2] := XmlDocumentTypeOld.PublicId;
+        IF XmlDocumentTypeOld.SystemId <> '' THEN
+          DoctypeParams[3] := XmlDocumentTypeOld.SystemId;
+        IF XmlDocumentTypeOld.InternalSubset <> '' THEN
+          DoctypeParams[4] := XmlDocumentTypeOld.InternalSubset;
+        XmlDocumentTypeNew := XmlDocument.CreateDocumentType(DoctypeParams[1],DoctypeParams[2],DoctypeParams[3],DoctypeParams[4]);
+        XmlDocument.ReplaceChild(XmlDocumentTypeNew,XmlDocumentTypeOld);
+      END;
+    END;
+
+    LOCAL PROCEDURE LoadXmlDocFromText@31(XmlText@1004 : Text;VAR XmlDocument@1003 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlDocument";XmlReaderSettings@1005 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlReaderSettings");
+    VAR
+      StringReader@1001 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.IO.StringReader";
+      XmlTextReader@1000 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlTextReader";
+    BEGIN
+      XmlDocument := XmlDocument.XmlDocument;
+
+      IF XmlText = '' THEN
+        EXIT;
+
+      ClearUTF8BOMSymbols(XmlText);
+      StringReader := StringReader.StringReader(XmlText);
+      XmlTextReader := XmlTextReader.Create(StringReader,XmlReaderSettings);
+      XmlDocument.Load(XmlTextReader);
+      XmlTextReader.Close;
+      StringReader.Close;
+    END;
+
+    PROCEDURE LoadXMLDocumentFromUri@36(Uri@1000 : Text;VAR XmlDocument@1001 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlDocument");
+    VAR
+      XMLRootNode@1002 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlNode";
+    BEGIN
+      LoadXMLNodeFromUri(Uri,XMLRootNode);
+      XmlDocument := XMLRootNode.OwnerDocument;
+    END;
+
+    PROCEDURE LoadXMLNodeFromUri@35(Uri@1000 : Text;VAR XMLRootNode@1001 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlNode");
+    VAR
+      WebClient@1003 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Net.WebClient";
+      XmlText@1002 : Text;
+    BEGIN
+      WebClient := WebClient.WebClient;
+      XmlText := WebClient.DownloadString(Uri);
+      LoadXMLNodeFromText(XmlText,XMLRootNode);
+    END;
+
+    LOCAL PROCEDURE ClearUTF8BOMSymbols@29(VAR XmlText@1000 : Text);
+    VAR
+      UTF8Encoding@1001 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.UTF8Encoding";
+      ByteOrderMarkUtf8@1002 : Text;
+    BEGIN
+      UTF8Encoding := UTF8Encoding.UTF8Encoding;
+      ByteOrderMarkUtf8 := UTF8Encoding.GetString(UTF8Encoding.GetPreamble);
+      IF STRPOS(XmlText,ByteOrderMarkUtf8) = 1 THEN
+        XmlText := DELSTR(XmlText,1,STRLEN(ByteOrderMarkUtf8));
+    END;
+
+    [TryFunction]
+    PROCEDURE SaveXMLDocumentToOutStream@27(VAR OutStream@1001 : OutStream;XMLRootNode@1000 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlNode");
+    BEGIN
+      XMLRootNode.OwnerDocument.Save(OutStream);
+    END;
+
+    [External]
+    PROCEDURE GetRelativePath@37(NodePath@1000 : Text;BasePath@1001 : Text) result : Text;
+    VAR
+      RegEx@1004 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.RegularExpressions.Regex";
+      BaseParts@1003 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Array";
+      NodeParts@1005 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Array";
+      commonCount@1006 : Integer;
+      part@1007 : Integer;
+      Done@1008 : Boolean;
+    BEGIN
+      IF NodePath = '' THEN
+        ERROR(NodePathErr);
+
+      IF BasePath = '' THEN
+        ERROR(BasePathErr);
+
+      IF LOWERCASE(NodePath) = LOWERCASE(BasePath) THEN
+        EXIT('.');
+
+      NodeParts := RegEx.Split(NodePath,SeparatorTxt);
+      BaseParts := RegEx.Split(BasePath,SeparatorTxt);
+
+      // Cut off the common path parts
+      WHILE (commonCount < NodeParts.Length) AND (commonCount < BaseParts.Length) AND NOT Done DO BEGIN
+        Done := LOWERCASE(NodeParts.GetValue(commonCount)) <> LOWERCASE(BaseParts.GetValue(commonCount));
+        IF NOT Done THEN
+          commonCount += 1
+      END;
+
+      // Add .. for the way up from Base
+      FOR part := commonCount TO BaseParts.Length - 1 DO
+        result += SeparatorTxt + DotDotTxt;
+
+      // Append the remaining part of the path
+      FOR part := commonCount TO NodeParts.Length - 1 DO
+        result += SeparatorTxt + FORMAT(NodeParts.GetValue(part));
+
+      // Cut off leading separator
+      result := COPYSTR(result,2);
+    END;
+
+    PROCEDURE ReplaceXMLInvalidCharacters@43(InputText@1001 : Text;ReplaceChar@1002 : Char) : Text;
+    VAR
+      Result@1000 : Text;
+      Index@1003 : Integer;
+      Count@1004 : Integer;
+    BEGIN
+      IF InputText = '' THEN
+        EXIT('');
+
+      Result := InputText;
+      Count := STRLEN(InputText);
+
+      IF NOT IsValidXMLNameStartCharacter(InputText[1]) THEN
+        Result[1] := ReplaceChar;
+      FOR Index := 2 TO Count DO
+        IF NOT IsValidXMLNameCharacter(InputText[Index]) THEN
+          Result[Index] := ReplaceChar;
+
+      EXIT(Result);
+    END;
+
+    [TryFunction]
+    [External]
+    PROCEDURE TryTransformXMLToOutStream@45(VAR XmlInStream@1002 : InStream;VAR XslInStream@1001 : InStream;VAR XmlOutStream@1000 : OutStream);
+    VAR
+      XslCompiledTransform@1010 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.Xsl.XslCompiledTransform";
+      XslReader@1009 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlReader";
+      XmlWriter@1008 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlWriter";
+      XmlReader@1005 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlReader";
+      XmlIn@1003 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlDocument";
+    BEGIN
+      XmlIn := XmlIn.XmlDocument;
+      XmlIn.PreserveWhitespace(FALSE);
+
+      CreateXMLReaderFromInStream(XmlInStream,XmlReader);
+      XmlIn.Load(XmlReader);
+
+      CreateXMLReaderFromInStream(XslInStream,XslReader);
+      XslCompiledTransform := XslCompiledTransform.XslCompiledTransform;
+      XslCompiledTransform.Load(XslReader);
+
+      XmlWriter := XmlWriter.Create(XmlOutStream);
+      XslCompiledTransform.Transform(XmlIn.CreateNavigator,XmlWriter);
+      XmlWriter.Flush;
+
+      XmlReader.Close;
+      XslReader.Close;
+      XmlWriter.Close;
+    END;
+
+    [External]
+    PROCEDURE TransformXMLText@48(XmlInText@1002 : Text;XslInText@1001 : Text) : Text;
+    VAR
+      TempBlobXmlIn@1012 : TEMPORARY Record 99008535;
+      TempBlobXsl@1014 : TEMPORARY Record 99008535;
+      TempBlobXmlOut@1013 : TEMPORARY Record 99008535;
+      XmlInStream@1018 : InStream;
+      XslInStream@1017 : InStream;
+      XmlOutStream@1011 : OutStream;
+    BEGIN
+      TempBlobXmlIn.WriteAsText(XmlInText,TEXTENCODING::UTF8);
+      TempBlobXmlIn.Blob.CREATEINSTREAM(XmlInStream);
+
+      TempBlobXsl.WriteAsText(XslInText,TEXTENCODING::UTF8);
+      TempBlobXsl.Blob.CREATEINSTREAM(XslInStream);
+
+      TempBlobXmlOut.Blob.CREATEOUTSTREAM(XmlOutStream);
+      IF NOT TryTransformXMLToOutStream(XmlInStream,XslInStream,XmlOutStream) THEN
+        ERROR(XMLTransformErr);
+      EXIT(TempBlobXmlOut.GetXMLAsText);
+    END;
+
+    LOCAL PROCEDURE CreateXMLReaderFromInStream@44(VAR XmlInStream@1000 : InStream;VAR XmlReader@1002 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlReader");
+    VAR
+      XmlReaderSettings@1001 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlReaderSettings";
+      DtdProcessing@1003 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.DtdProcessing";
+    BEGIN
+      XmlReaderSettings := XmlReaderSettings.XmlReaderSettings;
+      XmlReaderSettings.DtdProcessing := DtdProcessing.Ignore;
+      XmlReader := XmlReader.Create(XmlInStream,XmlReaderSettings);
+    END;
+
+    [TryFunction]
+    [External]
+    PROCEDURE TryFormatXML@40(XMLText@1000 : Text;VAR FormattedXMLText@1003 : Text);
+    VAR
+      XDocument@1002 : DotNet "'System.Xml.Linq, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.Linq.XDocument";
+      SystemEnvironment@1001 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Environment";
+    BEGIN
+      XDocument := XDocument.Parse(XMLText);
+      FormattedXMLText :=
+        XDocument.Declaration.ToString + SystemEnvironment.NewLine + XDocument.ToString;
+    END;
+
+    [External]
+    PROCEDURE RemoveNamespaces@46(XMLText@1000 : Text) : Text;
+    BEGIN
+      EXIT(TransformXMLText(XMLText,GetRemoveNamespacesXSLTText));
+    END;
+
+    LOCAL PROCEDURE GetRemoveNamespacesXSLTText@42() : Text;
+    BEGIN
+      EXIT(
+        '<?xml version="1.0" encoding="UTF-8"?>' +
+        '<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">' +
+        '<xsl:output method="xml" encoding="UTF-8" />' +
+        '<xsl:template match="/">' +
+        '<xsl:copy>' +
+        '<xsl:apply-templates />' +
+        '</xsl:copy>' +
+        '</xsl:template>' +
+        '<xsl:template match="*">' +
+        '<xsl:element name="{local-name()}">' +
+        '<xsl:apply-templates select="@* | node()" />' +
+        '</xsl:element>' +
+        '</xsl:template>' +
+        '<xsl:template match="@*">' +
+        '<xsl:attribute name="{local-name()}"><xsl:value-of select="."/></xsl:attribute>' +
+        '</xsl:template>' +
+        '<xsl:template match="text() | processing-instruction() | comment()">' +
+        '<xsl:copy />' +
+        '</xsl:template>' +
+        '</xsl:stylesheet>');
+    END;
+
+    BEGIN
+    END.
+  }
+}
+

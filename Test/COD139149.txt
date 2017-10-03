@@ -1,0 +1,517 @@
+OBJECT Codeunit 139149 Test XML Transformation
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=Test,W1,All;
+  }
+  PROPERTIES
+  {
+    Subtype=Test;
+    TestPermissions=Disabled;
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      Assert@1004 : Codeunit 130000;
+      FunctionCallFailedErr@1000 : TextConst 'ENU=Function call failed.';
+      FunctionCallNotFailedErr@1002 : TextConst 'ENU=Function call not failed.';
+      XMLTransformErr@1001 : TextConst 'ENU=The XML cannot be transformed.';
+
+    [Test]
+    PROCEDURE TestXMLTransformationStream@8();
+    VAR
+      TempBlobXML@1005 : TEMPORARY Record 99008535;
+      TempBlobXSLT@1006 : TEMPORARY Record 99008535;
+      XMLDOMMgt@1003 : Codeunit 6224;
+      XmlDocument@1004 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlDocument";
+      ExpectedXmlDocument@1007 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlDocument";
+      XMLInStream@1002 : InStream;
+      XSLTInStream@1001 : InStream;
+      XMLOutStream@1000 : OutStream;
+    BEGIN
+      // [SCENARIO 227334] XML file can be transformed to another XML using XSLT stylesheet
+
+      // [GIVEN] Incoming XML document InStream
+      TempBlobXML.WriteAsText(CreateIncomingPersonsXMLText,TEXTENCODING::UTF8);
+      TempBlobXML.Blob.CREATEINSTREAM(XMLInStream);
+
+      // [GIVEN] XSLT stylesheet InStream
+      TempBlobXSLT.WriteAsText(CreateTransformationSchemaPersonsText,TEXTENCODING::UTF8);
+      TempBlobXSLT.Blob.CREATEINSTREAM(XSLTInStream);
+
+      // [WHEN] Function TransformXML is being run
+      CreateOutStream(XMLOutStream);
+      Assert.IsTrue(XMLDOMMgt.TryTransformXMLToOutStream(XMLInStream,XSLTInStream,XMLOutStream),FunctionCallFailedErr);
+
+      // [THEN] Resulting XML has expected structure and content
+      XMLDOMMgt.LoadXMLDocumentFromOutStream(XMLOutStream,XmlDocument);
+      CreateExpectedXMLDoc(ExpectedXmlDocument);
+      VerifyTransformedXMLContent(XmlDocument,ExpectedXmlDocument);
+    END;
+
+    [Test]
+    PROCEDURE TestBrokenXMLTransformationStream@7();
+    VAR
+      TempBlobXML@1005 : TEMPORARY Record 99008535;
+      TempBlobXSLT@1006 : TEMPORARY Record 99008535;
+      XMLDOMMgt@1003 : Codeunit 6224;
+      XMLInStream@1002 : InStream;
+      XSLTInStream@1001 : InStream;
+      XMLOutStream@1000 : OutStream;
+    BEGIN
+      // [SCENARIO 227334] Broken XML InStream transformation leads to error
+
+      // [GIVEN] Broken incoming XML document InStream
+      TempBlobXML.WriteAsText(CreateBrokenXMLText,TEXTENCODING::UTF8);
+      TempBlobXML.Blob.CREATEINSTREAM(XMLInStream);
+
+      // [GIVEN] XSLT stylesheet InStream
+      TempBlobXSLT.WriteAsText(CreateTransformationSchemaPersonsText,TEXTENCODING::UTF8);
+      TempBlobXSLT.Blob.CREATEINSTREAM(XSLTInStream);
+
+      // [WHEN] Function TransformXML is being run
+      CreateOutStream(XMLOutStream);
+      Assert.IsFalse(XMLDOMMgt.TryTransformXMLToOutStream(XMLInStream,XSLTInStream,XMLOutStream),FunctionCallNotFailedErr);
+
+      // [THEN] Function failed with error
+      Assert.ExpectedError('System.Xml.XmlDocument.Load failed');
+    END;
+
+    [Test]
+    PROCEDURE TestBrokenXSLTransformationStream@20();
+    VAR
+      TempBlobXML@1005 : TEMPORARY Record 99008535;
+      TempBlobXSLT@1006 : TEMPORARY Record 99008535;
+      XMLDOMMgt@1003 : Codeunit 6224;
+      XMLInStream@1002 : InStream;
+      XSLTInStream@1001 : InStream;
+      XMLOutStream@1000 : OutStream;
+    BEGIN
+      // [SCENARIO 227334] Broken XSL InStream transformation leads to error
+
+      // [GIVEN] Incoming XML document InStream
+      TempBlobXML.WriteAsText(CreateIncomingPersonsXMLText,TEXTENCODING::UTF8);
+      TempBlobXML.Blob.CREATEINSTREAM(XMLInStream);
+
+      // [GIVEN] Broken XSLT stylesheet InStream
+      TempBlobXSLT.WriteAsText(CreateBrokenXMLText,TEXTENCODING::UTF8);
+      TempBlobXSLT.Blob.CREATEINSTREAM(XSLTInStream);
+
+      // [WHEN] Function TransformXML is being run
+      CreateOutStream(XMLOutStream);
+      Assert.IsFalse(XMLDOMMgt.TryTransformXMLToOutStream(XMLInStream,XSLTInStream,XMLOutStream),FunctionCallNotFailedErr);
+
+      // [THEN] Function failed with error
+      Assert.ExpectedError('System.Xml.Xsl.XslCompiledTransform.Load failed');
+    END;
+
+    [Test]
+    PROCEDURE TestHTMLTransformationStream@1();
+    VAR
+      TempBlobXML@1005 : TEMPORARY Record 99008535;
+      TempBlobXSLT@1006 : TEMPORARY Record 99008535;
+      XMLDOMMgt@1003 : Codeunit 6224;
+      XmlDocument@1004 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlDocument";
+      ExpectedXmlDocument@1007 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlDocument";
+      XMLInStream@1002 : InStream;
+      XSLTInStream@1001 : InStream;
+      XMLOutStream@1000 : OutStream;
+    BEGIN
+      // [SCENARIO 227334] XML file can be transformed to HTML using XSLT stylesheet
+
+      // [GIVEN] Incoming XML document InStream
+      CreateIncomingXMLBlobCDCatalog(TempBlobXML);
+      TempBlobXML.Blob.CREATEINSTREAM(XMLInStream);
+
+      // [GIVEN] XSLT stylesheet InStream
+      CreateTransformationSchemaBlobCDCatalog(TempBlobXSLT);
+      TempBlobXSLT.Blob.CREATEINSTREAM(XSLTInStream);
+
+      // [WHEN] Function TransformXML is being run
+      CreateOutStream(XMLOutStream);
+      Assert.IsTrue(XMLDOMMgt.TryTransformXMLToOutStream(XMLInStream,XSLTInStream,XMLOutStream),FunctionCallFailedErr);
+
+      // [THEN] Resulting HTML has expected structure and content
+      XMLDOMMgt.LoadXMLDocumentFromOutStream(XMLOutStream,XmlDocument);
+      CreateExpectedHTMLDoc(ExpectedXmlDocument);
+      VerifyTransformedXMLContent(XmlDocument,ExpectedXmlDocument);
+    END;
+
+    [Test]
+    PROCEDURE TestXMLTransformationText@12();
+    VAR
+      XMLDOMMgt@1003 : Codeunit 6224;
+      XmlDocument@1004 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlDocument";
+      ExpectedXmlDocument@1007 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlDocument";
+      XMLText@1002 : Text;
+      TransformationSchema@1001 : Text;
+      TransformedXMLText@1000 : Text;
+    BEGIN
+      // [SCENARIO 227334] XML file can be transformed to another XML using XSLT stylesheet
+
+      // [GIVEN] Incoming XML document text
+      XMLText := CreateIncomingPersonsXMLText;
+
+      // [GIVEN] XSLT stylesheet text
+      TransformationSchema := CreateTransformationSchemaPersonsText;
+
+      // [WHEN] Function TransformXMLText is being run
+      TransformedXMLText := XMLDOMMgt.TransformXMLText(XMLText,TransformationSchema);
+
+      // [THEN] Resulting XML has expected structure and content
+      XMLDOMMgt.LoadXMLDocumentFromText(TransformedXMLText,XmlDocument);
+      CreateExpectedXMLDoc(ExpectedXmlDocument);
+      VerifyTransformedXMLContent(XmlDocument,ExpectedXmlDocument);
+    END;
+
+    [Test]
+    PROCEDURE TestBrokenXMLTransformationText@27();
+    VAR
+      XMLDOMMgt@1003 : Codeunit 6224;
+      XMLText@1002 : Text;
+      TransformationSchema@1001 : Text;
+    BEGIN
+      // [SCENARIO 227334] Broken XML text transformation leads to error
+
+      // [GIVEN] Broken XML document text
+      XMLText := CreateBrokenXMLText;
+
+      // [GIVEN] XSLT stylesheet text
+      TransformationSchema := CreateTransformationSchemaPersonsText;
+
+      // [WHEN] Function TransformXMLText is being run
+      ASSERTERROR XMLDOMMgt.TransformXMLText(XMLText,TransformationSchema);
+
+      // [THEN] Function failed with error
+      Assert.ExpectedError(XMLTransformErr);
+    END;
+
+    [Test]
+    PROCEDURE TestBrokenXSLTransformationText@30();
+    VAR
+      XMLDOMMgt@1003 : Codeunit 6224;
+      XMLText@1002 : Text;
+      TransformationSchema@1001 : Text;
+    BEGIN
+      // [SCENARIO 227334] Broken XSL text transformation leads to error
+
+      // [GIVEN] Incoming XML document text
+      XMLText := CreateIncomingPersonsXMLText;
+
+      // [GIVEN] Broken XSLT stylesheet text
+      TransformationSchema := CreateBrokenXMLText;
+
+      // [WHEN] Function TransformXMLText is being run
+      ASSERTERROR XMLDOMMgt.TransformXMLText(XMLText,TransformationSchema);
+
+      // [THEN] Function failed with error
+      Assert.ExpectedError(XMLTransformErr);
+    END;
+
+    [Test]
+    PROCEDURE FormatXML@5();
+    VAR
+      XMLDOMMgt@1001 : Codeunit 6224;
+      XMLText@1000 : Text;
+      FormattedXMLText@1002 : Text;
+    BEGIN
+      // [SCENARIO 229439] "On-line-string" XML can be formatted with new lines and identation with function TryFormatXML
+
+      // [GIVEN] "On-line-string" XML
+      XMLText := CreateOneLineXMLText;
+
+      // [WHEN] XMLDOMMgt.TryFormatXML is being run
+      Assert.IsTrue(XMLDOMMgt.TryFormatXML(XMLText,FormattedXMLText),FunctionCallFailedErr);
+
+      // [THEN] XML text contains new lines and identation
+      VerifyXMLText(FormattedXMLText,CreateExpectedFormattedXMLText);
+    END;
+
+    [Test]
+    PROCEDURE FormatBrokenXML@31();
+    VAR
+      XMLDOMMgt@1001 : Codeunit 6224;
+      XMLText@1000 : Text;
+      FormattedXMLText@1002 : Text;
+    BEGIN
+      // [SCENARIO 229439] Try to format broken XML leads to error
+
+      // [GIVEN] Broken XML
+      XMLText := CreateBrokenXMLText;
+
+      // [WHEN] XMLDOMMgt.TryFormatXML is being run
+      Assert.IsFalse(XMLDOMMgt.TryFormatXML(XMLText,FormattedXMLText),FunctionCallNotFailedErr);
+
+      // [THEN] Function failed with error
+      Assert.ExpectedError('System.Xml.Linq.XDocument.Parse failed');
+    END;
+
+    [Test]
+    PROCEDURE RemoveXMLNameSpaces@11();
+    VAR
+      XMLDOMMgt@1002 : Codeunit 6224;
+      XMLText@1001 : Text;
+      SimplifiedXMLText@1000 : Text;
+    BEGIN
+      // [SCENARIO 229439] XML containing namespaces can be transformed to simplified form - without namespaces
+
+      // [GIVEN] XML text with namespaces
+      XMLText := CreateXMLWithNamespacesText;
+
+      // [WHEN] Function XMLDOMMgt.RemoveNameSpaces is being run
+      SimplifiedXMLText := XMLDOMMgt.RemoveNamespaces(XMLText);
+
+      // [THEN] Resulted XML does not contain namespaces
+      VerifyXMLText(SimplifiedXMLText,CreateExpectedSimplifiedXMLText);
+    END;
+
+    [Test]
+    PROCEDURE RemoveNameSpacesBrokenXML@41();
+    VAR
+      XMLDOMMgt@1002 : Codeunit 6224;
+      XMLText@1001 : Text;
+    BEGIN
+      // [SCENARIO 229439] Removing namespaces from broken XML leads to error
+
+      // [GIVEN] Broken XML
+      XMLText := CreateBrokenXMLText;
+
+      // [WHEN] Function XMLDOMMgt.RemoveNameSpaces is being run
+      ASSERTERROR XMLDOMMgt.RemoveNamespaces(XMLText);
+
+      // [THEN] Function failed with error
+      Assert.ExpectedError(XMLTransformErr);
+    END;
+
+    LOCAL PROCEDURE CreateBrokenXMLText@32() : Text;
+    BEGIN
+      EXIT(FORMAT(CREATEGUID));
+    END;
+
+    LOCAL PROCEDURE CreateOutStream@14(VAR OutStr@1001 : OutStream);
+    VAR
+      TempBlob@1000 : TEMPORARY Record 99008535;
+    BEGIN
+      TempBlob.INIT;
+      TempBlob.Blob.CREATEOUTSTREAM(OutStr);
+    END;
+
+    LOCAL PROCEDURE CreateIncomingPersonsXMLText@19() : Text;
+    BEGIN
+      EXIT(
+        '<?xml version="1.0" encoding="UTF-8"?>' +
+        '<persons>' +
+        '<person username="MP123456">' +
+        '<name>Annette</name>' +
+        '<surname>Hill</surname>' +
+        '</person>' +
+        '<person username="PK123456">' +
+        '<name>Bart</name>' +
+        '<surname>Duncan</surname>' +
+        '</person>' +
+        '</persons>');
+    END;
+
+    LOCAL PROCEDURE CreateIncomingXMLBlobCDCatalog@2(VAR TempBlob@1001 : TEMPORARY Record 99008535);
+    VAR
+      OutStr@1000 : OutStream;
+    BEGIN
+      TempBlob.Blob.CREATEOUTSTREAM(OutStr);
+
+      OutStr.WRITETEXT('<?xml version="1.0"?>');
+      OutStr.WRITETEXT('<catalog>');
+      OutStr.WRITETEXT('<cd>');
+      OutStr.WRITETEXT('<title>Empire Burlesque</title>');
+      OutStr.WRITETEXT('<artist>Bob Dylan</artist>');
+      OutStr.WRITETEXT('<country>USA</country>');
+      OutStr.WRITETEXT('<company>Columbia</company>');
+      OutStr.WRITETEXT('<price>10.90</price>');
+      OutStr.WRITETEXT('<year>1985</year>');
+      OutStr.WRITETEXT('</cd>');
+      OutStr.WRITETEXT('</catalog>');
+    END;
+
+    LOCAL PROCEDURE CreateExpectedXMLDoc@3(XmlDocument@1001 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlDocument");
+    VAR
+      XMLDOMMgt@1000 : Codeunit 6224;
+      XMLText@1004 : Text;
+    BEGIN
+      XMLText := CreateOneLineXMLText;
+      XMLDOMMgt.LoadXMLDocumentFromText(XMLText,XmlDocument);
+    END;
+
+    LOCAL PROCEDURE CreateExpectedHTMLDoc@15(XmlDocument@1001 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlDocument");
+    VAR
+      XMLDOMMgt@1000 : Codeunit 6224;
+      XMLText@1004 : Text;
+    BEGIN
+      XMLText :=
+        '<?xml version="1.0" encoding="utf-8"?>' +
+        '<html>' +
+        '<body>' +
+        '<h2>My CD Collection</h2>' +
+        '<table border="1">' +
+        '<tr bgcolor="#9acd32">' +
+        '<th>Title</th>' +
+        '<th>Artist</th>' +
+        '</tr>' +
+        '<tr>' +
+        '<td>Empire Burlesque</td>' +
+        '<td>Bob Dylan</td>' +
+        '</tr>' +
+        '</table>' +
+        '</body>' +
+        '</html>';
+
+      XMLDOMMgt.LoadXMLDocumentFromText(XMLText,XmlDocument);
+    END;
+
+    LOCAL PROCEDURE CreateExpectedFormattedXMLText@18() : Text;
+    VAR
+      Environment@1000 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Environment";
+    BEGIN
+      EXIT(
+        '<?xml version="1.0" encoding="utf-8"?>' + Environment.NewLine +
+        '<transform>' + Environment.NewLine +
+        '  <record>' + Environment.NewLine +
+        '    <username>MP123456</username>' + Environment.NewLine +
+        '    <fullname>Annette Hill</fullname>' + Environment.NewLine +
+        '  </record>' + Environment.NewLine +
+        '  <record>' + Environment.NewLine +
+        '    <username>PK123456</username>' + Environment.NewLine +
+        '    <fullname>Bart Duncan</fullname>' + Environment.NewLine +
+        '  </record>' + Environment.NewLine +
+        '</transform>');
+    END;
+
+    LOCAL PROCEDURE CreateExpectedSimplifiedXMLText@17() : Text;
+    BEGIN
+      EXIT(
+        '<?xml version="1.0" encoding="utf-8"?>' +
+        '<student>' +
+        '<id>3235329</id>' +
+        '<name>Jeff Smith</name>' +
+        '<language>C#</language>' +
+        '<rating>9.5</rating>' +
+        '</student>');
+    END;
+
+    LOCAL PROCEDURE CreateOneLineXMLText@10() : Text;
+    BEGIN
+      EXIT(
+        '<?xml version="1.0" encoding="utf-8"?>' +
+        '<transform>' +
+        '<record>' +
+        '<username>MP123456</username>' +
+        '<fullname>Annette Hill</fullname>' +
+        '</record>' +
+        '<record>' +
+        '<username>PK123456</username>' +
+        '<fullname>Bart Duncan</fullname>' +
+        '</record>' +
+        '</transform>');
+    END;
+
+    LOCAL PROCEDURE CreateXMLWithNamespacesText@16() : Text;
+    BEGIN
+      EXIT(
+        '<?xml version="1.0" encoding="utf-8"?>' +
+        '<d:student xmlns:d="http://www.develop.com/student" ' +
+        'xmlns:i="urn:schemas-develop-com:identifiers" ' +
+        'xmlns:p="urn:schemas-develop-com:programming-languages">' +
+        '<i:id>3235329</i:id>' +
+        '<name>Jeff Smith</name>' +
+        '<p:language>C#</p:language>' +
+        '<d:rating>9.5</d:rating>' +
+        '</d:student>');
+    END;
+
+    LOCAL PROCEDURE CreateTransformationSchemaPersonsText@21() : Text;
+    BEGIN
+      EXIT(
+        '<?xml version="1.0"?>' +
+        '<xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0">' +
+        '<xsl:output method="xml" indent="yes"/>' +
+        '<xsl:template match="persons">' +
+        '<transform>' +
+        '<xsl:apply-templates/>' +
+        '</transform>' +
+        '</xsl:template>' +
+        '<xsl:template match="person">' +
+        '<record>' +
+        '<xsl:apply-templates select="@*|*"/>' +
+        '</record>' +
+        '</xsl:template>' +
+        '<xsl:template match="@username">' +
+        '<username>' +
+        '<xsl:value-of select="."/>' +
+        '</username>' +
+        '</xsl:template>' +
+        '<xsl:template match="name">' +
+        '<fullname>' +
+        '<xsl:apply-templates/>' +
+        '<xsl:apply-templates select="following-sibling::surname" mode="fullname"/>' +
+        '</fullname>' +
+        '</xsl:template>' +
+        '<xsl:template match="surname"/>' +
+        '<xsl:template match="surname" mode="fullname">' +
+        '<xsl:text> </xsl:text>' +
+        '<xsl:apply-templates/>' +
+        '</xsl:template>' +
+        '</xsl:stylesheet>');
+    END;
+
+    LOCAL PROCEDURE CreateTransformationSchemaBlobCDCatalog@6(VAR TempBlob@1001 : TEMPORARY Record 99008535);
+    VAR
+      OutStr@1000 : OutStream;
+    BEGIN
+      TempBlob.Blob.CREATEOUTSTREAM(OutStr);
+
+      OutStr.WRITETEXT('<?xml version="1.0" encoding="UTF-8"?>');
+      OutStr.WRITETEXT('<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">');
+      OutStr.WRITETEXT('<xsl:output method="xml" indent="yes"/>');
+      OutStr.WRITETEXT('<xsl:template match="/">');
+      OutStr.WRITETEXT('<html>');
+      OutStr.WRITETEXT('<body>');
+      OutStr.WRITETEXT('<h2>My CD Collection</h2>');
+      OutStr.WRITETEXT('<table border="1">');
+      OutStr.WRITETEXT('<tr bgcolor="#9acd32">');
+      OutStr.WRITETEXT('<th>Title</th>');
+      OutStr.WRITETEXT('<th>Artist</th>');
+      OutStr.WRITETEXT('</tr>');
+      OutStr.WRITETEXT('<xsl:for-each select="catalog/cd">');
+      OutStr.WRITETEXT('<tr>');
+      OutStr.WRITETEXT('<td><xsl:value-of select="title"/></td>');
+      OutStr.WRITETEXT('<td><xsl:value-of select="artist"/></td>');
+      OutStr.WRITETEXT('</tr>');
+      OutStr.WRITETEXT('</xsl:for-each>');
+      OutStr.WRITETEXT('</table>');
+      OutStr.WRITETEXT('</body>');
+      OutStr.WRITETEXT('</html>');
+      OutStr.WRITETEXT('</xsl:template>');
+      OutStr.WRITETEXT('</xsl:stylesheet>');
+    END;
+
+    LOCAL PROCEDURE VerifyTransformedXMLContent@9(VAR XmlDocument@1000 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlDocument";VAR ExpectedXmlDocument@1008 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlDocument");
+    BEGIN
+      Assert.AreEqual(ExpectedXmlDocument.InnerXml,XmlDocument.InnerXml,'Invalid transformed XML');
+    END;
+
+    LOCAL PROCEDURE VerifyXMLText@13(ActualXMLText@1000 : Text;ExpectedXMLText@1001 : Text);
+    BEGIN
+      Assert.AreEqual(ExpectedXMLText,ActualXMLText,'Invalid XML Text');
+    END;
+
+    BEGIN
+    {
+      // [FEATURE] [UT] [XML Transformation]
+    }
+    END.
+  }
+}
+
