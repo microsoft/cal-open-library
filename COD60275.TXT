@@ -1,0 +1,193 @@
+OBJECT Codeunit 60275 Xml Transformation Mgt.
+{
+  OBJECT-PROPERTIES
+  {
+    Date=08-09-17;
+    Time=12:35:46;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+
+    PROCEDURE PrettyPrintXml@6150619(Xml@6150613 : Text) PrettyXml : Text;
+    VAR
+      StreamReader@6150618 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.IO.StreamReader";
+      XmlDoc@6150614 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlDocument";
+      TempBlob@6150615 : TEMPORARY Record 99008535;
+      InStream@6150617 : InStream;
+      OutStream@6150616 : OutStream;
+    BEGIN
+      XmlDoc := XmlDoc.XmlDocument;
+      XmlDoc.LoadXml(Xml);
+
+      TempBlob.Blob.CREATEOUTSTREAM(OutStream,TEXTENCODING::UTF8);
+      XmlDoc.Save(OutStream);
+
+      TempBlob.Blob.CREATEINSTREAM(InStream,TEXTENCODING::UTF8);
+      StreamReader := StreamReader.StreamReader(InStream);
+      PrettyXml := StreamReader.ReadToEnd;
+    END;
+
+    PROCEDURE RemoveNameSpaces@6150637(Xml@6150616 : Text) : Text;
+    VAR
+      Xsl@6014400 : Text;
+    BEGIN
+      Xsl :=
+        '<?xml version="1.0" encoding="UTF-8"?>' +
+        '<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">' +
+          '<xsl:output method="xml" encoding="UTF-8" />' +
+          '<xsl:template match="/">' +
+            '<xsl:copy>' +
+              '<xsl:apply-templates />' +
+            '</xsl:copy>' +
+          '</xsl:template>' +
+          '<xsl:template match="*">' +
+            '<xsl:element name="{local-name()}">' +
+                '<xsl:apply-templates select="@* | node()" />' +
+            '</xsl:element>' +
+          '</xsl:template>' +
+          '<xsl:template match="@*">' +
+            '<xsl:attribute name="{local-name()}"><xsl:value-of select="."/></xsl:attribute>' +
+          '</xsl:template>' +
+          '<xsl:template match="text() | processing-instruction() | comment()">' +
+            '<xsl:copy />' +
+          '</xsl:template>' +
+        '</xsl:stylesheet>';
+
+      EXIT(Transform(Xml,Xsl));
+    END;
+
+    PROCEDURE Transform@6014400(Xml@6014401 : Text;Xsl@6014402 : Text) : Text;
+    VAR
+      MemoryStream@6150614 : DotNet "'mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.IO.MemoryStream";
+      MemoryStream2@6150619 : DotNet "'mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.IO.MemoryStream";
+      XmlDoc@6014400 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlDocument";
+      XmlStyleSheet@6150615 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlDocument";
+      XslCompiledTransform@6150613 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.Xsl.XslCompiledTransform";
+      XmlReader@6150618 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlReader";
+      XmlWriter@6150617 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlWriter";
+    BEGIN
+      XmlStyleSheet := XmlStyleSheet.XmlDocument;
+      XmlStyleSheet.LoadXml(Xsl);
+      XslCompiledTransform := XslCompiledTransform.XslCompiledTransform;
+      XslCompiledTransform.Load(XmlStyleSheet);
+
+      XmlDoc := XmlDoc.XmlDocument;
+      XmlDoc.LoadXml(Xml);
+      MemoryStream := MemoryStream.MemoryStream;
+      XmlDoc.Save(MemoryStream);
+      MemoryStream.Position := 0;
+      XmlReader := XmlReader.Create(MemoryStream);
+
+      MemoryStream2 := MemoryStream2.MemoryStream;
+      XmlWriter := XmlWriter.Create(MemoryStream2);
+      XslCompiledTransform.Transform(XmlReader,XmlWriter);
+      MemoryStream2.Position := 0;
+
+      CLEAR(XmlDoc);
+      XmlDoc := XmlDoc.XmlDocument;
+      XmlDoc.Load(MemoryStream2);
+
+      EXIT(XmlDoc.InnerXml);
+    END;
+
+    PROCEDURE Json2Xml@6014408(Json@6014400 : Text;RootName@6014403 : Text;WriteArrayAttribute@6014404 : Boolean) Xml : Text;
+    VAR
+      JsonConvert@6014402 : DotNet "'Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed'.Newtonsoft.Json.JsonConvert";
+      XmlDoc@6014401 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlDocument";
+    BEGIN
+      XmlDoc := JsonConvert.DeserializeXmlNode(Json,RootName,WriteArrayAttribute);
+      EXIT(XmlDoc.OuterXml);
+    END;
+
+    PROCEDURE Xml2Json@6151402(Xml@6014405 : Text) JsonString : Text;
+    VAR
+      XmlDoc@6014404 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlDocument";
+      XmlDoc2@6014400 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlDocument";
+      XmlElement@6014402 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlElement";
+      JsonConvert@6151402 : DotNet "'Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed'.Newtonsoft.Json.JsonConvert";
+      JsonFormatting@6151401 : DotNet "'Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed'.Newtonsoft.Json.Formatting";
+      XmlNodeList@6014403 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlNodeList";
+      i@6014401 : Integer;
+    BEGIN
+      XmlDoc := XmlDoc.XmlDocument;
+      XmlDoc.LoadXml(Xml);
+
+      XmlDoc2 := XmlDoc.Clone;
+      XmlNodeList := XmlDoc2.DocumentElement.ChildNodes;
+      FOR i := 0 TO XmlNodeList.Count - 1 DO BEGIN
+        XmlElement := XmlNodeList.Item(i);
+        MarkContainersAsArray(XmlElement);
+      END;
+      JsonString := JsonConvert.SerializeXmlNode(XmlDoc2.DocumentElement,JsonFormatting.Indented,TRUE);
+
+      EXIT(JsonString);
+    END;
+
+    LOCAL PROCEDURE MarkContainersAsArray@6014404(VAR XmlElement@6014400 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlElement");
+    VAR
+      XmlAttribute@6014405 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlAttribute";
+      XmlElementNextChild@6014402 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlElement";
+      XmlElementChild@6014401 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlElement";
+      XmlNodeList@6014404 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlNodeList";
+      i@6014403 : Integer;
+    BEGIN
+      IF ISNULL(XmlElement) THEN
+        EXIT;
+      IF IsLeafNode(XmlElement) THEN
+        EXIT;
+
+      AddAttribute(XmlElement,'Array','http://james.newtonking.com/projects/json',XmlAttribute);
+      XmlAttribute.InnerText := 'true';
+
+      XmlNodeList := XmlElement.ChildNodes;
+      XmlElementChild := XmlElement.FirstChild;
+      REPEAT
+        XmlElementChild := XmlElementChild.NextSibling;
+
+        IF XmlElementChild.Name = '#text' THEN
+          XmlElement.RemoveChild(XmlElementChild)
+        ELSE
+          MarkContainersAsArray(XmlElementChild);
+
+        XmlElementChild := XmlElementNextChild;
+      UNTIL ISNULL(XmlElementChild);
+    END;
+
+    LOCAL PROCEDURE AddAttribute@6150623(VAR XmlElement@1001 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlElement";Name@1002 : Text;Namespace@6150613 : Text;VAR XmlAttribute@6014400 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlAttribute") @1000 : Boolean;
+    BEGIN
+      XmlAttribute := XmlElement.OwnerDocument.CreateAttribute(Name,Namespace);
+      IF ISNULL(XmlAttribute) THEN
+        EXIT(FALSE);
+
+      XmlElement.Attributes.SetNamedItem(XmlAttribute);
+    END;
+
+    LOCAL PROCEDURE IsLeafNode@6150616(XmlElement@6150613 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlElement") : Boolean;
+    VAR
+      XmlElementChild@6150614 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlNode";
+    BEGIN
+      IF NOT XmlElement.HasChildNodes THEN
+        EXIT(TRUE);
+
+      XmlElementChild := XmlElement.FirstChild;
+      REPEAT
+        IF XmlElementChild.Name <> '#text' THEN
+          EXIT(FALSE);
+        XmlElementChild := XmlElementChild.NextSibling;
+      UNTIL ISNULL(XmlElementChild);
+
+      EXIT(TRUE);
+    END;
+
+    BEGIN
+    END.
+  }
+}
+
