@@ -1,0 +1,133 @@
+OBJECT Codeunit 50000 Note Management
+{
+  OBJECT-PROPERTIES
+  {
+    Date=03.03.17;
+    Time=10:49:40;
+    Version List=Navision.Guru;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+
+    PROCEDURE GetRecordLinkNote@1(RecVariant@1010 : Variant;VAR Note@1011 : BigText);
+    VAR
+      DataTypeMgt@1000 : Codeunit 701;
+      RecRef@1001 : RecordRef;
+    BEGIN
+      IF DataTypeMgt.GetRecordRef(RecVariant,RecRef) THEN
+        GetNote(RecRef.RECORDID,Note);
+    END;
+
+    LOCAL PROCEDURE GetNote@2(RelatedRecordID@1000 : RecordID;VAR NoteInText@1001 : BigText);
+    VAR
+      RecordLink@1002 : Record 2000000068;
+      Encoding@1011 : DotNet "'mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.Encoding";
+      BinaryReader@1012 : DotNet "'mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.IO.BinaryReader";
+      InStr@1013 : InStream;
+    BEGIN
+      CLEAR(NoteInText);
+      WITH RecordLink DO BEGIN
+        RESET;
+        SETCURRENTKEY("Record ID");
+        SETRANGE("Record ID",RelatedRecordID);
+        SETRANGE(Type,RecordLink.Type::Note);
+        IF FINDSET THEN BEGIN
+          Encoding := Encoding.UTF8;
+          REPEAT
+            CALCFIELDS(Note);
+            IF Note.HASVALUE THEN BEGIN
+              Note.CREATEINSTREAM(InStr);
+              BinaryReader := BinaryReader.BinaryReader(InStr,Encoding);
+              NoteInText.ADDTEXT(BinaryReader.ReadString);
+            END;
+          UNTIL NEXT = 0;
+        END;
+      END;
+    END;
+
+    PROCEDURE AddNote@3(LinkID@1001 : Integer;VAR NoteInText@1000 : BigText);
+    VAR
+      RecordLink@1002 : Record 2000000068;
+      Encoding@1003 : DotNet "'mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.Encoding";
+      BinaryWriter@1012 : DotNet "'mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.IO.BinaryWriter";
+      CommentLine@1015 : Text[1024];
+      CommentPosition@1016 : Integer;
+      CommentLength@1017 : Integer;
+      OutStr@1014 : OutStream;
+    BEGIN
+      WITH RecordLink DO BEGIN
+        GET(LinkID);
+        Note.CREATEOUTSTREAM(OutStr);
+        Type := Type::Note;
+        Encoding := Encoding.UTF8;
+        BinaryWriter := BinaryWriter.BinaryWriter(OutStr,Encoding);
+        CommentLength := NoteInText.LENGTH;
+        CommentPosition := 1;
+        WHILE CommentPosition < CommentLength DO BEGIN
+          CommentPosition := CommentPosition  + NoteInText.GETSUBTEXT(CommentLine,CommentPosition,MAXSTRLEN(CommentLine));
+          BinaryWriter.Write(CommentLine);
+        END;
+        MODIFY;
+      END;
+    END;
+
+    BEGIN
+    END.
+  }
+}
+
+OBJECT Codeunit 50001 Note Management Test
+{
+  OBJECT-PROPERTIES
+  {
+    Date=28.09.17;
+    Time=16:47:38;
+    Version List=Navision.Guru,Test;
+  }
+  PROPERTIES
+  {
+    Subtype=Test;
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+
+    [Test]
+    PROCEDURE RecordLinkNoteTest@1();
+    VAR
+      Customer@1002 : Record 18;
+      NoteManagement@1000 : Codeunit 50000;
+      Note@1003 : BigText;
+      ResultNote@1005 : Text;
+      LinkID@1001 : Integer;
+      NoteText@1004 : TextConst 'ENU=the quick brown fox jumped over the lazy dog';
+      NoteTestErr@1006 : TextConst 'ENU=Note test failed.\Expected: %1\Got: %2';
+    BEGIN
+      WITH Customer DO BEGIN
+        DELETEALL;
+        "No." := 'NOTETEST';
+        INSERT;
+        LinkID := ADDLINK('Customer Note');
+        Note.ADDTEXT(NoteText);
+        NoteManagement.AddNote(LinkID,Note);
+
+        NoteManagement.GetRecordLinkNote(Customer,Note);
+        Note.GETSUBTEXT(ResultNote,1);
+        IF ResultNote <> NoteText THEN
+          ERROR(NoteTestErr,NoteText,ResultNote);
+      END;
+    END;
+
+    BEGIN
+    END.
+  }
+}
+
