@@ -637,6 +637,21 @@ OBJECT Codeunit 10 Type Helper
     END;
 
     [External]
+    PROCEDURE ReadRecordLinkNote@45(RecordLink@1000 : Record 2000000068) Note : Text;
+    VAR
+      BinReader@1003 : DotNet "'mscorlib'.System.IO.BinaryReader";
+      IStr@1002 : InStream;
+    BEGIN
+      // Read the Note BLOB
+      RecordLink.Note.CREATEINSTREAM(IStr,TEXTENCODING::UTF8);
+      BinReader := BinReader.BinaryReader(IStr);
+      // Peek if stream is empty
+      IF BinReader.BaseStream.Position = BinReader.BaseStream.Length THEN
+        EXIT;
+      Note := BinReader.ReadString;
+    END;
+
+    [External]
     PROCEDURE GetMaxNumberOfParametersInSQLQuery@31() : Integer;
     BEGIN
       EXIT(2100);
