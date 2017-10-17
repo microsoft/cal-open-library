@@ -36,13 +36,11 @@ OBJECT Codeunit 5459 JSON Management
       InitializeObjectFromString(JSONString);
     END;
 
-    [External]
     PROCEDURE InitializeObjectFromJObject@12(NewJsonObject@1000 : DotNet "'Newtonsoft.Json'.Newtonsoft.Json.Linq.JObject");
     BEGIN
       JsonObject := NewJsonObject;
     END;
 
-    [External]
     PROCEDURE InitializeCollectionFromJArray@15(NewJsonArray@1000 : DotNet "'Newtonsoft.Json, Version=9.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed'.Newtonsoft.Json.Linq.JArray");
     BEGIN
       JsonArray := NewJsonArray;
@@ -72,19 +70,16 @@ OBJECT Codeunit 5459 JSON Management
         InitializeEmptyObject;
     END;
 
-    [External]
     PROCEDURE GetJSONObject@1(VAR JObject@1000 : DotNet "'Newtonsoft.Json'.Newtonsoft.Json.Linq.JObject");
     BEGIN
       JObject := JsonObject;
     END;
 
-    [External]
     PROCEDURE GetJsonArray@20(VAR JArray@1000 : DotNet "'Newtonsoft.Json, Version=9.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed'.Newtonsoft.Json.Linq.JArray");
     BEGIN
       JArray := JsonArray;
     END;
 
-    [External]
     PROCEDURE GetJObjectFromCollectionByIndex@13(VAR JObject@1001 : DotNet "'Newtonsoft.Json'.Newtonsoft.Json.Linq.JObject";Index@1002 : Integer) : Boolean;
     BEGIN
       IF (GetCollectionCount = 0) OR (GetCollectionCount <= Index) THEN
@@ -94,7 +89,6 @@ OBJECT Codeunit 5459 JSON Management
       EXIT(NOT ISNULL(JObject))
     END;
 
-    [External]
     PROCEDURE GetJObjectFromCollectionByPropertyValue@2(VAR JObject@1001 : DotNet "'Newtonsoft.Json'.Newtonsoft.Json.Linq.JObject";propertyName@1002 : Text;value@1003 : Text) : Boolean;
     VAR
       IEnumerable@1000 : DotNet "'mscorlib'.System.Collections.Generic.IEnumerable`1";
@@ -110,7 +104,6 @@ OBJECT Codeunit 5459 JSON Management
       END;
     END;
 
-    [External]
     PROCEDURE GetPropertyValueFromJObjectByName@14(JObject@1002 : DotNet "'Newtonsoft.Json'.Newtonsoft.Json.Linq.JObject";propertyName@1000 : Text;VAR value@1003 : Variant) : Boolean;
     VAR
       JProperty@1001 : DotNet "'Newtonsoft.Json'.Newtonsoft.Json.Linq.JProperty";
@@ -124,7 +117,6 @@ OBJECT Codeunit 5459 JSON Management
       END;
     END;
 
-    [External]
     PROCEDURE GetPropertyValueFromJObjectByPathSetToFieldRef@28(JObject@1002 : DotNet "'Newtonsoft.Json'.Newtonsoft.Json.Linq.JObject";propertyPath@1001 : Text;VAR FieldRef@1000 : FieldRef) : Boolean;
     VAR
       OutlookSynchTypeConv@1011 : Codeunit 5302;
@@ -187,7 +179,6 @@ OBJECT Codeunit 5459 JSON Management
       EXIT(Success);
     END;
 
-    [External]
     PROCEDURE GetPropertyValueFromJObjectByPath@6(JObject@1002 : DotNet "'Newtonsoft.Json'.Newtonsoft.Json.Linq.JObject";fullyQualifiedPropertyName@1000 : Text;VAR value@1003 : Variant) : Boolean;
     VAR
       containerJObject@1004 : DotNet "'Newtonsoft.Json'.Newtonsoft.Json.Linq.JObject";
@@ -201,7 +192,6 @@ OBJECT Codeunit 5459 JSON Management
       EXIT(GetPropertyValueFromJObjectByName(containerJObject,propertyName,value));
     END;
 
-    [External]
     PROCEDURE GetStringPropertyValueFromJObjectByName@16(JObject@1002 : DotNet "'Newtonsoft.Json'.Newtonsoft.Json.Linq.JObject";propertyName@1000 : Text;VAR value@1003 : Text) : Boolean;
     VAR
       VariantValue@1001 : Variant;
@@ -214,7 +204,6 @@ OBJECT Codeunit 5459 JSON Management
       EXIT(FALSE);
     END;
 
-    [External]
     PROCEDURE GetStringPropertyValueFromJObjectByPath@10(JObject@1002 : DotNet "'Newtonsoft.Json'.Newtonsoft.Json.Linq.JObject";fullyQualifiedPropertyName@1000 : Text;VAR value@1003 : Text) : Boolean;
     VAR
       VariantValue@1001 : Variant;
@@ -227,7 +216,6 @@ OBJECT Codeunit 5459 JSON Management
       EXIT(FALSE);
     END;
 
-    [External]
     PROCEDURE GetEnumPropertyValueFromJObjectByName@32(JObject@1002 : DotNet "'Newtonsoft.Json'.Newtonsoft.Json.Linq.JObject";propertyName@1001 : Text;VAR value@1000 : Option);
     VAR
       StringValue@1004 : Text;
@@ -236,7 +224,6 @@ OBJECT Codeunit 5459 JSON Management
       EVALUATE(value,StringValue,0);
     END;
 
-    [External]
     PROCEDURE GetBoolPropertyValueFromJObjectByName@93(JObject@1002 : DotNet "'Newtonsoft.Json'.Newtonsoft.Json.Linq.JObject";propertyName@1001 : Text;VAR value@1000 : Boolean) : Boolean;
     VAR
       StringValue@1004 : Text;
@@ -248,7 +235,6 @@ OBJECT Codeunit 5459 JSON Management
       EXIT(FALSE);
     END;
 
-    [External]
     PROCEDURE GetArrayPropertyValueFromJObjectByName@18(JObject@1002 : DotNet "'Newtonsoft.Json'.Newtonsoft.Json.Linq.JObject";propertyName@1001 : Text;VAR JArray@1000 : DotNet "'Newtonsoft.Json'.Newtonsoft.Json.Linq.JArray") : Boolean;
     VAR
       JProperty@1004 : DotNet "'Newtonsoft.Json'.Newtonsoft.Json.Linq.JProperty";
@@ -263,7 +249,6 @@ OBJECT Codeunit 5459 JSON Management
       EXIT(FALSE);
     END;
 
-    [External]
     PROCEDURE GetObjectPropertyValueFromJObjectByName@30(JObject@1002 : DotNet "'Newtonsoft.Json'.Newtonsoft.Json.Linq.JObject";propertyName@1001 : Text;VAR JSubObject@1000 : DotNet "'Newtonsoft.Json'.Newtonsoft.Json.Linq.JObject") : Boolean;
     VAR
       JProperty@1004 : DotNet "'Newtonsoft.Json'.Newtonsoft.Json.Linq.JProperty";
@@ -278,7 +263,6 @@ OBJECT Codeunit 5459 JSON Management
       EXIT(FALSE);
     END;
 
-    [External]
     PROCEDURE GetDecimalPropertyValueFromJObjectByName@23(JObject@1002 : DotNet "'Newtonsoft.Json'.Newtonsoft.Json.Linq.JObject";propertyName@1001 : Text;VAR value@1000 : Decimal) : Boolean;
     VAR
       StringValue@1003 : Text;
@@ -290,7 +274,6 @@ OBJECT Codeunit 5459 JSON Management
       EXIT(FALSE);
     END;
 
-    [External]
     PROCEDURE GetGuidPropertyValueFromJObjectByName@27(JObject@1002 : DotNet "'Newtonsoft.Json'.Newtonsoft.Json.Linq.JObject";propertyName@1001 : Text;VAR value@1000 : GUID) : Boolean;
     VAR
       StringValue@1003 : Text;
@@ -311,7 +294,6 @@ OBJECT Codeunit 5459 JSON Management
       value := JValue.Value;
     END;
 
-    [External]
     PROCEDURE GetStringValueFromJObject@21(JObject@1001 : DotNet "'Newtonsoft.Json'.Newtonsoft.Json.Linq.JObject";VAR value@1000 : Text);
     VAR
       VariantValue@1002 : Variant;
@@ -321,7 +303,6 @@ OBJECT Codeunit 5459 JSON Management
       value := FORMAT(VariantValue);
     END;
 
-    [External]
     PROCEDURE AddJArrayToJObject@51(VAR JObject@1002 : DotNet "'Newtonsoft.Json'.Newtonsoft.Json.Linq.JObject";propertyName@1001 : Text;value@1000 : Variant);
     VAR
       JArray2@1003 : DotNet "'Newtonsoft.Json'.Newtonsoft.Json.Linq.JArray";
@@ -331,7 +312,6 @@ OBJECT Codeunit 5459 JSON Management
       JObject.Add(JProperty.JProperty(propertyName,JArray2));
     END;
 
-    [External]
     PROCEDURE AddJObjectToJObject@35(VAR JObject@1002 : DotNet "'Newtonsoft.Json'.Newtonsoft.Json.Linq.JObject";propertyName@1000 : Text;value@1003 : Variant);
     VAR
       JObject2@1004 : DotNet "'Newtonsoft.Json'.Newtonsoft.Json.Linq.JObject";
@@ -343,7 +323,6 @@ OBJECT Codeunit 5459 JSON Management
       JObject.Add(propertyName,JToken.Parse(ValueText));
     END;
 
-    [External]
     PROCEDURE AddJObjectToJArray@26(VAR JArray@1000 : DotNet "'Newtonsoft.Json, Version=9.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed'.Newtonsoft.Json.Linq.JArray";value@1001 : Variant);
     VAR
       JObject@1002 : DotNet "'Newtonsoft.Json, Version=9.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed'.Newtonsoft.Json.Linq.JObject";
@@ -352,7 +331,6 @@ OBJECT Codeunit 5459 JSON Management
       JArray.Add(JObject.DeepClone);
     END;
 
-    [External]
     PROCEDURE AddJPropertyToJObject@3(VAR JObject@1002 : DotNet "'Newtonsoft.Json'.Newtonsoft.Json.Linq.JObject";propertyName@1000 : Text;value@1003 : Variant);
     VAR
       JProperty@1001 : DotNet "'Newtonsoft.Json'.Newtonsoft.Json.Linq.JProperty";
@@ -368,7 +346,6 @@ OBJECT Codeunit 5459 JSON Management
       JObject.Add(JProperty);
     END;
 
-    [External]
     PROCEDURE AddJValueToJObject@22(VAR JObject@1002 : DotNet "'Newtonsoft.Json'.Newtonsoft.Json.Linq.JObject";value@1003 : Variant);
     VAR
       JValue@1001 : DotNet "'Newtonsoft.Json'.Newtonsoft.Json.Linq.JValue";
@@ -376,19 +353,16 @@ OBJECT Codeunit 5459 JSON Management
       JObject := JValue.JValue(value);
     END;
 
-    [External]
     PROCEDURE AddJObjectToCollection@4(JObject@1001 : DotNet "'Newtonsoft.Json'.Newtonsoft.Json.Linq.JObject");
     BEGIN
       JsonArray.Add(JObject.DeepClone);
     END;
 
-    [External]
     PROCEDURE AddJArrayContentToCollection@17(JArray@1001 : DotNet "'Newtonsoft.Json'.Newtonsoft.Json.Linq.JArray");
     BEGIN
       JsonArray.Merge(JArray.DeepClone);
     END;
 
-    [External]
     PROCEDURE ReplaceOrAddJPropertyInJObject@44(VAR JObject@1000 : DotNet "'Newtonsoft.Json'.Newtonsoft.Json.Linq.JObject";propertyName@1001 : Text;value@1002 : Variant) : Boolean;
     VAR
       JProperty@1003 : DotNet "'Newtonsoft.Json'.Newtonsoft.Json.Linq.JProperty";
@@ -407,7 +381,6 @@ OBJECT Codeunit 5459 JSON Management
       EXIT(TRUE);
     END;
 
-    [External]
     PROCEDURE ReplaceOrAddDescendantJPropertyInJObject@5(VAR JObject@1002 : DotNet "'Newtonsoft.Json'.Newtonsoft.Json.Linq.JObject";fullyQualifiedPropertyName@1003 : Text;value@1000 : Variant) : Boolean;
     VAR
       containerJObject@1005 : DotNet "'Newtonsoft.Json'.Newtonsoft.Json.Linq.JObject";
