@@ -1,0 +1,108 @@
+OBJECT Page 99999 Camera
+{
+  OBJECT-PROPERTIES
+  {
+    Date=17-10-20;
+    Time=16:17:10;
+    Modified=Yes;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    Editable=No;
+    CaptionML=ENU=Camera;
+    SourceTable=Table99998;
+    PageType=StandardDialog;
+    SourceTableTemporary=Yes;
+    OnOpenPage=BEGIN
+                 CameraAvailable := CameraProvider.IsAvailable();
+
+                 IF CameraAvailable THEN BEGIN
+                   CameraOptions := CameraOptions.CameraOptions;
+                   CameraOptions.Quality := Quality;
+                   CameraOptions.AllowEdit := AllowEdit;
+
+                   CASE EncodingType OF
+                     EncodingType::JPEG:
+                       CameraOptions.EncodingType := 'JPEG';
+                     EncodingType::PNG:
+                       CameraOptions.EncodingType := 'PNG';
+                   END;
+
+                   CASE MediaType OF
+                     MediaType::AllMedia:
+                       CameraOptions.MediaType := 'AllMedia';
+                     MediaType::Picture:
+                       CameraOptions.MediaType := 'Picture';
+                     MediaType::Video:
+                       CameraOptions.MediaType := 'Video';
+                   END;
+
+                   CASE SourceType OF
+                     SourceType::PhotoLibrary:
+                       CameraOptions.SourceType := 'PhotoLibrary';
+                     SourceType::Camera:
+                       CameraOptions.SourceType := 'Camera';
+                   END;
+
+                   CameraProvider := CameraProvider.Create();
+                   CameraProvider.RequestPictureAsync(CameraOptions);
+                 END;
+               END;
+
+  }
+  CONTROLS
+  {
+    { 1   ;    ;Container ;
+                Name=Content;
+                CaptionML=ENU=Content;
+                ContainerType=ContentArea }
+
+    { 3   ;1   ;Group     ;
+                Name=TakingPicture;
+                CaptionML=ENU=Taking picture...;
+                Visible=CameraAvailable;
+                GroupType=Group;
+                InstructionalTextML=ENU=Please take the picture using your camera. }
+
+    { 4   ;1   ;Group     ;
+                Name=CameraNotSupported;
+                CaptionML=ENU=Could not connect to camera;
+                Visible=NOT CameraAvailable;
+                GroupType=Group;
+                InstructionalTextML=ENU=The camera on the device could not be accessed. Please make sure you are using a Dynamics Tenerife app for Windows, Android or iOS. }
+
+  }
+  CODE
+  {
+    VAR
+      CameraProvider@1001 : DotNet "'Microsoft.Dynamics.Nav.ClientExtensions, Version=11.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.Microsoft.Dynamics.Nav.Client.Capabilities.CameraProvider" WITHEVENTS RUNONCLIENT SUPPRESSDISPOSE;
+      CameraOptions@1000 : DotNet "'Microsoft.Dynamics.Nav.ClientExtensions, Version=11.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.Microsoft.Dynamics.Nav.Client.Capabilities.CameraOptions";
+      CameraAvailable@1002 : Boolean INDATASET;
+
+    EVENT CameraProvider@1001::PictureAvailable@10(PictureName@1001 : Text;PictureFilePath@1000 : Text);
+    VAR
+      File@1002 : File;
+      InStream@1003 : InStream;
+      OutStream@1004 : OutStream;
+    BEGIN
+      File.OPEN(PictureFilePath);
+      File.CREATEINSTREAM(InStream);
+
+      CLEAR(TakenPicture);
+      TakenPicture.CREATEOUTSTREAM(OutStream);
+      COPYSTREAM(OutStream, InStream);
+
+      TakenPictureName := PictureName;
+      MODIFY(TRUE);
+
+      File.CLOSE;
+
+      CurrPage.CLOSE;
+    END;
+
+    BEGIN
+    END.
+  }
+}
+
