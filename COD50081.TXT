@@ -1,0 +1,31 @@
+OBJECT Codeunit 50081 Env Functions
+{
+  OBJECT-PROPERTIES
+  {
+    Date=25.10.17;
+    Time=15:00:12;
+    Modified=Yes;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+
+    [External]
+    PROCEDURE NewLine@11() : Text;
+    VAR
+      Env@10900 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Environment";
+    BEGIN
+      EXIT(Env.NewLine);
+    END;
+
+    BEGIN
+    END.
+  }
+}
+
