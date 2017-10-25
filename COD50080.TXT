@@ -1,0 +1,40 @@
+OBJECT Codeunit 50080 Small Library
+{
+  OBJECT-PROPERTIES
+  {
+    Date=25.10.17;
+    Time=10:33:40;
+    Modified=Yes;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+
+    PROCEDURE IsLeapYear@8(DateToBeChecked@1000 : Date) : Boolean;
+    VAR
+      DateTime@1001 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.DateTime";
+    BEGIN
+      EXIT(DateTime.IsLeapYear(DATE2DMY(DateToBeChecked,3)));
+    END;
+
+    PROCEDURE IsNumeric@11(CheckString@1000 : Text) : Boolean;
+    BEGIN
+      EXIT(DELCHR(CheckString,'=','1234567890') = '');
+    END;
+
+    PROCEDURE NumericValue@13(MixedString@1000 : Text) : Text;
+    BEGIN
+      EXIT(DELCHR(MixedString,'=',DELCHR(MixedString,'=','1234567890')));
+    END;
+
+    BEGIN
+    END.
+  }
+}
+
