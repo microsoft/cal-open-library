@@ -1,0 +1,92 @@
+OBJECT Codeunit 50070 DotNetStringFormat
+{
+  OBJECT-PROPERTIES
+  {
+    Date=18.10.17;
+    Time=18:50:00;
+    Modified=Yes;
+    Version List=Navision.Guru;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+
+    [External]
+    PROCEDURE Format@1000(Variable@1003 : Variant;DataFormat@1001 : Text;DataFormattingCulture@1000 : Text) String : Text;
+    VAR
+      CultureInfo@1002 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Globalization.CultureInfo";
+      DotNetString@1004 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.String";
+    BEGIN
+      IF DataFormattingCulture = '' THEN
+        CultureInfo := CultureInfo.CurrentCulture
+      ELSE
+        CultureInfo := CultureInfo.CultureInfo(DataFormattingCulture);
+      String := DotNetString.Format(CultureInfo,'{0:' + DataFormat + '}',Variable);
+    END;
+
+    BEGIN
+    END.
+  }
+}
+
+OBJECT Codeunit 50071 DotNetStringFormat Test
+{
+  OBJECT-PROPERTIES
+  {
+    Date=18.10.17;
+    Time=19:01:00;
+    Modified=Yes;
+    Version List=Navision.Guru,Test;
+  }
+  PROPERTIES
+  {
+    Subtype=Test;
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      Assert@1000 : Codeunit 130000;
+      DataFormattingErr@1001 : TextConst 'ENU=Data formatting error';
+
+    [Test]
+    PROCEDURE TestFormatting@1000();
+    VAR
+      DotNetStringFormat@1003 : Codeunit 50070;
+      Amount@1000 : Decimal;
+      DateTime@1001 : DateTime;
+      Date@1002 : Date;
+      FormattingResult@1004 : Text;
+    BEGIN
+      Amount := 123.456789;
+      Date := TODAY;
+      DateTime := ROUNDDATETIME(CURRENTDATETIME);
+
+      FormattingResult := DotNetStringFormat.Format(Amount,'G','en-US');
+      Assert.AreEqual(FORMAT(Amount,0,9),FormattingResult,DataFormattingErr);
+
+      FormattingResult := DotNetStringFormat.Format(Amount,'G','');
+      Assert.AreEqual(FORMAT(Amount,0,1),FormattingResult,DataFormattingErr);
+
+      FormattingResult := DotNetStringFormat.Format(Amount,'G','en-US');
+      Assert.AreEqual(FORMAT(Amount,0,2),FormattingResult,DataFormattingErr);
+
+      FormattingResult := DotNetStringFormat.Format(Date,'yyyy-MM-dd','');
+      Assert.AreEqual(FORMAT(Date,0,9),FormattingResult,DataFormattingErr);
+
+      FormattingResult := DotNetStringFormat.Format(DateTime,'s','en-US');
+      Assert.AreEqual(FORMAT(DateTime,0,9),FormattingResult + 'Z',DataFormattingErr);
+    END;
+
+    BEGIN
+    END.
+  }
+}
+
