@@ -190,6 +190,14 @@ OBJECT Codeunit 10 Type Helper
     END;
 
     [External]
+    PROCEDURE IsLeapYear@46(Date@1001 : Date) : Boolean;
+    VAR
+      DateTime@1000 : DotNet "'mscorlib'.System.DateTime";
+    BEGIN
+      EXIT(DateTime.IsLeapYear(DATE2DMY(Date,3)));
+    END;
+
+    [External]
     PROCEDURE LanguageIDToCultureName@4(LanguageID@1001 : Integer) : Text;
     VAR
       CultureInfo@1000 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Globalization.CultureInfo";
@@ -237,6 +245,14 @@ OBJECT Codeunit 10 Type Helper
     LOCAL PROCEDURE OptionsAreEqual@18(Value@1000 : Text;CurrentOption@1001 : Text) : Boolean;
     BEGIN
       EXIT((Value = CurrentOption) OR ((Value = '') AND (DELCHR(CurrentOption,'=',' ') = '')));
+    END;
+
+    [External]
+    PROCEDURE IsNumeric@47(Text@1000 : Text) : Boolean;
+    VAR
+      Decimal@1001 : Decimal;
+    BEGIN
+      EXIT(EVALUATE(Decimal,Text));
     END;
 
     [External]
@@ -607,6 +623,14 @@ OBJECT Codeunit 10 Type Helper
       EXIT(Array2[STRLEN(Text2) + 1]);
     END;
 
+    [External]
+    PROCEDURE NewLine@48() : Text;
+    VAR
+      Environment@1000 : DotNet "'mscorlib'.System.Environment";
+    BEGIN
+      EXIT(Environment.NewLine);
+    END;
+
     LOCAL PROCEDURE MinimumInt3@26(i1@1000 : Integer;i2@1001 : Integer;i3@1002 : Integer) : Integer;
     BEGIN
       IF (i1 <= i2) AND (i1 <= i3) THEN
@@ -634,6 +658,21 @@ OBJECT Codeunit 10 Type Helper
       RecordLink.Note.CREATEOUTSTREAM(OStr,TEXTENCODING::UTF8);
       BinWriter := BinWriter.BinaryWriter(OStr);
       BinWriter.Write(Note);
+    END;
+
+    [External]
+    PROCEDURE ReadRecordLinkNote@45(RecordLink@1000 : Record 2000000068) Note : Text;
+    VAR
+      BinReader@1003 : DotNet "'mscorlib'.System.IO.BinaryReader";
+      IStr@1002 : InStream;
+    BEGIN
+      // Read the Note BLOB
+      RecordLink.Note.CREATEINSTREAM(IStr,TEXTENCODING::UTF8);
+      BinReader := BinReader.BinaryReader(IStr);
+      // Peek if stream is empty
+      IF BinReader.BaseStream.Position = BinReader.BaseStream.Length THEN
+        EXIT;
+      Note := BinReader.ReadString;
     END;
 
     [External]
