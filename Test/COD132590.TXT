@@ -1039,6 +1039,82 @@ OBJECT Codeunit 132590 Type Helper Unit Tests
     END;
 
     [Test]
+    PROCEDURE TestIsLeapYear@45();
+    VAR
+      TypeHelper@1001 : Codeunit 10;
+      Date@1000 : Date;
+    BEGIN
+      // [GIVEN] A leap year
+      Date := DMY2DATE(1,1,2000);
+
+      // [WHEN] IsLeapYear is called
+      // [THEN] It returns true
+      Assert.IsTrue(TypeHelper.IsLeapYear(Date),'Year was not a leap year');
+    END;
+
+    [Test]
+    PROCEDURE TestIsNotLeapYear@53();
+    VAR
+      TypeHelper@1001 : Codeunit 10;
+      Date@1000 : Date;
+    BEGIN
+      // [GIVEN] A non-leap year
+      Date := DMY2DATE(1,1,2001);
+
+      // [WHEN] IsLeapYear is called
+      // [THEN] It returns false
+      Assert.IsFalse(TypeHelper.IsLeapYear(Date),'Year was a leap year');
+    END;
+
+    [Test]
+    PROCEDURE TestIsNumeric@48();
+    VAR
+      TypeHelper@1001 : Codeunit 10;
+      Text@1000 : Text;
+    BEGIN
+      // [GIVEN] A numeric string
+      Text := '1234567890';
+      // [WHEN] IsNumeric is called
+      // [THEN] It returns true
+      Assert.IsTrue(TypeHelper.IsNumeric(Text),'String was not numeric');
+
+      // [GIVEN] A numeric decimal with negative sign and comma
+      Text := '-123.12';
+      // [WHEN] IsNumeric is called
+      // [THEN] It returns true
+      Assert.IsTrue(TypeHelper.IsNumeric(Text),'String was not numeric');
+    END;
+
+    [Test]
+    PROCEDURE TestIsNotNumeric@51();
+    VAR
+      TypeHelper@1001 : Codeunit 10;
+      Text@1000 : Text;
+    BEGIN
+      // [GIVEN] A non-numeric string
+      Text := 'Test1234567890';
+
+      // [WHEN] IsNumeric is called
+      // [THEN] It returns false
+      Assert.IsFalse(TypeHelper.IsNumeric(Text),'String was numeric');
+    END;
+
+    [Test]
+    PROCEDURE TestNewLine@50();
+    VAR
+      TypeHelper@1000 : Codeunit 10;
+      CRLF@1001 : Text[2];
+    BEGIN
+      CRLF := '';
+      CRLF[1] := 13;
+      CRLF[2] := 10;
+
+      // [WHEN] NewLine is called
+      // [THEN] A new line is returned
+      Assert.AreEqual(CRLF,TypeHelper.NewLine,'Function did not return new line');
+    END;
+
+    [Test]
     PROCEDURE TestLevenshteinDistance@32();
     VAR
       TypeHelper@1000 : Codeunit 10;
@@ -1244,6 +1320,32 @@ OBJECT Codeunit 132590 Type Helper Unit Tests
       DateTimeB := DateTimeA + LibraryRandom.RandIntInRange(Threshold + 1,500);
       Assert.IsTrue(TypeHelper.CompareDateTime(DateTimeA,DateTimeB) < 0,'Return value should be < 0.');
       Assert.IsTrue(TypeHelper.CompareDateTime(DateTimeB,DateTimeA) > 0,'Return value should be > 0.');
+    END;
+
+    [Test]
+    PROCEDURE VerifyReadRecordLinkNote@47();
+    VAR
+      RecordLink@1001 : Record 2000000068;
+      TypeHelper@1000 : Codeunit 10;
+    BEGIN
+      RecordLink.DELETEALL;
+
+      TypeHelper.WriteRecordLinkNote(RecordLink,'This is a test');
+
+      RecordLink.INSERT;
+      Assert.AreEqual(TypeHelper.ReadRecordLinkNote(RecordLink),'This is a test','The value in the Note field was read incorrectly');
+    END;
+
+    [Test]
+    PROCEDURE VerifyEmptyReadRecordLinkNote@56();
+    VAR
+      RecordLink@1001 : Record 2000000068;
+      TypeHelper@1000 : Codeunit 10;
+    BEGIN
+      RecordLink.DELETEALL;
+
+      RecordLink.INSERT;
+      Assert.AreEqual(TypeHelper.ReadRecordLinkNote(RecordLink),'','The value in the Note field was read incorrectly');
     END;
 
     LOCAL PROCEDURE WriteTextToBLOBFieldRef@28(VAR IncomingDocumentAttachment@1002 : Record 133;VAR BlobFieldRef@1005 : FieldRef;NewText@1003 : Text;Encoding@1004 : TextEncoding) FieldValueWasChanged : Boolean;
