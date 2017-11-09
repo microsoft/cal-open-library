@@ -408,6 +408,29 @@ OBJECT Codeunit 10 Type Helper
     END;
 
     [External]
+    PROCEDURE RegexReplace@55(StringToReplace@1000 : Text;Pattern@1001 : Text;NewValue@1002 : Text) : Text;
+    VAR
+      Regex@1003 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.RegularExpressions.Regex";
+      NewString@1004 : Text;
+    BEGIN
+      Regex := Regex.Regex(Pattern);
+      NewString := Regex.Replace(StringToReplace,NewValue);
+      EXIT(NewString);
+    END;
+
+    [External]
+    PROCEDURE RegexReplaceIgnoreCase@52(StringToReplace@1000 : Text;Pattern@1001 : Text;NewValue@1002 : Text) : Text;
+    VAR
+      Regex@1003 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.RegularExpressions.Regex";
+      RegexOptions@1005 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.RegularExpressions.RegexOptions";
+      NewString@1004 : Text;
+    BEGIN
+      Regex := Regex.Regex(Pattern,RegexOptions.IgnoreCase);
+      NewString := Regex.Replace(StringToReplace,NewValue);
+      EXIT(NewString);
+    END;
+
+    [External]
     PROCEDURE IsMatch@6(Input@1000 : Text;RegExExpression@1003 : Text) : Boolean;
     VAR
       Regex@1002 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.RegularExpressions.Regex";

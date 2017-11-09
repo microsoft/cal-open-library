@@ -1439,6 +1439,26 @@ OBJECT Codeunit 132590 Type Helper Unit Tests
       Assert.AreEqual(ExpectedTime,DT2TIME(DateTime),'Invalid time');
     END;
 
+    [Test]
+    PROCEDURE TestRegExReplace@54();
+    VAR
+      TypeHelper@1000 : Codeunit 10;
+    BEGIN
+      Assert.AreEqual('My text and the content to replace!', TypeHelper.RegexReplace('The text and the content to replace!', '^The', 'My'), 'RegexReplace failed.');
+      Assert.AreEqual('The text and the content to replace!', TypeHelper.RegexReplace('The text and the content to replace!', '^the', 'My'), 'RegexReplace failed.');
+      Assert.AreEqual('Hxxxx xxxxx!', TypeHelper.RegExReplace('Hallo world!', '[a-z]', 'x'), 'RegexReplace failed.');
+    END;
+
+    [Test]
+    PROCEDURE TestRegExReplaceIgnoreCase@58();
+    VAR
+      TypeHelper@1001 : Codeunit 10;
+    BEGIN
+      Assert.AreEqual('My text and the content to replace!', TypeHelper.RegexReplaceIgnoreCase('The text and the content to replace!', '^The', 'My'), 'RegexReplaceIgnoreCase failed.');
+      Assert.AreEqual('My text and the content to replace!', TypeHelper.RegexReplaceIgnoreCase('The text and the content to replace!', '^the', 'My'), 'RegexReplaceIgnoreCase failed.');
+      Assert.AreEqual('xxxxx xxxxx!', TypeHelper.RegexReplaceIgnoreCase('Hallo world!', '[a-z]', 'x'), 'RegexReplaceIgnoreCase failed.');
+    END;
+
     BEGIN
     {
       // [FEATURE] [Type Helper] [UT]
