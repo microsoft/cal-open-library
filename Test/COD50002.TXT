@@ -1,0 +1,83 @@
+OBJECT Codeunit 50002 Path Helper Test
+{
+  OBJECT-PROPERTIES
+  {
+    Date=16.11.17;
+    Time=00:00:00;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    Subtype=Test;
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      Assert@1000 : Codeunit 130000;
+      PathHelper@1001 : Codeunit 50001;
+      InvalidValueErr@1002 : TextConst 'ENU=Invalid returned value';
+
+    [Test]
+    PROCEDURE TestGetDirectoryName@2();
+    BEGIN
+      // [SCENARIO] Check GetDirectoryName
+      // [GIVEN]
+      // [WHEN]
+      // [THEN]
+      Assert.AreEqual(PathHelper.GetDirectoryName(GetTestPath), 'C:\Temp', InvalidValueErr);
+    END;
+
+    [Test]
+    PROCEDURE TestGetExtension@4();
+    BEGIN
+      // [SCENARIO] Check GetExtension
+      // [GIVEN]
+      // [WHEN]
+      // [THEN]
+      Assert.AreEqual(PathHelper.GetExtension(GetTestPath), '.txt', InvalidValueErr);
+    END;
+
+    [Test]
+    PROCEDURE TestGetFileName@5();
+    BEGIN
+      // [SCENARIO] Check GetFileName
+      // [GIVEN]
+      // [WHEN]
+      // [THEN]
+      Assert.AreEqual(PathHelper.GetFileName(GetTestPath), 'testfile.txt', InvalidValueErr);
+    END;
+
+    [Test]
+    PROCEDURE TestGetFileNameWithoutExtension@6();
+    BEGIN
+      // [SCENARIO] Check GetFileNameWithoutExtension
+      // [GIVEN]
+      // [WHEN]
+      // [THEN]
+      Assert.AreEqual(PathHelper.GetFileNameWithoutExtension(GetTestPath), 'testfile', InvalidValueErr);
+    END;
+
+    [Test]
+    PROCEDURE TestHasExtension@7();
+    BEGIN
+      // [SCENARIO] Check HasExtension
+      // [GIVEN]
+      // [WHEN]
+      // [THEN]
+      Assert.IsTrue(PathHelper.HasExtension(GetTestPath),InvalidValueErr);
+    END;
+
+    [Normal]
+    PROCEDURE GetTestPath@16() : Text;
+    BEGIN
+      EXIT('C:\Temp\testfile.txt');
+    END;
+
+    BEGIN
+    END.
+  }
+}
+

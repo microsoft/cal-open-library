@@ -1,0 +1,49 @@
+OBJECT Codeunit 50001 Path Helper
+{
+  OBJECT-PROPERTIES
+  {
+    Date=16.11.17;
+    Time=00:00:00;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      IOPath@1000 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.IO.Path";
+
+    PROCEDURE GetDirectoryName@2(Path@1000 : Text) : Text;
+    BEGIN
+      EXIT(IOPath.GetDirectoryName(Path));
+    END;
+
+    PROCEDURE GetExtension@4(Path@1000 : Text) : Text;
+    BEGIN
+      EXIT(IOPath.GetExtension(Path));
+    END;
+
+    PROCEDURE GetFileName@5(Path@1000 : Text) : Text;
+    BEGIN
+      EXIT(IOPath.GetFileName(Path));
+    END;
+
+    PROCEDURE GetFileNameWithoutExtension@6(Path@1000 : Text) : Text;
+    BEGIN
+      EXIT(IOPath.GetFileNameWithoutExtension(Path));
+    END;
+
+    PROCEDURE HasExtension@7(Path@1000 : Text) : Boolean;
+    BEGIN
+      EXIT(IOPath.HasExtension(Path));
+    END;
+
+    BEGIN
+    END.
+  }
+}
+
