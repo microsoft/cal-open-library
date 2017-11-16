@@ -2,8 +2,8 @@ OBJECT Codeunit 50002 Path Helper Test
 {
   OBJECT-PROPERTIES
   {
-    Date=16.11.17;
-    Time=00:00:00;
+    Date=;
+    Time=;
     Version List=;
   }
   PROPERTIES
