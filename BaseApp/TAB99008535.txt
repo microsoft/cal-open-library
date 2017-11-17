@@ -25,7 +25,9 @@ OBJECT Table 99008535 TempBlob
   {
     VAR
       GlobalInStream@1000 : InStream;
+      GlobalOutStream@1012 : OutStream;
       ReadLinesInitialized@1001 : Boolean;
+      WriteLinesInitialized@1013 : Boolean;
       NoContentErr@1002 : TextConst 'ENU=The BLOB field is empty.';
       UnknownImageTypeErr@1003 : TextConst 'ENU=Unknown image type.';
       XmlCannotBeLoadedErr@1004 : TextConst 'ENU=The XML cannot be loaded.';
@@ -65,6 +67,14 @@ OBJECT Table 99008535 TempBlob
     END;
 
     [External]
+    PROCEDURE StartWritingTextLines@13(Encoding@1000 : TextEncoding);
+    BEGIN
+      CLEAR(Blob);
+      Blob.CREATEOUTSTREAM(GlobalOutStream,Encoding);
+      WriteLinesInitialized := TRUE;
+    END;
+
+    [External]
     PROCEDURE MoreTextLines@9() : Boolean;
     BEGIN
       IF NOT ReadLinesInitialized THEN
@@ -81,6 +91,14 @@ OBJECT Table 99008535 TempBlob
         EXIT('');
       GlobalInStream.READTEXT(ContentLine);
       EXIT(ContentLine);
+    END;
+
+    [External]
+    PROCEDURE WriteTextLine@14(Content@1000 : Text);
+    BEGIN
+      IF NOT WriteLinesInitialized THEN
+        StartWritingTextLines(TEXTENCODING::Windows);
+      GlobalOutStream.WRITETEXT(Content);
     END;
 
     [External]
