@@ -1,0 +1,388 @@
+OBJECT Codeunit 1297 Http Web Request Mgt.
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      HttpWebRequest@1030 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Net.HttpWebRequest";
+      TraceLogEnabled@1011 : Boolean;
+      InvalidUrlErr@1025 : TextConst 'ENU=The URL is not valid.';
+      NonSecureUrlErr@1026 : TextConst 'ENU=The URL is not secure.';
+      GlobalSkipCheckHttps@1018 : Boolean;
+      GlobalProgressDialogEnabled@1023 : Boolean;
+      InternalErr@1001 : TextConst 'ENU=The remote service has returned the following error message:\\';
+      NoCookieForYouErr@1040 : TextConst 'ENU=The web request has no cookies.';
+
+    [Internal]
+    PROCEDURE GetResponse@6(VAR ResponseInStream@1005 : InStream;VAR HttpStatusCode@1000 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Net.HttpStatusCode";VAR ResponseHeaders@1003 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Collections.Specialized.NameValueCollection") : Boolean;
+    VAR
+      WebRequestHelper@1001 : Codeunit 1299;
+      HttpWebResponse@1006 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Net.HttpWebResponse";
+    BEGIN
+      EXIT(WebRequestHelper.GetWebResponse(HttpWebRequest,HttpWebResponse,ResponseInStream,HttpStatusCode,
+          ResponseHeaders,GlobalProgressDialogEnabled));
+    END;
+
+    [Internal]
+    PROCEDURE GetResponseStream@23(VAR ResponseInStream@1005 : InStream) : Boolean;
+    VAR
+      WebRequestHelper@1001 : Codeunit 1299;
+      HttpWebResponse@1006 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Net.HttpWebResponse";
+      HttpStatusCode@1002 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Net.HttpStatusCode";
+      ResponseHeaders@1000 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Collections.Specialized.NameValueCollection";
+    BEGIN
+      EXIT(WebRequestHelper.GetWebResponse(HttpWebRequest,HttpWebResponse,ResponseInStream,HttpStatusCode,
+          ResponseHeaders,GlobalProgressDialogEnabled));
+    END;
+
+    [TryFunction]
+    [Internal]
+    PROCEDURE ProcessFaultResponse@14(SupportInfo@1001 : Text);
+    BEGIN
+      ProcessFaultXMLResponse(SupportInfo,'','','');
+    END;
+
+    [TryFunction]
+    [Internal]
+    PROCEDURE ProcessFaultXMLResponse@16(SupportInfo@1001 : Text;NodePath@1011 : Text;Prefix@1008 : Text;NameSpace@1007 : Text);
+    VAR
+      TempReturnTempBlob@1004 : TEMPORARY Record 99008535;
+      WebRequestHelper@1002 : Codeunit 1299;
+      XMLDOMMgt@1003 : Codeunit 6224;
+      WebException@1005 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Net.WebException";
+      XmlDoc@1006 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlDocument";
+      ResponseInputStream@1000 : InStream;
+      ErrorText@1009 : Text;
+      ServiceURL@1010 : Text;
+    BEGIN
+      ErrorText := WebRequestHelper.GetWebResponseError(WebException,ServiceURL);
+
+      IF NOT ISNULL(WebException.Response) THEN BEGIN
+        ResponseInputStream := WebException.Response.GetResponseStream;
+
+        TraceLogStreamToTempFile(ResponseInputStream,'WebExceptionResponse',TempReturnTempBlob);
+
+        IF NodePath <> '' THEN
+          IF TryLoadXMLResponse(ResponseInputStream,XmlDoc) THEN
+            IF Prefix = '' THEN
+              ErrorText := XMLDOMMgt.FindNodeText(XmlDoc.DocumentElement,NodePath)
+            ELSE
+              ErrorText := XMLDOMMgt.FindNodeTextWithNamespace(XmlDoc.DocumentElement,NodePath,Prefix,NameSpace);
+      END;
+
+      IF ErrorText = '' THEN
+        ErrorText := WebException.Message;
+
+      ErrorText := InternalErr + ErrorText;
+
+      IF SupportInfo <> '' THEN
+        ErrorText += '\\' + SupportInfo;
+
+      ERROR(ErrorText);
+    END;
+
+    [TryFunction]
+    [External]
+    PROCEDURE CheckUrl@28(Url@1000 : Text);
+    VAR
+      Uri@1002 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Uri";
+      UriKind@1001 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.UriKind";
+    BEGIN
+      IF NOT Uri.TryCreate(Url,UriKind.Absolute,Uri) THEN
+        ERROR(InvalidUrlErr);
+
+      IF NOT GlobalSkipCheckHttps AND NOT (Uri.Scheme = 'https') THEN
+        ERROR(NonSecureUrlErr);
+    END;
+
+    PROCEDURE GetUrl@25() : Text;
+    BEGIN
+      EXIT(HttpWebRequest.RequestUri.AbsoluteUri);
+    END;
+
+    PROCEDURE GetUri@27() : Text;
+    BEGIN
+      EXIT(HttpWebRequest.RequestUri.PathAndQuery);
+    END;
+
+    PROCEDURE GetMethod@32() : Text;
+    BEGIN
+      EXIT(HttpWebRequest.Method);
+    END;
+
+    LOCAL PROCEDURE TraceLogStreamToTempFile@33(VAR ToLogInStream@1000 : InStream;Name@1005 : Text;VAR TraceLogTempBlob@1001 : Record 99008535);
+    VAR
+      Trace@1002 : Codeunit 1292;
+    BEGIN
+      IF TraceLogEnabled THEN
+        Trace.LogStreamToTempFile(ToLogInStream,Name,TraceLogTempBlob);
+    END;
+
+    [TryFunction]
+    [External]
+    PROCEDURE TryLoadXMLResponse@15(ResponseInputStream@1002 : InStream;VAR XmlDoc@1000 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlDocument");
+    VAR
+      XMLDOMManagement@1001 : Codeunit 6224;
+    BEGIN
+      XMLDOMManagement.LoadXMLDocumentFromInStream(ResponseInputStream,XmlDoc);
+    END;
+
+    [External]
+    PROCEDURE SetTraceLogEnabled@1(Enabled@1000 : Boolean);
+    BEGIN
+      TraceLogEnabled := Enabled;
+    END;
+
+    [External]
+    PROCEDURE DisableUI@18();
+    BEGIN
+      GlobalProgressDialogEnabled := FALSE;
+    END;
+
+    [Internal]
+    PROCEDURE Initialize@11(URL@1000 : Text);
+    VAR
+      PermissionManager@1002 : Codeunit 9002;
+    BEGIN
+      IF NOT PermissionManager.SoftwareAsAService THEN
+        OnOverrideUrl(URL);
+
+      HttpWebRequest := HttpWebRequest.Create(URL);
+      SetDefaults;
+    END;
+
+    LOCAL PROCEDURE SetDefaults@12();
+    VAR
+      CookieContainer@1000 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Net.CookieContainer";
+    BEGIN
+      HttpWebRequest.Method := 'GET';
+      HttpWebRequest.KeepAlive := TRUE;
+      HttpWebRequest.AllowAutoRedirect := TRUE;
+      HttpWebRequest.UseDefaultCredentials := TRUE;
+      HttpWebRequest.Timeout := 60000;
+      HttpWebRequest.Accept('application/xml');
+      HttpWebRequest.ContentType('application/xml');
+      CookieContainer := CookieContainer.CookieContainer;
+      HttpWebRequest.CookieContainer := CookieContainer;
+
+      GlobalSkipCheckHttps := TRUE;
+      GlobalProgressDialogEnabled := GUIALLOWED;
+      TraceLogEnabled := TRUE;
+    END;
+
+    [Internal]
+    PROCEDURE AddBodyAsText@26(BodyText@1001 : Text);
+    VAR
+      Encoding@1002 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.Encoding";
+    BEGIN
+      // Assume UTF8
+      AddBodyAsTextWithEncoding(BodyText,Encoding.UTF8);
+    END;
+
+    [Internal]
+    PROCEDURE AddBodyAsAsciiText@21(BodyText@1001 : Text);
+    VAR
+      Encoding@1002 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.Encoding";
+    BEGIN
+      AddBodyAsTextWithEncoding(BodyText,Encoding.ASCII);
+    END;
+
+    LOCAL PROCEDURE AddBodyAsTextWithEncoding@20(BodyText@1001 : Text;Encoding@1000 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.Encoding");
+    VAR
+      RequestStr@1004 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.IO.Stream";
+      StreamWriter@1003 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.IO.StreamWriter";
+    BEGIN
+      RequestStr := HttpWebRequest.GetRequestStream;
+      StreamWriter := StreamWriter.StreamWriter(RequestStr,Encoding);
+      StreamWriter.Write(BodyText);
+      StreamWriter.Flush;
+      StreamWriter.Close;
+      StreamWriter.Dispose;
+    END;
+
+    [Internal]
+    PROCEDURE SetTimeout@7(NewTimeout@1000 : Integer);
+    BEGIN
+      HttpWebRequest.Timeout := NewTimeout;
+    END;
+
+    [Internal]
+    PROCEDURE SetMethod@4(Method@1000 : Text);
+    BEGIN
+      HttpWebRequest.Method := Method;
+    END;
+
+    [Internal]
+    PROCEDURE SetDecompresionMethod@9(DecompressionMethod@1000 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Net.DecompressionMethods");
+    BEGIN
+      HttpWebRequest.AutomaticDecompression := DecompressionMethod;
+    END;
+
+    [Internal]
+    PROCEDURE SetContentType@5(ContentType@1000 : Text);
+    BEGIN
+      HttpWebRequest.ContentType := ContentType;
+    END;
+
+    [Internal]
+    PROCEDURE SetReturnType@2(ReturnType@1000 : Text);
+    BEGIN
+      HttpWebRequest.Accept := ReturnType;
+    END;
+
+    [Internal]
+    PROCEDURE SetProxy@22(ProxyUrl@1000 : Text);
+    VAR
+      WebProxy@1001 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Net.WebProxy";
+    BEGIN
+      IF ProxyUrl = '' THEN
+        EXIT;
+
+      WebProxy := WebProxy.WebProxy(ProxyUrl);
+
+      HttpWebRequest.Proxy := WebProxy;
+    END;
+
+    [External]
+    PROCEDURE SetExpect@24(expectValue@1000 : Boolean);
+    BEGIN
+      HttpWebRequest.ServicePoint.Expect100Continue := expectValue;
+    END;
+
+    [Internal]
+    PROCEDURE SetContentLength@29(ContentLength@1000 : BigInteger);
+    BEGIN
+      HttpWebRequest.ContentLength := ContentLength;
+    END;
+
+    [Internal]
+    PROCEDURE AddSecurityProtocolTls12@30();
+    VAR
+      Convert@1000 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Convert";
+      SecurityProtocolType@1001 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Net.SecurityProtocolType";
+      SecurityProtocol@1002 : Integer;
+    BEGIN
+      SecurityProtocol := Convert.ToInt32(SecurityProtocolType.Tls12);
+      AddSecurityProtocol(SecurityProtocol);
+    END;
+
+    LOCAL PROCEDURE AddSecurityProtocol@31(SecurityProtocol@1000 : Integer);
+    VAR
+      TypeHelper@1001 : Codeunit 10;
+      Convert@1002 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Convert";
+      ServicePointManager@1003 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Net.ServicePointManager";
+      CurrentSecurityProtocol@1004 : Integer;
+    BEGIN
+      CurrentSecurityProtocol := Convert.ToInt32(ServicePointManager.SecurityProtocol);
+      IF TypeHelper.BitwiseAnd(CurrentSecurityProtocol,SecurityProtocol) <> SecurityProtocol THEN
+        ServicePointManager.SecurityProtocol := TypeHelper.BitwiseOr(CurrentSecurityProtocol,SecurityProtocol);
+    END;
+
+    [Internal]
+    PROCEDURE AddHeader@10(Key@1000 : Text;Value@1001 : Text);
+    BEGIN
+      HttpWebRequest.Headers.Add(Key,Value);
+    END;
+
+    [Internal]
+    PROCEDURE AddBody@3(BodyFilePath@1000 : Text);
+    VAR
+      FileStream@1003 : DotNet "'mscorlib'.System.IO.FileStream";
+      FileMode@1004 : DotNet "'mscorlib'.System.IO.FileMode";
+    BEGIN
+      IF BodyFilePath = '' THEN
+        EXIT;
+
+      FileStream := FileStream.FileStream(BodyFilePath,FileMode.Open);
+      FileStream.CopyTo(HttpWebRequest.GetRequestStream);
+    END;
+
+    [Internal]
+    PROCEDURE AddBodyBlob@19(VAR TempBlob@1000 : Record 99008535);
+    VAR
+      RequestStr@1002 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.IO.Stream";
+      BlobStr@1001 : InStream;
+    BEGIN
+      IF NOT TempBlob.Blob.HASVALUE THEN
+        EXIT;
+
+      RequestStr := HttpWebRequest.GetRequestStream;
+      TempBlob.Blob.CREATEINSTREAM(BlobStr);
+      COPYSTREAM(RequestStr,BlobStr);
+      RequestStr.Flush;
+      RequestStr.Close;
+      RequestStr.Dispose;
+    END;
+
+    [External]
+    PROCEDURE AddBasicAuthentication@60(BasicUserId@1000 : Text;BasicUserPassword@1001 : Text);
+    VAR
+      Credential@1003 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Net.NetworkCredential";
+    BEGIN
+      HttpWebRequest.UseDefaultCredentials(FALSE);
+      Credential := Credential.NetworkCredential;
+      Credential.UserName := BasicUserId;
+      Credential.Password := BasicUserPassword;
+      HttpWebRequest.Credentials := Credential;
+    END;
+
+    [Internal]
+    PROCEDURE SetUserAgent@8(UserAgent@1000 : Text);
+    BEGIN
+      HttpWebRequest.UserAgent := UserAgent;
+    END;
+
+    [Internal]
+    PROCEDURE SetCookie@53(VAR Cookie@1000 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Net.Cookie");
+    BEGIN
+      HttpWebRequest.CookieContainer.Add(Cookie);
+    END;
+
+    [Internal]
+    PROCEDURE GetCookie@13(VAR Cookie@1000 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Net.Cookie");
+    VAR
+      CookieCollection@1001 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Net.CookieCollection";
+    BEGIN
+      IF NOT HasCookie THEN
+        ERROR(NoCookieForYouErr);
+      CookieCollection := HttpWebRequest.CookieContainer.GetCookies(HttpWebRequest.RequestUri);
+      Cookie := CookieCollection.Item(0);
+    END;
+
+    [Internal]
+    PROCEDURE HasCookie@34() : Boolean;
+    BEGIN
+      EXIT(HttpWebRequest.CookieContainer.Count > 0);
+    END;
+
+    [External]
+    PROCEDURE CreateInstream@17(VAR InStr@1000 : InStream);
+    VAR
+      TempBlob@1001 : Record 99008535;
+    BEGIN
+      TempBlob.INIT;
+      TempBlob.Blob.CREATEINSTREAM(InStr);
+    END;
+
+    [Integration]
+    PROCEDURE OnOverrideUrl@36(VAR Url@1000 : Text);
+    BEGIN
+      // Provides an option to rewrite URL in non SaaS environments.
+    END;
+
+    BEGIN
+    END.
+  }
+}
+
