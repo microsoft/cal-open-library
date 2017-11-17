@@ -275,37 +275,48 @@ OBJECT Codeunit 1290 SOAP Web Service Request Mgt.
     [External]
     PROCEDURE HasJWTExpired@5(JsonWebToken@1000 : Text) : Boolean;
     VAR
-      TempStandardText@1001 : TEMPORARY Record 7;
+      WebTokenAsJson@1001 : Text;
     BEGIN
       IF JsonWebToken = '' THEN
         EXIT(TRUE);
-      IF NOT GetTokenDetails(JsonWebToken,TempStandardText) THEN
+      IF NOT GetTokenDetailsAsJson(JsonWebToken,WebTokenAsJson) THEN
         ERROR(InvalidTokenFormatErr);
-      EXIT(GetTokenDateTimeValue(TempStandardText,'EXP') < CURRENTDATETIME);
+      EXIT(GetTokenDateTimeValue(WebTokenAsJson,'exp') < CURRENTDATETIME);
     END;
 
-    LOCAL PROCEDURE GetTokenValue@6(VAR TempStandardText@1000 : TEMPORARY Record 7;ClaimCode@1001 : Text) : Text;
+    [External]
+    PROCEDURE GetTokenValue@6(WebTokenAsJson@1000 : Text;ClaimType@1001 : Text) : Text;
+    VAR
+      JSONManagement@1002 : Codeunit 5459;
+      JObject@1004 : DotNet "'Newtonsoft.Json'.Newtonsoft.Json.Linq.JObject";
+      ClaimValue@1003 : Text;
     BEGIN
-      IF  TempStandardText.GET(ClaimCode) THEN
-        EXIT(TempStandardText.Description);
+      JSONManagement.InitializeObject(WebTokenAsJson);
+      JSONManagement.GetJSONObject(JObject);
+      IF JSONManagement.GetStringPropertyValueFromJObjectByName(JObject,ClaimType,ClaimValue) THEN
+        EXIT(ClaimValue);
     END;
 
-    LOCAL PROCEDURE GetTokenDateTimeValue@8(VAR TempStandardText@1001 : TEMPORARY Record 7;ClaimCode@1000 : Text) : DateTime;
+    [External]
+    PROCEDURE GetTokenDateTimeValue@8(WebTokenAsJson@1001 : Text;ClaimType@1000 : Text) : DateTime;
     VAR
       TypeHelper@1003 : Codeunit 10;
       Timestamp@1002 : Decimal;
     BEGIN
-      IF NOT EVALUATE(Timestamp,GetTokenValue(TempStandardText,ClaimCode)) THEN
+      IF NOT EVALUATE(Timestamp,GetTokenValue(WebTokenAsJson,ClaimType)) THEN
         EXIT;
       EXIT(TypeHelper.EvaluateUnixTimestamp(Timestamp));
     END;
 
     [TryFunction]
-    LOCAL PROCEDURE GetTokenDetails@16(JsonWebToken@1000 : Text;VAR TempStandardText@1001 : TEMPORARY Record 7);
+    [External]
+    PROCEDURE GetTokenDetailsAsJson@19(JsonWebToken@1000 : Text;VAR WebTokenAsJson@1006 : Text);
     VAR
+      JSONManagement@1005 : Codeunit 5459;
       JwtSecurityTokenHandler@1004 : DotNet "'System.IdentityModel.Tokens.Jwt, Version=5.1.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler";
       JwtSecurityToken@1003 : DotNet "'System.IdentityModel.Tokens.Jwt, Version=5.1.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.System.IdentityModel.Tokens.Jwt.JwtSecurityToken";
       Claim@1002 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Security.Claims.Claim";
+      JObject@1001 : DotNet "'Newtonsoft.Json'.Newtonsoft.Json.Linq.JObject";
     BEGIN
       IF JsonWebToken = '' THEN
         EXIT;
@@ -313,12 +324,12 @@ OBJECT Codeunit 1290 SOAP Web Service Request Mgt.
       JwtSecurityTokenHandler := JwtSecurityTokenHandler.JwtSecurityTokenHandler;
       JwtSecurityToken := JwtSecurityTokenHandler.ReadToken(JsonWebToken);
 
-      WITH TempStandardText DO
-        FOREACH Claim IN JwtSecurityToken.Claims DO BEGIN
-          Code := Claim.Type;
-          Description := Claim.Value;
-          INSERT;
-        END;
+      JSONManagement.InitializeEmptyObject;
+      JSONManagement.GetJSONObject(JObject);
+      FOREACH Claim IN JwtSecurityToken.Claims DO
+        JSONManagement.AddJPropertyToJObject(JObject,Claim.Type,Claim.Value);
+
+      WebTokenAsJson := JObject.ToString;
     END;
 
     BEGIN
