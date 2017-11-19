@@ -23,6 +23,7 @@ OBJECT Codeunit 132590 Type Helper Unit Tests
       SkipBlob@1003 : Boolean;
       WrongDateFormatErr@1004 : TextConst 'ENU=Wrong date format';
       WrongDateTimeFormatErr@1005 : TextConst 'ENU=Wrong date format';
+      DataFormattingErr@1006 : TextConst 'ENU=Data formatting error';
 
     LOCAL PROCEDURE Initialize@7();
     VAR
@@ -1036,6 +1037,106 @@ OBJECT Codeunit 132590 Type Helper Unit Tests
 
       // [THEN] Date is equal to '01/10/2016'
       Assert.AreEqual('01/10/2016',ConvertedDateText,WrongDateFormatErr);
+    END;
+
+    [Test]
+    PROCEDURE FormatDecimalToStandardFormatWithDotNetString@53();
+    VAR
+      TypeHelper@1000 : Codeunit 10;
+      Amount@1002 : Decimal;
+      FormattingResult@1001 : Text;
+    BEGIN
+      // [FEATURE] [Standard DotNet Formats]
+      // [SCENARIO xxxxx] TypeHelper.Format() correctly converts Decimal to standard NAV formatting
+
+      // [GIVEN] Amount 123.456789
+      Amount := 123.456789;
+
+      // [WHEN] Format Decimal to DotNet standard format
+      FormattingResult := TypeHelper.Format(Amount,'G','');
+
+      // [THEN] Amount is equal to standard NAV format
+      Assert.AreEqual(FORMAT(Amount,0,1),FormattingResult,DataFormattingErr);
+    END;
+
+    [Test]
+    PROCEDURE FormatDecimalToStandardXmlFormatDotNetString@54();
+    VAR
+      TypeHelper@1000 : Codeunit 10;
+      Amount@1002 : Decimal;
+      FormattingResult@1001 : Text;
+    BEGIN
+      // [FEATURE] [Standard DotNet Formats]
+      // [SCENARIO xxxxx] TypeHelper.Format() correctly converts Decimal to standard Xml formatting
+
+      // [GIVEN] Amount 123.456789
+      Amount := 123.456789;
+
+      // [WHEN] Format Decimal to DotNet standard Xml format
+      FormattingResult := TypeHelper.Format(Amount,'G','en-US');
+
+      // [THEN] Amount is equal to standard NAV format
+      Assert.AreEqual(FORMAT(Amount,0,9),FormattingResult,DataFormattingErr);
+    END;
+
+    [Test]
+    PROCEDURE FormatDateWithDotNetString@55();
+    VAR
+      TypeHelper@1002 : Codeunit 10;
+      Date@1001 : Date;
+      FormattingResult@1000 : Text;
+    BEGIN
+      // [FEATURE] [Standard DotNet Formats]
+      // [SCENARIO xxxxx] TypeHelper.Format() correctly converts Date to standard Xml formatting
+
+      // [GIVEN] Date is current date
+      Date := TODAY;
+
+      // [WHEN] Format Date to DotNet standard Xml format
+      FormattingResult := TypeHelper.Format(Date,'yyyy-MM-dd','');
+
+      // [THEN] Date matches standard NAV format
+      Assert.AreEqual(FORMAT(Date,0,9),FormattingResult,DataFormattingErr);
+    END;
+
+    [Test]
+    PROCEDURE FormatDateTimeToStandardWithDotNetString@56();
+    VAR
+      TypeHelper@1002 : Codeunit 10;
+      DateTime@1001 : DateTime;
+      FormattingResult@1000 : Text;
+    BEGIN
+      // [FEATURE] [Standard DotNet Formats]
+      // [SCENARIO xxxxx] TypeHelper.Format() correctly converts DateTime to local date time formatting
+
+      // [GIVEN] DateTime is current date and time
+      DateTime := ROUNDDATETIME(CURRENTDATETIME);
+
+      // [WHEN] Format DateTime with DotNet to get local time
+      FormattingResult := TypeHelper.Format(DateTime,'yyyy-MM-dd HH:mm:ss','en-US');
+
+      // [THEN] DateTime matches NAV formatting
+      Assert.AreEqual(FORMAT(DateTime,0,'<Year4>-<Month,2>-<Day,2> <Hours,2>:<Minutes,2>:<Seconds,2>'),FormattingResult,DataFormattingErr);
+    END;
+
+    [Test]
+    PROCEDURE FormatDateTimeToUtcDateTimeWithDotNetString@57();
+    VAR
+      TypeHelper@1002 : Codeunit 10;
+      DateTime@1001 : DateTime;
+      FormattingResult@1000 : Text;
+    BEGIN
+      // [FEATURE] [Standard DotNet Formats]
+      // [SCENARIO xxxxx] TypeHelper.Format() correctly converts DateTime to utc date time formatting
+
+      // [GIVEN] DateTime is current date and time
+      DateTime := ROUNDDATETIME(CURRENTDATETIME);
+
+      // [WHEN] Format DateTime with DotNet to get utc time
+      FormattingResult := TypeHelper.FormatUtcDateTime(DateTime,'s','en-US');
+
+      // [THEN] DateTime matches NAV Xml formatting
+      Assert.AreEqual(FORMAT(DateTime,0,9),FormattingResult + 'Z',DataFormattingErr);
     END;
 
     [Test]

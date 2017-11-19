@@ -45,6 +45,26 @@ OBJECT Codeunit 10 Type Helper
       END;
     END;
 
+    [External]
+    PROCEDURE Format@52(Variable@1003 : Variant;DataFormat@1001 : Text;DataFormattingCulture@1000 : Text) String : Text;
+    VAR
+      CultureInfo@1002 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Globalization.CultureInfo";
+      DotNetString@1004 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.String";
+    BEGIN
+      IF DataFormattingCulture = '' THEN
+        CultureInfo := CultureInfo.CurrentCulture
+      ELSE
+        CultureInfo := CultureInfo.CultureInfo(DataFormattingCulture);
+
+      IF Variable.ISDATE THEN
+        Variable := CREATEDATETIME(Variable,TIME);
+
+      IF Variable.ISDATETIME THEN
+        String := FormatDateTime(Variable,DataFormat,CultureInfo.Name)
+      ELSE
+        String := DotNetString.Format(CultureInfo,'{0:' + DataFormat + '}',Variable);
+    END;
+
     LOCAL PROCEDURE TryEvaluateDate@12(DateText@1000 : Text;Format@1001 : Text;CultureName@1004 : Text;VAR EvaluatedDate@1006 : Date) : Boolean;
     VAR
       CultureInfo@1003 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Globalization.CultureInfo";
@@ -487,6 +507,20 @@ OBJECT Codeunit 10 Type Helper
       DateTimeOffset := DateTimeOffset.ToLocalTime;
 
       EXIT(DateTimeOffset.ToString(Format,CultureInfo));
+    END;
+
+    [External]
+    PROCEDURE FormatUtcDateTime@53(DateTime@1003 : DateTime;DataFormat@1001 : Text;DataFormattingCulture@1000 : Text) String : Text;
+    VAR
+      CultureInfo@1002 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Globalization.CultureInfo";
+      DotNetString@1004 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.String";
+    BEGIN
+      IF DataFormattingCulture = '' THEN
+        CultureInfo := CultureInfo.CurrentCulture
+      ELSE
+        CultureInfo := CultureInfo.CultureInfo(DataFormattingCulture);
+
+      String := DotNetString.Format(CultureInfo,'{0:' + DataFormat + '}',DateTime);
     END;
 
     [External]
