@@ -1,0 +1,115 @@
+OBJECT Codeunit 50003 Json Text Reader/Writer Test
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    Subtype=Test;
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      Assert@1000 : Codeunit 130000;
+      InvalidJsonValue@1001 : TextConst 'ENU=Invalid Json Value for property %1';
+
+    [Test]
+    PROCEDURE TestWriter@1001();
+    VAR
+      JSONBuffer@1000 : TEMPORARY Record 1236;
+      JsonTextWriter@1001 : Codeunit 50001;
+      JsonTextReader@1002 : Codeunit 50002;
+      Json@1003 : Text;
+    BEGIN
+      // Write Json and verify read
+      // Given https://en.wikipedia.org/wiki/JSON
+
+      // When writing
+      WITH JsonTextWriter DO BEGIN
+        WriteStartObject('');
+        WriteStringProperty('firstName','John');
+        WriteStringProperty('lastName','Smith');
+        WriteBooleanProperty('isAlive',TRUE);
+        WriteNumberProperty('age',27);
+        WriteStartObject('address');
+        WriteStringProperty('streetAddress','21 2nd Street');
+        WriteStringProperty('city','New York');
+        WriteStringProperty('state','NY');
+        WriteStringProperty('postalCode','10021-3100');
+        WriteEndObject;
+        WriteStartArray('phoneNumbers');
+        WriteStartObject('');
+        WriteStringProperty('type','home');
+        WriteStringProperty('number','212 555-1234');
+        WriteEndObject;
+        WriteStartObject('');
+        WriteStringProperty('type','office');
+        WriteStringProperty('number','646 555-4567');
+        WriteEndObject;
+        WriteStartObject('');
+        WriteStringProperty('type','mobile');
+        WriteStringProperty('number','123 456-7890');
+        WriteEndObject;
+        WriteEndArray;
+        WriteStartArray('children');
+        WriteEndArray;
+        WriteNullProperty('spouce');
+        WriteEndObject;
+        Json := GetJSonAsText;
+      END;
+
+      // Read Json back into Json Buffer
+      JsonTextReader.ReadJSonToJSonBuffer(Json,JSONBuffer);
+
+      // Verify JsonBuffer Content
+      VerifyPropertyValue(JSONBuffer,'firstName','John');
+      VerifyPropertyValue(JSONBuffer,'lastName','Smith');
+      VerifyPropertyValue(JSONBuffer,'isAlive',TRUE);
+      VerifyPropertyValue(JSONBuffer,'age',27);
+      VerifyPropertyValue(JSONBuffer,'streetAddress','21 2nd Street');
+      VerifyPropertyValue(JSONBuffer,'city','New York');
+      VerifyPropertyValue(JSONBuffer,'state','NY');
+      VerifyPropertyValue(JSONBuffer,'postalCode','10021-3100');
+      VerifyPropertyValue(JSONBuffer,'type','home');
+      VerifyPropertyValue(JSONBuffer,'number','212 555-1234');
+    END;
+
+    LOCAL PROCEDURE VerifyPropertyValue@1002(VAR JSONBuffer@1000 : TEMPORARY Record 1236;PropertyName@1001 : Text;PropertyValue@1002 : Variant);
+    BEGIN
+      WITH JSONBuffer DO BEGIN
+        SETRANGE("Token type","Token type"::"Property Name");
+        SETRANGE(Value,PropertyName);
+        FINDFIRST;
+        RESET;
+        FIND('>');
+        CASE TRUE OF
+          PropertyValue.ISTEXT:
+            BEGIN
+              Assert.AreEqual("Token type"::String,"Token type",STRSUBSTNO(InvalidJsonValue,PropertyName));
+              Assert.AreEqual(PropertyValue,Value,STRSUBSTNO(InvalidJsonValue,PropertyName));
+            END;
+          PropertyValue.ISINTEGER,PropertyValue.ISDECIMAL:
+            BEGIN
+              Assert.AreEqual("Token type"::Decimal,"Token type",STRSUBSTNO(InvalidJsonValue,PropertyName));
+              Assert.AreEqual(FORMAT(PropertyValue,0,9),Value,STRSUBSTNO(InvalidJsonValue,PropertyName));
+            END;
+          PropertyValue.ISBOOLEAN:
+            BEGIN
+              Assert.AreEqual("Token type"::Boolean,"Token type",STRSUBSTNO(InvalidJsonValue,PropertyName));
+              Assert.AreEqual(FORMAT(PropertyValue,0,9),Value,STRSUBSTNO(InvalidJsonValue,PropertyName));
+            END;
+        END;
+      END;
+    END;
+
+    BEGIN
+    END.
+  }
+}
+
