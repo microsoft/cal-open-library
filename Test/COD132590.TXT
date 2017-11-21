@@ -1348,6 +1348,42 @@ OBJECT Codeunit 132590 Type Helper Unit Tests
       Assert.AreEqual(TypeHelper.ReadRecordLinkNote(RecordLink),'','The value in the Note field was read incorrectly');
     END;
 
+    [Test]
+    PROCEDURE TestRegExReplace@54();
+    VAR
+      TypeHelper@1000 : Codeunit 10;
+    BEGIN
+      // [SCENARIO] The RegExReplace works as expected
+      // [GIVEN] A string
+      // [WHEN] The RegExReplace function is called on the string
+      // [THEN] The correct replacements took place
+      Assert.AreEqual(
+        'My text and the content to replace!',TypeHelper.RegexReplace('The text and the content to replace!','^The','My'),
+        'RegexReplace failed.');
+      Assert.AreEqual(
+        'The text and the content to replace!',TypeHelper.RegexReplace('The text and the content to replace!','^the','My'),
+        'RegexReplace failed.');
+      Assert.AreEqual('Hxxxx xxxxx!',TypeHelper.RegexReplace('Hallo world!','[a-z]','x'),'RegexReplace failed.');
+    END;
+
+    [Test]
+    PROCEDURE TestRegExReplaceIgnoreCase@58();
+    VAR
+      TypeHelper@1001 : Codeunit 10;
+    BEGIN
+      // [SCENARIO] The RegexReplaceIgnoreCase works as expected
+      // [GIVEN] A string
+      // [WHEN] The RegexReplaceIgnoreCase function is called on the string
+      // [THEN] The correct replacements took place
+      Assert.AreEqual(
+        'My text and the content to replace!',TypeHelper.RegexReplaceIgnoreCase('The text and the content to replace!','^The','My'),
+        'RegexReplaceIgnoreCase failed.');
+      Assert.AreEqual(
+        'My text and the content to replace!',TypeHelper.RegexReplaceIgnoreCase('The text and the content to replace!','^the','My'),
+        'RegexReplaceIgnoreCase failed.');
+      Assert.AreEqual('xxxxx xxxxx!',TypeHelper.RegexReplaceIgnoreCase('Hallo world!','[a-z]','x'),'RegexReplaceIgnoreCase failed.');
+    END;
+
     LOCAL PROCEDURE WriteTextToBLOBFieldRef@28(VAR IncomingDocumentAttachment@1002 : Record 133;VAR BlobFieldRef@1005 : FieldRef;NewText@1003 : Text;Encoding@1004 : TextEncoding) FieldValueWasChanged : Boolean;
     VAR
       TypeHelper@1001 : Codeunit 10;

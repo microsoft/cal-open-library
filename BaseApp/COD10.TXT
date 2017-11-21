@@ -334,7 +334,7 @@ OBJECT Codeunit 10 Type Helper
         BlobFieldRef.CALCFIELD;
         TempBlob.Blob := BlobFieldRef.VALUE;
       END;
-      TempBlob.Blob.CREATEINSTREAM(InStream);
+      TempBlob.Blob.CREATEINSTREAM(InStream,TEXTENCODING::UTF8);
       InStream.READ(Content);
 
       BlobFieldRef.VALUE := TempBlob.Blob;
@@ -367,7 +367,7 @@ OBJECT Codeunit 10 Type Helper
       OutStream@1002 : OutStream;
     BEGIN
       BlobFieldRef.CALCFIELD;
-      TempBlob.Blob.CREATEOUTSTREAM(OutStream);
+      TempBlob.Blob.CREATEOUTSTREAM(OutStream,TEXTENCODING::UTF8);
       OutStream.WRITE(NewContent);
       BlobFieldRef.VALUE := TempBlob.Blob;
 
@@ -405,6 +405,29 @@ OBJECT Codeunit 10 Type Helper
       TempBlob.Blob := BlobFieldRef.VALUE;
 
       EXIT(TempBlob.ReadAsText(LineSeparator,Encoding));
+    END;
+
+    [External]
+    PROCEDURE RegexReplace@55(Input@1000 : Text;Pattern@1001 : Text;Replacement@1002 : Text) : Text;
+    VAR
+      Regex@1003 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.RegularExpressions.Regex";
+      NewString@1004 : Text;
+    BEGIN
+      Regex := Regex.Regex(Pattern);
+      NewString := Regex.Replace(Input,Replacement);
+      EXIT(NewString);
+    END;
+
+    [External]
+    PROCEDURE RegexReplaceIgnoreCase@52(Input@1000 : Text;Pattern@1001 : Text;Replacement@1002 : Text) : Text;
+    VAR
+      Regex@1003 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.RegularExpressions.Regex";
+      RegexOptions@1005 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.RegularExpressions.RegexOptions";
+      NewString@1004 : Text;
+    BEGIN
+      Regex := Regex.Regex(Pattern,RegexOptions.IgnoreCase);
+      NewString := Regex.Replace(Input,Replacement);
+      EXIT(NewString);
     END;
 
     [External]
