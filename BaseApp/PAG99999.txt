@@ -2,8 +2,8 @@ OBJECT Page 99999 Camera
 {
   OBJECT-PROPERTIES
   {
-    Date=17-10-20;
-    Time=16:17:10;
+    Date=17-11-27;
+    Time=14:38:55;
     Modified=Yes;
     Version List=;
   }
@@ -11,43 +11,23 @@ OBJECT Page 99999 Camera
   {
     Editable=No;
     CaptionML=ENU=Camera;
-    SourceTable=Table99998;
-    PageType=StandardDialog;
-    SourceTableTemporary=Yes;
+    LinksAllowed=No;
+    PageType=Card;
     OnOpenPage=BEGIN
                  CameraAvailable := CameraProvider.IsAvailable();
 
-                 IF CameraAvailable THEN BEGIN
-                   CameraOptions := CameraOptions.CameraOptions;
-                   CameraOptions.Quality := Quality;
-                   CameraOptions.AllowEdit := AllowEdit;
+                 IF NOT CameraAvailable THEN
+                   EXIT;
 
-                   CASE EncodingType OF
-                     EncodingType::JPEG:
-                       CameraOptions.EncodingType := 'JPEG';
-                     EncodingType::PNG:
-                       CameraOptions.EncodingType := 'PNG';
-                   END;
+                 CameraOptions := CameraOptions.CameraOptions;
+                 CameraOptions.Quality := RequestedQuality;
+                 CameraOptions.AllowEdit := RequestedAllowEdit;
+                 CameraOptions.EncodingType := RequestedEncodingType;
+                 CameraOptions.MediaType := RequestedMediaType;
+                 CameraOptions.SourceType := RequestedSourceType;
 
-                   CASE MediaType OF
-                     MediaType::AllMedia:
-                       CameraOptions.MediaType := 'AllMedia';
-                     MediaType::Picture:
-                       CameraOptions.MediaType := 'Picture';
-                     MediaType::Video:
-                       CameraOptions.MediaType := 'Video';
-                   END;
-
-                   CASE SourceType OF
-                     SourceType::PhotoLibrary:
-                       CameraOptions.SourceType := 'PhotoLibrary';
-                     SourceType::Camera:
-                       CameraOptions.SourceType := 'Camera';
-                   END;
-
-                   CameraProvider := CameraProvider.Create();
-                   CameraProvider.RequestPictureAsync(CameraOptions);
-                 END;
+                 CameraProvider := CameraProvider.Create();
+                 CameraProvider.RequestPictureAsync(CameraOptions);
                END;
 
   }
@@ -79,26 +59,81 @@ OBJECT Page 99999 Camera
       CameraProvider@1001 : DotNet "'Microsoft.Dynamics.Nav.ClientExtensions, Version=11.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.Microsoft.Dynamics.Nav.Client.Capabilities.CameraProvider" WITHEVENTS RUNONCLIENT SUPPRESSDISPOSE;
       CameraOptions@1000 : DotNet "'Microsoft.Dynamics.Nav.ClientExtensions, Version=11.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.Microsoft.Dynamics.Nav.Client.Capabilities.CameraOptions";
       CameraAvailable@1002 : Boolean INDATASET;
+      RequestedAllowEdit@1003 : Boolean;
+      SavedPictureName@1004 : Text;
+      SavedPictureFilePath@1005 : Text;
+      RequestedEncodingType@1006 : Text;
+      RequestedMediaType@1007 : Text;
+      RequestedSourceType@1008 : Text;
+      PictureNotAvailable@1009 : TextConst 'ENU=The picture is not available';
+      RequestedIgnoreError@1010 : Boolean;
+      PictureBlob@1011 : Record 99008535;
+      RequestedQuality@1012 : Integer;
+
+    [External]
+    PROCEDURE AllowEdit@2(AllowEdit@1000 : Boolean);
+    BEGIN
+      RequestedAllowEdit := AllowEdit;
+    END;
+
+    [External]
+    PROCEDURE GetPictureName@5() : Text;
+    BEGIN
+      EXIT(SavedPictureName);
+    END;
+
+    [Internal]
+    PROCEDURE GetPicture@6(Stream@1000 : InStream) : Boolean;
+    BEGIN
+      IF SavedPictureFilePath = '' THEN BEGIN
+        IF NOT RequestedIgnoreError THEN
+          MESSAGE(PictureNotAvailable);
+
+        EXIT(FALSE);
+      END;
+
+      PictureBlob.Blob.IMPORT(SavedPictureFilePath);
+      PictureBlob.Blob.CREATEINSTREAM(Stream);
+
+      EXIT(TRUE);
+    END;
+
+    [External]
+    PROCEDURE EncodingType@17(EncodingType@1000 : Text);
+    BEGIN
+      RequestedEncodingType := EncodingType;
+    END;
+
+    [External]
+    PROCEDURE MediaType@18(MediaType@1000 : Text);
+    BEGIN
+      RequestedMediaType := MediaType;
+    END;
+
+    [External]
+    PROCEDURE SourceType@19(SourceType@1000 : Text);
+    BEGIN
+      RequestedSourceType := SourceType;
+    END;
+
+    [External]
+    PROCEDURE IgnoreError@31(IgnoreError@1000 : Boolean);
+    BEGIN
+      RequestedIgnoreError := IgnoreError;
+    END;
+
+    [External]
+    PROCEDURE Quality@46(Quality@1000 : Integer);
+    BEGIN
+      RequestedQuality := Quality;
+    END;
 
     EVENT CameraProvider@1001::PictureAvailable@10(PictureName@1001 : Text;PictureFilePath@1000 : Text);
-    VAR
-      File@1002 : File;
-      InStream@1003 : InStream;
-      OutStream@1004 : OutStream;
     BEGIN
-      File.OPEN(PictureFilePath);
-      File.CREATEINSTREAM(InStream);
+      SavedPictureFilePath := PictureFilePath;
+      SavedPictureName := PictureName;
 
-      CLEAR(TakenPicture);
-      TakenPicture.CREATEOUTSTREAM(OutStream);
-      COPYSTREAM(OutStream, InStream);
-
-      TakenPictureName := PictureName;
-      MODIFY(TRUE);
-
-      File.CLOSE;
-
-      CurrPage.CLOSE;
+      CurrPage.CLOSE();
     END;
 
     BEGIN
