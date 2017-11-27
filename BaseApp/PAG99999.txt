@@ -3,7 +3,7 @@ OBJECT Page 99999 Camera
   OBJECT-PROPERTIES
   {
     Date=17-11-27;
-    Time=14:38:55;
+    Time=16:03:34;
     Modified=Yes;
     Version List=;
   }
@@ -82,7 +82,7 @@ OBJECT Page 99999 Camera
       EXIT(SavedPictureName);
     END;
 
-    [Internal]
+    [External]
     PROCEDURE GetPicture@6(Stream@1000 : InStream) : Boolean;
     BEGIN
       IF SavedPictureFilePath = '' THEN BEGIN
