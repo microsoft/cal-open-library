@@ -49,6 +49,7 @@ OBJECT Codeunit 419 File Management
       InvalidWindowsChrStringTxt@1027 : TextConst '@@@={Locked};ENU="""#%&*:<>?\/{|}~"';
       ZipArchive@1029 : DotNet "'System.IO.Compression, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.IO.Compression.ZipArchive";
       ZipArchiveMode@1033 : DotNet "'System.IO.Compression, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.IO.Compression.ZipArchiveMode";
+      DownloadImageTxt@1034 : TextConst 'ENU=Download image';
 
     [Internal]
     PROCEDURE BLOBImport@3(VAR BLOBRef@1000 : TEMPORARY Record 99008535;Name@1002 : Text) : Text;
@@ -168,7 +169,7 @@ OBJECT Codeunit 419 File Management
       ServerFile.CLOSE;
       ClientDirectory := GetDirectoryName(DownloadTempFile(ServerFileName));
       IF ERASE(ServerFileName) THEN;
-      DeleteClientFile(CombinePath(ClientDirectory,ServerFileName));
+      DeleteClientFile(CombinePath(ClientDirectory,GetFileName(ServerFileName)));
       ClientDirectory := CombinePath(ClientDirectory,CREATEGUID);
       CreateClientDirectory(ClientDirectory);
     END;
@@ -176,8 +177,8 @@ OBJECT Codeunit 419 File Management
     [External]
     PROCEDURE DownloadTempFile@7(ServerFileName@1001 : Text) : Text;
     VAR
-      FileName@1102601003 : Text;
-      Path@1102601004 : Text;
+      FileName@1568 : Text;
+      Path@1569 : Text;
     BEGIN
       FileName := ServerFileName;
       Path := Magicpath;
@@ -510,7 +511,7 @@ OBJECT Codeunit 419 File Management
     END;
 
     [External]
-    PROCEDURE HasExtension@70(FilePath@1000 : Text) : Boolean;
+    PROCEDURE HasExtension@74(FilePath@1000 : Text) : Boolean;
     BEGIN
       EXIT(PathHelper.HasExtension(FilePath));
     END;
@@ -967,6 +968,21 @@ OBJECT Codeunit 419 File Management
       GetServerDirectoryFilesList(NameValueBuffer,ServerDestinationFolder);
     END;
 
+    PROCEDURE ExportImage@70(ImagetPath@1000 : Text;ToFile@1005 : Text);
+    VAR
+      NameValueBuffer@1004 : Record 823;
+      TempNameValueBuffer@1003 : TEMPORARY Record 823;
+      FileManagement@1002 : Codeunit 419;
+    BEGIN
+      NameValueBuffer.DELETEALL;
+      FileManagement.GetServerDirectoryFilesList(TempNameValueBuffer,TEMPORARYPATH);
+      TempNameValueBuffer.SETFILTER(Name,STRSUBSTNO('%1*',ImagetPath));
+      TempNameValueBuffer.FINDFIRST;
+      ToFile := StripNotsupportChrInFileName(ToFile);
+      DOWNLOAD(TempNameValueBuffer.Name,DownloadImageTxt,'','',ToFile);
+      IF FileManagement.DeleteServerFile(TempNameValueBuffer.Name) THEN;
+    END;
+
     [Internal]
     PROCEDURE IsClientDirectoryEmpty@60(Path@1000 : Text) : Boolean;
     BEGIN
@@ -1009,6 +1025,23 @@ OBJECT Codeunit 419 File Management
       FileHandle.CREATEINSTREAM(InStr);
 
       InStr.READTEXT(Result);
+    END;
+
+    [External]    
+    PROCEDURE AddStreamToZipStream@71(ZipStream@1000 : OutStream;StreamToAdd@1001 : InStream;PathInArchive@1002 : Text);
+    VAR
+      ZipArchiveLocal@1004 : DotNet "'System.IO.Compression, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.IO.Compression.ZipArchive";
+      ZipArchiveEntry@1003 : DotNet "'System.IO.Compression, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.IO.Compression.ZipArchiveEntry";
+      StreamReader@1005 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.IO.StreamReader";
+      StreamWriter@1006 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.IO.StreamWriter";
+    BEGIN
+      ZipArchiveLocal := ZipArchiveLocal.ZipArchive(ZipStream,ZipArchiveMode.Update,TRUE);
+      ZipArchiveEntry := ZipArchiveLocal.CreateEntry(PathInArchive);
+      StreamReader := StreamReader.StreamReader(StreamToAdd);
+      StreamWriter := StreamWriter.StreamWriter(ZipArchiveEntry.Open);
+      StreamWriter.Write(StreamReader.ReadToEnd);
+      StreamWriter.Close;
+      StreamReader.Close;
     END;
 
     BEGIN
