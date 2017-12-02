@@ -431,6 +431,43 @@ OBJECT Codeunit 10 Type Helper
     END;
 
     [External]
+    PROCEDURE ConvertToAscii@58(NonAscii@50000 : Text) : Text;
+    VAR
+      StringBuilder@1002 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.StringBuilder";
+      Encoding@50003 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.Encoding";
+      CharUnicodeInfo@1005 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Globalization.CharUnicodeInfo";
+      UnicodeCategory@1006 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Globalization.UnicodeCategory";
+      Char@1004 : Char;
+      i@1003 : Integer;
+    BEGIN
+      StringBuilder := StringBuilder.StringBuilder;
+      FOR i := 1 TO STRLEN(NonAscii) DO BEGIN
+        Char := NonAscii[i];
+        CASE Char OF
+          254: // ç
+            StringBuilder.Append('t');
+          240: // Ð
+            StringBuilder.Append('d');
+          230: // ‘
+            StringBuilder.Append('a');
+          223: // á
+            StringBuilder.Append('s');
+          222: // è
+            StringBuilder.Append('T');
+          208: // Ñ
+            StringBuilder.Append('D');
+          198: // ’
+            StringBuilder.Append('A');
+          ELSE
+            IF UnicodeCategory.NonSpacingMark.CompareTo(CharUnicodeInfo.GetUnicodeCategory(Char)) = 1 THEN
+              StringBuilder.Append(Char);
+        END;
+      END;
+
+      EXIT(Encoding.ASCII.GetString(Encoding.GetEncoding(1251).GetBytes(StringBuilder.ToString)));
+    END;
+
+    [External]
     PROCEDURE IsMatch@6(Input@1000 : Text;RegExExpression@1003 : Text) : Boolean;
     VAR
       Regex@1002 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.RegularExpressions.Regex";
@@ -529,6 +566,20 @@ OBJECT Codeunit 10 Type Helper
     END;
 
     [External]
+    PROCEDURE FormatUtcDateTime@53(DateTime@1003 : DateTime;DataFormat@1001 : Text;DataFormattingCulture@1000 : Text) String : Text;
+    VAR
+      CultureInfo@1002 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Globalization.CultureInfo";
+      DotNetString@1004 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.String";
+    BEGIN
+      IF DataFormattingCulture = '' THEN
+        CultureInfo := CultureInfo.CurrentCulture
+      ELSE
+        CultureInfo := CultureInfo.CultureInfo(DataFormattingCulture);
+
+      String := DotNetString.Format(CultureInfo,'{0:' + DataFormat + '}',DateTime);
+    END;
+
+    [External]
     PROCEDURE GetCurrUTCDateTime@50() : DateTime;
     VAR
       DotNetDateTime@1000 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.DateTime";
@@ -541,6 +592,20 @@ OBJECT Codeunit 10 Type Helper
     PROCEDURE GetCurrUTCDateTimeAsText@49() : Text;
     BEGIN
       EXIT(FormatDateTime(GetCurrUTCDateTime,'R',''));
+    END;
+
+    [External]
+    PROCEDURE FormatDecimal@54(Decimal@1003 : Decimal;DataFormat@1001 : Text;DataFormattingCulture@1000 : Text) String : Text;
+    VAR
+      CultureInfo@1002 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Globalization.CultureInfo";
+      DotNetString@1004 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.String";
+    BEGIN
+      IF DataFormattingCulture = '' THEN
+        CultureInfo := CultureInfo.CurrentCulture
+      ELSE
+        CultureInfo := CultureInfo.CultureInfo(DataFormattingCulture);
+
+      String := DotNetString.Format(CultureInfo,'{0:' + DataFormat + '}',Decimal);
     END;
 
     [External]

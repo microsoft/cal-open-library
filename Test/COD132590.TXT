@@ -1039,6 +1039,86 @@ OBJECT Codeunit 132590 Type Helper Unit Tests
     END;
 
     [Test]
+    PROCEDURE FormatDecimalToStandardFormatWithDotNetString@61();
+    VAR
+      TypeHelper@1000 : Codeunit 10;
+      Amount@1002 : Decimal;
+      FormattingResult@1001 : Text;
+    BEGIN
+      // [FEATURE] [Standard DotNet Formats]
+      // [SCENARIO xxxxx] TypeHelper.Format() correctly converts Decimal to standard NAV formatting
+
+      // [GIVEN] Amount 123.456789
+      Amount := 123.456789;
+
+      // [WHEN] Format Decimal to DotNet standard format
+      FormattingResult := TypeHelper.FormatDecimal(Amount,'G','');
+
+      // [THEN] Amount is equal to standard NAV format
+      Assert.AreEqual(FORMAT(Amount,0,1),FormattingResult,DataFormattingErr);
+    END;
+
+    [Test]
+    PROCEDURE FormatDecimalToStandardXmlFormatDotNetString@60();
+    VAR
+      TypeHelper@1000 : Codeunit 10;
+      Amount@1002 : Decimal;
+      FormattingResult@1001 : Text;
+    BEGIN
+      // [FEATURE] [Standard DotNet Formats]
+      // [SCENARIO xxxxx] TypeHelper.Format() correctly converts Decimal to standard Xml formatting
+
+      // [GIVEN] Amount 123.456789
+      Amount := 123.456789;
+
+      // [WHEN] Format Decimal to DotNet standard Xml format
+      FormattingResult := TypeHelper.FormatDecimal(Amount,'G','en-US');
+
+      // [THEN] Amount is equal to standard NAV format
+      Assert.AreEqual(FORMAT(Amount,0,9),FormattingResult,DataFormattingErr);
+    END;
+
+    [Test]
+    PROCEDURE FormatDateTimeToUtcDateTimeWithDotNetString@57();
+    VAR
+      TypeHelper@1002 : Codeunit 10;
+      DateTime@1001 : DateTime;
+      FormattingResult@1000 : Text;
+    BEGIN
+      // [FEATURE] [Standard DotNet Formats]
+      // [SCENARIO xxxxx] TypeHelper.Format() correctly converts DateTime to utc date time formatting
+
+      // [GIVEN] DateTime is current date and time
+      DateTime := ROUNDDATETIME(CURRENTDATETIME);
+
+      // [WHEN] Format DateTime with DotNet to get utc time
+      FormattingResult := TypeHelper.FormatUtcDateTime(DateTime,'s','en-US');
+
+      // [THEN] DateTime matches NAV Xml formatting
+      Assert.AreEqual(FORMAT(DateTime,0,9),FormattingResult + 'Z',DataFormattingErr);
+    END;
+
+    [Test]
+    PROCEDURE ConvertToAscci@55();
+    VAR
+      TypeHelper@1002 : Codeunit 10;
+      NonAscii@1001 : Text;
+      Ascii@1000 : Text;
+    BEGIN
+      // [FEATURE] [Remove Diacritic from a string]
+      // [SCENARIO xxxxx] TypeHelper.Format() correctly converts DateTime to utc date time formatting
+
+      // [GIVEN] String with diacritic marks
+      NonAscii := '⁄Ú˛∑µ∂«éèíÄ‘ê“”ﬁ÷◊ÿ—•„‡‚ÂôùÎÈÍöÌË·Ö†É∆ÑÜëáäÇàâç°åã–§ï¢ì‰îõó£ñÅÏÁò';
+
+      // [WHEN] Format DateTime with DotNet to get utc time
+      Ascii := TypeHelper.ConvertToAscii(NonAscii);
+
+      // [THEN] DateTime matches NAV Xml formatting
+      Assert.AreEqual('szYAAAAAAACEEEEIIIIDNOOOOOOUUUUYTsaaaaaaaceeeeiiiidnoooooouuuuyty',Ascii,DataFormattingErr);
+    END;
+
+    [Test]
     PROCEDURE TestIsLeapYear@45();
     VAR
       TypeHelper@1001 : Codeunit 10;
