@@ -822,6 +822,14 @@ OBJECT Codeunit 10 Type Helper
       UNTIL TempFieldBuffer.NEXT = 0;
     END;
 
+    [External]
+    PROCEDURE GetCultureName@50000() : Text;
+    VAR
+      CultureInfo@50000 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Globalization.CultureInfo";
+    BEGIN
+      EXIT(CultureInfo.CurrentCulture.Name);
+    END;
+
     BEGIN
     END.
   }
