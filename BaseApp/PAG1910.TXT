@@ -1,0 +1,142 @@
+OBJECT Page 1910 Camera Interaction
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    Editable=No;
+    LinksAllowed=No;
+    PageType=Card;
+    OnOpenPage=BEGIN
+                 CameraAvailable := CameraProvider.IsAvailable;
+
+                 IF NOT CameraAvailable THEN
+                   EXIT;
+
+                 CameraOptions := CameraOptions.CameraOptions;
+                 CameraOptions.Quality := RequestedQuality;
+                 CameraOptions.AllowEdit := RequestedAllowEdit;
+                 CameraOptions.EncodingType := RequestedEncodingType;
+                 CameraOptions.MediaType := RequestedMediaType;
+                 CameraOptions.SourceType := RequestedSourceType;
+
+                 CameraProvider := CameraProvider.Create;
+                 CameraProvider.RequestPictureAsync(CameraOptions);
+               END;
+
+  }
+  CONTROLS
+  {
+    { 1   ;    ;Container ;
+                Name=Content;
+                CaptionML=ENU=Content;
+                ContainerType=ContentArea }
+
+    { 3   ;1   ;Group     ;
+                Name=TakingPicture;
+                CaptionML=ENU=Taking picture...;
+                Visible=CameraAvailable;
+                GroupType=Group;
+                InstructionalTextML=ENU=Please take the picture using your camera. }
+
+    { 4   ;1   ;Group     ;
+                Name=CameraNotSupported;
+                CaptionML=ENU=Could not connect to camera;
+                Visible=NOT CameraAvailable;
+                GroupType=Group;
+                InstructionalTextML=ENU=The camera on the device could not be accessed. Please make sure you are using a Dynamics Tenerife app for Windows, Android or iOS. }
+
+  }
+  CODE
+  {
+    VAR
+      TempPictureTempBlob@1011 : TEMPORARY Record 99008535;
+      CameraProvider@1001 : DotNet "'Microsoft.Dynamics.Nav.ClientExtensions, Version=11.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.Microsoft.Dynamics.Nav.Client.Capabilities.CameraProvider" WITHEVENTS RUNONCLIENT;
+      CameraOptions@1000 : DotNet "'Microsoft.Dynamics.Nav.ClientExtensions, Version=11.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.Microsoft.Dynamics.Nav.Client.Capabilities.CameraOptions";
+      CameraAvailable@1002 : Boolean INDATASET;
+      RequestedAllowEdit@1003 : Boolean;
+      SavedPictureName@1004 : Text;
+      SavedPictureFilePath@1005 : Text;
+      RequestedEncodingType@1006 : Text;
+      RequestedMediaType@1007 : Text;
+      RequestedSourceType@1008 : Text;
+      PictureNotAvailableErr@1009 : TextConst 'ENU=The picture is not available.';
+      RequestedIgnoreError@1010 : Boolean;
+      RequestedQuality@1012 : Integer;
+
+    [External]
+    PROCEDURE AllowEdit@2(AllowEdit@1000 : Boolean);
+    BEGIN
+      RequestedAllowEdit := AllowEdit;
+    END;
+
+    [External]
+    PROCEDURE GetPictureName@5() : Text;
+    BEGIN
+      EXIT(SavedPictureName);
+    END;
+
+    [External]
+    PROCEDURE GetPicture@6(Stream@1000 : InStream) : Boolean;
+    BEGIN
+      IF SavedPictureFilePath = '' THEN BEGIN
+        IF NOT RequestedIgnoreError THEN
+          ERROR(PictureNotAvailableErr);
+
+        EXIT(FALSE);
+      END;
+
+      TempPictureTempBlob.INIT;
+      TempPictureTempBlob.Blob.IMPORT(SavedPictureFilePath);
+      TempPictureTempBlob.Blob.CREATEINSTREAM(Stream);
+      TempPictureTempBlob.INSERT;
+
+      EXIT(TRUE);
+    END;
+
+    [External]
+    PROCEDURE EncodingType@17(EncodingType@1000 : Text);
+    BEGIN
+      RequestedEncodingType := EncodingType;
+    END;
+
+    [External]
+    PROCEDURE MediaType@18(MediaType@1000 : Text);
+    BEGIN
+      RequestedMediaType := MediaType;
+    END;
+
+    [External]
+    PROCEDURE SourceType@19(SourceType@1000 : Text);
+    BEGIN
+      RequestedSourceType := SourceType;
+    END;
+
+    [External]
+    PROCEDURE IgnoreError@31(IgnoreError@1000 : Boolean);
+    BEGIN
+      RequestedIgnoreError := IgnoreError;
+    END;
+
+    [External]
+    PROCEDURE Quality@46(Quality@1000 : Integer);
+    BEGIN
+      RequestedQuality := Quality;
+    END;
+
+    EVENT CameraProvider@1001::PictureAvailable@10(PictureName@1001 : Text;PictureFilePath@1000 : Text);
+    BEGIN
+      SavedPictureFilePath := PictureFilePath;
+      SavedPictureName := PictureName;
+
+      CurrPage.CLOSE;
+    END;
+
+    BEGIN
+    END.
+  }
+}
