@@ -613,6 +613,14 @@ OBJECT Codeunit 419 File Management
       Size := FileInfo.FileInfo(FullFileName).Length;
     END;
 
+    [External]
+    PROCEDURE GetFileNameMimeType@77(FileName@1000 : Text) : Text;
+    VAR
+      MimeMapping@1001 : DotNet "'System.Web, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a'.System.Web.MimeMapping";
+    BEGIN
+      EXIT(MimeMapping.GetMimeMapping(FileName));
+    END;
+
     [Internal]
     PROCEDURE CombinePath@50(BasePath@1000 : Text;Suffix@1001 : Text) : Text;
     BEGIN
