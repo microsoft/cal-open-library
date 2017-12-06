@@ -517,6 +517,14 @@ OBJECT Codeunit 419 File Management
     END;
 
     [External]
+    PROCEDURE GetFileNameMimeType@77(FileName@1000 : Text) : Text;
+    VAR
+      MimeMapping@1001 : DotNet "'System.Web, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a'.System.Web.MimeMapping";
+    BEGIN
+      EXIT(MimeMapping.GetMimeMapping(FileName));
+    END;
+
+    [External]
     PROCEDURE GetDirectoryName@8(FileName@1001 : Text) : Text;
     BEGIN
       IF FileName = '' THEN
@@ -1027,7 +1035,7 @@ OBJECT Codeunit 419 File Management
       InStr.READTEXT(Result);
     END;
 
-    [External]    
+    [External]
     PROCEDURE AddStreamToZipStream@71(ZipStream@1000 : OutStream;StreamToAdd@1001 : InStream;PathInArchive@1002 : Text);
     VAR
       ZipArchiveLocal@1004 : DotNet "'System.IO.Compression, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.IO.Compression.ZipArchive";
