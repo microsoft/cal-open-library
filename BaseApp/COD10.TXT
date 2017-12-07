@@ -200,10 +200,18 @@ OBJECT Codeunit 10 Type Helper
     [External]
     PROCEDURE LanguageIDToCultureName@4(LanguageID@1001 : Integer) : Text;
     VAR
-      CultureInfo@1000 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Globalization.CultureInfo";
+      CultureInfo@1000 : DotNet "'mscorlib'.System.Globalization.CultureInfo";
     BEGIN
       CultureInfo := CultureInfo.GetCultureInfo(LanguageID);
       EXIT(CultureInfo.Name);
+    END;
+
+    [External]
+    PROCEDURE GetCultureName@58() : Text;
+    VAR
+      CultureInfo@1000 : DotNet "'mscorlib'.System.Globalization.CultureInfo";
+    BEGIN
+      EXIT(CultureInfo.CurrentCulture.Name);
     END;
 
     [External]
