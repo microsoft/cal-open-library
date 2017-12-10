@@ -196,6 +196,59 @@ OBJECT Table 99008535 TempBlob
       EXIT(Xml);
     END;
 
+    [External]
+    PROCEDURE GetContentLength@20() : Integer;
+    VAR
+      MemoryStream@1001 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.IO.MemoryStream";
+      InStr@1000 : InStream;
+    BEGIN
+      Blob.CREATEINSTREAM(InStr);
+      MemoryStream := MemoryStream.MemoryStream;
+      COPYSTREAM(MemoryStream,InStr);
+      EXIT(MemoryStream.ToArray.Length);
+    END;
+
+    [External]
+    PROCEDURE GetContentHash@21(HashAlgorithmType@1002 : 'MD5,SHA1,SHA256,SHA384,SHA512') : Text;
+    VAR
+      MemoryStream@1004 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.IO.MemoryStream";
+      HashBytes@1005 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Array";
+      InStr@1003 : InStream;
+    BEGIN
+      Blob.CREATEINSTREAM(InStr);
+      MemoryStream := MemoryStream.MemoryStream;
+      COPYSTREAM(MemoryStream,InStr);
+      IF NOT TryGenerateHash(MemoryStream.ToArray,HashBytes,FORMAT(HashAlgorithmType)) THEN
+        ERROR(GETLASTERRORTEXT);
+
+      EXIT(ConvertByteHashToString(HashBytes));
+    END;
+
+    [TryFunction]
+    LOCAL PROCEDURE TryGenerateHash@22(Bytes@1001 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Array";VAR HashBytes@1000 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Array";Algorithm@1002 : Text);
+    VAR
+      HashAlgorithm@1003 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Security.Cryptography.HashAlgorithm";
+      Encoding@1004 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.Encoding";
+    BEGIN
+      HashAlgorithm := HashAlgorithm.Create(Algorithm);
+      HashBytes := HashAlgorithm.ComputeHash(Bytes);
+      HashAlgorithm.Dispose;
+    END;
+
+    LOCAL PROCEDURE ConvertByteHashToString@23(HashBytes@1000 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Array") : Text;
+    VAR
+      Byte@1002 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Byte";
+      StringBuilder@1001 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.StringBuilder";
+      I@1003 : Integer;
+    BEGIN
+      StringBuilder := StringBuilder.StringBuilder;
+      FOR I := 0 TO HashBytes.Length - 1 DO BEGIN
+        Byte := HashBytes.GetValue(I);
+        StringBuilder.Append(Byte.ToString('X2'));
+      END;
+      EXIT(StringBuilder.ToString);
+    END;
+
     BEGIN
     END.
   }
