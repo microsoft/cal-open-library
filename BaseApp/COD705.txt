@@ -1,0 +1,50 @@
+OBJECT Codeunit 705 XmlStream Utils
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Modified=Yes;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+
+    [External]
+    PROCEDURE DecompressStreamToXmlStream@1106900001(VAR CompressedStream@1106900011 : InStream;VAR XmlStream@1106900010 : InStream;ContentType@1106900008 : Text);
+    VAR
+      TextEncoding@1106900007 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.Encoding";
+      MemoryStream@1106900012 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.IO.MemoryStream";
+      GZipStream@1106900005 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.IO.Compression.GZipStream";
+      CompressionMode@1106900004 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.IO.Compression.CompressionMode";
+      DotNetArray@1106900003 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Array";
+      XmlTextReader@1106900002 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlTextReader";
+      XmlDocument@1106900006 : DotNet "'System.Xml, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlDocument";
+      XmlDictionaryReader@1106900001 : DotNet "'System.Runtime.Serialization, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlDictionaryReader";
+      XmlDictionaryReaderQuotas@1106900000 : DotNet "'System.Runtime.Serialization, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlDictionaryReaderQuotas";
+    BEGIN
+      GZipStream := GZipStream.GZipStream(CompressedStream, CompressionMode.Decompress);
+      DotNetArray := DotNetArray.CreateInstance(GETDOTNETTYPE(TextEncoding),1);
+      DotNetArray.SetValue(TextEncoding.UTF8,0);
+      XmlDictionaryReader := XmlDictionaryReader.CreateMtomReader(GZipStream,DotNetArray, ContentType, XmlDictionaryReaderQuotas.Max);
+      XmlDictionaryReader.MoveToContent();
+
+      XmlDocument := XmlDocument.XmlDocument();
+      XmlDocument.PreserveWhitespace := TRUE;
+      XmlDocument.Load(XmlDictionaryReader);
+      MemoryStream := MemoryStream.MemoryStream;
+      XmlDocument.Save(MemoryStream);
+      MemoryStream.Position := 0;
+      XmlStream := MemoryStream;
+    END;
+
+    BEGIN
+    END.
+  }
+}
