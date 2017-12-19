@@ -24,6 +24,9 @@ OBJECT Codeunit 139148 UT REST
       InvalidValueErr@1001 : TextConst 'ENU=Invalid returned value';
       XMLDOMMgt@1004 : Codeunit 6224;
       InvalidTokenFormatErr@1006 : TextConst 'ENU=The token must be in JWS or JWE Compact Serialization Format.';
+      ExampleJwtTokenTxt@1011 : TextConst 'ENU=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhdWQiOiJodHRwOi8vd3d3LmV4YW1wbGUuY29tIiwiaXNzIjoic2VsZiIsIm5iZiI6MTM1Mzk3NDczNiwiZXhwIjoxMzUzOTc0ODU2LCJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1lIjoiUGVkcm8iLCJodHRwOi8vc2NoZW1hcy5taWNyb3NvZnQuY29tL3dzLzIwMDgvMDYvaWRlbnRpdHkvY2xhaW1zL3JvbGUiOiJBdXRob3IifQ.a-Tu5ojQSyiGSzTb9E5QbEYxyhomywzh2wqKs4El7lc';
+      UnableToParseJwtObjectErr@1010 : TextConst 'ENU=Unable to parse Jwt object.';
+      HasJWTExpiredErr@1007 : TextConst 'ENU=HasJWTExpired function returns incorrect results for token expire date.';
 
     [Test]
     PROCEDURE ExpiredToken@3();
@@ -111,6 +114,31 @@ OBJECT Codeunit 139148 UT REST
 
       // [THEN] Resulted XML text has appropriate content
       VerifyXMLText(XmlText,MockXMLText);
+    END;
+
+    [Test]
+    PROCEDURE TestJwtToken@14();
+    VAR
+      SOAPWebServiceRequestMgt@1001 : Codeunit 1290;
+      WebTokenAsJson@1000 : Text;
+    BEGIN
+      // [SCENARIO] You can retrieve token details
+
+      // [GIVEN] A sample token
+      // [WHEN] The token details are retrieved
+      IF SOAPWebServiceRequestMgt.GetTokenDetailsAsJson(ExampleJwtTokenTxt,WebTokenAsJson) THEN BEGIN
+        // [THEN] The correct values are retrieved
+        Assert.AreEqual('http://www.example.com',SOAPWebServiceRequestMgt.GetTokenValue(WebTokenAsJson,'aud'),'');
+        Assert.AreEqual('self',SOAPWebServiceRequestMgt.GetTokenValue(WebTokenAsJson,'iss'),'');
+        Assert.AreEqual('1353974736',SOAPWebServiceRequestMgt.GetTokenValue(WebTokenAsJson,'nbf'),'');
+        Assert.AreEqual('1353974856',SOAPWebServiceRequestMgt.GetTokenValue(WebTokenAsJson,'exp'),'');
+        Assert.AreEqual('Pedro',SOAPWebServiceRequestMgt.GetTokenValue(WebTokenAsJson,
+            'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name'),'');
+        Assert.AreEqual('Author',SOAPWebServiceRequestMgt.GetTokenValue(WebTokenAsJson,
+            'http://schemas.microsoft.com/ws/2008/06/identity/claims/role'),'');
+        Assert.IsTrue(SOAPWebServiceRequestMgt.HasJWTExpired(ExampleJwtTokenTxt),HasJWTExpiredErr);
+      END ELSE
+        ERROR(UnableToParseJwtObjectErr);
     END;
 
     [Test]
