@@ -27,7 +27,7 @@ OBJECT Codeunit 132592 XmlStream Utils Test
       TempBlob@1008 : TEMPORARY Record 99008535;
       MtomString@1007 : Text;
       LineBreak@1006 : Text;
-      XmlDocumentResponse@1005 : DotNet "'System.Xml, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlDocument";
+      XmlDocumentResponse@1005 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlDocument";
       MtomInStream@1004 : InStream;
       XmlInStream@1003 : InStream;
       MtomOutStream@1002 : OutStream;
