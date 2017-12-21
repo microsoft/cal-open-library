@@ -1,0 +1,47 @@
+OBJECT Codeunit 705 Stream Management
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      MemoryStream@1000 : DotNet "'mscorlib'.System.IO.MemoryStream";
+
+    [External]
+    PROCEDURE MtomStreamToXmlStream@1(MtomStream@1000 : InStream;VAR XmlStream@1001 : InStream;ContentType@1002 : Text);
+    VAR
+      TextEncoding@1003 : DotNet "'mscorlib'.System.Text.Encoding";
+      DotNetArray@1004 : DotNet "'mscorlib'.System.Array";
+      XmlDocument@1006 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlDocument";
+      XmlDictionaryReader@1007 : DotNet "'System.Runtime.Serialization, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlDictionaryReader";
+      XmlDictionaryReaderQuotas@1008 : DotNet "'System.Runtime.Serialization, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlDictionaryReaderQuotas";
+    BEGIN
+      DotNetArray := DotNetArray.CreateInstance(GETDOTNETTYPE(TextEncoding),1);
+      DotNetArray.SetValue(TextEncoding.UTF8,0);
+      XmlDictionaryReader := XmlDictionaryReader.CreateMtomReader(MtomStream,DotNetArray,ContentType,XmlDictionaryReaderQuotas.Max);
+      XmlDictionaryReader.MoveToContent;
+
+      XmlDocument := XmlDocument.XmlDocument;
+      XmlDocument.PreserveWhitespace := TRUE;
+      XmlDocument.Load(XmlDictionaryReader);
+      MemoryStream := MemoryStream.MemoryStream;
+      XmlDocument.Save(MemoryStream);
+      MemoryStream.Position := 0;
+      XmlStream := MemoryStream;
+    END;
+
+    BEGIN
+    END.
+  }
+}
+
