@@ -1,0 +1,72 @@
+OBJECT Codeunit 132592 Stream Management Tests
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=Test,W1,All;
+  }
+  PROPERTIES
+  {
+    Subtype=Test;
+    TestPermissions=Disabled;
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      Assert@1000 : Codeunit 130000;
+
+    [Test]
+    PROCEDURE TestMtomStreamToXmlStream@1();
+    VAR
+      TempBlob@1000 : TEMPORARY Record 99008535;
+      StreamManagement@1001 : Codeunit 705;
+      TypeHelper@1002 : Codeunit 10;
+      MtomInStream@1003 : InStream;
+      XmlInStream@1004 : InStream;
+      MtomOutStream@1005 : OutStream;
+      XmlDocumentResponse@1006 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlDocument";
+      MtomString@1007 : Text;
+      Result@1008 : Text;
+      Content@1009 : Text;
+    BEGIN
+      // [SCENARIO] Unit test of function MtomStreamToXmlStream - convert Mtom to XML
+
+      // [GIVEN] An XML document
+      Content := '<env:Envelope xmlns:env="http://www.w3.org/2003/05/soap-envelope">';
+      Content += '<env:Header />';
+      Content += '<env:Body>';
+      Content += '<ns2:test xmlns:ns2="https://ns2" />';
+      Content += '</env:Body>';
+      Content += '</env:Envelope>';
+
+      // [GIVEN] An Mtom String embedding the xml document
+      MtomString := '------=_Part_170043_1574782596.1513784534431' + TypeHelper.NewLine;
+      MtomString += 'Content-Type: application/xop+xml; charset=utf-8; type="application/soap+xml"' + TypeHelper.NewLine;
+      MtomString += '' + TypeHelper.NewLine;
+      MtomString += Content + TypeHelper.NewLine;
+      MtomString += '------=_Part_170043_1574782596.1513784534431--';
+
+      // [WHEN] The Mtom String is processed by the MtomStreamToXmlStream function
+      TempBlob.Blob.CREATEOUTSTREAM(MtomOutStream);
+      MtomOutStream.WRITETEXT(MtomString);
+
+      TempBlob.Blob.CREATEINSTREAM(MtomInStream);
+      StreamManagement.MtomStreamToXmlStream(MtomInStream,XmlInStream,'Multipart/Related; boundary="----=_Part_170043_1574782596.1513784534431"; type="application/xop+xml"; start-info="application/soap+xml"');
+
+      // [THEN] The XML document is returned
+      XmlDocumentResponse := XmlDocumentResponse.XmlDocument;
+      XmlDocumentResponse.PreserveWhitespace := TRUE;
+      XmlDocumentResponse.Load(XmlInStream);
+      Result := XmlDocumentResponse.InnerXml;
+      Assert.AreEqual(Content,Result,'XmlStreamUtils.MtomStreamToXmlStream returned the wrong value');
+    END;
+
+    BEGIN
+    END.
+  }
+}
+
