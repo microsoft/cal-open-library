@@ -29,6 +29,8 @@ OBJECT Codeunit 132569 Data Encryption Mgmt. Tests
       HMACSHA512Txt@1008 : TextConst 'ENU=A4C31E9B1E4F224A437888B35856A8E914E0A6562317A52763ECEA0CF96CDBF6AC5C7D777F42BBD5AD41AEF425D7EDA429ED1C1D8EA080B436F4A7FEEC1DC238';
       HashAlgorithmType@1009 : 'MD5,SHA1,SHA256,SHA384,SHA512';
       KeyedHashAlgorithmType@1010 : 'HMACMD5,HMACSHA1,HMACSHA256,HMACSHA384,HMACSHA512';
+      SHA512Base64Txt@1012 : TextConst 'ENU="gRqgxTwAObbq0MqHiwlu7R057Yc/0tLScKv7nKYg0+1WHFZdbb0RFMMj044/WcAN9HVFH8mzAHTyq9o1Kd8vpw=="';
+      HMACSHA512Base64Txt@1011 : TextConst 'ENU="pMMemx5PIkpDeIizWFao6RTgplYjF6UnY+zqDPls2/asXH13f0K71a1BrvQl1+2kKe0cHY6ggLQ29Kf+7B3COA=="';
 
     [Test]
     PROCEDURE EncryptThrowsErrorWhenEncryptionIsNotEnabled@3();
@@ -430,6 +432,26 @@ OBJECT Codeunit 132569 Data Encryption Mgmt. Tests
     END;
 
     [Test]
+    PROCEDURE TestGetBlobGetContentHash@19();
+    VAR
+      TempBlob@1000 : Record 99008535;
+      EncryptionManagement@1001 : Codeunit 1266;
+      InStr@1002 : InStream;
+    BEGIN
+      // [FEATURE] [TempBlob function GetContentLength]
+      // [GIVEN] A blob containing a seting 'abc'
+      TempBlob.INIT;
+      TempBlob.WriteAsText('abc',TEXTENCODING::UTF8);
+
+      // [THEN] The SHA256-hash value of that string is 'BA7816BF8F01CFEA414140DE5DAE2223B00361A396177A9CB410FF61F20015AD'
+      TempBlob.Blob.CREATEINSTREAM(InStr);
+      Assert.AreEqual(
+        'BA7816BF8F01CFEA414140DE5DAE2223B00361A396177A9CB410FF61F20015AD',
+        EncryptionManagement.GenerateHashFromStream(InStr,HashAlgorithmType::SHA256),
+        'Wrong hashvalue returned');
+    END;
+
+    [Test]
     PROCEDURE UT_MD5HashGeneration@8();
     VAR
       EncryptionManagement@1000 : Codeunit 1266;
@@ -532,6 +554,111 @@ OBJECT Codeunit 132569 Data Encryption Mgmt. Tests
       Assert.AreEqual(
         HMACSHA512Txt,
         EncryptionManagement.GenerateKeyedHash(InputStringTxt,KeyTxt,KeyedHashAlgorithmType::HMACSHA512),WrongHashErr);
+    END;
+
+    [Test]
+    PROCEDURE UT_MD5HashGenerationBase64@27();
+    VAR
+      EncryptionManagement@1000 : Codeunit 1266;
+    BEGIN
+      // [FEATURE] [Hash]
+      // [SCENARIO 228632] Generate Base64 hash using MD5 algorithm
+
+      // [WHEN] GenerateHash is invoked with input string
+      // [THEN] Correct Base64 MD5 hash is generated
+      Assert.AreEqual(
+        'D9Pb7JcwEBv/kqzIIL78NA==',
+        EncryptionManagement.GenerateHashAsBase64String(InputStringTxt,HashAlgorithmType::MD5),WrongHashErr);
+
+      // [WHEN] GenerateHash is invoked with input string and key
+      // [THEN] Correct Base64 HMACMD5 hash is generated
+      Assert.AreEqual(
+        'm+BSXWHRUWKOkKm0Gsp8OA==',
+        EncryptionManagement.GenerateKeyedHashAsBase64String(InputStringTxt,KeyTxt,KeyedHashAlgorithmType::HMACMD5),WrongHashErr);
+    END;
+
+    [Test]
+    PROCEDURE UT_SHA1HashGenerationBase64@26();
+    VAR
+      EncryptionManagement@1000 : Codeunit 1266;
+    BEGIN
+      // [FEATURE] [Hash]
+      // [SCENARIO 228632] Generate Base64 hash using SHA1 algorithm
+
+      // [WHEN] GenerateHash is invoked with input string
+      // [THEN] Correct Base64 SHA1 hash is generated
+      Assert.AreEqual(
+        'GK+BkSW3CHnTY3hDHE6Nm/pqJZk=',
+        EncryptionManagement.GenerateHashAsBase64String(InputStringTxt,HashAlgorithmType::SHA1),WrongHashErr);
+
+      // [WHEN] GenerateHash is invoked with input string and key
+      // [THEN] Correct Base64 HMACSHA1 hash is generated
+      Assert.AreEqual(
+        'jZ/RsGP5wi31czgrIQtYHbZ6Mz0=',
+        EncryptionManagement.GenerateKeyedHashAsBase64String(InputStringTxt,KeyTxt,KeyedHashAlgorithmType::HMACSHA1),WrongHashErr);
+    END;
+
+    [Test]
+    PROCEDURE UT_TestSHA256HashGenerationBase64@20();
+    VAR
+      EncryptionManagement@1000 : Codeunit 1266;
+    BEGIN
+      // [FEATURE] [Hash]
+      // [SCENARIO 228632] Generate Base64 hash using SHA256 algorithm
+
+      // [WHEN] GenerateHash is invoked with input string
+      // [THEN] Correct Base64 SHA256 hash is generated
+      Assert.AreEqual(
+        'o+SdhD3xPC4qd4b27Nfg0YT0XXGNGsGopj5XBGbkid0=',
+        EncryptionManagement.GenerateHashAsBase64String(InputStringTxt,HashAlgorithmType::SHA256),WrongHashErr);
+
+      // [WHEN] GenerateHash is invoked with input string and key
+      // [THEN] Correct Base64 HMACSHA256 hash is generated
+      Assert.AreEqual(
+        'aWu4muvNN+k2qPwzk0VzPBQ0+pV3uObRp1opzOADfFg=',
+        EncryptionManagement.GenerateKeyedHashAsBase64String(InputStringTxt,KeyTxt,KeyedHashAlgorithmType::HMACSHA256),WrongHashErr);
+    END;
+
+    [Test]
+    PROCEDURE UT_TestSHA384HashGenerationBase64@18();
+    VAR
+      EncryptionManagement@1000 : Codeunit 1266;
+    BEGIN
+      // [FEATURE] [Hash]
+      // [SCENARIO 228632] Generate Base64 hash using SHA384 algorithm
+
+      // [WHEN] GenerateHash is invoked with input string
+      // [THEN] Correct Base64 SHA384 hash is generated
+      Assert.AreEqual(
+        'g8oU6/MAWhD1CDl0K9qCqmB9lyoDseajCG4pGVzq8F8Dj+zf8Cr/bp3N0nMmiHX3',
+        EncryptionManagement.GenerateHashAsBase64String(InputStringTxt,HashAlgorithmType::SHA384),WrongHashErr);
+
+      // [WHEN] GenerateHash is invoked with input string and key
+      // [THEN] Correct Base64 HMACSHA384 hash is generated
+      Assert.AreEqual(
+        '7wIRNuIKGqdgyAO+IRY3crq0ilPvF4qPW+tM6y5mgw4bvuXeJmMs/zJTUrgLUrtv',
+        EncryptionManagement.GenerateKeyedHashAsBase64String(InputStringTxt,KeyTxt,KeyedHashAlgorithmType::HMACSHA384),WrongHashErr);
+    END;
+
+    [Test]
+    PROCEDURE UT_TestSHA512HashGenerationBase64@17();
+    VAR
+      EncryptionManagement@1000 : Codeunit 1266;
+    BEGIN
+      // [FEATURE] [Hash]
+      // [SCENARIO 228632] Generate Base64 hash using SHA512 algorithm
+
+      // [WHEN] GenerateHash is invoked with input string
+      // [THEN] Correct Base64 SHA512 hash is generated
+      Assert.AreEqual(
+        SHA512Base64Txt,
+        EncryptionManagement.GenerateHashAsBase64String(InputStringTxt,HashAlgorithmType::SHA512),WrongHashErr);
+
+      // [WHEN] GenerateHash is invoked with input string and key
+      // [THEN] Correct Base64 HMACSHA512 hash is generated
+      Assert.AreEqual(
+        HMACSHA512Base64Txt,
+        EncryptionManagement.GenerateKeyedHashAsBase64String(InputStringTxt,KeyTxt,KeyedHashAlgorithmType::HMACSHA512),WrongHashErr);
     END;
 
     [Test]

@@ -597,6 +597,32 @@ OBJECT Codeunit 10 Type Helper
     END;
 
     [External]
+    PROCEDURE ConvertValueFromBase64@61(base64Value@1001 : Text) stringValue : Text;
+    VAR
+      Convert@1002 : DotNet "'mscorlib'.System.Convert";
+      Encoding@1000 : DotNet "'mscorlib'.System.Text.Encoding";
+    BEGIN
+      IF base64Value = '' THEN
+        EXIT('');
+
+      stringValue := Encoding.UTF8.GetString(Convert.FromBase64String(base64Value));
+      EXIT(stringValue);
+    END;
+
+    [External]
+    PROCEDURE ConvertValueToBase64@60(stringValue@1001 : Text) base64Value : Text;
+    VAR
+      Convert@1002 : DotNet "'mscorlib'.System.Convert";
+      Encoding@1000 : DotNet "'mscorlib'.System.Text.Encoding";
+    BEGIN
+      IF stringValue = '' THEN
+        EXIT('');
+
+      base64Value := Convert.ToBase64String(Encoding.UTF8.GetBytes(stringValue));
+      EXIT(base64Value);
+    END;
+
+    [External]
     PROCEDURE SortRecordRef@28(VAR RecRef@1000 : RecordRef;CommaSeparatedFieldsToSort@1001 : Text;Ascending@1002 : Boolean);
     VAR
       OrderString@1003 : Text;
@@ -828,6 +854,29 @@ OBJECT Codeunit 10 Type Helper
               TargetFieldRef.VALIDATE(SourceFieldRef.VALUE);
         END;
       UNTIL TempFieldBuffer.NEXT = 0;
+    END;
+
+    [External]
+    PROCEDURE AddMinutesToDateTime@53(SourceDateTime@1000 : DateTime;NoOfMinutes@1001 : Integer) : DateTime;
+    VAR
+      NewDateTime@1002 : DateTime;
+      i@1003 : Integer;
+      Sign@1004 : Boolean;
+    BEGIN
+      IF (NoOfMinutes < 1000) AND (NoOfMinutes > -1000) THEN
+        NewDateTime := SourceDateTime + 60000 * NoOfMinutes
+      ELSE BEGIN
+        NewDateTime := SourceDateTime;
+        Sign := NoOfMinutes > 0;
+        FOR i := 1 TO ABS(ROUND(NoOfMinutes / 1000,1,'<')) DO BEGIN
+          IF Sign THEN
+            NewDateTime += 60000 * 1000
+          ELSE
+            NewDateTime += 60000 * -1000
+        END;
+        NewDateTime += 60000 * (NoOfMinutes MOD 1000)
+      END;
+      EXIT(NewDateTime);
     END;
 
     BEGIN

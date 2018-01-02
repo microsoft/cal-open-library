@@ -371,21 +371,39 @@ OBJECT Codeunit 1266 Encryption Management
     VAR
       HashBytes@1004 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Array";
     BEGIN
-      IF InputString = '' THEN
+      IF NOT GenerateHashBytes(HashBytes,InputString,HashAlgorithmType) THEN
         EXIT('');
-      IF NOT TryGenerateHash(HashBytes,InputString,FORMAT(HashAlgorithmType)) THEN
-        ERROR(GETLASTERRORTEXT);
       EXIT(ConvertByteHashToString(HashBytes));
     END;
 
+    [External]
+    PROCEDURE GenerateHashAsBase64String@32(InputString@1000 : Text;HashAlgorithmType@1001 : 'MD5,SHA1,SHA256,SHA384,SHA512') : Text;
+    VAR
+      HashBytes@1004 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Array";
+    BEGIN
+      IF NOT GenerateHashBytes(HashBytes,InputString,HashAlgorithmType) THEN
+        EXIT('');
+      EXIT(ConvertByteHashToBase64String(HashBytes));
+    END;
+
+    LOCAL PROCEDURE GenerateHashBytes@34(VAR HashBytes@1003 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Array";InputString@1000 : Text;HashAlgorithmType@1001 : 'MD5,SHA1,SHA256,SHA384,SHA512') : Boolean;
+    VAR
+      Encoding@1002 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.Encoding";
+    BEGIN
+      IF InputString = '' THEN
+        EXIT(FALSE);
+      IF NOT TryGenerateHash(HashBytes,Encoding.UTF8.GetBytes(InputString),FORMAT(HashAlgorithmType)) THEN
+        ERROR(GETLASTERRORTEXT);
+      EXIT(TRUE);
+    END;
+
     [TryFunction]
-    LOCAL PROCEDURE TryGenerateHash@26(VAR HashBytes@1000 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Array";InputString@1001 : Text;Algorithm@1002 : Text);
+    LOCAL PROCEDURE TryGenerateHash@26(VAR HashBytes@1000 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Array";Bytes@1001 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Array";Algorithm@1002 : Text);
     VAR
       HashAlgorithm@1003 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Security.Cryptography.HashAlgorithm";
-      Encoding@1004 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.Encoding";
     BEGIN
       HashAlgorithm := HashAlgorithm.Create(Algorithm);
-      HashBytes := HashAlgorithm.ComputeHash(Encoding.UTF8.GetBytes(InputString));
+      HashBytes := HashAlgorithm.ComputeHash(Bytes);
       HashAlgorithm.Dispose;
     END;
 
@@ -394,11 +412,28 @@ OBJECT Codeunit 1266 Encryption Management
     VAR
       HashBytes@1004 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Array";
     BEGIN
-      IF (InputString = '') OR (Key = '') THEN
+      IF NOT GenerateKeyedHashBytes(HashBytes,InputString,Key,HashAlgorithmType) THEN
         EXIT('');
+      EXIT(ConvertByteHashToString(HashBytes));
+    END;
+
+    [External]
+    PROCEDURE GenerateKeyedHashAsBase64String@43(InputString@1000 : Text;Key@1005 : Text;HashAlgorithmType@1001 : 'HMACMD5,HMACSHA1,HMACSHA256,HMACSHA384,HMACSHA512') : Text;
+    VAR
+      HashBytes@1004 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Array";
+    BEGIN
+      IF NOT GenerateKeyedHashBytes(HashBytes,InputString,Key,HashAlgorithmType) THEN
+        EXIT('');
+      EXIT(ConvertByteHashToBase64String(HashBytes));
+    END;
+
+    LOCAL PROCEDURE GenerateKeyedHashBytes@44(VAR HashBytes@1002 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Array";InputString@1000 : Text;Key@1005 : Text;HashAlgorithmType@1001 : 'HMACMD5,HMACSHA1,HMACSHA256,HMACSHA384,HMACSHA512') : Boolean;
+    BEGIN
+      IF (InputString = '') OR (Key = '') THEN
+        EXIT(FALSE);
       IF NOT TryGenerateKeyedHash(HashBytes,InputString,Key,FORMAT(HashAlgorithmType)) THEN
         ERROR(GETLASTERRORTEXT);
-      EXIT(ConvertByteHashToString(HashBytes));
+      EXIT(TRUE);
     END;
 
     [TryFunction]
@@ -425,6 +460,28 @@ OBJECT Codeunit 1266 Encryption Management
         StringBuilder.Append(Byte.ToString('X2'));
       END;
       EXIT(StringBuilder.ToString);
+    END;
+
+    LOCAL PROCEDURE ConvertByteHashToBase64String@31(HashBytes@1000 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Array") : Text;
+    VAR
+      Convert@1001 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Convert";
+    BEGIN
+      EXIT(Convert.ToBase64String(HashBytes));
+    END;
+
+    [External]
+    PROCEDURE GenerateHashFromStream@33(InStr@1000 : InStream;HashAlgorithmType@1002 : 'MD5,SHA1,SHA256,SHA384,SHA512') : Text;
+    VAR
+      MemoryStream@1004 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.IO.MemoryStream";
+      HashBytes@1005 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Array";
+    BEGIN
+      IF InStr.EOS THEN
+        EXIT('');
+      MemoryStream := MemoryStream.MemoryStream;
+      COPYSTREAM(MemoryStream,InStr);
+      IF NOT TryGenerateHash(HashBytes,MemoryStream.ToArray,FORMAT(HashAlgorithmType)) THEN
+        ERROR(GETLASTERRORTEXT);
+      EXIT(ConvertByteHashToString(HashBytes));
     END;
 
     BEGIN
