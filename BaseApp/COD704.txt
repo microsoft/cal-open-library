@@ -15,40 +15,47 @@ OBJECT Codeunit 704 MemoryStream Wrapper
   CODE
   {
     VAR
-      MemoryStream@1000 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.IO.MemoryStream";
-      StreamWriter@1001 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.IO.StreamWriter";
-      StreamReader@1002 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.IO.StreamReader";
+      MemoryStream@1000 : DotNet "'mscorlib'.System.IO.MemoryStream";
+      StreamWriter@1001 : DotNet "'mscorlib'.System.IO.StreamWriter";
+      StreamReader@1002 : DotNet "'mscorlib'.System.IO.StreamReader";
 
+    [External]
     PROCEDURE Create@1(Capacity@1000 : Integer);
     BEGIN
       MemoryStream := MemoryStream.MemoryStream(Capacity);
     END;
 
+    [External]
     PROCEDURE SetPosition@2(Position@1000 : Integer);
     BEGIN
       MemoryStream.Position := Position;
     END;
 
+    [External]
     PROCEDURE GetPosition@3() : Integer;
     BEGIN
       EXIT(MemoryStream.Position);
     END;
 
+    [External]
     PROCEDURE CopyTo@4(OutStream@1000 : OutStream);
     BEGIN
       MemoryStream.CopyTo(OutStream);
     END;
 
+    [External]
     PROCEDURE GetInStream@5(VAR InStream@1000 : InStream);
     BEGIN
       InStream := MemoryStream;
     END;
 
+    [External]
     PROCEDURE ReadFrom@6(VAR InStream@1000 : InStream);
     BEGIN
       COPYSTREAM(MemoryStream,InStream);
     END;
 
+    [External]
     PROCEDURE ToText@7() : Text;
     BEGIN
       MemoryStream.Position := 0;
@@ -57,6 +64,7 @@ OBJECT Codeunit 704 MemoryStream Wrapper
       EXIT(StreamReader.ReadToEnd());
     END;
 
+    [External]
     PROCEDURE AddText@8(Txt@1000 : Text);
     BEGIN
       IF ISNULL(StreamWriter) THEN
@@ -65,6 +73,7 @@ OBJECT Codeunit 704 MemoryStream Wrapper
       StreamWriter.Flush();
     END;
 
+    [External]
     PROCEDURE Length@9() : Integer;
     BEGIN
       EXIT(MemoryStream.Length);
