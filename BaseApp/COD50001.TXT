@@ -1,0 +1,144 @@
+OBJECT Codeunit 50001 Json Text Writer
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      StringBuilder@1004 : DotNet "'mscorlib'.System.Text.StringBuilder";
+      StringWriter@1003 : DotNet "'mscorlib'.System.IO.StringWriter";
+      JsonTextWriter@1001 : DotNet "'Newtonsoft.Json, Version=9.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed'.Newtonsoft.Json.JsonTextWriter";
+
+    LOCAL PROCEDURE Initialize@15();
+    VAR
+      Formatting@1000 : DotNet "'Newtonsoft.Json, Version=9.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed'.Newtonsoft.Json.Formatting";
+    BEGIN
+      StringBuilder := StringBuilder.StringBuilder;
+      StringWriter := StringWriter.StringWriter(StringBuilder);
+      JsonTextWriter := JsonTextWriter.JsonTextWriter(StringWriter);
+      JsonTextWriter.Formatting := Formatting.Indented;
+    END;
+
+    PROCEDURE WriteStartConstructor@1003(Name@1000 : Text);
+    BEGIN
+      IF ISNULL(StringBuilder) THEN
+        Initialize;
+
+      JsonTextWriter.WriteStartConstructor(Name);
+    END;
+
+    PROCEDURE WriteEndConstructor@1002();
+    BEGIN
+      JsonTextWriter.WriteEndConstructor;
+    END;
+
+    PROCEDURE WriteStartObject@1(ObjectName@1000 : Text);
+    BEGIN
+      IF ISNULL(StringBuilder) THEN
+        Initialize;
+
+      IF ObjectName <> '' THEN
+        JsonTextWriter.WritePropertyName(ObjectName);
+      JsonTextWriter.WriteStartObject;
+    END;
+
+    PROCEDURE WriteEndObject@3();
+    BEGIN
+      JsonTextWriter.WriteEndObject;
+    END;
+
+    PROCEDURE WriteStartArray@14(ArrayName@1000 : Text);
+    BEGIN
+      IF ISNULL(StringBuilder) THEN
+        Initialize;
+
+      IF ArrayName <> '' THEN
+        JsonTextWriter.WritePropertyName(ArrayName);
+      JsonTextWriter.WriteStartArray;
+    END;
+
+    PROCEDURE WriteEndArray@19();
+    BEGIN
+      JsonTextWriter.WriteEndArray;
+    END;
+
+    PROCEDURE WriteStringProperty@4(VariableName@1001 : Text;Variable@1002 : Variant);
+    BEGIN
+      JsonTextWriter.WritePropertyName(VariableName);
+      JsonTextWriter.WriteValue(FORMAT(Variable,0,9));
+    END;
+
+    PROCEDURE WriteNumberProperty@9(VariableName@1001 : Text;Variable@1002 : Variant);
+    VAR
+      Decimal@1000 : Decimal;
+    BEGIN
+      CASE TRUE OF
+        Variable.ISINTEGER,Variable.ISDECIMAL:
+          Decimal := Variable;
+        ELSE
+          EVALUATE(Decimal,Variable);
+      END;
+      JsonTextWriter.WritePropertyName(VariableName);
+      JsonTextWriter.WriteValue(Decimal);
+    END;
+
+    PROCEDURE WriteBooleanProperty@10(VariableName@1001 : Text;Variable@1002 : Variant);
+    VAR
+      Bool@1000 : Boolean;
+    BEGIN
+      CASE TRUE OF
+        Variable.ISBOOLEAN:
+          Bool := Variable;
+        ELSE
+          EVALUATE(Bool,Variable);
+      END;
+      JsonTextWriter.WritePropertyName(VariableName);
+      JsonTextWriter.WriteValue(Bool);
+    END;
+
+    PROCEDURE WriteNullProperty@8(VariableName@1001 : Text);
+    BEGIN
+      JsonTextWriter.WritePropertyName(VariableName);
+      JsonTextWriter.WriteNull;
+    END;
+
+    PROCEDURE WriteBytesProperty@1000(VariableName@1001 : Text;TempBlob@1002 : Record 99008535);
+    VAR
+      MemoryStream@1004 : DotNet "'mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.IO.MemoryStream";
+      InStr@1003 : InStream;
+      Bool@1000 : Boolean;
+    BEGIN
+      TempBlob.Blob.CREATEINSTREAM(InStr);
+      MemoryStream := MemoryStream.MemoryStream;
+      COPYSTREAM(MemoryStream,InStr);
+      JsonTextWriter.WritePropertyName(VariableName);
+      JsonTextWriter.WriteValue(MemoryStream.ToArray);
+    END;
+
+    PROCEDURE WriteRawProperty@1005(VariableName@1001 : Text;Variable@1002 : Variant);
+    BEGIN
+      JsonTextWriter.WritePropertyName(VariableName);
+      JsonTextWriter.WriteValue(Variable);
+    END;
+
+    PROCEDURE GetJSonAsText@20() JSon : Text;
+    BEGIN
+      JSon := StringBuilder.ToString;
+      Initialize;
+    END;
+
+    BEGIN
+    END.
+  }
+}
+

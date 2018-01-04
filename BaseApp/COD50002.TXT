@@ -1,0 +1,90 @@
+OBJECT Codeunit 50002 Json Text Reader
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      StringReader@1002 : DotNet "'mscorlib'.System.IO.StringReader";
+      JsonTextReader@1000 : DotNet "'Newtonsoft.Json, Version=9.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed'.Newtonsoft.Json.JsonTextReader";
+
+    PROCEDURE ReadJSonToJSonBuffer@12(Json@1000 : Text;VAR JsonBuffer@1001 : Record 1236);
+    VAR
+      JsonToken@1007 : DotNet "'Newtonsoft.Json, Version=9.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed'.Newtonsoft.Json.JsonToken";
+      MemoryStream@1006 : DotNet "'mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.IO.MemoryStream";
+      Bytes@1003 : DotNet "'mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Array";
+      OutStr@1002 : OutStream;
+    BEGIN
+      StringReader := StringReader.StringReader(Json);
+      JsonTextReader := JsonTextReader.JsonTextReader(StringReader);
+      WITH JsonBuffer DO
+        WHILE JsonTextReader.Read DO BEGIN
+          "Entry No." += 1;
+          Depth := JsonTextReader.Depth;
+
+          CASE TRUE OF
+            JsonTextReader.TokenType.CompareTo(JsonToken.StartObject) = 0 :
+              "Token type" := "Token type"::"Start Object";
+            JsonTextReader.TokenType.CompareTo(JsonToken.StartArray) = 0 :
+              "Token type" := "Token type"::"Start Array";
+            JsonTextReader.TokenType.CompareTo(JsonToken.StartConstructor) = 0 :
+              "Token type" := "Token type"::"Start Constructor";
+            JsonTextReader.TokenType.CompareTo(JsonToken.PropertyName) = 0 :
+              "Token type" := "Token type"::"Property Name";
+            JsonTextReader.TokenType.CompareTo(JsonToken.Comment) = 0 :
+              "Token type" := "Token type"::Comment;
+            JsonTextReader.TokenType.CompareTo(JsonToken.Raw) = 0 :
+              "Token type" := "Token type"::Raw;
+            JsonTextReader.TokenType.CompareTo(JsonToken.Integer) = 0 :
+              "Token type" := "Token type"::Integer;
+            JsonTextReader.TokenType.CompareTo(JsonToken.Float) = 0 :
+              "Token type" := "Token type"::Decimal;
+            JsonTextReader.TokenType.CompareTo(JsonToken.String) = 0 :
+              "Token type" := "Token type"::String;
+            JsonTextReader.TokenType.CompareTo(JsonToken.Boolean) = 0 :
+              "Token type" := "Token type"::Boolean;
+            JsonTextReader.TokenType.CompareTo(JsonToken.Null) = 0 :
+              "Token type" := "Token type"::Null;
+            JsonTextReader.TokenType.CompareTo(JsonToken.Undefined) = 0 :
+              "Token type" := "Token type"::Undefined;
+            JsonTextReader.TokenType.CompareTo(JsonToken.EndObject) = 0 :
+              "Token type" := "Token type"::"End Object";
+            JsonTextReader.TokenType.CompareTo(JsonToken.EndArray) = 0 :
+              "Token type" := "Token type"::"End Array";
+            JsonTextReader.TokenType.CompareTo(JsonToken.EndConstructor) = 0 :
+              "Token type" := "Token type"::"End Constructor";
+            JsonTextReader.TokenType.CompareTo(JsonToken.Date) = 0 :
+              "Token type" := "Token type"::Date;
+            JsonTextReader.TokenType.CompareTo(JsonToken.Bytes) = 0 :
+              "Token type" := "Token type"::Bytes;
+          END;
+
+          "Value Type" := FORMAT(JsonTextReader.ValueType,0,9);
+          Path := JsonTextReader.Path;
+
+          IF "Token type" = "Token type"::Bytes THEN BEGIN
+            Bytes := JsonTextReader.Value;
+            MemoryStream := MemoryStream.MemoryStream(Bytes);
+            "Value BLOB".CREATEOUTSTREAM(OutStr);
+            COPYSTREAM(OutStr,MemoryStream);
+          END ELSE
+            Value := FORMAT(JsonTextReader.Value,0,9);
+          INSERT;
+      END;
+    END;
+
+    BEGIN
+    END.
+  }
+}
+
