@@ -1,0 +1,106 @@
+OBJECT Codeunit 50011 Zip Stream Wrapper Test
+{
+  OBJECT-PROPERTIES
+  {
+    Date=23/01/18;
+    Time=15:01:20;
+    Modified=Yes;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    Subtype=Test;
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+
+    [Test]
+    LOCAL PROCEDURE TestZipStreams@1000000001();
+    VAR
+      TempBlob@1000000000 : Record 99008535;
+      FileList@1000000010 : TEMPORARY Record 823;
+      InputStream@1000000001 : InStream;
+      OutputStream@1000000002 : OutStream;
+      OutZipStream@1000000003 : Codeunit 50010;
+      InZipStream@1000000009 : Codeunit 50010;
+      TextToWrite@1000000004 : Text;
+      TextFromZip@1000000005 : Text;
+      GuidToWrite@1000000006 : GUID;
+      GuidFromZip@1000000007 : GUID;
+      TextFileName@1000000008 : Text;
+      BinaryFileName@1000000011 : Text;
+      txtFileListTestFailed@1000000013 : TextConst 'ENU=Zip file list returned incorrect results';
+      txtTextFileTestFailed@1000000014 : TextConst 'ENU="Text zip file test failed "';
+      txtBinaryFileTestFailed@1000000015 : TextConst 'ENU=Binary zip file test failed';
+    BEGIN
+      //initialize variables
+      TextFileName := 'TextFile.txt';
+      BinaryFileName := 'BinaryFile.dat';
+      TextToWrite := 'Text to write';
+      GuidToWrite := CREATEGUID;
+
+      //create new zip
+      OutZipStream.CreateNewZip();
+
+      //add text file to zip
+      CLEAR(TempBlob);
+      TempBlob.Blob.CREATEOUTSTREAM(OutputStream);
+      OutputStream.WRITE(TextToWrite);
+      TempBlob.Blob.CREATEINSTREAM(InputStream);
+      OutZipStream.AddFileFromStreamToZip(TextFileName, InputStream);
+
+      //add binary file to zip
+      CLEAR(TempBlob);
+      TempBlob.Blob.CREATEOUTSTREAM(OutputStream);
+      OutputStream.WRITE(GuidToWrite);
+      TempBlob.Blob.CREATEINSTREAM(InputStream);
+      OutZipStream.AddFileFromStreamToZip(BinaryFileName, InputStream);
+
+      //create zip file
+      CLEAR(TempBlob);
+      TempBlob.Blob.CREATEOUTSTREAM(OutputStream);
+      OutZipStream.SaveZipToStream(OutputStream);
+
+      //open zip
+      InZipStream.OpenZipFromTempBlob(TempBlob, FALSE);
+      InZipStream.GetFiles(FileList);
+
+      //check if files exist in the returned list of files
+      FileList.RESET();
+      FileList.SETRANGE(Name, TextFileName);
+      IF (FileList.ISEMPTY) THEN
+        ERROR(txtFileListTestFailed);
+
+      FileList.RESET();
+      FileList.SETRANGE(Name, BinaryFileName);
+      IF (FileList.ISEMPTY) THEN
+        ERROR(txtFileListTestFailed);
+
+      //check if we can extract text back from text file
+      CLEAR(TempBlob);
+      TempBlob.Blob.CREATEOUTSTREAM(OutputStream);
+      InZipStream.WriteFileFromZipToOutStream(TextFileName, OutputStream);
+      TempBlob.Blob.CREATEINSTREAM(InputStream);
+      InputStream.READ(TextFromZip);
+
+      IF (TextFromZip <> TextToWrite) THEN
+        ERROR(txtTextFileTestFailed);
+
+      CLEAR(TempBlob);
+      TempBlob.Blob.CREATEOUTSTREAM(OutputStream);
+      InZipStream.WriteFileFromZipToOutStream(BinaryFileName, OutputStream);
+      TempBlob.Blob.CREATEINSTREAM(InputStream);
+      InputStream.READ(GuidFromZip);
+
+      IF (GuidFromZip <> GuidToWrite) THEN
+        ERROR(txtBinaryFileTestFailed);
+    END;
+
+    BEGIN
+    END.
+  }
+}
+

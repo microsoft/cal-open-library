@@ -1,0 +1,164 @@
+OBJECT Codeunit 50010 Zip Stream Wrapper
+{
+  OBJECT-PROPERTIES
+  {
+    Date=23/01/18;
+    Time=15:04:10;
+    Modified=Yes;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      ZipArchive@1000000000 : DotNet "'System.IO.Compression, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.IO.Compression.ZipArchive";
+      ZipArchiveMode@1000000004 : DotNet "'System.IO.Compression, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.IO.Compression.ZipArchiveMode";
+      ZipMemoryStream@1000000001 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.IO.MemoryStream";
+      SeekOrigin@1000000002 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.IO.SeekOrigin";
+      txtZipFileFilter@1000000003 : TextConst 'ENU=Zip Files (*.zip)|*.zip|All Files (*.*)|*.*';
+      txtUploadZipFile@1000000005 : TextConst 'ENU=Upload ZIP file';
+      txtDownloadZipFile@1000000006 : TextConst 'ENU=Download ZIP file';
+      txtDefaultZipFile@1000000007 : TextConst 'ENU=default.zip';
+
+    [External]
+    PROCEDURE CreateNewZip@1000000012();
+    BEGIN
+      ZipMemoryStream := ZipMemoryStream.MemoryStream();
+      ZipArchive := ZipArchive.ZipArchive(ZipMemoryStream, ZipArchiveMode.Create);
+    END;
+
+    [External]
+    PROCEDURE UploadZip@1000000005(DialogTitle@1000000000 : Text;FromFolder@1000000001 : Text;FromFilter@1000000002 : Text;VAR FromFile@1000000003 : Text) : Boolean;
+    VAR
+      InputStream@1000000004 : InStream;
+    BEGIN
+      IF (DialogTitle = '') THEN
+        DialogTitle := txtUploadZipFile;
+      IF (FromFilter = '') THEN
+        FromFilter := txtZipFileFilter;
+
+      IF (UPLOADINTOSTREAM(DialogTitle, FromFolder, FromFilter, FromFile, InputStream)) THEN BEGIN
+        OpenZipFromStream(InputStream, FALSE);
+        EXIT(TRUE);
+      END;
+      EXIT(FALSE);
+    END;
+
+    [External]
+    PROCEDURE OpenZipFromStream@1000000007(InputStream@1000000000 : InStream;ForUpdate@1000000001 : Boolean);
+    VAR
+      InputNetStream@1000000004 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.IO.Stream";
+      BinaryReader@1000000003 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.IO.BinaryReader";
+      BinaryWriter@1000000002 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.IO.BinaryWriter";
+    BEGIN
+      ZipMemoryStream := ZipMemoryStream.MemoryStream();
+      InputNetStream := InputStream;
+      InputNetStream.CopyTo(ZipMemoryStream);
+      ZipMemoryStream.Seek(0, SeekOrigin."Begin");
+
+      IF (ForUpdate) THEN
+        ZipArchive := ZipArchive.ZipArchive(ZipMemoryStream, ZipArchiveMode.Update)
+      ELSE
+        ZipArchive := ZipArchive.ZipArchive(ZipMemoryStream, ZipArchiveMode.Read);
+    END;
+
+    [External]
+    PROCEDURE OpenZipFromTempBlob@1000000001(VAR TempBlob@1000000000 : Record 99008535;ForUpdate@1000000002 : Boolean);
+    VAR
+      InputStream@1000000001 : InStream;
+    BEGIN
+      TempBlob.Blob.CREATEINSTREAM(InputStream);
+      OpenZipFromStream(InputStream, ForUpdate);
+    END;
+
+    [External]
+    PROCEDURE DownloadZip@1000000006(DialogTitle@1000000000 : Text;ToFolder@1000000001 : Text;ToFilter@1000000002 : Text;ToFile@1000000003 : Text) : Boolean;
+    VAR
+      TempBlob@1000000004 : TEMPORARY Record 99008535;
+      OutputStream@1000000005 : OutStream;
+      InputStream@1000000006 : InStream;
+    BEGIN
+      IF (DialogTitle = '') THEN
+        DialogTitle := txtDownloadZipFile;
+      IF (ToFilter = '') THEN
+        ToFilter := txtZipFileFilter;
+      IF (ToFile = '') THEN
+        ToFile := txtDefaultZipFile;
+
+      CLEAR(TempBlob);
+      TempBlob.Blob.CREATEOUTSTREAM(OutputStream);
+      SaveZipToStream(OutputStream);
+      TempBlob.Blob.CREATEINSTREAM(InputStream);
+
+      EXIT(DOWNLOADFROMSTREAM(InputStream, DialogTitle, ToFolder, ToFilter, ToFile));
+    END;
+
+    [External]
+    PROCEDURE SaveZipToStream@1000000008(OutputStream@1000000000 : OutStream);
+    VAR
+      InputStream@1000000001 : InStream;
+    BEGIN
+      ZipArchive.Dispose();
+      ZipMemoryStream := ZipMemoryStream.MemoryStream(ZipMemoryStream.GetBuffer());
+      ZipMemoryStream.CopyTo(OutputStream);
+      ZipMemoryStream.Dispose();
+
+      CLEAR(ZipArchive);
+      CLEAR(ZipMemoryStream);
+    END;
+
+    [External]
+    PROCEDURE SaveZipToTempBlob@1000000011(VAR TempBlob@1000000000 : Record 99008535);
+    VAR
+      OutputStream@1000000001 : OutStream;
+    BEGIN
+      CLEAR(TempBlob);
+      TempBlob.Blob.CREATEOUTSTREAM(OutputStream);
+      SaveZipToStream(OutputStream);
+    END;
+
+    [External]
+    PROCEDURE GetFiles@1000000004(VAR FileList@1000000000 : Record 823);
+    VAR
+      ZipArchiveEntry@1000000001 : DotNet "'System.IO.Compression, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.IO.Compression.ZipArchiveEntry";
+    BEGIN
+      FileList.RESET();
+      FileList.DELETEALL();
+      FOREACH ZipArchiveEntry IN ZipArchive.Entries DO BEGIN
+        FileList.AddNewEntry(ZipArchiveEntry.FullName, ZipArchiveEntry.Name);
+      END;
+    END;
+
+    [External]
+    PROCEDURE WriteFileFromZipToOutStream@1000000002(FileName@1000000000 : Text;VAR OutputStream@1000000002 : OutStream);
+    VAR
+      ZipArchiveEntry@1000000001 : DotNet "'System.IO.Compression, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.IO.Compression.ZipArchiveEntry";
+      ZipArchiveEntryStream@1000000003 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.IO.Stream";
+    BEGIN
+      ZipArchiveEntry := ZipArchive.GetEntry(FileName);
+      ZipArchiveEntryStream := ZipArchiveEntry.Open();
+      ZipArchiveEntryStream.CopyTo(OutputStream);
+    END;
+
+    [External]
+    PROCEDURE AddFileFromStreamToZip@1000000003(FileName@1000000000 : Text;InputStream@1000000001 : InStream);
+    VAR
+      ZipArchiveEntry@1000000002 : DotNet "'System.IO.Compression, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.IO.Compression.ZipArchiveEntry";
+      ZipArchiveEntryStream@1000000003 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.IO.Stream";
+    BEGIN
+      ZipArchiveEntry := ZipArchive.CreateEntry(FileName);
+      ZipArchiveEntryStream := ZipArchiveEntry.Open();
+      COPYSTREAM(ZipArchiveEntryStream, InputStream);
+      ZipArchiveEntryStream.Close();
+    END;
+
+    BEGIN
+    END.
+  }
+}
+
