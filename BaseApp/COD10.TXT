@@ -522,8 +522,8 @@ OBJECT Codeunit 10 Type Helper
     [External]
     PROCEDURE FormatDateTime@44(FormattingDateTime@1001 : DateTime;Format@1000 : Text;CultureName@1004 : Text) : Text;
     VAR
-      CultureInfo@1002 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Globalization.CultureInfo";
-      DateTimeOffset@1010 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.DateTimeOffset";
+      CultureInfo@1002 : DotNet "'mscorlib'.System.Globalization.CultureInfo";
+      DateTimeOffset@1010 : DotNet "'mscorlib'.System.DateTimeOffset";
     BEGIN
       IF CultureName = '' THEN
         CultureInfo := CultureInfo.InvariantCulture
@@ -537,9 +537,23 @@ OBJECT Codeunit 10 Type Helper
     END;
 
     [External]
+    PROCEDURE FormatUtcDateTime@68(DateTime@1000 : DateTime;DataFormat@1001 : Text;DataFormattingCulture@1002 : Text) String : Text;
+    VAR
+      CultureInfo@1003 : DotNet "'mscorlib'.System.Globalization.CultureInfo";
+      DotNetString@1004 : DotNet "'mscorlib'.System.String";
+    BEGIN
+      IF DataFormattingCulture = '' THEN
+        CultureInfo := CultureInfo.CurrentCulture
+      ELSE
+        CultureInfo := CultureInfo.CultureInfo(DataFormattingCulture);
+
+      String := DotNetString.Format(CultureInfo,'{0:' + DataFormat + '}',DateTime);
+    END;
+
+    [External]
     PROCEDURE GetCurrUTCDateTime@50() : DateTime;
     VAR
-      DotNetDateTime@1000 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.DateTime";
+      DotNetDateTime@1000 : DotNet "'mscorlib'.System.DateTime";
     BEGIN
       DotNetDateTime := DotNetDateTime.UtcNow;
       EXIT(DotNetDateTime)
@@ -549,6 +563,20 @@ OBJECT Codeunit 10 Type Helper
     PROCEDURE GetCurrUTCDateTimeAsText@49() : Text;
     BEGIN
       EXIT(FormatDateTime(GetCurrUTCDateTime,'R',''));
+    END;
+
+    [External]
+    PROCEDURE FormatDecimal@69(Decimal@1000 : Decimal;DataFormat@1001 : Text;DataFormattingCulture@1002 : Text) String : Text;
+    VAR
+      CultureInfo@1003 : DotNet "'mscorlib'.System.Globalization.CultureInfo";
+      DotNetString@1004 : DotNet "'mscorlib'.System.String";
+    BEGIN
+      IF DataFormattingCulture = '' THEN
+        CultureInfo := CultureInfo.CurrentCulture
+      ELSE
+        CultureInfo := CultureInfo.CultureInfo(DataFormattingCulture);
+
+      String := DotNetString.Format(CultureInfo,'{0:' + DataFormat + '}',Decimal);
     END;
 
     [External]
@@ -567,6 +595,14 @@ OBJECT Codeunit 10 Type Helper
     BEGIN
       Value := HttpUtility.HtmlEncode(Value);
       EXIT(Value);
+    END;
+
+    [External]
+    PROCEDURE UriEscapeDataString@155(Value@1000 : Text) : Text;
+    VAR
+      Uri@1001 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Uri";
+    BEGIN
+      EXIT(Uri.EscapeDataString(Value));
     END;
 
     [External]
@@ -877,6 +913,13 @@ OBJECT Codeunit 10 Type Helper
         NewDateTime += 60000 * (NoOfMinutes MOD 1000)
       END;
       EXIT(NewDateTime);
+    END;
+
+    PROCEDURE CalculateLog@54(Number@1000 : Decimal) : Decimal;
+    VAR
+      Math@1002 : DotNet "'mscorlib'.System.Math";
+    BEGIN
+      EXIT(Math.Log10(Number));
     END;
 
     BEGIN
