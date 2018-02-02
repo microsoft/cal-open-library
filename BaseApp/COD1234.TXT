@@ -1,0 +1,170 @@
+OBJECT Codeunit 1234 Json Text Reader/Writer
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      StringBuilder@1000 : DotNet "'mscorlib'.System.Text.StringBuilder";
+      StringWriter@1001 : DotNet "'mscorlib'.System.IO.StringWriter";
+      JsonTextWriter@1004 : DotNet "'Newtonsoft.Json'.Newtonsoft.Json.JsonTextWriter";
+      DoNotFormat@1002 : Boolean;
+
+    [External]
+    PROCEDURE ReadJSonToJSonBuffer@15(Json@1000 : Text;VAR JsonBuffer@1001 : Record 1236);
+    BEGIN
+      JsonBuffer.ReadFromText(Json);
+    END;
+
+    LOCAL PROCEDURE InitializeWriter@1();
+    VAR
+      Formatting@1000 : DotNet "'Newtonsoft.Json'.Newtonsoft.Json.Formatting";
+    BEGIN
+      IF NOT ISNULL(StringBuilder) THEN
+        EXIT;
+      StringBuilder := StringBuilder.StringBuilder;
+      StringWriter := StringWriter.StringWriter(StringBuilder);
+      JsonTextWriter := JsonTextWriter.JsonTextWriter(StringWriter);
+      IF DoNotFormat THEN
+        JsonTextWriter.Formatting := Formatting.None
+      ELSE
+        JsonTextWriter.Formatting := Formatting.Indented;
+    END;
+
+    [External]
+    PROCEDURE SetDoNotFormat@16();
+    BEGIN
+      DoNotFormat := TRUE;
+    END;
+
+    [External]
+    PROCEDURE WriteStartConstructor@2(Name@1000 : Text);
+    BEGIN
+      InitializeWriter;
+
+      JsonTextWriter.WriteStartConstructor(Name);
+    END;
+
+    [External]
+    PROCEDURE WriteEndConstructor@3();
+    BEGIN
+      JsonTextWriter.WriteEndConstructor;
+    END;
+
+    [External]
+    PROCEDURE WriteStartObject@4(ObjectName@1000 : Text);
+    BEGIN
+      InitializeWriter;
+
+      IF ObjectName <> '' THEN
+        JsonTextWriter.WritePropertyName(ObjectName);
+      JsonTextWriter.WriteStartObject;
+    END;
+
+    [External]
+    PROCEDURE WriteEndObject@5();
+    BEGIN
+      JsonTextWriter.WriteEndObject;
+    END;
+
+    [External]
+    PROCEDURE WriteStartArray@6(ArrayName@1000 : Text);
+    BEGIN
+      InitializeWriter;
+
+      IF ArrayName <> '' THEN
+        JsonTextWriter.WritePropertyName(ArrayName);
+      JsonTextWriter.WriteStartArray;
+    END;
+
+    [External]
+    PROCEDURE WriteEndArray@7();
+    BEGIN
+      JsonTextWriter.WriteEndArray;
+    END;
+
+    [External]
+    PROCEDURE WriteStringProperty@8(VariableName@1000 : Text;Variable@1001 : Variant);
+    BEGIN
+      JsonTextWriter.WritePropertyName(VariableName);
+      JsonTextWriter.WriteValue(FORMAT(Variable,0,9));
+    END;
+
+    [External]
+    PROCEDURE WriteNumberProperty@9(VariableName@1000 : Text;Variable@1001 : Variant);
+    VAR
+      Decimal@1002 : Decimal;
+    BEGIN
+      CASE TRUE OF
+        Variable.ISINTEGER,Variable.ISDECIMAL:
+          Decimal := Variable;
+        ELSE
+          EVALUATE(Decimal,Variable);
+      END;
+      JsonTextWriter.WritePropertyName(VariableName);
+      JsonTextWriter.WriteValue(Decimal);
+    END;
+
+    [External]
+    PROCEDURE WriteBooleanProperty@10(VariableName@1000 : Text;Variable@1001 : Variant);
+    VAR
+      Bool@1002 : Boolean;
+    BEGIN
+      CASE TRUE OF
+        Variable.ISBOOLEAN:
+          Bool := Variable;
+        ELSE
+          EVALUATE(Bool,Variable);
+      END;
+      JsonTextWriter.WritePropertyName(VariableName);
+      JsonTextWriter.WriteValue(Bool);
+    END;
+
+    [External]
+    PROCEDURE WriteNullProperty@11(VariableName@1001 : Text);
+    BEGIN
+      JsonTextWriter.WritePropertyName(VariableName);
+      JsonTextWriter.WriteNull;
+    END;
+
+    [External]
+    PROCEDURE WriteBytesProperty@12(VariableName@1001 : Text;TempBlob@1002 : Record 99008535);
+    VAR
+      MemoryStream@1003 : DotNet "'mscorlib'.System.IO.MemoryStream";
+      InStr@1004 : InStream;
+    BEGIN
+      TempBlob.Blob.CREATEINSTREAM(InStr);
+      MemoryStream := MemoryStream.MemoryStream;
+      COPYSTREAM(MemoryStream,InStr);
+      JsonTextWriter.WritePropertyName(VariableName);
+      JsonTextWriter.WriteValue(MemoryStream.ToArray);
+    END;
+
+    [External]
+    PROCEDURE WriteRawProperty@13(VariableName@1000 : Text;Variable@1001 : Variant);
+    BEGIN
+      JsonTextWriter.WritePropertyName(VariableName);
+      JsonTextWriter.WriteValue(Variable);
+    END;
+
+    [External]
+    PROCEDURE GetJSonAsText@14() JSon : Text;
+    BEGIN
+      JSon := StringBuilder.ToString;
+    END;
+
+    BEGIN
+    END.
+  }
+}
+

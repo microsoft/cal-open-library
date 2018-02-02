@@ -1,0 +1,114 @@
+OBJECT Codeunit 139211 Json Text Reader/Writer Test
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=Test,ERM,W1,All;
+  }
+  PROPERTIES
+  {
+    Subtype=Test;
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      Assert@1000 : Codeunit 130000;
+      InvalidJsonValueTxt@1001 : TextConst 'ENU=Invalid Json Value for property %1';
+
+    [Test]
+    PROCEDURE TestWriter@1();
+    VAR
+      TempJSONBuffer@1000 : TEMPORARY Record 1236;
+      JsonTextReaderWriter@1001 : Codeunit 1234;
+      Json@1002 : Text;
+    BEGIN
+      // [SCENARIO] Write Json and verify read Json
+      // [GIVEN] https://en.wikipedia.org/wiki/JSON
+
+      // [WHEN] Writing
+      WITH JsonTextReaderWriter DO BEGIN
+        WriteStartObject('');
+        WriteStringProperty('firstName','John');
+        WriteStringProperty('lastName','Smith');
+        WriteBooleanProperty('isAlive',TRUE);
+        WriteNumberProperty('age',27);
+        WriteStartObject('address');
+        WriteStringProperty('streetAddress','21 2nd Street');
+        WriteStringProperty('city','New York');
+        WriteStringProperty('state','NY');
+        WriteStringProperty('postalCode','10021-3100');
+        WriteEndObject;
+        WriteStartArray('phoneNumbers');
+        WriteStartObject('');
+        WriteStringProperty('type','home');
+        WriteStringProperty('number','212 555-1234');
+        WriteEndObject;
+        WriteStartObject('');
+        WriteStringProperty('type','office');
+        WriteStringProperty('number','646 555-4567');
+        WriteEndObject;
+        WriteStartObject('');
+        WriteStringProperty('type','mobile');
+        WriteStringProperty('number','123 456-7890');
+        WriteEndObject;
+        WriteEndArray;
+        WriteStartArray('children');
+        WriteEndArray;
+        WriteNullProperty('spouce');
+        WriteEndObject;
+        Json := GetJSonAsText;
+      END;
+
+      // [WHEN] Reading Json back into Json Buffer
+      JsonTextReaderWriter.ReadJSonToJSonBuffer(Json,TempJSONBuffer);
+
+      // [THEN] JsonBuffer content is identical to input values
+      VerifyPropertyValue(TempJSONBuffer,'firstName','John');
+      VerifyPropertyValue(TempJSONBuffer,'lastName','Smith');
+      VerifyPropertyValue(TempJSONBuffer,'isAlive',TRUE);
+      VerifyPropertyValue(TempJSONBuffer,'age',27);
+      VerifyPropertyValue(TempJSONBuffer,'streetAddress','21 2nd Street');
+      VerifyPropertyValue(TempJSONBuffer,'city','New York');
+      VerifyPropertyValue(TempJSONBuffer,'state','NY');
+      VerifyPropertyValue(TempJSONBuffer,'postalCode','10021-3100');
+      VerifyPropertyValue(TempJSONBuffer,'type','home');
+      VerifyPropertyValue(TempJSONBuffer,'number','212 555-1234');
+    END;
+
+    LOCAL PROCEDURE VerifyPropertyValue@2(VAR TempJSONBuffer@1000 : TEMPORARY Record 1236;PropertyName@1001 : Text;PropertyValue@1002 : Variant);
+    BEGIN
+      WITH TempJSONBuffer DO BEGIN
+        SETRANGE("Token type","Token type"::"Property Name");
+        SETRANGE(Value,PropertyName);
+        FINDFIRST;
+        RESET;
+        NEXT;
+        CASE TRUE OF
+          PropertyValue.ISTEXT:
+            BEGIN
+              Assert.AreEqual("Token type"::String,"Token type",STRSUBSTNO(InvalidJsonValueTxt,PropertyName));
+              Assert.AreEqual(PropertyValue,Value,STRSUBSTNO(InvalidJsonValueTxt,PropertyName));
+            END;
+          PropertyValue.ISINTEGER,PropertyValue.ISDECIMAL:
+            BEGIN
+              Assert.AreEqual("Token type"::Decimal,"Token type",STRSUBSTNO(InvalidJsonValueTxt,PropertyName));
+              Assert.AreEqual(FORMAT(PropertyValue,0,9),Value,STRSUBSTNO(InvalidJsonValueTxt,PropertyName));
+            END;
+          PropertyValue.ISBOOLEAN:
+            BEGIN
+              Assert.AreEqual("Token type"::Boolean,"Token type",STRSUBSTNO(InvalidJsonValueTxt,PropertyName));
+              Assert.AreEqual(FORMAT(PropertyValue,0,9),FORMAT(Value = 'Yes',0,9),STRSUBSTNO(InvalidJsonValueTxt,PropertyName));
+            END;
+        END;
+      END;
+    END;
+
+    BEGIN
+    END.
+  }
+}
+
