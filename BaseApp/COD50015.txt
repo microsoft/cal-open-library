@@ -1,0 +1,137 @@
+OBJECT Codeunit 50015 Signed Xml Mgt.
+{
+  OBJECT-PROPERTIES
+  {
+    Date=26/01/18;
+    Time=10:49:58;
+    Modified=Yes;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+
+    [External]
+    PROCEDURE CheckXmlStreamSignature@1000000000(XmlStream@1000000000 : InStream;PublicKey@1000000001 : Text) : Boolean;
+    VAR
+      XmlDocument@1000000002 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlDocument";
+    BEGIN
+      XmlDocument := XmlDocument.XmlDocument();
+      XmlDocument.Load(XmlStream);
+      EXIT(CheckXmlSignature(XmlDocument, PublicKey));
+    END;
+
+    [External]
+    PROCEDURE CheckXmlTextSignature@1000000001(XmlText@1000000000 : Text;PublicKey@1000000001 : Text) : Boolean;
+    VAR
+      XmlDocument@1000000002 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlDocument";
+    BEGIN
+      XmlDocument := XmlDocument.XmlDocument();
+      XmlDocument.LoadXml(XmlText);
+      EXIT(CheckXmlSignature(XmlDocument, PublicKey));
+    END;
+
+    LOCAL PROCEDURE CheckXmlSignature@1000000002(XmlDocument@1000000004 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlDocument";PublicKey@1000000005 : Text) : Boolean;
+    VAR
+      PublicKeyData@1000000000 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Object";
+      Convert@1000000001 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Convert";
+      RSAKey@1000000002 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Security.Cryptography.RSACryptoServiceProvider";
+      SignedXml@1000000003 : DotNet "'System.Security, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a'.System.Security.Cryptography.Xml.SignedXml";
+      SignatureNode@1000000007 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlNode";
+      XmlNamespaceManager@1000000006 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlNamespaceManager";
+    BEGIN
+      //create xml namespace manager
+      XmlNamespaceManager := XmlNamespaceManager.XmlNamespaceManager(XmlDocument.NameTable);
+      XmlNamespaceManager.AddNamespace('xmlsig', 'http://www.w3.org/2000/09/xmldsig#');
+
+      //try to find signature
+      SignatureNode := XmlDocument.FirstChild.SelectSingleNode('xmlsig:Signature', XmlNamespaceManager);
+      IF (ISNULL(SignatureNode)) THEN
+        EXIT(FALSE);
+
+      //Import key
+      PublicKeyData := Convert.FromBase64String(PublicKey);
+      RSAKey := RSAKey.RSACryptoServiceProvider();
+      RSAKey.ImportCspBlob(PublicKeyData);
+
+      // Create a new SignedXml object and pass it
+      // the XML document class.
+      SignedXml := SignedXml.SignedXml(XmlDocument);
+
+      // Load the first <signature> node.
+      SignedXml.LoadXml(SignatureNode);
+
+      // Check the signature and return the result.
+      EXIT(SignedXml.CheckSignature(RSAKey));
+    END;
+
+    [External]
+    PROCEDURE SignXmlText@1000000012(XmlText@1000000000 : Text;PrivateKey@1000000001 : Text) : Text;
+    VAR
+      XmlDocument@1000000002 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlDocument";
+      StringWiter@1000000003 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.IO.StringWriter";
+      XmlWriter@1000000004 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlTextWriter";
+    BEGIN
+      XmlDocument := XmlDocument.XmlDocument();
+      XmlDocument.LoadXml(XmlText);
+      SignXmlDocument(XmlDocument, PrivateKey);
+
+      StringWiter := StringWiter.StringWriter();
+      XmlWriter := XmlWriter.XmlTextWriter(StringWiter);
+      XmlDocument.WriteTo(XmlWriter);
+
+      EXIT(StringWiter.ToString());
+    END;
+
+    LOCAL PROCEDURE SignXmlDocument@1000000013(XmlDocument@1000000001 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlDocument";PrivateKey@1000000000 : Text);
+    VAR
+      Convert@1000000004 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Convert";
+      RSAKey@1000000003 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Security.Cryptography.RSACryptoServiceProvider";
+      SignedXml@1000000002 : DotNet "'System.Security, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a'.System.Security.Cryptography.Xml.SignedXml";
+      DocReference@1000000005 : DotNet "'System.Security, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a'.System.Security.Cryptography.Xml.Reference";
+      Env@1000000006 : DotNet "'System.Security, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a'.System.Security.Cryptography.Xml.XmlDsigEnvelopedSignatureTransform";
+      xmlSignature@1000000007 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlElement";
+    BEGIN
+      //import key
+      RSAKey := RSAKey.RSACryptoServiceProvider();
+      RSAKey.ImportCspBlob(Convert.FromBase64String(PrivateKey));
+
+      //create signed document
+      SignedXml := SignedXml.SignedXml(XmlDocument);
+      SignedXml.SigningKey := RSAKey;
+
+      // Add the key to the SignedXml document.
+      SignedXml.SigningKey := RSAKey;
+
+      // Create a reference to be signed.
+      DocReference := DocReference.Reference();
+      DocReference.Uri := '';
+
+      // Add an enveloped transformation to the reference.
+      Env := Env.XmlDsigEnvelopedSignatureTransform();
+      DocReference.AddTransform(Env);
+
+      // Add the reference to the SignedXml object.
+      SignedXml.AddReference(DocReference);
+
+      // Compute the signature.
+      SignedXml.ComputeSignature();
+
+      // Get the XML representation of the signature and save
+      // it to an XmlElement object.
+      xmlSignature := SignedXml.GetXml();
+
+      // Append the element to the XML document.
+      XmlDocument.DocumentElement.AppendChild(XmlDocument.ImportNode(xmlSignature, TRUE));
+    END;
+
+    BEGIN
+    END.
+  }
+}
+

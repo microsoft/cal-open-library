@@ -1,0 +1,144 @@
+OBJECT Codeunit 50016 Signed Xml Test
+{
+  OBJECT-PROPERTIES
+  {
+    Date=26/01/18;
+    Time=10:37:03;
+    Modified=Yes;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    Subtype=Test;
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      errSignedXmlTextTestFailed@1000000000 : TextConst 'ENU=Xml Document Text signature test failed;ENG=Xml Document Text signature test failed';
+      errSignedXmlStreamTestFailed@1000000001 : TextConst 'ENU=Xml Document Stream signature test failed;ENG=Xml Document Stream signature test failed';
+      errSignedXmlHardcodedTextTestFailed@1000000002 : TextConst 'ENU=Hardcoded Xml Document signature test failed;ENG=Hardcoded Xml Document signature test failed';
+      errIncorrectSignedXmlTestFailed@1000000003 : TextConst 'ENU="Incorrect xml document signature test failed ";ENG="Incorrect xml document signature test failed "';
+
+    [Test]
+    PROCEDURE TestSignedXmlText@1000000000();
+    VAR
+      SignedXmlMgt@1000000001 : Codeunit 50015;
+      Convert@1000000002 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Convert";
+      RSAKey@1000000000 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Security.Cryptography.RSACryptoServiceProvider";
+      PrivateKey@1000000003 : Text;
+      PublicKey@1000000004 : Text;
+      XmlText@1000000005 : Text;
+      SignedXmlText@1000000006 : Text;
+    BEGIN
+      RSAKey := RSAKey.RSACryptoServiceProvider();
+
+      PrivateKey := Convert.ToBase64String(RSAKey.ExportCspBlob(TRUE));
+      PublicKey := Convert.ToBase64String(RSAKey.ExportCspBlob(FALSE));
+
+      XmlText := '<xml><data>something</data><data>another node</data></xml>';
+
+      //sign document
+      SignedXmlText := SignedXmlMgt.SignXmlText(XmlText, PrivateKey);
+
+      //test CheckXMlTestSignature function
+      IF (NOT(SignedXmlMgt.CheckXmlTextSignature(SignedXmlText, PublicKey))) THEN
+        ERROR(errSignedXmlTextTestFailed);
+    END;
+
+    [Test]
+    PROCEDURE TestSignedXmlStream@1000000002();
+    VAR
+      TempBlob@1000000007 : Record 99008535;
+      InputStream@1000000008 : InStream;
+      OutputStream@1000000009 : OutStream;
+      SignedXmlMgt@1000000001 : Codeunit 50015;
+      Convert@1000000002 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Convert";
+      RSAKey@1000000000 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Security.Cryptography.RSACryptoServiceProvider";
+      PrivateKey@1000000003 : Text;
+      PublicKey@1000000004 : Text;
+      XmlText@1000000005 : Text;
+      SignedXmlText@1000000006 : Text;
+    BEGIN
+      RSAKey := RSAKey.RSACryptoServiceProvider();
+
+      PrivateKey := Convert.ToBase64String(RSAKey.ExportCspBlob(TRUE));
+      PublicKey := Convert.ToBase64String(RSAKey.ExportCspBlob(FALSE));
+
+      XmlText := '<xml><data>something</data><data>another node</data></xml>';
+
+      //sign document
+      SignedXmlText := SignedXmlMgt.SignXmlText(XmlText, PrivateKey);
+
+      //test CheckXmlStreamSignature function
+      CLEAR(TempBlob);
+      TempBlob.Blob.CREATEOUTSTREAM(OutputStream);
+      OutputStream.WRITETEXT(SignedXmlText);
+      TempBlob.Blob.CREATEINSTREAM(InputStream);
+      IF (NOT(SignedXmlMgt.CheckXmlStreamSignature(InputStream, PublicKey))) THEN
+        ERROR(errSignedXmlStreamTestFailed);
+    END;
+
+    [Test]
+    PROCEDURE TestHardcodedValidXml@1000000003();
+    VAR
+      SignedXmlMgt@1000000000 : Codeunit 50015;
+      PublicKey@1000000004 : Text;
+      XmlText@1000000005 : Text;
+      SignedXmlText@1000000006 : Text;
+    BEGIN
+      //test valid hardcoded xml document and public key
+      SignedXmlText := '<xml><data>something</data><data>another node</data>' +
+        '<Signature xmlns="http://www.w3.org/2000/09/xmldsig#">' +
+        '<SignedInfo><CanonicalizationMethod Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315" />' +
+        '<SignatureMethod Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha1" /><Reference URI="">' +
+        '<Transforms><Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature" />' +
+        '</Transforms><DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1" />' +
+        '<DigestValue>VhH7n9U2xFJSPDRmd1ssLb2kn9w=</DigestValue></Reference></SignedInfo>' +
+        '<SignatureValue>PGxNsb7HfG9wtKMdzozJJ59Hdnf8Q+lVU65L6RW5qlju9ZhkUvjZMEGKAtFD38AgbR3sD' +
+        'TMjyyY/5XriMZNDhE8NGOPOA7ZPoFVUkc1cCbvAFKmsxlz8zP3TBfrsL9jkBpdQi9rJKltAqI62NzPu/lkexb' +
+        '6vPh9y5rPLZG7hH/g=</SignatureValue></Signature></xml>';
+
+      PublicKey := 'BgIAAACkAABSU0ExAAQAAAEAAQBr/IYd2end7HQ9Q9a7IH4uZhb6ICQ1Nqv4rbrW4ftOa96sHpMn4vPMfx9Nd2G4vN0RZLB' +
+        'JzODADPyqwJmxwATD420PY5Tj8LUxBh60erCsxtc002551ggOxLAJFgfli3TtezAmT8uyoVj+SQ/wElfZqmMGADQVZ99QQt' +
+        'N04lUOrA==';
+
+      IF (NOT(SignedXmlMgt.CheckXmlTextSignature(SignedXmlText, PublicKey))) THEN
+        ERROR(errSignedXmlHardcodedTextTestFailed);
+    END;
+
+    [Test]
+    PROCEDURE TestHardcodedInvalidXml@1000000004();
+    VAR
+      SignedXmlMgt@1000000003 : Codeunit 50015;
+      PublicKey@1000000002 : Text;
+      XmlText@1000000001 : Text;
+      SignedXmlText@1000000000 : Text;
+    BEGIN
+      //test invalid hardcoded xml document and public key
+      SignedXmlText := '<xml><data>something different</data><data>another node</data>' +
+        '<Signature xmlns="http://www.w3.org/2000/09/xmldsig#">' +
+        '<SignedInfo><CanonicalizationMethod Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315" />' +
+        '<SignatureMethod Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha1" /><Reference URI="">' +
+        '<Transforms><Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature" />' +
+        '</Transforms><DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1" />' +
+        '<DigestValue>VhH7n9U2xFJSPDRmd1ssLb2kn9w=</DigestValue></Reference></SignedInfo>' +
+        '<SignatureValue>PGxNsb7HfG9wtKMdzozJJ59Hdnf8Q+lVU65L6RW5qlju9ZhkUvjZMEGKAtFD38AgbR3sD' +
+        'TMjyyY/5XriMZNDhE8NGOPOA7ZPoFVUkc1cCbvAFKmsxlz8zP3TBfrsL9jkBpdQi9rJKltAqI62NzPu/lkexb' +
+        '6vPh9y5rPLZG7hH/g=</SignatureValue></Signature></xml>';
+
+      PublicKey := 'BgIAAACkAABSU0ExAAQAAAEAAQBr/IYd2end7HQ9Q9a7IH4uZhb6ICQ1Nqv4rbrW4ftOa96sHpMn4vPMfx9Nd2G4vN0RZLB' +
+        'JzODADPyqwJmxwATD420PY5Tj8LUxBh60erCsxtc002551ggOxLAJFgfli3TtezAmT8uyoVj+SQ/wElfZqmMGADQVZ99QQt' +
+        'N04lUOrA==';
+
+      IF (SignedXmlMgt.CheckXmlTextSignature(SignedXmlText, PublicKey)) THEN
+        ERROR(errIncorrectSignedXmlTestFailed);
+    END;
+
+    BEGIN
+    END.
+  }
+}
+
