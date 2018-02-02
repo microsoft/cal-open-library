@@ -1,0 +1,154 @@
+OBJECT Codeunit 132559 Signed XML Test
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=Test,Dev,ERM,All;
+  }
+  PROPERTIES
+  {
+    Subtype=Test;
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      SignedXmlTextTestFailedErr@1000 : TextConst 'ENU=Xml Document Text signature test failed';
+      SignedXmlStreamTestFailedErr@1001 : TextConst 'ENU=Xml Document Stream signature test failed';
+      SignedXmlHardcodedTextTestFailedErr@1002 : TextConst 'ENU=Hardcoded Xml Document signature test failed';
+      IncorrectSignedXmlTestFailedErr@1003 : TextConst 'ENU="Incorrect xml document signature test failed "';
+      Assert@1004 : Codeunit 130000;
+
+    [Test]
+    PROCEDURE TestSignedXmlText@1();
+    VAR
+      SignedXMLMgt@1001 : Codeunit 6227;
+      Convert@1002 : DotNet "'mscorlib'.System.Convert";
+      RSAKey@1000 : DotNet "'mscorlib'.System.Security.Cryptography.RSACryptoServiceProvider";
+      PrivateKey@1003 : Text;
+      PublicKey@1004 : Text;
+      XmlText@1005 : Text;
+      SignedXmlText@1006 : Text;
+    BEGIN
+      // [SCENARIO] Test of SignedXMLText function
+
+      // [GIVEN] A private and public key
+      RSAKey := RSAKey.RSACryptoServiceProvider;
+
+      PrivateKey := Convert.ToBase64String(RSAKey.ExportCspBlob(TRUE));
+      PublicKey := Convert.ToBase64String(RSAKey.ExportCspBlob(FALSE));
+
+      // [GIVEN] A xml document in text representation
+      XmlText := '<xml><data>something</data><data>another node</data></xml>';
+
+      // [WHEN] The document is signed
+      SignedXmlText := SignedXMLMgt.SignXmlText(XmlText,PrivateKey);
+
+      // [THEN] The signature is valid
+      Assert.IsTrue(SignedXMLMgt.CheckXmlTextSignature(SignedXmlText,PublicKey),SignedXmlTextTestFailedErr);
+    END;
+
+    [Test]
+    PROCEDURE TestSignedXmlStream@2();
+    VAR
+      TempBlob@1007 : Record 99008535;
+      SignedXMLMgt@1001 : Codeunit 6227;
+      InputStream@1008 : InStream;
+      Convert@1002 : DotNet "'mscorlib'.System.Convert";
+      RSAKey@1000 : DotNet "'mscorlib'.System.Security.Cryptography.RSACryptoServiceProvider";
+      PrivateKey@1003 : Text;
+      PublicKey@1004 : Text;
+      XmlText@1005 : Text;
+      SignedXmlText@1006 : Text;
+    BEGIN
+      // [SCENARIO] Test of SignedXMLStream function
+
+      // [GIVEN] A private and public key
+      RSAKey := RSAKey.RSACryptoServiceProvider;
+
+      PrivateKey := Convert.ToBase64String(RSAKey.ExportCspBlob(TRUE));
+      PublicKey := Convert.ToBase64String(RSAKey.ExportCspBlob(FALSE));
+
+      // [GIVEN] A xml document in text representation
+      XmlText := '<xml><data>something</data><data>another node</data></xml>';
+
+      // [WHEN] The document is signed
+      SignedXmlText := SignedXMLMgt.SignXmlText(XmlText,PrivateKey);
+
+      TempBlob.WriteTextLine(SignedXmlText);
+      TempBlob.Blob.CREATEINSTREAM(InputStream);
+
+      // [THEN] The signature is valid
+      Assert.IsTrue(SignedXMLMgt.CheckXmlStreamSignature(InputStream,PublicKey),SignedXmlStreamTestFailedErr);
+    END;
+
+    [Test]
+    PROCEDURE TestHardcodedValidXml@3();
+    VAR
+      SignedXMLMgt@1000 : Codeunit 6227;
+      PublicKey@1004 : Text;
+      SignedXmlText@1006 : Text;
+    BEGIN
+      // [SCENARIO] Test valid hardcoded xml document and public key
+
+      // [GIVEN] A signed xml document
+      SignedXmlText := '<xml><data>something</data><data>another node</data>' +
+        '<Signature xmlns="http://www.w3.org/2000/09/xmldsig#">' +
+        '<SignedInfo><CanonicalizationMethod Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315" />' +
+        '<SignatureMethod Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha1" /><Reference URI="">' +
+        '<Transforms><Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature" />' +
+        '</Transforms><DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1" />' +
+        '<DigestValue>VhH7n9U2xFJSPDRmd1ssLb2kn9w=</DigestValue></Reference></SignedInfo>' +
+        '<SignatureValue>PGxNsb7HfG9wtKMdzozJJ59Hdnf8Q+lVU65L6RW5qlju9ZhkUvjZMEGKAtFD38AgbR3sD' +
+        'TMjyyY/5XriMZNDhE8NGOPOA7ZPoFVUkc1cCbvAFKmsxlz8zP3TBfrsL9jkBpdQi9rJKltAqI62NzPu/lkexb' +
+        '6vPh9y5rPLZG7hH/g=</SignatureValue></Signature></xml>';
+
+      // [GIVEN] A public key
+      PublicKey := 'BgIAAACkAABSU0ExAAQAAAEAAQBr/IYd2end7HQ9Q9a7IH4uZhb6ICQ1Nqv4rbrW4ftOa96sHpMn4vPMfx9Nd2G4vN0RZLB' +
+        'JzODADPyqwJmxwATD420PY5Tj8LUxBh60erCsxtc002551ggOxLAJFgfli3TtezAmT8uyoVj+SQ/wElfZqmMGADQVZ99QQt' +
+        'N04lUOrA==';
+
+      // [WHEN] The xml signature is validated
+      // [THEN] The the xml is valid
+      Assert.IsTrue(SignedXMLMgt.CheckXmlTextSignature(SignedXmlText,PublicKey),SignedXmlHardcodedTextTestFailedErr);
+    END;
+
+    [Test]
+    PROCEDURE TestHardcodedInvalidXml@4();
+    VAR
+      SignedXMLMgt@1003 : Codeunit 6227;
+      PublicKey@1002 : Text;
+      SignedXmlText@1000 : Text;
+    BEGIN
+      // [SCENARIO] Test invalid hardcoded xml document and public key
+
+      // [GIVEN] A signed xml document
+      SignedXmlText := '<xml><data>something different</data><data>another node</data>' +
+        '<Signature xmlns="http://www.w3.org/2000/09/xmldsig#">' +
+        '<SignedInfo><CanonicalizationMethod Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315" />' +
+        '<SignatureMethod Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha1" /><Reference URI="">' +
+        '<Transforms><Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature" />' +
+        '</Transforms><DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1" />' +
+        '<DigestValue>VhH7n9U2xFJSPDRmd1ssLb2kn9w=</DigestValue></Reference></SignedInfo>' +
+        '<SignatureValue>PGxNsb7HfG9wtKMdzozJJ59Hdnf8Q+lVU65L6RW5qlju9ZhkUvjZMEGKAtFD38AgbR3sD' +
+        'TMjyyY/5XriMZNDhE8NGOPOA7ZPoFVUkc1cCbvAFKmsxlz8zP3TBfrsL9jkBpdQi9rJKltAqI62NzPu/lkexb' +
+        '6vPh9y5rPLZG7hH/g=</SignatureValue></Signature></xml>';
+
+      // [GIVEN] A public key
+      PublicKey := 'BgIAAACkAABSU0ExAAQAAAEAAQBr/IYd2end7HQ9Q9a7IH4uZhb6ICQ1Nqv4rbrW4ftOa96sHpMn4vPMfx9Nd2G4vN0RZLB' +
+        'JzODADPyqwJmxwATD420PY5Tj8LUxBh60erCsxtc002551ggOxLAJFgfli3TtezAmT8uyoVj+SQ/wElfZqmMGADQVZ99QQt' +
+        'N04lUOrA==';
+
+      // [WHEN] The xml signature is validated
+      // [THEN] The the xml is invalid
+      Assert.IsFalse(SignedXMLMgt.CheckXmlTextSignature(SignedXmlText,PublicKey),IncorrectSignedXmlTestFailedErr);
+    END;
+
+    BEGIN
+    END.
+  }
+}
+
