@@ -1,0 +1,80 @@
+OBJECT Codeunit 93008 RegEx Split Wrapper
+{
+  OBJECT-PROPERTIES
+  {
+    Date=18-03-08;
+    Time=20:46:04;
+    Modified=Yes;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      Array@50002 : DotNet "'mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Array";
+      Index@50003 : Integer;
+      RegEx@50004 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.RegularExpressions.Regex";
+      ArrayIsEmpty@50001 : TextConst 'ENU=No split string has been supplied.';
+      IndexIsAboveBoundary@50005 : TextConst 'ENU=Index is above boundary (%1)';
+      IndexIsBelowBoundary@50006 : TextConst 'ENU=Index is below boundary.';
+      TextVarIsEmpty@50008 : TextConst 'ENU=Variable Text is empty.';
+      SeparatorVar@50009 : TextConst 'ENU=Variable Separator is empty.';
+
+    PROCEDURE Split@50002(Text@50001 : Text;Separator@50002 : Text);
+    BEGIN
+      IF Text = '' THEN
+        ERROR(TextVarIsEmpty);
+      IF Separator = '' THEN
+        ERROR(SeparatorVar);
+
+      IF NOT TrySplit(Text, Separator) THEN
+        ERROR(GETLASTERRORTEXT);
+    END;
+
+    PROCEDURE GetLength@50006() : Integer;
+    BEGIN
+      CheckIfArrayIsEmpty;
+      EXIT("Array".Length());
+    END;
+
+    PROCEDURE GetIndex@50011(Index@50001 : Integer) : Text;
+    BEGIN
+      CheckIfArrayIsEmpty;
+      CheckIfIndexIsWithinBoundaries(Index);
+      EXIT("Array".GetValue(Index));
+    END;
+
+    LOCAL PROCEDURE "*** Private ***"@50003();
+    BEGIN
+    END;
+
+    LOCAL PROCEDURE CheckIfArrayIsEmpty@50008();
+    BEGIN
+      IF ISNULL("Array") THEN
+        ERROR(ArrayIsEmpty);
+    END;
+
+    LOCAL PROCEDURE CheckIfIndexIsWithinBoundaries@50017(Index@50001 : Integer);
+    BEGIN
+      IF (Index + 1) > GetLength THEN
+        ERROR(IndexIsAboveBoundary, GetLength-1);
+      IF Index < 0 THEN
+        ERROR(IndexIsBelowBoundary);
+    END;
+
+    [TryFunction]
+    PROCEDURE TrySplit@50009(Text@50001 : Text;Separator@50002 : Text);
+    BEGIN
+      "Array" := RegEx.Split(Text, Separator);
+    END;
+
+    BEGIN
+    END.
+  }
+}
+
