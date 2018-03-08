@@ -1,0 +1,118 @@
+OBJECT Codeunit 93009 RegEx Split Unit Test
+{
+  OBJECT-PROPERTIES
+  {
+    Date=18-03-08;
+    Time=19:01:57;
+    Modified=Yes;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    Subtype=Test;
+    TestPermissions=Disabled;
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      RegExSplitWrapper@50001 : Codeunit 93008;
+
+    [Test]
+    PROCEDURE GetEmptyLength@50018();
+    BEGIN
+      ASSERTERROR RegExSplitWrapper.GetLength;
+
+      IF GETLASTERRORTEXT <>  'No split string has been supplied.' THEN
+        ERROR('Unknown Error: %1', GETLASTERRORTEXT);
+    END;
+
+    [Test]
+    PROCEDURE GetEmptyIndex@50021();
+    BEGIN
+      ASSERTERROR RegExSplitWrapper.GetIndex(7);
+      IF GETLASTERRORTEXT <>  'No split string has been supplied.' THEN
+        ERROR('Unknown Error: %1', GETLASTERRORTEXT);
+    END;
+
+    [Test]
+    PROCEDURE SplitString@50027();
+    BEGIN
+      RegExSplitWrapper.Split('1;2;3;4;5;6',';');
+    END;
+
+    [Test]
+    PROCEDURE GetLowerBoundaryError@50029();
+    BEGIN
+      ASSERTERROR RegExSplitWrapper.GetIndex(-10);
+      IF GETLASTERRORTEXT <>  'Index is below boundary.' THEN
+        ERROR('Unknown Error: %1', GETLASTERRORTEXT);
+    END;
+
+    [Test]
+    PROCEDURE GetUpperBoundaryError@50030();
+    BEGIN
+      ASSERTERROR RegExSplitWrapper.GetIndex(10);
+      IF GETLASTERRORTEXT <>  'Index is above boundary (5)' THEN
+        ERROR('Unknown Error: %1', GETLASTERRORTEXT);
+    END;
+
+    [Test]
+    PROCEDURE GetLength@50002();
+    BEGIN
+      IF NOT (RegExSplitWrapper.GetLength = 6) THEN
+        ERROR('Wrong length of string');
+    END;
+
+    [Test]
+    PROCEDURE ResetVariable@50005();
+    BEGIN
+      CLEAR(RegExSplitWrapper);
+      ASSERTERROR RegExSplitWrapper.GetIndex(2);
+      IF GETLASTERRORTEXT <>  'No split string has been supplied.' THEN
+        ERROR('Unknown Error: %1', GETLASTERRORTEXT);
+    END;
+
+    [Test]
+    PROCEDURE FillArrayAndTestValues@50004();
+    BEGIN
+      RegExSplitWrapper.Split('1;2;3;4;5;6',';');
+      IF NOT (RegExSplitWrapper.GetIndex(0) = '1') THEN ERROR('Wrong value');
+      IF NOT (RegExSplitWrapper.GetIndex(1) = '2') THEN ERROR('Wrong value');
+      IF NOT (RegExSplitWrapper.GetIndex(2) = '3') THEN ERROR('Wrong value');
+      IF NOT (RegExSplitWrapper.GetIndex(3) = '4') THEN ERROR('Wrong value');
+      IF NOT (RegExSplitWrapper.GetIndex(4) = '5') THEN ERROR('Wrong value');
+      IF NOT (RegExSplitWrapper.GetIndex(5) = '6') THEN ERROR('Wrong value');
+      ASSERTERROR RegExSplitWrapper.GetIndex(6);
+      IF GETLASTERRORTEXT <>  'Index is above boundary (5)' THEN
+        ERROR('Unknown Error: %1', GETLASTERRORTEXT);
+    END;
+
+    [Test]
+    PROCEDURE TestEmptyParameters@50003();
+    BEGIN
+      ASSERTERROR RegExSplitWrapper.Split('',';');
+      IF GETLASTERRORTEXT <>  'Variable Text is empty.' THEN
+        ERROR('Unknown Error: %1', GETLASTERRORTEXT);
+
+      ASSERTERROR RegExSplitWrapper.Split('123456','');
+      IF GETLASTERRORTEXT <>  'Variable Separator is empty.' THEN
+        ERROR('Unknown Error: %1', GETLASTERRORTEXT);
+    END;
+
+    PROCEDURE "****"@50012();
+    BEGIN
+    END;
+
+    PROCEDURE Test@50013();
+    BEGIN
+      ERROR('wtfbajs');
+    END;
+
+    BEGIN
+    END.
+  }
+}
+
