@@ -196,6 +196,20 @@ OBJECT Table 99008535 TempBlob
       EXIT(Xml);
     END;
 
+    [TryFunction]
+    [External]
+    PROCEDURE TryDownloadFromUrl@21(Url@1000 : Text);
+    VAR
+      WebClient@1001 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Net.WebClient";
+      MemoryStream@1002 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.IO.MemoryStream";
+      OutStr@1003 : OutStream;
+    BEGIN
+      WebClient := WebClient.WebClient;
+      MemoryStream := MemoryStream.MemoryStream(WebClient.DownloadData(Url));
+      Blob.CREATEOUTSTREAM(OutStr);
+      COPYSTREAM(OutStr,MemoryStream);
+    END;
+
     BEGIN
     END.
   }
