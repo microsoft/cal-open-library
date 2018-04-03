@@ -115,6 +115,11 @@ OBJECT Page 1216 Data Exch Col Def Part
                 ToolTipML=ENU=Specifies if the column justification is left or right.;
                 ApplicationArea=#Basic,#Suite;
                 SourceExpr=Justification }
+    { 19  ;2   ;Field     ;
+                ToolTipML=ENU=Specifies if the node name should be used as value for file types Xml or Json during import.;
+                ApplicationArea=#Basic,#Suite;
+                SourceExpr="Use Node Name as Value";
+                Visible=FALSE }
 
   }
   CODE
