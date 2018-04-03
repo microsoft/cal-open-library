@@ -1,0 +1,216 @@
+OBJECT Table 1223 Data Exch. Column Def
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnInsert=BEGIN
+               ValidateRec;
+             END;
+
+    OnModify=BEGIN
+               ValidateRec;
+             END;
+
+    OnDelete=VAR
+               DataExchFieldMapping@1000 : Record 1225;
+               DataExchColumnDef@1001 : Record 1223;
+             BEGIN
+               DataExchFieldMapping.SETRANGE("Data Exch. Def Code","Data Exch. Def Code");
+               DataExchFieldMapping.SETRANGE("Data Exch. Line Def Code","Data Exch. Line Def Code");
+               DataExchFieldMapping.SETRANGE("Column No.","Column No.");
+               IF NOT DataExchFieldMapping.ISEMPTY THEN
+                 IF CONFIRM(STRSUBSTNO(DeleteFieldMappingQst,DataExchColumnDef.TABLECAPTION,DataExchFieldMapping.TABLECAPTION)) THEN
+                   DataExchFieldMapping.DELETEALL
+                 ELSE
+                   ERROR('')
+             END;
+
+  }
+  FIELDS
+  {
+    { 1   ;   ;Data Exch. Def Code ;Code20        ;TableRelation="Data Exch. Def";
+                                                   NotBlank=Yes }
+    { 2   ;   ;Column No.          ;Integer       ;MinValue=1;
+                                                   NotBlank=Yes }
+    { 3   ;   ;Name                ;Text250        }
+    { 4   ;   ;Show                ;Boolean        }
+    { 5   ;   ;Data Type           ;Option        ;OptionString=Text,Date,Decimal,DateTime }
+    { 6   ;   ;Data Format         ;Text100        }
+    { 7   ;   ;Data Formatting Culture;Text10      }
+    { 8   ;   ;Description         ;Text50         }
+    { 10  ;   ;Data Exch. Line Def Code;Code20    ;TableRelation="Data Exch. Line Def".Code WHERE (Data Exch. Def Code=FIELD(Data Exch. Def Code));
+                                                   NotBlank=Yes }
+    { 11  ;   ;Length              ;Integer        }
+    { 12  ;   ;Constant            ;Text30         }
+    { 13  ;   ;Path                ;Text250        }
+    { 14  ;   ;Negative-Sign Identifier;Text30     }
+    { 15  ;   ;Text Padding Required;Boolean       }
+    { 16  ;   ;Pad Character       ;Text1          }
+    { 17  ;   ;Justification       ;Option        ;OptionString=Right,Left }
+  }
+  KEYS
+  {
+    {    ;Data Exch. Def Code,Data Exch. Line Def Code,Column No.;
+                                                   Clustered=Yes }
+  }
+  FIELDGROUPS
+  {
+  }
+  CODE
+  {
+    VAR
+      DeleteFieldMappingQst@1001 : TextConst 'ENU=The %1 that you are about to delete is used for one or more %2, which will also be deleted. \\Do you want to continue?';
+
+    [External]
+    PROCEDURE InsertRec@7(DataExchDefCode@1000 : Code[20];DataExchLineDefCode@1007 : Code[20];ColumnNo@1001 : Integer;NewName@1002 : Text[250];NewShow@1003 : Boolean;DataType@1004 : Option;DataTypeFormatting@1005 : Text[100];DataFormattingCulture@1006 : Text[10];NewDescription@1008 : Text[50]);
+    BEGIN
+      INIT;
+      VALIDATE("Data Exch. Def Code",DataExchDefCode);
+      VALIDATE("Data Exch. Line Def Code",DataExchLineDefCode);
+      VALIDATE("Column No.",ColumnNo);
+      VALIDATE(Name,NewName);
+      VALIDATE(Show,NewShow);
+      VALIDATE("Data Type",DataType);
+      VALIDATE("Data Format",DataTypeFormatting);
+      VALIDATE("Data Formatting Culture",DataFormattingCulture);
+      VALIDATE(Description,NewDescription);
+      INSERT;
+    END;
+
+    [External]
+    PROCEDURE InsertRecForExport@2(DataExchDefCode@1000 : Code[20];DataExchLineDefCode@1002 : Code[20];ColumnNo@1001 : Integer;NewName@1003 : Text[250];DataType@1005 : Option;DataFormat@1006 : Text[100];NewLength@1009 : Integer;NewConstant@1004 : Text[30]);
+    BEGIN
+      INIT;
+      VALIDATE("Data Exch. Def Code",DataExchDefCode);
+      VALIDATE("Data Exch. Line Def Code",DataExchLineDefCode);
+      VALIDATE("Column No.",ColumnNo);
+      VALIDATE(Name,NewName);
+      VALIDATE("Data Type",DataType);
+      VALIDATE("Data Format",DataFormat);
+      VALIDATE(Length,NewLength);
+      VALIDATE(Constant,NewConstant);
+      INSERT;
+    END;
+
+    [External]
+    PROCEDURE InsertRecForImport@3(DataExchDefCode@1020 : Code[20];DataExchLineDefCode@1019 : Code[20];ColumnNo@1018 : Integer;NewName@1017 : Text[250];NewDescription@1016 : Text[50];NewShow@1015 : Boolean;DataType@1014 : Option;DataFormat@1013 : Text[100];DataFormattingCulture@1012 : Text[10]);
+    BEGIN
+      INIT;
+      VALIDATE("Data Exch. Def Code",DataExchDefCode);
+      VALIDATE("Data Exch. Line Def Code",DataExchLineDefCode);
+      VALIDATE("Column No.",ColumnNo);
+      VALIDATE(Name,NewName);
+      VALIDATE(Description,NewDescription);
+      VALIDATE(Show,NewShow);
+      VALIDATE("Data Type",DataType);
+      VALIDATE("Data Format",DataFormat);
+      VALIDATE("Data Formatting Culture",DataFormattingCulture);
+      INSERT;
+    END;
+
+    [External]
+    PROCEDURE ValidateRec@1();
+    VAR
+      DataExchDef@1000 : Record 1222;
+    BEGIN
+      TESTFIELD("Data Exch. Def Code");
+      TESTFIELD("Column No.");
+
+      DataExchDef.GET("Data Exch. Def Code");
+
+      IF DataExchDef."File Type" = DataExchDef."File Type"::"Fixed Text" THEN
+        TESTFIELD(Length);
+
+      IF IsDataFormatRequired THEN
+        TESTFIELD("Data Format");
+
+      IF IsDataFormattingCultureRequired THEN
+        TESTFIELD("Data Formatting Culture");
+    END;
+
+    [External]
+    PROCEDURE IsDataFormatRequired@12() : Boolean;
+    VAR
+      DataExchDef@1000 : Record 1222;
+    BEGIN
+      IF IsXML OR IsJson THEN
+        EXIT(FALSE);
+
+      DataExchDef.GET("Data Exch. Def Code");
+
+      CASE "Data Type" OF
+        "Data Type"::Date:
+          EXIT(DataExchDef.Type <> DataExchDef.Type::"Payment Export");
+        "Data Type"::Text:
+          ;
+        ELSE
+          EXIT(DataExchDef.Type = DataExchDef.Type::"Payment Export");
+      END;
+    END;
+
+    [External]
+    PROCEDURE IsDataFormattingCultureRequired@4() : Boolean;
+    VAR
+      DataExchDef@1000 : Record 1222;
+    BEGIN
+      IF ("Data Type" <> "Data Type"::Text) AND NOT IsXML AND NOT IsJson THEN BEGIN
+        DataExchDef.GET("Data Exch. Def Code");
+        EXIT(DataExchDef.Type <> DataExchDef.Type::"Payment Export");
+      END;
+    END;
+
+    LOCAL PROCEDURE IsXML@8() : Boolean;
+    VAR
+      DataExchDef@1000 : Record 1222;
+    BEGIN
+      DataExchDef.GET("Data Exch. Def Code");
+      EXIT(DataExchDef."File Type" = DataExchDef."File Type"::Xml);
+    END;
+
+    LOCAL PROCEDURE IsJson@11() : Boolean;
+    VAR
+      DataExchDef@1000 : Record 1222;
+    BEGIN
+      DataExchDef.GET("Data Exch. Def Code");
+      EXIT(DataExchDef."File Type" = DataExchDef."File Type"::Json);
+    END;
+
+    [External]
+    PROCEDURE SetXMLDataFormattingValues@21(SimpleDataType@1000 : Text);
+    VAR
+      DataExchColDef@1001 : Record 1223;
+    BEGIN
+      CASE DELCHR(LOWERCASE(SimpleDataType)) OF
+        'decimal':
+          "Data Type" := DataExchColDef."Data Type"::Decimal;
+        'date','datetime':
+          "Data Type" := DataExchColDef."Data Type"::Date;
+        ELSE
+          "Data Type" := DataExchColDef."Data Type"::Text;
+      END;
+      MODIFY;
+    END;
+
+    [External]
+    PROCEDURE IsOfDataLine@10() : Boolean;
+    VAR
+      DataExchLineDef@1000 : Record 1227;
+    BEGIN
+      DataExchLineDef.GET("Data Exch. Def Code","Data Exch. Line Def Code");
+
+      IF NOT (IsXML OR IsJson) OR (DataExchLineDef."Data Line Tag" = '') THEN
+        EXIT(TRUE);
+
+      EXIT(STRPOS(Path,DataExchLineDef."Data Line Tag") > 0);
+    END;
+
+    BEGIN
+    END.
+  }
+}
+

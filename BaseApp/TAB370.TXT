@@ -1,0 +1,972 @@
+OBJECT Table 370 Excel Buffer
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=;
+  }
+  PROPERTIES
+  {
+  }
+  FIELDS
+  {
+    { 1   ;   ;Row No.             ;Integer       ;OnValidate=BEGIN
+                                                                xlRowID := '';
+                                                                IF "Row No." <> 0 THEN
+                                                                  xlRowID := FORMAT("Row No.");
+                                                              END;
+
+                                                   DataClassification=SystemMetadata }
+    { 2   ;   ;xlRowID             ;Text10        ;DataClassification=SystemMetadata }
+    { 3   ;   ;Column No.          ;Integer       ;OnValidate=VAR
+                                                                x@1000 : Integer;
+                                                                i@1001 : Integer;
+                                                                y@1003 : Integer;
+                                                                c@1002 : Char;
+                                                                t@1102601000 : Text[30];
+                                                              BEGIN
+                                                                xlColID := '';
+                                                                x := "Column No.";
+                                                                WHILE x > 26 DO BEGIN
+                                                                  y := x MOD 26;
+                                                                  IF y = 0 THEN
+                                                                    y := 26;
+                                                                  c := 64 + y;
+                                                                  i := i + 1;
+                                                                  t[i] := c;
+                                                                  x := (x - y) DIV 26;
+                                                                END;
+                                                                IF x > 0 THEN BEGIN
+                                                                  c := 64 + x;
+                                                                  i := i + 1;
+                                                                  t[i] := c;
+                                                                END;
+                                                                FOR x := 1 TO i DO
+                                                                  xlColID[x] := t[1 + i - x];
+                                                              END;
+
+                                                   DataClassification=SystemMetadata }
+    { 4   ;   ;xlColID             ;Text10        ;DataClassification=SystemMetadata }
+    { 5   ;   ;Cell Value as Text  ;Text250       ;DataClassification=SystemMetadata }
+    { 6   ;   ;Comment             ;Text250       ;DataClassification=SystemMetadata }
+    { 7   ;   ;Formula             ;Text250       ;DataClassification=SystemMetadata }
+    { 8   ;   ;Bold                ;Boolean       ;DataClassification=SystemMetadata }
+    { 9   ;   ;Italic              ;Boolean       ;DataClassification=SystemMetadata }
+    { 10  ;   ;Underline           ;Boolean       ;DataClassification=SystemMetadata }
+    { 11  ;   ;NumberFormat        ;Text30        ;DataClassification=SystemMetadata }
+    { 12  ;   ;Formula2            ;Text250       ;DataClassification=SystemMetadata }
+    { 13  ;   ;Formula3            ;Text250       ;DataClassification=SystemMetadata }
+    { 14  ;   ;Formula4            ;Text250       ;DataClassification=SystemMetadata }
+    { 15  ;   ;Cell Type           ;Option        ;DataClassification=SystemMetadata;
+                                                   OptionString=Number,Text,Date,Time }
+    { 16  ;   ;Double Underline    ;Boolean       ;DataClassification=SystemMetadata }
+  }
+  KEYS
+  {
+    {    ;Row No.,Column No.                      ;Clustered=Yes }
+  }
+  FIELDGROUPS
+  {
+  }
+  CODE
+  {
+    VAR
+      Text001@1001 : TextConst 'ENU=You must enter a file name.';
+      Text002@1002 : TextConst '@@@="{Locked=""Excel""}";ENU=You must enter an Excel worksheet name.';
+      Text003@1003 : TextConst 'ENU=The file %1 does not exist.';
+      Text004@1004 : TextConst '@@@="{Locked=""Excel""}";ENU=The Excel worksheet %1 does not exist.';
+      Text005@1005 : TextConst '@@@="{Locked=""Excel""}";ENU=Creating Excel worksheet...\\';
+      PageTxt@1006 : TextConst 'ENU=Page';
+      Text007@1007 : TextConst '@@@="{Locked=""Excel""}";ENU=Reading Excel worksheet...\\';
+      Text013@1013 : TextConst 'ENU=&B';
+      Text014@1014 : TextConst 'ENU=&D';
+      Text015@1015 : TextConst 'ENU=&P';
+      Text016@1016 : TextConst 'ENU=A1';
+      Text017@1017 : TextConst 'ENU=SUMIF';
+      Text018@1018 : TextConst 'ENU=#N/A';
+      Text019@1019 : TextConst '@@@={Locked} Used to define an Excel range name. You must refer to Excel rules to change this term.;ENU=GLAcc';
+      Text020@1020 : TextConst '@@@={Locked} Used to define an Excel range name. You must refer to Excel rules to change this term.;ENU=Period';
+      Text021@1021 : TextConst 'ENU=Budget';
+      TempInfoExcelBuf@1036 : TEMPORARY Record 370;
+      FileManagement@1045 : Codeunit 419;
+      XlWrkBkWriter@1022 : DotNet "'Microsoft.Dynamics.Nav.OpenXml, Version=11.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.Microsoft.Dynamics.Nav.OpenXml.Spreadsheet.WorkbookWriter";
+      XlWrkBkReader@1023 : DotNet "'Microsoft.Dynamics.Nav.OpenXml, Version=11.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.Microsoft.Dynamics.Nav.OpenXml.Spreadsheet.WorkbookReader";
+      XlWrkShtWriter@1024 : DotNet "'Microsoft.Dynamics.Nav.OpenXml, Version=11.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.Microsoft.Dynamics.Nav.OpenXml.Spreadsheet.WorksheetWriter";
+      XlWrkShtReader@1043 : DotNet "'Microsoft.Dynamics.Nav.OpenXml, Version=11.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.Microsoft.Dynamics.Nav.OpenXml.Spreadsheet.WorksheetReader";
+      RangeStartXlRow@1034 : Text[30];
+      RangeStartXlCol@1033 : Text[30];
+      RangeEndXlRow@1032 : Text[30];
+      RangeEndXlCol@1031 : Text[30];
+      FileNameServer@1046 : Text;
+      FriendlyName@1025 : Text;
+      CurrentRow@1029 : Integer;
+      CurrentCol@1030 : Integer;
+      UseInfoSheet@1035 : Boolean;
+      Text022@1041 : TextConst '@@@={Locked} Used to define an Excel range name. You must refer to Excel rules to change this term.;ENU=CostAcc';
+      Text023@1037 : TextConst 'ENU=Information';
+      Text034@1039 : TextConst '@@@="{Split=r''\|\*\..{1,4}\|?''}{Locked=""Excel""}";ENU=Excel Files (*.xls*)|*.xls*|All Files (*.*)|*.*';
+      Text035@1040 : TextConst 'ENU=The operation was canceled.';
+      Text037@1047 : TextConst '@@@="{Locked=""Excel""}";ENU=Could not create the Excel workbook.';
+      Text038@1048 : TextConst 'ENU=Global variable %1 is not included for test.';
+      Text039@1050 : TextConst 'ENU=Cell type has not been set.';
+      SavingDocumentMsg@1010 : TextConst 'ENU=Saving the following document: %1.';
+      ExcelFileExtensionTok@1012 : TextConst '@@@={Locked};ENU=.xlsx';
+      ErrorMessage@1026 : Text;
+
+    [External]
+    PROCEDURE CreateNewBook@42(SheetName@1000 : Text[250]);
+    BEGIN
+      CreateBook('',SheetName);
+    END;
+
+    [Internal]
+    PROCEDURE CreateBook@1(FileName@1001 : Text;SheetName@1000 : Text);
+    BEGIN
+      IF SheetName = '' THEN
+        ERROR(Text002);
+
+      IF FileName = '' THEN
+        FileNameServer := FileManagement.ServerTempFileName('xlsx')
+      ELSE BEGIN
+        IF EXISTS(FileName) THEN
+          ERASE(FileName);
+        FileNameServer := FileName;
+      END;
+
+      XlWrkBkWriter := XlWrkBkWriter.Create(FileNameServer);
+      IF ISNULL(XlWrkBkWriter) THEN
+        ERROR(Text037);
+
+      XlWrkShtWriter := XlWrkBkWriter.FirstWorksheet;
+      IF SheetName <> '' THEN
+        XlWrkShtWriter.Name := SheetName;
+    END;
+
+    PROCEDURE OpenBook@2(FileName@1000 : Text;SheetName@1001 : Text);
+    BEGIN
+      IF FileName = '' THEN
+        ERROR(Text001);
+
+      IF SheetName = '' THEN
+        ERROR(Text002);
+
+      IF SheetName = 'G/L Account' THEN
+        SheetName := 'GL Account';
+
+      XlWrkBkReader := XlWrkBkReader.Open(FileName);
+      IF XlWrkBkReader.HasWorksheet(SheetName) THEN BEGIN
+        XlWrkShtReader := XlWrkBkReader.GetWorksheetByName(SheetName);
+      END ELSE BEGIN
+        CloseBook;
+        ERROR(Text004,SheetName);
+      END;
+    END;
+
+    [External]
+    PROCEDURE OpenBookStream@44(FileStream@1000 : InStream;SheetName@1001 : Text) : Text;
+    BEGIN
+      IF SheetName = '' THEN
+        EXIT(Text002);
+
+      IF SheetName = 'G/L Account' THEN
+        SheetName := 'GL Account';
+
+      XlWrkBkReader := XlWrkBkReader.Open(FileStream);
+      IF XlWrkBkReader.HasWorksheet(SheetName) THEN
+        XlWrkShtReader := XlWrkBkReader.GetWorksheetByName(SheetName)
+      ELSE BEGIN
+        CloseBook;
+        ErrorMessage := STRSUBSTNO(Text004,SheetName);
+        EXIT(ErrorMessage);
+      END;
+    END;
+
+    [Internal]
+    PROCEDURE UpdateBook@5(FileName@1000 : Text;SheetName@1001 : Text);
+    BEGIN
+      UpdateBookExcel(FileName,SheetName,TRUE);
+    END;
+
+    [Internal]
+    PROCEDURE UpdateBookExcel@48(FileName@1001 : Text;SheetName@1000 : Text;PreserveDataOnUpdate@1002 : Boolean);
+    BEGIN
+      IF FileName = '' THEN
+        ERROR(Text001);
+
+      IF SheetName = '' THEN
+        ERROR(Text002);
+
+      FileNameServer := FileName;
+      XlWrkBkWriter := XlWrkBkWriter.Open(FileNameServer);
+      IF XlWrkBkWriter.HasWorksheet(SheetName) THEN BEGIN
+        XlWrkShtWriter := XlWrkBkWriter.GetWorksheetByName(SheetName);
+        // Set PreserverDataOnUpdate to false if the sheet writer should clear all empty cells
+        // in which NAV does not have new data. Notice that the sheet writer will only clear Excel
+        // cells that are addressed by the writer. All other cells will be left unmodified.
+        XlWrkShtWriter.PreserveDataOnUpdate := PreserveDataOnUpdate;
+      END ELSE BEGIN
+        CloseBook;
+        ERROR(Text004,SheetName);
+      END;
+    END;
+
+    [External]
+    PROCEDURE CloseBook@30();
+    BEGIN
+      IF NOT ISNULL(XlWrkBkWriter) THEN BEGIN
+        XlWrkBkWriter.ClearFormulaCalculations;
+        XlWrkBkWriter.ValidateDocument;
+        XlWrkBkWriter.Close;
+        CLEAR(XlWrkShtWriter);
+        CLEAR(XlWrkBkWriter);
+      END;
+
+      IF NOT ISNULL(XlWrkBkReader) THEN BEGIN
+        CLEAR(XlWrkShtReader);
+        CLEAR(XlWrkBkReader);
+      END;
+    END;
+
+    PROCEDURE SelectOrAddSheet@47(NewSheetName@1000 : Text);
+    BEGIN
+      IF NewSheetName = '' THEN
+        EXIT;
+      IF XlWrkBkWriter.HasWorksheet(NewSheetName) THEN
+        XlWrkShtWriter := XlWrkBkWriter.GetWorksheetByName(NewSheetName)
+      ELSE
+        XlWrkShtWriter := XlWrkBkWriter.AddWorksheet(NewSheetName);
+    END;
+
+    [External]
+    PROCEDURE WriteSheet@37(ReportHeader@1001 : Text;CompanyName2@1002 : Text;UserID2@1003 : Text);
+    VAR
+      OrientationValues@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.5.5631.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Spreadsheet.OrientationValues";
+      CRLF@1008 : Char;
+    BEGIN
+      CRLF := 10;
+
+      XlWrkShtWriter.AddPageSetup(OrientationValues.Landscape,9); // 9 - default value for Paper Size - A4
+
+      WriteAllToCurrentSheet(Rec);
+
+      IF ReportHeader <> '' THEN
+        XlWrkShtWriter.AddHeader(
+          TRUE,
+          STRSUBSTNO('%1%2%1%3%4',GetExcelReference(1),ReportHeader,CRLF,CompanyName2));
+
+      XlWrkShtWriter.AddHeader(
+        FALSE,
+        STRSUBSTNO('%1%3%4%3%5 %2',GetExcelReference(2),GetExcelReference(3),CRLF,UserID2,PageTxt));
+
+      IF UseInfoSheet THEN
+        IF NOT TempInfoExcelBuf.ISEMPTY THEN BEGIN
+          SelectOrAddSheet(Text023);
+          WriteAllToCurrentSheet(TempInfoExcelBuf);
+        END;
+    END;
+
+    [External]
+    PROCEDURE WriteAllToCurrentSheet@49(VAR ExcelBuffer@1002 : Record 370);
+    VAR
+      ExcelBufferDialogMgt@1000 : Codeunit 5370;
+      RecNo@1001 : Integer;
+      TotalRecNo@1004 : Integer;
+      LastUpdate@1003 : DateTime;
+    BEGIN
+      IF ExcelBuffer.ISEMPTY THEN
+        EXIT;
+      ExcelBufferDialogMgt.Open(Text005);
+      LastUpdate := CURRENTDATETIME;
+      TotalRecNo := ExcelBuffer.COUNT;
+      IF ExcelBuffer.FINDSET THEN
+        REPEAT
+          RecNo := RecNo + 1;
+          IF NOT UpdateProgressDialog(ExcelBufferDialogMgt,LastUpdate,RecNo,TotalRecNo) THEN BEGIN
+            CloseBook;
+            ERROR(Text035)
+          END;
+          IF Formula = '' THEN
+            WriteCellValue(ExcelBuffer)
+          ELSE
+            WriteCellFormula(ExcelBuffer)
+        UNTIL ExcelBuffer.NEXT = 0;
+      ExcelBufferDialogMgt.Close;
+    END;
+
+    LOCAL PROCEDURE WriteCellValue@28(ExcelBuffer@1000 : Record 370);
+    VAR
+      Decorator@1001 : DotNet "'Microsoft.Dynamics.Nav.OpenXml, Version=11.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.Microsoft.Dynamics.Nav.OpenXml.Spreadsheet.CellDecorator";
+    BEGIN
+      WITH ExcelBuffer DO BEGIN
+        GetCellDecorator(Bold,Italic,Underline,"Double Underline",Decorator);
+
+        CASE "Cell Type" OF
+          "Cell Type"::Number:
+            XlWrkShtWriter.SetCellValueNumber("Row No.",xlColID,"Cell Value as Text",NumberFormat,Decorator);
+          "Cell Type"::Text:
+            XlWrkShtWriter.SetCellValueText("Row No.",xlColID,"Cell Value as Text",Decorator);
+          "Cell Type"::Date:
+            XlWrkShtWriter.SetCellValueDate("Row No.",xlColID,"Cell Value as Text",NumberFormat,Decorator);
+          "Cell Type"::Time:
+            XlWrkShtWriter.SetCellValueTime("Row No.",xlColID,"Cell Value as Text",NumberFormat,Decorator);
+          ELSE
+            ERROR(Text039)
+        END;
+      END;
+    END;
+
+    LOCAL PROCEDURE WriteCellFormula@38(ExcelBuffer@1000 : Record 370);
+    VAR
+      Decorator@1001 : DotNet "'Microsoft.Dynamics.Nav.OpenXml, Version=11.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.Microsoft.Dynamics.Nav.OpenXml.Spreadsheet.CellDecorator";
+    BEGIN
+      WITH ExcelBuffer DO BEGIN
+        GetCellDecorator(Bold,Italic,Underline,"Double Underline",Decorator);
+
+        XlWrkShtWriter.SetCellFormula("Row No.",xlColID,GetFormula,NumberFormat,Decorator);
+      END;
+    END;
+
+    LOCAL PROCEDURE GetCellDecorator@33(IsBold@1000 : Boolean;IsItalic@1001 : Boolean;IsUnderlined@1002 : Boolean;IsDoubleUnderlined@1004 : Boolean;VAR Decorator@1003 : DotNet "'Microsoft.Dynamics.Nav.OpenXml, Version=11.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.Microsoft.Dynamics.Nav.OpenXml.Spreadsheet.CellDecorator");
+    BEGIN
+      IF IsBold AND IsItalic THEN BEGIN
+        IF IsDoubleUnderlined THEN BEGIN
+          Decorator := XlWrkShtWriter.DefaultBoldItalicDoubleUnderlinedCellDecorator;
+          EXIT;
+        END;
+        IF IsUnderlined THEN BEGIN
+          Decorator := XlWrkShtWriter.DefaultBoldItalicUnderlinedCellDecorator;
+          EXIT;
+        END;
+      END;
+
+      IF IsBold AND IsItalic THEN BEGIN
+        Decorator := XlWrkShtWriter.DefaultBoldItalicCellDecorator;
+        EXIT;
+      END;
+
+      IF IsBold THEN BEGIN
+        IF IsDoubleUnderlined THEN BEGIN
+          Decorator := XlWrkShtWriter.DefaultBoldDoubleUnderlinedCellDecorator;
+          EXIT;
+        END;
+        IF IsUnderlined THEN BEGIN
+          Decorator := XlWrkShtWriter.DefaultBoldUnderlinedCellDecorator;
+          EXIT;
+        END;
+      END;
+
+      IF IsBold THEN BEGIN
+        Decorator := XlWrkShtWriter.DefaultBoldCellDecorator;
+        EXIT;
+      END;
+
+      IF IsItalic THEN BEGIN
+        IF IsDoubleUnderlined THEN BEGIN
+          Decorator := XlWrkShtWriter.DefaultItalicDoubleUnderlinedCellDecorator;
+          EXIT;
+        END;
+        IF IsUnderlined THEN BEGIN
+          Decorator := XlWrkShtWriter.DefaultItalicUnderlinedCellDecorator;
+          EXIT;
+        END;
+      END;
+
+      IF IsItalic THEN BEGIN
+        Decorator := XlWrkShtWriter.DefaultItalicCellDecorator;
+        EXIT;
+      END;
+
+      IF IsDoubleUnderlined THEN
+        Decorator := XlWrkShtWriter.DefaultDoubleUnderlinedCellDecorator
+      ELSE BEGIN
+        IF IsUnderlined THEN
+          Decorator := XlWrkShtWriter.DefaultUnderlinedCellDecorator
+        ELSE
+          Decorator := XlWrkShtWriter.DefaultCellDecorator;
+      END;
+    END;
+
+    [External]
+    PROCEDURE SetColumnWidth@50(ColName@1000 : Text[10];NewColWidth@1001 : Decimal);
+    BEGIN
+      IF NOT ISNULL(XlWrkShtWriter) THEN
+        XlWrkShtWriter.SetColumnWidth(ColName,NewColWidth);
+    END;
+
+    [Internal]
+    PROCEDURE CreateRangeName@9(RangeName@1000 : Text[30];FromColumnNo@1001 : Integer;FromRowNo@1002 : Integer);
+    VAR
+      TempExcelBuf@1005 : TEMPORARY Record 370;
+      ToxlRowID@1004 : Text[10];
+    BEGIN
+      SETCURRENTKEY("Row No.","Column No.");
+      IF FIND('+') THEN
+        ToxlRowID := xlRowID;
+      TempExcelBuf.VALIDATE("Row No.",FromRowNo);
+      TempExcelBuf.VALIDATE("Column No.",FromColumnNo);
+
+      XlWrkShtWriter.AddRange(
+        RangeName,
+        GetExcelReference(4) + TempExcelBuf.xlColID + GetExcelReference(4) + TempExcelBuf.xlRowID +
+        ':' +
+        GetExcelReference(4) + TempExcelBuf.xlColID + GetExcelReference(4) + ToxlRowID);
+    END;
+
+    [External]
+    PROCEDURE ReadSheet@4();
+    VAR
+      ExcelBufferDialogMgt@1003 : Codeunit 5370;
+      CellData@1002 : DotNet "'Microsoft.Dynamics.Nav.OpenXml, Version=11.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.Microsoft.Dynamics.Nav.OpenXml.Spreadsheet.CellData";
+      Enumerator@1001 : DotNet "'mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Collections.IEnumerator";
+      RowCount@1009 : Integer;
+      LastUpdate@1004 : DateTime;
+    BEGIN
+      LastUpdate := CURRENTDATETIME;
+      ExcelBufferDialogMgt.Open(Text007);
+      DELETEALL;
+
+      Enumerator := XlWrkShtReader.GetEnumerator;
+      RowCount := XlWrkShtReader.RowCount;
+      WHILE Enumerator.MoveNext DO BEGIN
+        CellData := Enumerator.Current;
+        IF CellData.HasValue THEN BEGIN
+          VALIDATE("Row No.",CellData.RowNumber);
+          VALIDATE("Column No.",CellData.ColumnNumber);
+          ParseCellValue(CellData.Value,CellData.Format);
+          INSERT;
+
+          IF NOT UpdateProgressDialog(ExcelBufferDialogMgt,LastUpdate,CellData.RowNumber,RowCount) THEN BEGIN
+            CloseBook;
+            ERROR(Text035)
+          END;
+        END;
+      END;
+
+      CloseBook;
+      ExcelBufferDialogMgt.Close;
+    END;
+
+    LOCAL PROCEDURE ParseCellValue@40(Value@1000 : Text;FormatString@1001 : Text);
+    VAR
+      Decimal@1004 : Decimal;
+    BEGIN
+      // The format contains only en-US number separators, this is an OpenXML standard requirement
+      // The algorithm sieves the data based on formatting as follows (the steps must run in this order)
+      // 1. FormatString = '@' -> Text
+      // 2. FormatString.Contains(':') -> Time
+      // 3. FormatString.ContainsOneOf('y', 'm', 'd') && FormatString.DoesNotContain('Red') -> Date
+      // 4. anything else -> Decimal
+
+      NumberFormat := COPYSTR(FormatString,1,30);
+
+      IF FormatString = '@' THEN BEGIN
+        "Cell Type" := "Cell Type"::Text;
+        "Cell Value as Text" := Value;
+        EXIT;
+      END;
+
+      EVALUATE(Decimal,Value);
+
+      IF STRPOS(FormatString,':') <> 0 THEN BEGIN
+        // Excel Time is stored in OADate format
+        "Cell Type" := "Cell Type"::Time;
+        "Cell Value as Text" := FORMAT(DT2TIME(ConvertDateTimeDecimalToDateTime(Decimal)));
+        EXIT;
+      END;
+
+      IF ((STRPOS(FormatString,'y') <> 0) OR
+          (STRPOS(FormatString,'m') <> 0) OR
+          (STRPOS(FormatString,'d') <> 0)) AND
+         (STRPOS(FormatString,'Red') = 0)
+      THEN BEGIN
+        "Cell Type" := "Cell Type"::Date;
+        "Cell Value as Text" := FORMAT(DT2DATE(ConvertDateTimeDecimalToDateTime(Decimal)));
+        EXIT;
+      END;
+
+      "Cell Type" := "Cell Type"::Number;
+      "Cell Value as Text" := FORMAT(ROUND(Decimal,0.000001),0,1);
+    END;
+
+    [External]
+    PROCEDURE SelectSheetsName@6(FileName@1000 : Text) : Text[250];
+    VAR
+      TempNameValueBuffer@1009 : TEMPORARY Record 823;
+      SheetNames@1008 : DotNet "'mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Collections.ArrayList";
+      SheetName@1002 : Text[250];
+      SelectedSheetName@1007 : Text[250];
+      i@1001 : Integer;
+    BEGIN
+      IF FileName = '' THEN
+        ERROR(Text001);
+
+      XlWrkBkReader := XlWrkBkReader.Open(FileName);
+
+      SelectedSheetName := '';
+      SheetNames := SheetNames.ArrayList(XlWrkBkReader.SheetNames);
+      IF NOT ISNULL(SheetNames) THEN BEGIN
+        FOR i := 0 TO SheetNames.Count - 1 DO BEGIN
+          SheetName := SheetNames.Item(i);
+          IF SheetName <> '' THEN BEGIN
+            TempNameValueBuffer.INIT;
+            TempNameValueBuffer.ID := i;
+            TempNameValueBuffer.Name := FORMAT(i + 1);
+            TempNameValueBuffer.Value := SheetName;
+            TempNameValueBuffer.INSERT;
+          END;
+        END;
+        IF NOT TempNameValueBuffer.ISEMPTY THEN
+          IF TempNameValueBuffer.COUNT = 1 THEN
+            SelectedSheetName := TempNameValueBuffer.Value
+          ELSE BEGIN
+            TempNameValueBuffer.FINDFIRST;
+            IF PAGE.RUNMODAL(PAGE::"Name/Value Lookup",TempNameValueBuffer) = ACTION::LookupOK THEN
+              SelectedSheetName := TempNameValueBuffer.Value;
+          END;
+      END;
+
+      CloseBook;
+      EXIT(SelectedSheetName);
+    END;
+
+    [External]
+    PROCEDURE GetExcelReference@10(Which@1000 : Integer) : Text[250];
+    BEGIN
+      CASE Which OF
+        1:
+          EXIT(Text013);
+        // DO NOT TRANSLATE: &B is the Excel code to turn bold printing on or off for customized Header/Footer.
+        2:
+          EXIT(Text014);
+        // DO NOT TRANSLATE: &D is the Excel code to print the current date in customized Header/Footer.
+        3:
+          EXIT(Text015);
+        // DO NOT TRANSLATE: &P is the Excel code to print the page number in customized Header/Footer.
+        4:
+          EXIT('$');
+        // DO NOT TRANSLATE: $ is the Excel code for absolute reference to cells.
+        5:
+          EXIT(Text016);
+        // DO NOT TRANSLATE: A1 is the Excel reference of the first cell.
+        6:
+          EXIT(Text017);
+        // DO NOT TRANSLATE: SUMIF is the name of the Excel function used to summarize values according to some conditions.
+        7:
+          EXIT(Text018);
+        // DO NOT TRANSLATE: The #N/A Excel error value occurs when a value is not available to a function or formula.
+        8:
+          EXIT(Text019);
+        // DO NOT TRANSLATE: GLAcc is used to define an Excel range name. You must refer to Excel rules to change this term.
+        9:
+          EXIT(Text020);
+        // DO NOT TRANSLATE: Period is used to define an Excel range name. You must refer to Excel rules to change this term.
+        10:
+          EXIT(Text021);
+        // DO NOT TRANSLATE: Budget is used to define an Excel worksheet name. You must refer to Excel rules to change this term.
+        11:
+          EXIT(Text022);
+        // DO NOT TRANSLATE: CostAcc is used to define an Excel range name. You must refer to Excel rules to change this term.
+      END;
+    END;
+
+    [External]
+    PROCEDURE ExportBudgetFilterToFormula@11(VAR ExcelBuf@1000 : Record 370) : Boolean;
+    VAR
+      TempExcelBufFormula@1001 : TEMPORARY Record 370;
+      TempExcelBufFormula2@1004 : TEMPORARY Record 370;
+      FirstRow@1002 : Integer;
+      LastRow@1003 : Integer;
+      HasFormulaError@1005 : Boolean;
+      ThisCellHasFormulaError@1006 : Boolean;
+    BEGIN
+      ExcelBuf.SETFILTER(Formula,'<>%1','');
+      IF ExcelBuf.FINDSET THEN
+        REPEAT
+          TempExcelBufFormula := ExcelBuf;
+          TempExcelBufFormula.INSERT;
+        UNTIL ExcelBuf.NEXT = 0;
+      ExcelBuf.RESET;
+
+      WITH TempExcelBufFormula DO
+        IF FINDSET THEN
+          REPEAT
+            ThisCellHasFormulaError := FALSE;
+            ExcelBuf.SETRANGE("Column No.",1);
+            ExcelBuf.SETFILTER("Row No.",'<>%1',"Row No.");
+            ExcelBuf.SETFILTER("Cell Value as Text",Formula);
+            TempExcelBufFormula2 := TempExcelBufFormula;
+            IF ExcelBuf.FINDSET THEN
+              REPEAT
+                IF NOT GET(ExcelBuf."Row No.","Column No.") THEN
+                  ExcelBuf.MARK(TRUE);
+              UNTIL ExcelBuf.NEXT = 0;
+            TempExcelBufFormula := TempExcelBufFormula2;
+            ClearFormula;
+            ExcelBuf.SETRANGE("Cell Value as Text");
+            ExcelBuf.SETRANGE("Row No.");
+            IF ExcelBuf.FINDSET THEN
+              REPEAT
+                IF ExcelBuf.MARK THEN BEGIN
+                  LastRow := ExcelBuf."Row No.";
+                  IF FirstRow = 0 THEN
+                    FirstRow := LastRow;
+                END ELSE
+                  IF FirstRow <> 0 THEN BEGIN
+                    IF FirstRow = LastRow THEN
+                      ThisCellHasFormulaError := AddToFormula(xlColID + FORMAT(FirstRow))
+                    ELSE
+                      ThisCellHasFormulaError :=
+                        AddToFormula('SUM(' + xlColID + FORMAT(FirstRow) + ':' + xlColID + FORMAT(LastRow) + ')');
+                    FirstRow := 0;
+                    IF ThisCellHasFormulaError THEN
+                      SetFormula(ExcelBuf.GetExcelReference(7));
+                  END;
+              UNTIL ThisCellHasFormulaError OR (ExcelBuf.NEXT = 0);
+
+            IF NOT ThisCellHasFormulaError AND (FirstRow <> 0) THEN BEGIN
+              IF FirstRow = LastRow THEN
+                ThisCellHasFormulaError := AddToFormula(xlColID + FORMAT(FirstRow))
+              ELSE
+                ThisCellHasFormulaError :=
+                  AddToFormula('SUM(' + xlColID + FORMAT(FirstRow) + ':' + xlColID + FORMAT(LastRow) + ')');
+              FirstRow := 0;
+              IF ThisCellHasFormulaError THEN
+                SetFormula(ExcelBuf.GetExcelReference(7));
+            END;
+
+            ExcelBuf.RESET;
+            ExcelBuf.GET("Row No.","Column No.");
+            ExcelBuf.SetFormula(GetFormula);
+            ExcelBuf.MODIFY;
+            HasFormulaError := HasFormulaError OR ThisCellHasFormulaError;
+          UNTIL NEXT = 0;
+
+      EXIT(HasFormulaError);
+    END;
+
+    [External]
+    PROCEDURE AddToFormula@12(Text@1001 : Text[30]) : Boolean;
+    VAR
+      Overflow@1002 : Boolean;
+      LongFormula@1000 : Text[1000];
+    BEGIN
+      LongFormula := GetFormula;
+      IF LongFormula = '' THEN
+        LongFormula := '=';
+      IF LongFormula <> '=' THEN
+        IF STRLEN(LongFormula) + 1 > MAXSTRLEN(LongFormula) THEN
+          Overflow := TRUE
+        ELSE
+          LongFormula := LongFormula + '+';
+      IF STRLEN(LongFormula) + STRLEN(Text) > MAXSTRLEN(LongFormula) THEN
+        Overflow := TRUE
+      ELSE
+        SetFormula(LongFormula + Text);
+      EXIT(Overflow);
+    END;
+
+    [External]
+    PROCEDURE GetFormula@13() : Text[1000];
+    BEGIN
+      EXIT(Formula + Formula2 + Formula3 + Formula4);
+    END;
+
+    [External]
+    PROCEDURE SetFormula@22(LongFormula@1000 : Text[1000]);
+    BEGIN
+      ClearFormula;
+      IF LongFormula = '' THEN
+        EXIT;
+
+      Formula := COPYSTR(LongFormula,1,MAXSTRLEN(Formula));
+      IF STRLEN(LongFormula) > MAXSTRLEN(Formula) THEN
+        Formula2 := COPYSTR(LongFormula,MAXSTRLEN(Formula) + 1,MAXSTRLEN(Formula2));
+      IF STRLEN(LongFormula) > MAXSTRLEN(Formula) + MAXSTRLEN(Formula2) THEN
+        Formula3 := COPYSTR(LongFormula,MAXSTRLEN(Formula) + MAXSTRLEN(Formula2) + 1,MAXSTRLEN(Formula3));
+      IF STRLEN(LongFormula) > MAXSTRLEN(Formula) + MAXSTRLEN(Formula2) + MAXSTRLEN(Formula3) THEN
+        Formula4 := COPYSTR(LongFormula,MAXSTRLEN(Formula) + MAXSTRLEN(Formula2) + MAXSTRLEN(Formula3) + 1,MAXSTRLEN(Formula4));
+    END;
+
+    [External]
+    PROCEDURE ClearFormula@18();
+    BEGIN
+      Formula := '';
+      Formula2 := '';
+      Formula3 := '';
+      Formula4 := '';
+    END;
+
+    [External]
+    PROCEDURE NewRow@14();
+    BEGIN
+      SetCurrent(CurrentRow + 1,0);
+    END;
+
+    [External]
+    PROCEDURE AddColumn@16(Value@1000 : Variant;IsFormula@1001 : Boolean;CommentText@1002 : Text;IsBold@1003 : Boolean;IsItalics@1004 : Boolean;IsUnderline@1005 : Boolean;NumFormat@1006 : Text[30];CellType@1007 : Option);
+    BEGIN
+      AddColumnToBuffer(Rec,Value,IsFormula,CommentText,IsBold,IsItalics,IsUnderline,NumFormat,CellType);
+    END;
+
+    [External]
+    PROCEDURE AddInfoColumn@24(Value@1006 : Variant;IsFormula@1005 : Boolean;IsBold@1003 : Boolean;IsItalics@1002 : Boolean;IsUnderline@1001 : Boolean;NumFormat@1000 : Text[30];CellType@1007 : Option);
+    BEGIN
+      AddColumnToBuffer(TempInfoExcelBuf,Value,IsFormula,'',IsBold,IsItalics,IsUnderline,NumFormat,CellType);
+    END;
+
+    LOCAL PROCEDURE AddColumnToBuffer@54(VAR ExcelBuffer@1008 : Record 370;Value@1000 : Variant;IsFormula@1001 : Boolean;CommentText@1002 : Text;IsBold@1003 : Boolean;IsItalics@1004 : Boolean;IsUnderline@1005 : Boolean;NumFormat@1006 : Text[30];CellType@1007 : Option);
+    BEGIN
+      IF CurrentRow < 1 THEN
+        NewRow;
+
+      CurrentCol := CurrentCol + 1;
+      ExcelBuffer.INIT;
+      ExcelBuffer.VALIDATE("Row No.",CurrentRow);
+      ExcelBuffer.VALIDATE("Column No.",CurrentCol);
+      IF IsFormula THEN
+        ExcelBuffer.SetFormula(FORMAT(Value))
+      ELSE
+        ExcelBuffer."Cell Value as Text" := FORMAT(Value);
+      ExcelBuffer.Comment := COPYSTR(CommentText,1,MAXSTRLEN(ExcelBuffer.Comment));
+      ExcelBuffer.Bold := IsBold;
+      ExcelBuffer.Italic := IsItalics;
+      ExcelBuffer.Underline := IsUnderline;
+      ExcelBuffer.NumberFormat := NumFormat;
+      ExcelBuffer."Cell Type" := CellType;
+      ExcelBuffer.INSERT;
+    END;
+
+    [External]
+    PROCEDURE EnterCell@51(VAR ExcelBuffer@1006 : Record 370;RowNo@1000 : Integer;ColumnNo@1001 : Integer;Value@1002 : Variant;IsBold@1005 : Boolean;IsItalics@1004 : Boolean;IsUnderline@1003 : Boolean);
+    BEGIN
+      ExcelBuffer.INIT;
+      ExcelBuffer.VALIDATE("Row No.",RowNo);
+      ExcelBuffer.VALIDATE("Column No.",ColumnNo);
+
+      CASE TRUE OF
+        Value.ISDECIMAL OR Value.ISINTEGER:
+          ExcelBuffer.VALIDATE("Cell Type",ExcelBuffer."Cell Type"::Number);
+        Value.ISDATE:
+          ExcelBuffer.VALIDATE("Cell Type",ExcelBuffer."Cell Type"::Date);
+        ELSE
+          ExcelBuffer.VALIDATE("Cell Type",ExcelBuffer."Cell Type"::Text);
+      END;
+
+      ExcelBuffer."Cell Value as Text" := COPYSTR(FORMAT(Value),1,MAXSTRLEN(ExcelBuffer."Cell Value as Text" ));
+      ExcelBuffer.Bold := IsBold;
+      ExcelBuffer.Italic := IsItalics;
+      ExcelBuffer.Underline := IsUnderline;
+      ExcelBuffer.INSERT(TRUE);
+    END;
+
+    [External]
+    PROCEDURE StartRange@19();
+    VAR
+      DummyExcelBuf@1000 : Record 370;
+    BEGIN
+      DummyExcelBuf.VALIDATE("Row No.",CurrentRow);
+      DummyExcelBuf.VALIDATE("Column No.",CurrentCol);
+
+      RangeStartXlRow := DummyExcelBuf.xlRowID;
+      RangeStartXlCol := DummyExcelBuf.xlColID;
+    END;
+
+    [External]
+    PROCEDURE EndRange@23();
+    VAR
+      DummyExcelBuf@1000 : Record 370;
+    BEGIN
+      DummyExcelBuf.VALIDATE("Row No.",CurrentRow);
+      DummyExcelBuf.VALIDATE("Column No.",CurrentCol);
+
+      RangeEndXlRow := DummyExcelBuf.xlRowID;
+      RangeEndXlCol := DummyExcelBuf.xlColID;
+    END;
+
+    [External]
+    PROCEDURE CreateRange@45(RangeName@1000 : Text[250]);
+    BEGIN
+      XlWrkShtWriter.AddRange(
+        RangeName,
+        GetExcelReference(4) + RangeStartXlCol + GetExcelReference(4) + RangeStartXlRow +
+        ':' +
+        GetExcelReference(4) + RangeEndXlCol + GetExcelReference(4) + RangeEndXlRow);
+    END;
+
+    [External]
+    PROCEDURE ClearNewRow@26();
+    BEGIN
+      SetCurrent(0,0);
+    END;
+
+    [External]
+    PROCEDURE SetUseInfoSheet@25();
+    BEGIN
+      UseInfoSheet := TRUE;
+    END;
+
+    [External]
+    PROCEDURE UTgetGlobalValue@35(globalVariable@1001 : Text[30];VAR value@1000 : Variant);
+    BEGIN
+      CASE globalVariable OF
+        'CurrentRow':
+          value := CurrentRow;
+        'CurrentCol':
+          value := CurrentCol;
+        'RangeStartXlRow':
+          value := RangeStartXlRow;
+        'RangeStartXlCol':
+          value := RangeStartXlCol;
+        'RangeEndXlRow':
+          value := RangeEndXlRow;
+        'RangeEndXlCol':
+          value := RangeEndXlCol;
+        'XlWrkSht':
+          value := XlWrkShtWriter;
+        'ExcelFile':
+          value := FileNameServer;
+        ELSE
+          ERROR(Text038,globalVariable);
+      END;
+    END;
+
+    [External]
+    PROCEDURE SetCurrent@27(NewCurrentRow@1000 : Integer;NewCurrentCol@1001 : Integer);
+    BEGIN
+      CurrentRow := NewCurrentRow;
+      CurrentCol := NewCurrentCol;
+    END;
+
+    [Internal]
+    PROCEDURE CreateValidationRule@17(Range@1000 : Code[20]);
+    BEGIN
+      XlWrkShtWriter.AddRangeDataValidation(
+        Range,
+        GetExcelReference(4) + RangeStartXlCol + GetExcelReference(4) + RangeStartXlRow +
+        ':' +
+        GetExcelReference(4) + RangeEndXlCol + GetExcelReference(4) + RangeEndXlRow);
+    END;
+
+    [External]
+    PROCEDURE QuitExcel@29();
+    BEGIN
+      CloseBook;
+    END;
+
+    [External]
+    PROCEDURE OpenExcel@31();
+    BEGIN
+      IF OpenUsingDocumentService('') THEN
+        EXIT;
+
+      FileManagement.DownloadHandler(FileNameServer,'','',Text034,GetFriendlyFilename);
+    END;
+
+    [Internal]
+    PROCEDURE DownloadAndOpenExcel@34();
+    BEGIN
+      OpenExcelWithName(GetFriendlyFilename);
+    END;
+
+    [Internal]
+    PROCEDURE OpenExcelWithName@15(FileName@1000 : Text);
+    BEGIN
+      IF FileName = '' THEN
+        ERROR(Text001);
+
+      IF OpenUsingDocumentService(FileName) THEN
+        EXIT;
+
+      FileManagement.DownloadHandler(FileNameServer,'','',Text034,FileName);
+    END;
+
+    LOCAL PROCEDURE OpenUsingDocumentService@21(FileName@1000 : Text) : Boolean;
+    VAR
+      DocumentServiceMgt@1005 : Codeunit 9510;
+      FileMgt@1004 : Codeunit 419;
+      PathHelper@1003 : DotNet "'mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.IO.Path";
+      DialogWindow@1002 : Dialog;
+      DocumentUrl@1001 : Text;
+    BEGIN
+      IF NOT EXISTS(FileNameServer) THEN
+        ERROR(Text003,FileNameServer);
+
+      // if document service is configured we save the generated document to SharePoint and open it from there.
+      IF DocumentServiceMgt.IsConfigured THEN BEGIN
+        IF FileName = '' THEN
+          FileName := 'Book.' + PathHelper.ChangeExtension(PathHelper.GetRandomFileName,'xlsx')
+        ELSE BEGIN
+          // if file is not applicable for the service it can not be opened using the document service.
+          IF NOT DocumentServiceMgt.IsServiceUri(FileName) THEN
+            EXIT(FALSE);
+
+          FileName := FileMgt.GetFileName(FileName);
+        END;
+
+        DialogWindow.OPEN(STRSUBSTNO(SavingDocumentMsg,FileName));
+        DocumentUrl := DocumentServiceMgt.SaveFile(FileNameServer,FileName,TRUE);
+        DocumentServiceMgt.OpenDocument(DocumentUrl);
+        DialogWindow.CLOSE;
+        EXIT(TRUE);
+      END;
+
+      EXIT(FALSE);
+    END;
+
+    [Internal]
+    PROCEDURE CreateBookAndOpenExcel@32(FileName@1004 : Text;SheetName@1000 : Text[250];ReportHeader@1003 : Text;CompanyName2@1002 : Text;UserID2@1001 : Text);
+    BEGIN
+      CreateBook(FileName,SheetName);
+      WriteSheet(ReportHeader,CompanyName2,UserID2);
+      CloseBook;
+      OpenExcel;
+    END;
+
+    LOCAL PROCEDURE UpdateProgressDialog@36(VAR ExcelBufferDialogManagement@1000 : Codeunit 5370;VAR LastUpdate@1001 : DateTime;CurrentCount@1002 : Integer;TotalCount@1004 : Integer) : Boolean;
+    VAR
+      CurrentTime@1003 : DateTime;
+    BEGIN
+      // Refresh at 100%, and every second in between 0% to 100%
+      // Duration is measured in miliseconds -> 1 sec = 1000 ms
+      CurrentTime := CURRENTDATETIME;
+      IF (CurrentCount = TotalCount) OR (CurrentTime - LastUpdate >= 1000) THEN BEGIN
+        LastUpdate := CurrentTime;
+        IF NOT ExcelBufferDialogManagement.SetProgress(ROUND(CurrentCount / TotalCount * 10000,1)) THEN
+          EXIT(FALSE);
+      END;
+
+      EXIT(TRUE)
+    END;
+
+    LOCAL PROCEDURE GetFriendlyFilename@46() : Text;
+    BEGIN
+      IF FriendlyName = '' THEN
+        EXIT('Book1' + ExcelFileExtensionTok);
+
+      EXIT(FileManagement.StripNotsupportChrInFileName(FriendlyName) + ExcelFileExtensionTok);
+    END;
+
+    [External]
+    PROCEDURE SetFriendlyFilename@41(Name@1000 : Text);
+    BEGIN
+      FriendlyName := Name;
+    END;
+
+    [External]
+    PROCEDURE ConvertDateTimeDecimalToDateTime@43(DateTimeAsOADate@1000 : Decimal) : DateTime;
+    VAR
+      DotNetDateTime@1003 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.DateTime";
+      DotNetDateTimeWithKind@1002 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.DateTime";
+      DotNetDateTimeKind@1001 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.DateTimeKind";
+    BEGIN
+      DotNetDateTime := DotNetDateTime.FromOADate(DateTimeAsOADate);
+      DotNetDateTimeWithKind := DotNetDateTime.DateTime(DotNetDateTime.Ticks,DotNetDateTimeKind.Local);
+      EXIT(DotNetDateTimeWithKind);
+    END;
+
+    BEGIN
+    END.
+  }
+}
+

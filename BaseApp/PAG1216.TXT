@@ -1,0 +1,140 @@
+OBJECT Page 1216 Data Exch Col Def Part
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    CaptionML=ENU=Column Definitions;
+    SourceTable=Table1223;
+    DelayedInsert=Yes;
+    PageType=ListPart;
+    ActionList=ACTIONS
+    {
+      { 13      ;    ;ActionContainer;
+                      ActionContainerType=ActionItems }
+      { 17      ;1   ;Action    ;
+                      Name=GetFileStructure;
+                      Ellipsis=Yes;
+                      CaptionML=ENU=Get File Structure;
+                      ToolTipML=ENU=Prefill the lines of the column definitions according to the structure of a data file on your computer or network.;
+                      ApplicationArea=#Basic,#Suite;
+                      OnAction=BEGIN
+                                 GetStructure;
+                               END;
+                                }
+    }
+  }
+  CONTROLS
+  {
+    { 1   ;0   ;Container ;
+                ContainerType=ContentArea }
+
+    { 2   ;1   ;Group     ;
+                Name=Group;
+                GroupType=Repeater }
+
+    { 3   ;2   ;Field     ;
+                ToolTipML=ENU=Specifies the number that reflects the column's position on the line in the file.;
+                ApplicationArea=#Basic,#Suite;
+                SourceExpr="Column No." }
+
+    { 4   ;2   ;Field     ;
+                ToolTipML=ENU=Specifies the name of the column.;
+                ApplicationArea=#Basic,#Suite;
+                SourceExpr=Name }
+
+    { 6   ;2   ;Field     ;
+                ToolTipML=ENU=Specifies if the data to be exchanged is of type Text, Date, or Decimal.;
+                ApplicationArea=#Basic,#Suite;
+                SourceExpr="Data Type";
+                OnValidate=BEGIN
+                             DataFormatRequired := IsDataFormatRequired;
+                             DataFormattingCultureRequired := IsDataFormattingCultureRequired;
+                           END;
+
+                ShowMandatory=TRUE }
+
+    { 7   ;2   ;Field     ;
+                ToolTipML=ENU=Specifies the format of the data, if any. For example, MM-DD-YYYY if the data type is Date.;
+                ApplicationArea=#Basic,#Suite;
+                SourceExpr="Data Format";
+                ShowMandatory=DataFormatRequired }
+
+    { 8   ;2   ;Field     ;
+                ToolTipML=ENU=Specifies the culture of the data format, if any. For example, en-US if the data type is Decimal to ensure that comma is used as the .000 separator, according to the US format. This field is only relevant for import.;
+                ApplicationArea=#Basic,#Suite;
+                SourceExpr="Data Formatting Culture";
+                ShowMandatory=DataFormattingCultureRequired }
+
+    { 14  ;2   ;Field     ;
+                ToolTipML=ENU=Specifies the length of the fixed-width line that holds the column if the file is of type Fixed Text.;
+                ApplicationArea=#Basic,#Suite;
+                SourceExpr=Length }
+
+    { 9   ;2   ;Field     ;
+                ToolTipML=ENU=Specifies a description of the column, for informational purposes.;
+                ApplicationArea=#Basic,#Suite;
+                SourceExpr=Description }
+
+    { 15  ;2   ;Field     ;
+                ToolTipML=ENU=Specifies the position of the element in the related XML schema.;
+                ApplicationArea=#Basic,#Suite;
+                SourceExpr=Path }
+
+    { 16  ;2   ;Field     ;
+                ToolTipML=ENU=Specifies the value that is used in the data file to identify negative amounts, in data files that cannot contain negative signs. This identifier is then used to reverse the identified amounts to negative signs during import.;
+                ApplicationArea=#Basic,#Suite;
+                SourceExpr="Negative-Sign Identifier" }
+
+    { 11  ;2   ;Field     ;
+                ToolTipML=ENU=Specifies any data that you want to export in this column, such as extra information about the payment type.;
+                ApplicationArea=#Basic,#Suite;
+                SourceExpr=Constant }
+
+    { 5   ;2   ;Field     ;
+                ToolTipML=ENU=Specifies that the element is shown in the data exchange definition.;
+                ApplicationArea=#Advanced;
+                SourceExpr=Show;
+                Visible=false }
+
+    { 10  ;2   ;Field     ;
+                ToolTipML=ENU=Specifies that the data must include text padding.;
+                ApplicationArea=#Basic,#Suite;
+                SourceExpr="Text Padding Required" }
+
+    { 12  ;2   ;Field     ;
+                ToolTipML=ENU=Specifies that text padding.;
+                ApplicationArea=#Basic,#Suite;
+                SourceExpr="Pad Character" }
+
+    { 18  ;2   ;Field     ;
+                ToolTipML=ENU=Specifies if the column justification is left or right.;
+                ApplicationArea=#Basic,#Suite;
+                SourceExpr=Justification }
+
+  }
+  CODE
+  {
+    VAR
+      DataFormatRequired@1000 : Boolean;
+      DataFormattingCultureRequired@1001 : Boolean;
+
+    LOCAL PROCEDURE GetStructure@2();
+    VAR
+      DataExchLineDef@1005 : Record 1227;
+      GetFileStructure@1003 : Report 1235;
+    BEGIN
+      DataExchLineDef.GET("Data Exch. Def Code","Data Exch. Line Def Code");
+      GetFileStructure.Initialize(DataExchLineDef);
+      GetFileStructure.RUNMODAL;
+    END;
+
+    BEGIN
+    END.
+  }
+}
+
