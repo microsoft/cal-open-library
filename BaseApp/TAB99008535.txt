@@ -11,8 +11,8 @@ OBJECT Table 99008535 TempBlob
   }
   FIELDS
   {
-    { 1   ;   ;Primary Key         ;Integer        }
-    { 2   ;   ;Blob                ;BLOB           }
+    { 1   ;   ;Primary Key         ;Integer       ;DataClassification=SystemMetadata }
+    { 2   ;   ;Blob                ;BLOB          ;DataClassification=SystemMetadata }
   }
   KEYS
   {
@@ -57,6 +57,16 @@ OBJECT Table 99008535 TempBlob
         InStream.READTEXT(ContentLine);
         Content += LineSeparator + ContentLine;
       END;
+    END;
+
+    [External]
+    PROCEDURE ReadAsTextWithCRLFLineSeparator@20() : Text;
+    VAR
+      CRLF@1000 : Text[2];
+    BEGIN
+      CRLF[1] := 13;
+      CRLF[2] := 10;
+      EXIT(ReadAsText(CRLF,TEXTENCODING::UTF8));
     END;
 
     [External]
@@ -172,6 +182,20 @@ OBJECT Table 99008535 TempBlob
     END;
 
     [TryFunction]
+    [External]
+    PROCEDURE TryDownloadFromUrl@21(Url@1000 : Text);
+    VAR
+      WebClient@1001 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Net.WebClient";
+      MemoryStream@1002 : DotNet "'mscorlib'.System.IO.MemoryStream";
+      OutStr@1003 : OutStream;
+    BEGIN
+      WebClient := WebClient.WebClient;
+      MemoryStream := MemoryStream.MemoryStream(WebClient.DownloadData(Url));
+      Blob.CREATEOUTSTREAM(OutStr);
+      COPYSTREAM(OutStr,MemoryStream);
+    END;
+
+    [TryFunction]
     LOCAL PROCEDURE TryGetXMLAsText@6(VAR Xml@1000 : Text);
     VAR
       XmlDoc@1002 : DotNet "'System.Xml, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlDocument";
@@ -194,20 +218,6 @@ OBJECT Table 99008535 TempBlob
       IF NOT TryGetXMLAsText(Xml) THEN
         ERROR(XmlCannotBeLoadedErr);
       EXIT(Xml);
-    END;
-
-    [TryFunction]
-    [External]
-    PROCEDURE TryDownloadFromUrl@21(Url@1000 : Text);
-    VAR
-      WebClient@1001 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Net.WebClient";
-      MemoryStream@1002 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.IO.MemoryStream";
-      OutStr@1003 : OutStream;
-    BEGIN
-      WebClient := WebClient.WebClient;
-      MemoryStream := MemoryStream.MemoryStream(WebClient.DownloadData(Url));
-      Blob.CREATEOUTSTREAM(OutStr);
-      COPYSTREAM(OutStr,MemoryStream);
     END;
 
     BEGIN
