@@ -492,16 +492,27 @@ OBJECT Table 370 Excel Buffer
     [External]
     PROCEDURE SelectSheetsName@6(FileName@1000 : Text) : Text[250];
     VAR
+      TempBlob@1001 : Record 99008535;
+      InStr@1002 : InStream;
+    BEGIN
+      IF FileName = '' THEN
+        ERROR(Text001);
+
+      FileManagement.BLOBImportFromServerFile(TempBlob,FileName);
+      TempBlob.Blob.CREATEINSTREAM(InStr);
+      EXIT(SelectSheetsNameStream(InStr));
+    END;
+
+    [External]
+    PROCEDURE SelectSheetsNameStream@56(FileStream@1000 : InStream) : Text[250];
+    VAR
       TempNameValueBuffer@1009 : TEMPORARY Record 823;
       SheetNames@1008 : DotNet "'mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Collections.ArrayList";
       SheetName@1002 : Text[250];
       SelectedSheetName@1007 : Text[250];
       i@1001 : Integer;
     BEGIN
-      IF FileName = '' THEN
-        ERROR(Text001);
-
-      XlWrkBkReader := XlWrkBkReader.Open(FileName);
+      XlWrkBkReader := XlWrkBkReader.Open(FileStream);
 
       SelectedSheetName := '';
       SheetNames := SheetNames.ArrayList(XlWrkBkReader.SheetNames);
