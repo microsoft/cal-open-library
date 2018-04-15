@@ -1,0 +1,138 @@
+OBJECT Page 50900 Soap Proxy Type
+{
+  OBJECT-PROPERTIES
+  {
+    Date=15.04.18;
+    Time=19:24:01;
+    Modified=Yes;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    InsertAllowed=No;
+    DeleteAllowed=No;
+    SourceTable=Table823;
+    PageType=ListPart;
+    SourceTableTemporary=Yes;
+  }
+  CONTROLS
+  {
+    { 10008925;0;Container;
+                ContainerType=ContentArea }
+
+    { 10008926;1;Group    ;
+                Name=Group;
+                GroupType=Repeater }
+
+    { 10008927;2;Field    ;
+                SourceExpr=Name;
+                Editable=FALSE;
+                OnAssistEdit=BEGIN
+                               SetSelectedType;
+                               CurrPage.UPDATE;
+                             END;
+                              }
+
+    { 10008928;2;Field    ;
+                SourceExpr=Value;
+                Editable=FALSE }
+
+  }
+  CODE
+  {
+    VAR
+      TypeBuffer@10008929 : TEMPORARY Record 823;
+      ServiceBuffer@10008928 : TEMPORARY Record 823;
+      ParameterBuffer@10008927 : TEMPORARY Record 823;
+      PropertyBuffer@10008926 : TEMPORARY Record 823;
+      MethodBuffer@10008925 : TEMPORARY Record 823;
+      SelectedTypeBuffer@10008935 : TEMPORARY Record 823;
+      SelectedServiceBuffer@10008934 : TEMPORARY Record 823;
+      SelectedParameterBuffer@10008933 : TEMPORARY Record 823;
+      SelectedPropertyBuffer@10008932 : TEMPORARY Record 823;
+      SelectedMethodBuffer@10008931 : TEMPORARY Record 823;
+      PageType@10008930 : 'Types,Services,Parameters,Properties,Methods';
+
+    PROCEDURE SetBuffer@10008925(VAR SetTypeBuffer@10008929 : TEMPORARY Record 823;VAR SetServiceBuffer@10008928 : TEMPORARY Record 823;VAR SetParameterBuffer@10008927 : TEMPORARY Record 823;VAR SetPropertyBuffer@10008926 : TEMPORARY Record 823;VAR SetMethodBuffer@10008925 : TEMPORARY Record 823);
+    BEGIN
+      TypeBuffer.COPY(SetTypeBuffer,TRUE);
+      ServiceBuffer.COPY(SetServiceBuffer,TRUE);
+      ParameterBuffer.COPY(SetParameterBuffer,TRUE);
+      PropertyBuffer.COPY(SetPropertyBuffer,TRUE);
+      MethodBuffer.COPY(SetMethodBuffer,TRUE);
+    END;
+
+    PROCEDURE SetSelectedBuffer@10008927(VAR SetSelectedTypeBuffer@10008929 : TEMPORARY Record 823;VAR SetSelectedServiceBuffer@10008928 : TEMPORARY Record 823;VAR SetSelectedParameterBuffer@10008927 : TEMPORARY Record 823;VAR SetSelectedPropertyBuffer@10008926 : TEMPORARY Record 823;VAR SetSelectedMethodBuffer@10008925 : TEMPORARY Record 823);
+    BEGIN
+      SelectedTypeBuffer.COPY(SetSelectedTypeBuffer,TRUE);
+      SelectedServiceBuffer.COPY(SetSelectedServiceBuffer,TRUE);
+      SelectedParameterBuffer.COPY(SetSelectedParameterBuffer,TRUE);
+      SelectedPropertyBuffer.COPY(SetSelectedPropertyBuffer,TRUE);
+      SelectedMethodBuffer.COPY(SetSelectedMethodBuffer,TRUE);
+    END;
+
+    PROCEDURE SetDisplay@10008926(VAR SoapProxyClientMgt@10008925 : Codeunit 50900;SetPageType@10008926 : 'Types,Services,Parameters,Properties,Methods');
+    BEGIN
+      PageType := SetPageType;
+
+      CASE PageType OF
+        PageType::Services:
+          COPY(ServiceBuffer,TRUE);
+        PageType::Types:
+          COPY(TypeBuffer,TRUE);
+        PageType::Parameters:
+          COPY(ParameterBuffer,TRUE);
+        PageType::Properties:
+          COPY(PropertyBuffer,TRUE);
+        PageType::Methods:
+          COPY(MethodBuffer,TRUE);
+      END;
+    END;
+
+    LOCAL PROCEDURE SetSelectedType@10008929();
+    BEGIN
+      CASE PageType OF
+        PageType::Services:
+          BEGIN
+            SelectedServiceBuffer.DELETEALL;
+            SelectedServiceBuffer := Rec;
+            SelectedServiceBuffer.INSERT;
+            MethodBuffer.DELETEALL;
+            ParameterBuffer.DELETEALL;
+            PropertyBuffer.DELETEALL;
+          END;
+        PageType::Types:
+          BEGIN
+            SelectedTypeBuffer.DELETEALL;
+            SelectedTypeBuffer := Rec;
+            SelectedTypeBuffer.INSERT;
+          END;
+        PageType::Parameters:
+          BEGIN
+            SelectedParameterBuffer.DELETEALL;
+            SelectedParameterBuffer := Rec;
+            SelectedParameterBuffer.INSERT;
+            PropertyBuffer.DELETEALL;
+          END;
+        PageType::Properties:
+          BEGIN
+            SelectedPropertyBuffer.DELETEALL;
+            SelectedPropertyBuffer := Rec;
+            SelectedPropertyBuffer.INSERT;
+          END;
+        PageType::Methods:
+          BEGIN
+            SelectedMethodBuffer.DELETEALL;
+            SelectedMethodBuffer := Rec;
+            SelectedMethodBuffer.INSERT;
+            ParameterBuffer.DELETEALL;
+            PropertyBuffer.DELETEALL;
+          END;
+      END;
+    END;
+
+    BEGIN
+    END.
+  }
+}
+

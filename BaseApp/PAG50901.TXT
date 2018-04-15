@@ -1,0 +1,161 @@
+OBJECT Page 50901 Soap Service Viewer
+{
+  OBJECT-PROPERTIES
+  {
+    Date=15.04.18;
+    Time=19:22:21;
+    Modified=Yes;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    InsertAllowed=No;
+    DeleteAllowed=No;
+    ModifyAllowed=No;
+    SourceTable=Table2000000026;
+    DataCaptionExpr='';
+    SourceTableView=SORTING(Number)
+                    WHERE(Number=CONST(1));
+    OnOpenPage=BEGIN
+                 CurrPage.Services.PAGE.SetBuffer(TypeBuffer,ServiceBuffer,ParameterBuffer,PropertyBuffer,MethodBuffer);
+                 CurrPage.Services.PAGE.SetSelectedBuffer(SelectedTypeBuffer,SelectedServiceBuffer,SelectedParameterBuffer,SelectedPropertyBuffer,SelectedMethodBuffer);
+                 CurrPage.Services.PAGE.SetDisplay(SoapProxyClientMgt,PageType::Services);
+
+                 CurrPage.Types.PAGE.SetBuffer(TypeBuffer,ServiceBuffer,ParameterBuffer,PropertyBuffer,MethodBuffer);
+                 CurrPage.Types.PAGE.SetSelectedBuffer(SelectedTypeBuffer,SelectedServiceBuffer,SelectedParameterBuffer,SelectedPropertyBuffer,SelectedMethodBuffer);
+                 CurrPage.Types.PAGE.SetDisplay(SoapProxyClientMgt,PageType::Types);
+
+                 CurrPage.Properties.PAGE.SetBuffer(TypeBuffer,ServiceBuffer,ParameterBuffer,PropertyBuffer,MethodBuffer);
+                 CurrPage.Properties.PAGE.SetSelectedBuffer(SelectedTypeBuffer,SelectedServiceBuffer,SelectedParameterBuffer,SelectedPropertyBuffer,SelectedMethodBuffer);
+                 CurrPage.Properties.PAGE.SetDisplay(SoapProxyClientMgt,PageType::Properties);
+
+                 CurrPage.Methods.PAGE.SetBuffer(TypeBuffer,ServiceBuffer,ParameterBuffer,PropertyBuffer,MethodBuffer);
+                 CurrPage.Methods.PAGE.SetSelectedBuffer(SelectedTypeBuffer,SelectedServiceBuffer,SelectedParameterBuffer,SelectedPropertyBuffer,SelectedMethodBuffer);
+                 CurrPage.Methods.PAGE.SetDisplay(SoapProxyClientMgt,PageType::Methods);
+
+                 CurrPage.Parameters.PAGE.SetBuffer(TypeBuffer,ServiceBuffer,ParameterBuffer,PropertyBuffer,MethodBuffer);
+                 CurrPage.Parameters.PAGE.SetSelectedBuffer(SelectedTypeBuffer,SelectedServiceBuffer,SelectedParameterBuffer,SelectedPropertyBuffer,SelectedMethodBuffer);
+                 CurrPage.Parameters.PAGE.SetDisplay(SoapProxyClientMgt,PageType::Parameters);
+               END;
+
+    OnAfterGetCurrRecord=BEGIN
+                           UpdateTypes;
+                         END;
+
+  }
+  CONTROLS
+  {
+    { 10008925;;Container ;
+                Name=root;
+                ContainerType=ContentArea }
+
+    { 10008926;1;Field    ;
+                CaptionML=ENU=Proxy Url;
+                SourceExpr=ProxyUrl;
+                OnValidate=BEGIN
+                             Reload;
+                             CurrPage.UPDATE;
+                           END;
+                            }
+
+    { 10008927;1;Part     ;
+                Name=Services;
+                CaptionML=ENU=Services;
+                PagePartID=Page50900;
+                PartType=Page;
+                UpdatePropagation=Both }
+
+    { 10008931;1;Part     ;
+                Name=Methods;
+                CaptionML=ENU=Methods;
+                PagePartID=Page50900;
+                PartType=Page;
+                UpdatePropagation=Both }
+
+    { 10008932;1;Part     ;
+                Name=Parameters;
+                CaptionML=ENU=Parameters;
+                PagePartID=Page50900;
+                PartType=Page;
+                UpdatePropagation=Both }
+
+    { 10008930;1;Part     ;
+                Name=Properties;
+                CaptionML=ENU=Properties;
+                PagePartID=Page50900;
+                PartType=Page;
+                UpdatePropagation=Both }
+
+    { 10008929;;Container ;
+                ContainerType=FactBoxArea }
+
+    { 10008928;1;Part     ;
+                Name=Types;
+                CaptionML=ENU=Types;
+                PagePartID=Page50900;
+                PartType=Page }
+
+  }
+  CODE
+  {
+    VAR
+      SoapProxyClientMgt@10008926 : Codeunit 50900;
+      TypeBuffer@10008927 : TEMPORARY Record 823;
+      ServiceBuffer@10008928 : TEMPORARY Record 823;
+      ParameterBuffer@10008929 : TEMPORARY Record 823;
+      PropertyBuffer@10008930 : TEMPORARY Record 823;
+      MethodBuffer@10008931 : TEMPORARY Record 823;
+      SelectedTypeBuffer@10008936 : TEMPORARY Record 823;
+      SelectedServiceBuffer@10008935 : TEMPORARY Record 823;
+      SelectedParameterBuffer@10008934 : TEMPORARY Record 823;
+      SelectedPropertyBuffer@10008933 : TEMPORARY Record 823;
+      SelectedMethodBuffer@10008932 : TEMPORARY Record 823;
+      ProxyUrl@10008925 : Text;
+      PageType@10008937 : 'Types,Services,Parameters,Properties,Methods';
+
+    LOCAL PROCEDURE Reload@10008925();
+    BEGIN
+      TypeBuffer.DELETEALL;
+      ServiceBuffer.DELETEALL;
+      ParameterBuffer.DELETEALL;
+      PropertyBuffer.DELETEALL;
+      MethodBuffer.DELETEALL;
+      SelectedTypeBuffer.DELETEALL;
+      SelectedServiceBuffer.DELETEALL;
+      SelectedParameterBuffer.DELETEALL;
+      SelectedPropertyBuffer.DELETEALL;
+      SelectedMethodBuffer.DELETEALL;
+      SoapProxyClientMgt.CreateSoapProxy(ProxyUrl);
+      SoapProxyClientMgt.GetTypes(TypeBuffer,ServiceBuffer);
+    END;
+
+    LOCAL PROCEDURE UpdateTypes@10008926();
+    VAR
+      AllTypeBuffer@10008925 : TEMPORARY Record 823;
+    BEGIN
+      IF SelectedServiceBuffer.FINDFIRST THEN BEGIN
+        MethodBuffer.DELETEALL;
+        ParameterBuffer.DELETEALL;
+        PropertyBuffer.DELETEALL;
+        SoapProxyClientMgt.GetMethods(SelectedServiceBuffer.Name,MethodBuffer);
+        IF SelectedMethodBuffer.FINDFIRST THEN BEGIN
+          SoapProxyClientMgt.GetMethodParameters(SelectedServiceBuffer.Name,SelectedMethodBuffer.Name,ParameterBuffer);
+          IF SelectedParameterBuffer.FINDFIRST THEN BEGIN
+            AllTypeBuffer.COPY(TypeBuffer,TRUE);
+            IF AllTypeBuffer.FINDSET THEN REPEAT
+              IF STRPOS(SelectedParameterBuffer.Value,AllTypeBuffer.Name) > 0 THEN BEGIN
+                SoapProxyClientMgt.GetTypeProperties(AllTypeBuffer.Name,PropertyBuffer);
+                EXIT;
+              END;
+            UNTIL AllTypeBuffer.NEXT = 0;
+            SoapProxyClientMgt.GetMethodParameterProperties(SelectedServiceBuffer.Name,SelectedMethodBuffer.Name,SelectedParameterBuffer.Name,PropertyBuffer);
+          END;
+        END;
+      END;
+    END;
+
+    BEGIN
+    END.
+  }
+}
+

@@ -2,8 +2,9 @@ OBJECT Codeunit 50900 Soap Proxy Client Mgt.
 {
   OBJECT-PROPERTIES
   {
-    Date=;
-    Time=;
+    Date=15.04.18;
+    Time=19:21:29;
+    Modified=Yes;
     Version List=;
   }
   PROPERTIES
@@ -385,24 +386,50 @@ OBJECT Codeunit 50900 Soap Proxy Client Mgt.
       FOREACH ParameterInfo IN MethodInfo.GetParameters DO BEGIN
         Parameters.ID += 1;
         Parameters.Name := ParameterInfo.Name;
+        Parameters.Value := ParameterInfo.ParameterType.ToString;
         Parameters.INSERT;
       END;
     END;
 
     [External]
-    PROCEDURE GetProperties@13(ServiceName@1000 : Text;VAR Properties@1001 : Record 823);
+    PROCEDURE GetTypeProperties@13(TypeName@1000 : Text;VAR Properties@1001 : Record 823);
     VAR
-      ServiceType@1002 : DotNet "'mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Type";
+      Type@1002 : DotNet "'mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Type";
+      TypeInfo@1004 : DotNet "'mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Reflection.TypeInfo";
       PropertyInfo@1003 : DotNet "'mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Reflection.PropertyInfo";
     BEGIN
-      ServiceType := Assembly.GetType(ServiceName);
-      FOREACH PropertyInfo IN ServiceType.GetProperties
-         DO BEGIN
-        Properties.ID += 1;
-        Properties.Name := PropertyInfo.Name;
-        Properties.Value := PropertyInfo.PropertyType.ToString;
-        Properties.INSERT;
+      FOREACH TypeInfo IN Assembly.GetTypes DO BEGIN
+        IF TypeInfo.Name = TypeName THEN
+          FOREACH PropertyInfo IN TypeInfo.GetProperties DO BEGIN
+            Properties.ID += 1;
+            Properties.Name := PropertyInfo.Name;
+            Properties.Value := PropertyInfo.PropertyType.ToString;
+            Properties.INSERT;
+          END;
       END;
+    END;
+
+    [External]
+    PROCEDURE GetMethodParameterProperties@51(ServiceName@1000 : Text;MethodName@1006 : Text;ParameterName@1009 : Text;VAR Properties@1001 : Record 823);
+    VAR
+      ServiceType@1002 : DotNet "'mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Type";
+      MethodInfo@1003 : DotNet "'mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Reflection.MethodInfo";
+      ParameterInfo@1005 : DotNet "'mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Reflection.ParameterInfo";
+      Type@1007 : DotNet "'mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Type";
+      PropertyInfo@1008 : DotNet "'mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Reflection.PropertyInfo";
+    BEGIN
+      ServiceType := Assembly.GetType(ServiceName);
+      MethodInfo := ServiceType.GetMethod(MethodName);
+      FOREACH ParameterInfo IN MethodInfo.GetParameters DO
+        IF ParameterInfo.Name = ParameterName THEN BEGIN
+          Type := ParameterInfo.GetType;
+          FOREACH PropertyInfo IN Type.GetProperties DO BEGIN
+            Properties.ID += 1;
+            Properties.Name := PropertyInfo.Name;
+            Properties.Value := PropertyInfo.PropertyType.ToString;
+            Properties.INSERT;
+          END;
+        END;
     END;
 
     [External]
