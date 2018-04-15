@@ -2,9 +2,8 @@ OBJECT Codeunit 50900 Soap Proxy Client Mgt.
 {
   OBJECT-PROPERTIES
   {
-    Date=15.04.18;
-    Time=19:21:29;
-    Modified=Yes;
+    Date=;
+    Time=;
     Version List=;
   }
   PROPERTIES
