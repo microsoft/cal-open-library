@@ -1,0 +1,70 @@
+OBJECT Codeunit 50909 X509 Certificate Management
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      X509Certificate2@1000 : DotNet "'System, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Security.Cryptography.X509Certificates.X509Certificate2";
+      X509ContentType@1001 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Security.Cryptography.X509Certificates.X509ContentType";
+      Convert@1002 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Convert";
+      CertFileName@1003 : TextConst '@@@={Locked};ENU=Certificate.cer';
+      ImportErr@1004 : TextConst 'ENU=Unable to import certificate!';
+
+    [External]
+    PROCEDURE ImportCertificate@1(ContentType@1000 : Text) CertBase64Value : Text;
+    VAR
+      TempBlob@1002 : Record 99008535;
+      StdPasswordDialog@1003 : Page 9815;
+      FileManagement@1004 : Codeunit 419;
+    BEGIN
+      IF NOT TryParseEnum(X509ContentType,GETDOTNETTYPE(X509ContentType),ContentType) THEN
+        X509ContentType := X509ContentType.Pkcs12;
+
+      FileManagement.BLOBImport(TempBlob,CertFileName);
+      CertBase64Value := TempBlob.ToBase64String;
+
+      IF NOT TryImportCertificate(CertBase64Value,'') THEN BEGIN
+        StdPasswordDialog.DisablePasswordConfirmation;
+        StdPasswordDialog.EnableGetPasswordMode(TRUE);
+        IF StdPasswordDialog.RUNMODAL <> ACTION::OK THEN EXIT;
+        IF NOT TryImportCertificate(CertBase64Value,StdPasswordDialog.GetPasswordValue) THEN
+          ERROR(ImportErr);
+      END;
+
+      CertBase64Value := Convert.ToBase64String(X509Certificate2.Export(X509ContentType));
+    END;
+
+    [TryFunction]
+    LOCAL PROCEDURE TryImportCertificate@11(CertBase64Value@1000 : Text;Password@1001 : Text);
+    VAR
+      X509KeyStorageFlags@1002 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Security.Cryptography.X509Certificates.X509KeyStorageFlags";
+    BEGIN
+      X509Certificate2 := X509Certificate2.X509Certificate2(Convert.FromBase64String(CertBase64Value),Password,X509KeyStorageFlags.Exportable);
+      IF ISNULL(X509Certificate2) THEN
+        ERROR('');
+    END;
+
+    [TryFunction]
+    LOCAL PROCEDURE TryParseEnum@12(VAR Class@1000 : DotNet "'mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Object";EnumType@1003 : DotNet "'mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Type";EnumValue@1001 : Text);
+    VAR
+      Enum@1002 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Enum";
+    BEGIN
+      Class := Enum.Parse(EnumType,EnumValue);
+    END;
+
+    BEGIN
+    END.
+  }
+}
+

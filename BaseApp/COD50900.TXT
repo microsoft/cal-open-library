@@ -2,9 +2,8 @@ OBJECT Codeunit 50900 Soap Proxy Client Mgt.
 {
   OBJECT-PROPERTIES
   {
-    Date=10.04.18;
-    Time=21:39:38;
-    Modified=Yes;
+    Date=;
+    Time=;
     Version List=;
   }
   PROPERTIES
@@ -69,6 +68,7 @@ OBJECT Codeunit 50900 Soap Proxy Client Mgt.
     BEGIN
       WITH HttpWebRequestMgt DO BEGIN
         Initialize(Uri + '?wsdl');
+        DisableUI;
         IF NOT ISNULL(Credential) THEN
           AddBasicAuthentication(Credential.UserName,Credential.Password);
         TempBlob.INIT;
@@ -211,6 +211,16 @@ OBJECT Codeunit 50900 Soap Proxy Client Mgt.
     END;
 
     [External]
+    PROCEDURE SetSecurityProtocolType@38(SecurityProtocolTypeText@1000 : Text);
+    VAR
+      ServicePointManager@1001 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Net.ServicePointManager";
+      SecurityProtocolType@1002 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Net.SecurityProtocolType";
+    BEGIN
+      ParseEnum(SecurityProtocolType,GETDOTNETTYPE(SecurityProtocolType),SecurityProtocolTypeText);
+      ServicePointManager.SecurityProtocol := SecurityProtocolType;
+    END;
+
+    [External]
     PROCEDURE SetGlobalParameterType@22(TypeName@1000 : Text);
     VAR
       Type@1001 : DotNet "'mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Type";
@@ -236,6 +246,22 @@ OBJECT Codeunit 50900 Soap Proxy Client Mgt.
     BEGIN
       PropertyInfo := GlobalParameter.GetType.GetProperty(PropertyName);
       PropertyInfo.SetValue(GlobalParameter,PropertyValue);
+    END;
+
+    [External]
+    PROCEDURE SetGlobalParameterValueFromXml@41(TempBlob@1000 : Record 99008535);
+    VAR
+      XmlSerializer@1001 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.Serialization.XmlSerializer";
+      XmlDoc@1002 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlDocument";
+      XmlNodeReader@1003 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlNodeReader";
+      InStr@1004 : InStream;
+    BEGIN
+      TempBlob.Blob.CREATEINSTREAM(InStr);
+      XmlDoc := XmlDoc.XmlDocument;
+      XmlDoc.Load(InStr);
+      XmlNodeReader := XmlNodeReader.XmlNodeReader(XmlDoc.DocumentElement);
+      XmlSerializer := XmlSerializer.XmlSerializer(GlobalParameter.GetType,GetTargetNamespace);
+      GlobalParameter := XmlSerializer.Deserialize(XmlNodeReader);
     END;
 
     [External]
@@ -283,7 +309,6 @@ OBJECT Codeunit 50900 Soap Proxy Client Mgt.
       ClientCredentials@1015 : DotNet "'System.ServiceModel, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.ServiceModel.Description.ClientCredentials";
       Convert@1016 : DotNet "'mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Convert";
       X509Certificate2@1018 : DotNet "'System, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Security.Cryptography.X509Certificates.X509Certificate2";
-      WebServicesClientProtocol@1021 : DotNet "'Microsoft.Web.Services3, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.Microsoft.Web.Services3.WebServicesClientProtocol";
       OutStr@1009 : OutStream;
     BEGIN
       ServiceType := Assembly.GetType(ServiceName);
@@ -349,6 +374,22 @@ OBJECT Codeunit 50900 Soap Proxy Client Mgt.
     END;
 
     [External]
+    PROCEDURE GetMethodParameters@47(ServiceName@1000 : Text;MethodName@1006 : Text;VAR Parameters@1001 : Record 823);
+    VAR
+      ServiceType@1002 : DotNet "'mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Type";
+      MethodInfo@1003 : DotNet "'mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Reflection.MethodInfo";
+      ParameterInfo@1005 : DotNet "'mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Reflection.ParameterInfo";
+    BEGIN
+      ServiceType := Assembly.GetType(ServiceName);
+      MethodInfo := ServiceType.GetMethod(MethodName);
+      FOREACH ParameterInfo IN MethodInfo.GetParameters DO BEGIN
+        Parameters.ID += 1;
+        Parameters.Name := ParameterInfo.Name;
+        Parameters.INSERT;
+      END;
+    END;
+
+    [External]
     PROCEDURE GetProperties@13(ServiceName@1000 : Text;VAR Properties@1001 : Record 823);
     VAR
       ServiceType@1002 : DotNet "'mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Type";
@@ -391,9 +432,66 @@ OBJECT Codeunit 50900 Soap Proxy Client Mgt.
     END;
 
     [External]
+    PROCEDURE GetParameterValue@42(VAR ParameterValue@1000 : Variant;ParameterIndex@1001 : Integer);
+    BEGIN
+      ParameterValue := Parameters.GetValue(ParameterIndex - 1);
+    END;
+
+    [External]
+    PROCEDURE GetParameterValueAsText@43(ParameterIndex@1001 : Integer) ParameterValue : Text;
+    VAR
+      ParameterValueVariant@1002 : Variant;
+    BEGIN
+      GetParameterValue(ParameterValueVariant,ParameterIndex);
+      ParameterValue := FORMAT(ParameterValueVariant,0,9);
+    END;
+
+    [External]
+    PROCEDURE GetParameterValueAsInt@44(ParameterIndex@1001 : Integer) ParameterValue : Integer;
+    VAR
+      ParameterValueVariant@1002 : Variant;
+    BEGIN
+      GetParameterValue(ParameterValueVariant,ParameterIndex);
+      IF ParameterValueVariant.ISINTEGER THEN
+        ParameterValue := ParameterValueVariant;
+    END;
+
+    [External]
+    PROCEDURE GetParameterValueAsDecimal@45(ParameterIndex@1001 : Integer) ParameterValue : Decimal;
+    VAR
+      ParameterValueVariant@1002 : Variant;
+    BEGIN
+      GetParameterValue(ParameterValueVariant,ParameterIndex);
+      IF ParameterValueVariant.ISDECIMAL THEN
+        ParameterValue := ParameterValueVariant;
+    END;
+
+    [External]
+    PROCEDURE GetParameterValueAsDateTime@46(ParameterIndex@1001 : Integer) ParameterValue : DateTime;
+    VAR
+      ParameterValueVariant@1002 : Variant;
+    BEGIN
+      GetParameterValue(ParameterValueVariant,ParameterIndex);
+      IF ParameterValueVariant.ISDATETIME THEN
+        ParameterValue := ParameterValueVariant;
+    END;
+
+    [External]
     PROCEDURE GetGlobalParameterFromParameters@25(ParameterIndex@1000 : Integer);
     BEGIN
       GlobalParameter := Parameters.GetValue(ParameterIndex - 1);
+    END;
+
+    [External]
+    PROCEDURE GetGlobalParameterAsXml@39(VAR TempBlob@1000 : Record 99008535);
+    VAR
+      XmlSerializer@1001 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.Serialization.XmlSerializer";
+      OutStr@1002 : OutStream;
+    BEGIN
+      TempBlob.INIT;
+      TempBlob.Blob.CREATEOUTSTREAM(OutStr);
+      XmlSerializer := XmlSerializer.XmlSerializer(GlobalParameter.GetType,GetTargetNamespace);
+      XmlSerializer.Serialize(OutStr,GlobalParameter);
     END;
 
     [External]
