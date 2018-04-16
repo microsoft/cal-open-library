@@ -1,0 +1,69 @@
+OBJECT Codeunit 707 RegEx Split Wrapper
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      SplitArray@1000 : DotNet "'mscorlib'.System.Array";
+      ArrayIsEmptyErr@1003 : TextConst 'ENU=No split string has been supplied.';
+      IndexOutOfBoundsErr@1004 : TextConst '@@@="%1 = integer";ENU=Index out of bounds.';
+
+    [External]
+    PROCEDURE Split@1(Text@1000 : Text;Separator@1001 : Text);
+    BEGIN
+      IF NOT TrySplit(Text,Separator) THEN
+        ERROR(GETLASTERRORTEXT);
+    END;
+
+    [External]
+    PROCEDURE GetLength@2() : Integer;
+    BEGIN
+      CheckIfArrayIsEmpty;
+      EXIT(SplitArray.Length());
+    END;
+
+    [External]
+    PROCEDURE GetIndex@3(Index@1000 : Integer) : Text;
+    BEGIN
+      CheckIfArrayIsEmpty;
+      CheckIfIndexIsWithinBoundaries(Index);
+      EXIT(SplitArray.GetValue(Index));
+    END;
+
+    LOCAL PROCEDURE CheckIfArrayIsEmpty@4();
+    BEGIN
+      IF ISNULL(SplitArray) THEN
+        ERROR(ArrayIsEmptyErr);
+    END;
+
+    LOCAL PROCEDURE CheckIfIndexIsWithinBoundaries@5(Index@1000 : Integer);
+    BEGIN
+      IF ((Index + 1) > GetLength) OR (Index < 0) THEN
+        ERROR(IndexOutOfBoundsErr);
+    END;
+
+    [TryFunction]
+    [External]
+    PROCEDURE TrySplit@6(Text@1001 : Text;Separator@1002 : Text);
+    VAR
+      RegEx@1000 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.RegularExpressions.Regex";
+    BEGIN
+      SplitArray := RegEx.Split(Text,Separator);
+    END;
+
+    BEGIN
+    END.
+  }
+}
+
