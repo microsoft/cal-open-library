@@ -1,0 +1,334 @@
+OBJECT Codeunit 1235 XML Buffer Writer
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      GetJsonStructure@1009 : Codeunit 1237;
+      XmlReader@1000 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlReader";
+      XmlReaderSettings@1001 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlReaderSettings";
+      XmlUrlResolver@1003 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlUrlResolver";
+      XmlDtdProcessing@1002 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.DtdProcessing";
+      XmlNodeType@1004 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlNodeType";
+      NetCredentialCache@1006 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Net.CredentialCache";
+      StringReader@1008 : DotNet "'mscorlib'.System.IO.StringReader";
+      OnlyGenerateStructure@1007 : Boolean;
+      UnsupportedInputTypeErr@1005 : TextConst 'ENU=The supplied variable type is not supported.';
+
+    [External]
+    PROCEDURE InitializeXMLBufferFrom@15(VAR XMLBuffer@1002 : Record 1235;StreamOrServerFile@1001 : Variant);
+    BEGIN
+      OnlyGenerateStructure := FALSE;
+      InitializeXMLReaderSettings;
+      CreateXMLReaderFrom(StreamOrServerFile);
+      ReadXmlReader;
+      ParseXML(XMLBuffer);
+    END;
+
+    [External]
+    PROCEDURE InitializeXMLBufferFromText@9(VAR XMLBuffer@1002 : Record 1235;XmlText@1001 : Text);
+    BEGIN
+      InitializeXMLReaderSettings;
+      CreateXmlReaderFromXmlText(XmlText);
+      ReadXmlReader;
+      ParseXML(XMLBuffer);
+    END;
+
+    [Internal]
+    PROCEDURE GenerateStructureFromPath@1(VAR XMLBuffer@1002 : Record 1235;Path@1000 : Text);
+    BEGIN
+      OnlyGenerateStructure := TRUE;
+      InitializeXMLReaderSettings;
+      CreateXMLReaderFromPath(Path);
+      IF ReadXmlReader THEN
+        ParseXML(XMLBuffer)
+      ELSE
+        GetJsonStructure.GenerateStructure(Path,XMLBuffer);
+    END;
+
+    [External]
+    PROCEDURE GenerateStructure@3(VAR XMLBuffer@1002 : Record 1235;OutStream@1000 : OutStream);
+    BEGIN
+      InitializeXMLReaderSettings;
+      CreateXMLReaderFromOutStream(OutStream);
+      ReadXmlReader;
+      ParseXML(XMLBuffer);
+    END;
+
+    LOCAL PROCEDURE CreateXMLReaderFrom@7(StreamOrServerFile@1000 : Variant);
+    BEGIN
+      CASE TRUE OF
+        StreamOrServerFile.ISTEXT:
+          CreateXMLReaderFromPath(StreamOrServerFile);
+        StreamOrServerFile.ISINSTREAM:
+          CreateXMLReaderFromInStream(StreamOrServerFile);
+        StreamOrServerFile.ISOUTSTREAM:
+          CreateXMLReaderFromOutStream(StreamOrServerFile);
+        ELSE
+          ERROR(UnsupportedInputTypeErr);
+      END;
+    END;
+
+    LOCAL PROCEDURE CreateXMLReaderFromPath@4(Path@1000 : Text);
+    BEGIN
+      XmlReader := XmlReader.Create(Path,XmlReaderSettings);
+    END;
+
+    LOCAL PROCEDURE CreateXMLReaderFromInStream@6(InStream@1000 : InStream);
+    BEGIN
+      XmlReader := XmlReader.Create(InStream,XmlReaderSettings);
+    END;
+
+    LOCAL PROCEDURE CreateXMLReaderFromOutStream@24(OutStream@1000 : OutStream);
+    BEGIN
+      XmlReader := XmlReader.Create(OutStream,XmlReaderSettings);
+    END;
+
+    LOCAL PROCEDURE CreateXmlReaderFromXmlText@12(XmlText@1000 : Text);
+    BEGIN
+      StringReader := StringReader.StringReader(XmlText);
+      XmlReader := XmlReader.Create(StringReader);
+    END;
+
+    LOCAL PROCEDURE InitializeXMLReaderSettings@5();
+    BEGIN
+      XmlUrlResolver := XmlUrlResolver.XmlUrlResolver;
+      XmlUrlResolver.Credentials := NetCredentialCache.DefaultNetworkCredentials;
+
+      XmlReaderSettings := XmlReaderSettings.XmlReaderSettings;
+      XmlReaderSettings.DtdProcessing := XmlDtdProcessing.Ignore;
+      XmlReaderSettings.XmlResolver := XmlUrlResolver;
+    END;
+
+    LOCAL PROCEDURE ParseXML@14(VAR XMLBuffer@1001 : Record 1235);
+    VAR
+      ParentXMLBuffer@1000 : Record 1235;
+    BEGIN
+      IF XMLBuffer.FINDLAST THEN ;
+
+      ParentXMLBuffer.INIT;
+      ParseXMLIteratively(XMLBuffer,ParentXMLBuffer);
+
+      XmlReader.Close;
+      XMLBuffer.RESET;
+      XMLBuffer.SETRANGE("Import ID",XMLBuffer."Import ID");
+      XMLBuffer.FINDFIRST;
+    END;
+
+    LOCAL PROCEDURE ParseXMLIteratively@13(VAR XMLBuffer@1001 : Record 1235;ParentXMLBuffer@1000 : Record 1235);
+    VAR
+      LastInsertedXMLBufferElement@1003 : Record 1235;
+      ElementNumber@1002 : Integer;
+      Depth@1004 : Integer;
+    BEGIN
+      Depth := XmlReader.Depth;
+      REPEAT
+        IF IsParentElement(Depth) THEN
+          EXIT;
+        ParseCurrentXmlNode(XMLBuffer,ParentXMLBuffer,LastInsertedXMLBufferElement,ElementNumber,Depth);
+      UNTIL NOT XmlReader.Read;
+    END;
+
+    LOCAL PROCEDURE ParseCurrentXmlNode@16(VAR XMLBuffer@1001 : Record 1235;ParentXMLBuffer@1000 : Record 1235;VAR LastInsertedXMLBufferElement@1003 : Record 1235;VAR ElementNumber@1002 : Integer;Depth@1004 : Integer);
+    BEGIN
+      IF IsParentElement(Depth) THEN
+        EXIT;
+      IF IsChildElement(Depth) THEN BEGIN
+        ParseXMLIteratively(XMLBuffer,LastInsertedXMLBufferElement);
+        ParseCurrentXmlNode(XMLBuffer,ParentXMLBuffer,LastInsertedXMLBufferElement,ElementNumber,Depth);
+      END ELSE
+        ReadAndInsertXmlElement(XMLBuffer,ParentXMLBuffer,ElementNumber,LastInsertedXMLBufferElement);
+    END;
+
+    LOCAL PROCEDURE IsChildElement@10(CurrentDepth@1000 : Integer) : Boolean;
+    BEGIN
+      EXIT(XmlReader.Depth > CurrentDepth)
+    END;
+
+    LOCAL PROCEDURE IsParentElement@20(CurrentDepth@1000 : Integer) : Boolean;
+    BEGIN
+      EXIT(XmlReader.Depth < CurrentDepth)
+    END;
+
+    LOCAL PROCEDURE ReadAndInsertXmlElement@19(VAR XMLBuffer@1001 : Record 1235;ParentXMLBuffer@1000 : Record 1235;VAR ElementNumber@1002 : Integer;VAR InsertedXMLBufferElement@1003 : Record 1235);
+    VAR
+      TempXMLBuffer@1004 : TEMPORARY Record 1235;
+    BEGIN
+      XmlNodeType := XmlReader.NodeType;
+      IF XmlNodeType.Equals(XmlNodeType.Element) THEN BEGIN
+        ElementNumber += 1;
+        ProcessXmlElement(XMLBuffer,ParentXMLBuffer,ElementNumber,InsertedXMLBufferElement)
+      END ELSE
+        IF XmlNodeType.Equals(XmlNodeType.Text) THEN BEGIN
+          IF XMLBuffer.ISTEMPORARY THEN BEGIN
+            TempXMLBuffer.COPY(XMLBuffer,TRUE);
+            TempXMLBuffer := ParentXMLBuffer;
+            AddXmlTextNodeIntoParentXMLBuffer(TempXMLBuffer);
+          END ELSE
+            AddXmlTextNodeIntoParentXMLBuffer(ParentXMLBuffer);
+        END ELSE
+          IF XmlNodeType.Equals(XmlNodeType.XmlDeclaration) OR
+             XmlNodeType.Equals(XmlNodeType.ProcessingInstruction) OR
+             XmlNodeType.Equals(XmlNodeType.Comment)
+          THEN
+            ;
+    END;
+
+    LOCAL PROCEDURE ProcessXmlElement@8(VAR XMLBuffer@1003 : Record 1235;ParentXMLBuffer@1000 : Record 1235;ElementNumber@1001 : Integer;VAR InsertedXMLBufferElement@1002 : Record 1235);
+    VAR
+      AttributeNumber@1004 : Integer;
+    BEGIN
+      InsertXmlElement(XMLBuffer,ParentXMLBuffer,ElementNumber);
+      InsertedXMLBufferElement := XMLBuffer;
+
+      IF XmlReader.MoveToFirstAttribute THEN
+        REPEAT
+          AttributeNumber += 1;
+          InsertXmlAttribute(XMLBuffer,InsertedXMLBufferElement,AttributeNumber);
+        UNTIL NOT XmlReader.MoveToNextAttribute;
+    END;
+
+    LOCAL PROCEDURE InsertXmlElement@17(VAR XMLBuffer@1002 : Record 1235;ParentXMLBuffer@1001 : Record 1235;ElementNumber@1000 : Integer);
+    BEGIN
+      WITH XMLBuffer DO BEGIN
+        IF OnlyGenerateStructure THEN BEGIN
+          RESET;
+          SETRANGE("Parent Entry No.",ParentXMLBuffer."Entry No.");
+          SETRANGE(Type,Type::Element);
+          SETRANGE(Name,XmlReader.Name);
+          IF FINDFIRST THEN
+            EXIT;
+        END;
+
+        InsertElement(XMLBuffer,ParentXMLBuffer,ElementNumber,XmlReader.Depth + 1,XmlReader.Name,'');
+      END;
+    END;
+
+    LOCAL PROCEDURE InsertXmlAttribute@18(VAR XMLBuffer@1001 : Record 1235;ParentXMLBuffer@1000 : Record 1235;AttributeNumber@1002 : Integer);
+    BEGIN
+      WITH XMLBuffer DO BEGIN
+        IF OnlyGenerateStructure THEN BEGIN
+          RESET;
+          SETRANGE("Parent Entry No.",ParentXMLBuffer."Entry No.");
+          SETRANGE(Type,Type::Attribute);
+          SETRANGE(Name,XmlReader.Name);
+          IF FINDFIRST THEN
+            EXIT;
+        END;
+
+        InsertAttribute(XMLBuffer,ParentXMLBuffer,AttributeNumber,XmlReader.Depth + 1,XmlReader.Name,XmlReader.Value);
+      END;
+    END;
+
+    LOCAL PROCEDURE GetType@2(Value@1000 : Text) : Integer;
+    VAR
+      DummyXMLBuffer@1001 : Record 1235;
+      Decimal@1003 : Decimal;
+    BEGIN
+      IF Value = '' THEN
+        EXIT(DummyXMLBuffer."Data Type"::Text);
+
+      IF EVALUATE(Decimal,Value) THEN
+        EXIT(DummyXMLBuffer."Data Type"::Decimal);
+
+      EXIT(DummyXMLBuffer."Data Type"::Text)
+    END;
+
+    LOCAL PROCEDURE AddXmlTextNodeIntoParentXMLBuffer@11(VAR XMLBuffer@1000 : Record 1235);
+    BEGIN
+      IF XMLBuffer.Value <> '' THEN
+        EXIT;
+
+      XMLBuffer.VALIDATE(Value,COPYSTR(XmlReader.Value,1,MAXSTRLEN(XMLBuffer.Value)));
+      XMLBuffer.VALIDATE("Data Type",GetType(XMLBuffer.Value));
+      XMLBuffer.MODIFY;
+    END;
+
+    [External]
+    PROCEDURE InsertAttribute@22(VAR XMLBuffer@1000 : Record 1235;ParentXMLBuffer@1005 : Record 1235;NodeNumber@1001 : Integer;NodeDepth@1004 : Integer;AttributeName@1007 : Text[250];AttributeValue@1008 : Text[250]);
+    BEGIN
+      WITH XMLBuffer DO BEGIN
+        RESET;
+        IF FINDLAST THEN;
+        INIT;
+        "Entry No." += 1;
+        "Parent Entry No." := ParentXMLBuffer."Entry No.";
+        Path := COPYSTR(ParentXMLBuffer.Path + '/@' + AttributeName,1,MAXSTRLEN(Path));
+        "Node Number" := NodeNumber;
+        Depth := NodeDepth;
+        Name := AttributeName;
+        Value := AttributeValue;
+        "Data Type" := GetType(Value);
+        Type := Type::Attribute;
+        "Import ID" := ParentXMLBuffer."Import ID";
+
+        INSERT;
+      END;
+    END;
+
+    [External]
+    PROCEDURE InsertElement@21(VAR XMLBuffer@1010 : Record 1235;ParentXMLBuffer@1009 : Record 1235;ElementNumber@1003 : Integer;ElementDepth@1006 : Integer;ElementNameAndNamespace@1008 : Text[250];ElementValue@1007 : Text[250]);
+    VAR
+      ElementName@1000 : Text[250];
+      ElementNamespace@1005 : Text[250];
+    BEGIN
+      SplitXmlElementName(ElementNameAndNamespace,ElementName,ElementNamespace);
+
+      IF ISNULLGUID(ParentXMLBuffer."Import ID") THEN
+        ParentXMLBuffer."Import ID" := CREATEGUID;
+
+      WITH XMLBuffer DO BEGIN
+        RESET;
+        IF FINDLAST THEN ;
+        INIT;
+        "Entry No." += 1;
+        "Parent Entry No." := ParentXMLBuffer."Entry No.";
+        Path := COPYSTR(STRSUBSTNO('%1/%2',ParentXMLBuffer.Path,ElementNameAndNamespace),1,MAXSTRLEN(Path));
+        "Node Number" := ElementNumber;
+        Depth := ElementDepth;
+        Name := ElementName;
+        Value := ElementValue;
+        Type := Type::Element;
+        Namespace := ElementNamespace;
+        "Import ID" := ParentXMLBuffer."Import ID";
+
+        INSERT;
+      END;
+    END;
+
+    LOCAL PROCEDURE SplitXmlElementName@46(RawXmlElementName@1000 : Text[250];VAR ElementName@1001 : Text[250];VAR ElementNamespace@1002 : Text[250]);
+    VAR
+      ColonPosition@1003 : Integer;
+    BEGIN
+      ColonPosition := STRPOS(RawXmlElementName,':');
+      IF ColonPosition <> 0 THEN BEGIN
+        ElementNamespace := COPYSTR(RawXmlElementName,1,ColonPosition - 1);
+        ElementName := COPYSTR(RawXmlElementName,ColonPosition + 1);
+      END ELSE BEGIN
+        ElementName := RawXmlElementName;
+        ElementNamespace := '';
+      END;
+    END;
+
+    [TryFunction]
+    LOCAL PROCEDURE ReadXmlReader@23();
+    BEGIN
+      XmlReader.Read
+    END;
+
+    BEGIN
+    END.
+  }
+}
+
