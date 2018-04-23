@@ -54,6 +54,7 @@ OBJECT Codeunit 1239 XML Buffer Reader
       TempElementXMLBuffer@1001 : TEMPORARY Record 1235;
       ChildElement@1005 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlNode";
       Namespace@1006 : Text;
+      ElementValue@1008 : Text;
     BEGIN
       IF TempParentElementXMLBuffer.FindChildElements(TempElementXMLBuffer) THEN
         REPEAT
@@ -62,8 +63,9 @@ OBJECT Codeunit 1239 XML Buffer Reader
           ELSE
             Namespace := TempElementXMLBuffer.Namespace;
           ChildElement := XmlDocument.CreateNode('element',TempElementXMLBuffer.GetElementName,Namespace);
-          IF TempElementXMLBuffer.Value <> '' THEN
-            ChildElement.InnerText := TempElementXMLBuffer.Value;
+          ElementValue := TempElementXMLBuffer.GetValue;
+          IF ElementValue <> '' THEN
+            ChildElement.InnerText := ElementValue;
           XMLCurrElement.AppendChild(ChildElement);
           SaveAttributes(TempElementXMLBuffer,ChildElement,XmlDocument);
           SaveChildElements(TempElementXMLBuffer,ChildElement,XmlDocument);

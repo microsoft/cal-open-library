@@ -153,23 +153,23 @@ OBJECT Table 1235 XML Buffer
     END;
 
     [External]
-    PROCEDURE AddElement@5(ElementNameWithNamespace@1007 : Text[250];ElementValue@1006 : Text[250]) ElementEntryNo : Integer;
+    PROCEDURE AddElement@5(ElementNameWithNamespace@1007 : Text[250];ElementValue@1006 : Text) ElementEntryNo : Integer;
     BEGIN
       ElementEntryNo := AddGroupElement(ElementNameWithNamespace);
-      Value := ElementValue;
+      SetValueWithoutModifying(ElementValue);
       MODIFY(TRUE);
       GetParent;
     END;
 
     [External]
-    PROCEDURE AddLastElement@6(ElementNameWithNamespace@1001 : Text[250];ElementValue@1000 : Text[250]) ElementEntryNo : Integer;
+    PROCEDURE AddLastElement@6(ElementNameWithNamespace@1001 : Text[250];ElementValue@1000 : Text) ElementEntryNo : Integer;
     BEGIN
       ElementEntryNo := AddElement(ElementNameWithNamespace,ElementValue);
       GetParent;
     END;
 
     [External]
-    PROCEDURE AddNonEmptyElement@15(ElementNameWithNamespace@1007 : Text[250];ElementValue@1006 : Text[250]) ElementEntryNo : Integer;
+    PROCEDURE AddNonEmptyElement@15(ElementNameWithNamespace@1007 : Text[250];ElementValue@1006 : Text) ElementEntryNo : Integer;
     BEGIN
       IF ElementValue = '' THEN
         EXIT;
@@ -177,7 +177,7 @@ OBJECT Table 1235 XML Buffer
     END;
 
     [External]
-    PROCEDURE AddNonEmptyLastElement@17(ElementNameWithNamespace@1007 : Text[250];ElementValue@1006 : Text[250]) ElementEntryNo : Integer;
+    PROCEDURE AddNonEmptyLastElement@17(ElementNameWithNamespace@1007 : Text[250];ElementValue@1006 : Text) ElementEntryNo : Integer;
     BEGIN
       ElementEntryNo := AddNonEmptyElement(ElementNameWithNamespace,ElementValue);
       GetParent;
@@ -295,6 +295,39 @@ OBJECT Table 1235 XML Buffer
       IF NodeName <> '' THEN
         TempResultXMLBuffer.SETRANGE(Name,NodeName);
       EXIT(TempResultXMLBuffer.FINDSET);
+    END;
+
+    PROCEDURE GetValue@22() : Text;
+    VAR
+      TempBlob@1001 : Record 99008535;
+      CR@1002 : Text[1];
+    BEGIN
+      CALCFIELDS("Value BLOB");
+      IF NOT "Value BLOB".HASVALUE THEN
+        EXIT(Value);
+      CR[1] := 10;
+      TempBlob.Blob := "Value BLOB";
+      EXIT(TempBlob.ReadAsText(CR,TEXTENCODING::Windows));
+    END;
+
+    PROCEDURE SetValue@24(NewValue@1000 : Text);
+    BEGIN
+      SetValueWithoutModifying(NewValue);
+      MODIFY;
+    END;
+
+    PROCEDURE SetValueWithoutModifying@25(NewValue@1000 : Text);
+    VAR
+      TempBlob@1001 : Record 99008535;
+    BEGIN
+      CLEAR("Value BLOB");
+      Value := COPYSTR(NewValue,1,MAXSTRLEN(Value));
+      IF STRLEN(NewValue) <= MAXSTRLEN(Value) THEN
+        EXIT; // No need to store anything in the blob
+      IF NewValue = '' THEN
+        EXIT;
+      TempBlob.WriteAsText(NewValue,TEXTENCODING::Windows);
+      "Value BLOB" := TempBlob.Blob;
     END;
 
     BEGIN
