@@ -1,0 +1,46 @@
+OBJECT Table 1799 Data Migration Status
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnModify=BEGIN
+               IF ("Total Number" <> 0) AND ("Migrated Number" <= "Total Number") THEN
+                 "Progress Percent" := "Migrated Number" / "Total Number" * 10000; // 10000 = 100%
+             END;
+
+  }
+  FIELDS
+  {
+    { 1   ;   ;Migration Type      ;Text250        }
+    { 2   ;   ;Destination Table ID;Integer        }
+    { 3   ;   ;Total Number        ;Integer        }
+    { 4   ;   ;Migrated Number     ;Integer        }
+    { 5   ;   ;Progress Percent    ;Decimal       ;ExtendedDatatype=Ratio }
+    { 6   ;   ;Status              ;Option        ;OptionCaptionML=ENU=Pending,In Progress,Completed,Completed with Errors,Stopped,Failed;
+                                                   OptionString=Pending,In Progress,Completed,Completed with Errors,Stopped,Failed }
+    { 7   ;   ;Source Staging Table ID;Integer     }
+    { 8   ;   ;Migration Codeunit To Run;Integer   }
+    { 9   ;   ;Error Count         ;Integer       ;FieldClass=FlowField;
+                                                   CalcFormula=Count("Data Migration Error" WHERE (Migration Type=FIELD(Migration Type),
+                                                                                                   Destination Table ID=FIELD(Destination Table ID))) }
+  }
+  KEYS
+  {
+    {    ;Migration Type,Destination Table ID     ;Clustered=Yes }
+  }
+  FIELDGROUPS
+  {
+  }
+  CODE
+  {
+
+    BEGIN
+    END.
+  }
+}
+

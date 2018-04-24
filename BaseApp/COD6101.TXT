@@ -1,0 +1,101 @@
+OBJECT Codeunit 6101 Data Migration Status Facade
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+
+    [External]
+    PROCEDURE InitStatusLine@4(MigrationType@1000 : Text[250];DestinationTableId@1001 : Integer;TotalNumber@1003 : Integer;StagingTableId@1004 : Integer;MigrationCodeunitId@1005 : Integer);
+    VAR
+      DataMigrationStatus@1002 : Record 1799;
+    BEGIN
+      IF TotalNumber = 0 THEN
+        EXIT;
+
+      IF DataMigrationStatus.GET(MigrationType,DestinationTableId) THEN
+        DataMigrationStatus.DELETE;
+
+      DataMigrationStatus.INIT;
+      DataMigrationStatus.VALIDATE("Migration Type",MigrationType);
+      DataMigrationStatus.VALIDATE("Destination Table ID",DestinationTableId);
+      DataMigrationStatus.VALIDATE("Total Number",TotalNumber);
+      DataMigrationStatus.VALIDATE("Migrated Number",0);
+      DataMigrationStatus.VALIDATE("Progress Percent",0);
+      DataMigrationStatus.VALIDATE(Status,DataMigrationStatus.Status::Pending);
+      DataMigrationStatus.VALIDATE("Source Staging Table ID",StagingTableId);
+      DataMigrationStatus.VALIDATE("Migration Codeunit To Run",MigrationCodeunitId);
+      DataMigrationStatus.INSERT;
+    END;
+
+    [External]
+    PROCEDURE IncrementMigratedRecordCount@3(MigrationType@1000 : Text[250];DestinationTableId@1001 : Integer;MigratedEntities@1003 : Integer);
+    VAR
+      DataMigrationStatus@1002 : Record 1799;
+    BEGIN
+      DataMigrationStatus.GET(MigrationType,DestinationTableId);
+
+      DataMigrationStatus.VALIDATE("Migrated Number",DataMigrationStatus."Migrated Number" + MigratedEntities);
+      DataMigrationStatus.MODIFY(TRUE);
+    END;
+
+    [External]
+    PROCEDURE UpdateLineStatus@6(MigrationType@1000 : Text[250];DestinationTableId@1001 : Integer;Status@1003 : Option);
+    VAR
+      DataMigrationStatus@1002 : Record 1799;
+    BEGIN
+      DataMigrationStatus.GET(MigrationType,DestinationTableId);
+
+      DataMigrationStatus.VALIDATE(Status,Status);
+      DataMigrationStatus.MODIFY(TRUE);
+    END;
+
+    [External]
+    PROCEDURE IgnoreErrors@1(MigrationType@1001 : Text[250];DestinationTableId@1000 : Integer;ErrorCountToIgnore@1002 : Integer);
+    VAR
+      DataMigrationStatus@1003 : Record 1799;
+    BEGIN
+      DataMigrationStatus.GET(MigrationType,DestinationTableId);
+
+      DataMigrationStatus.VALIDATE("Total Number",DataMigrationStatus."Total Number" - ErrorCountToIgnore);
+      DataMigrationStatus.CALCFIELDS("Error Count");
+      IF DataMigrationStatus."Error Count" = 0 THEN
+        DataMigrationStatus.Status := DataMigrationStatus.Status::Completed;
+      DataMigrationStatus.MODIFY(TRUE);
+      IF DataMigrationStatus."Total Number" = 0 THEN
+        DataMigrationStatus.DELETE(TRUE);
+    END;
+
+    [External]
+    PROCEDURE HasMigratedChartOfAccounts@2(DataMigrationParameters@1000 : Record 1798) : Boolean;
+    VAR
+      DataMigrationStatus@1001 : Record 1799;
+    BEGIN
+      DataMigrationStatus.SETRANGE("Migration Type",DataMigrationParameters."Migration Type");
+      DataMigrationStatus.SETRANGE("Destination Table ID",DATABASE::"G/L Account");
+      EXIT(NOT DataMigrationStatus.ISEMPTY);
+    END;
+
+    [External]
+    PROCEDURE RegisterErrorNoStagingTablesCase@5(MigrationType@1001 : Text[250];DestinationTableId@1002 : Integer;ErrorMessage@1003 : Text[250]);
+    VAR
+      DataMigrationError@1000 : Record 1797;
+    BEGIN
+      DataMigrationError.CreateEntryNoStagingTableWithMessage(MigrationType,DestinationTableId,ErrorMessage);
+    END;
+    
+    BEGIN
+    END.
+  }
+}
+

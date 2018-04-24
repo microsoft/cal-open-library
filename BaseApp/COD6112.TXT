@@ -1,0 +1,726 @@
+OBJECT Codeunit 6112 Customer Data Migration Facade
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    TableNo=1798;
+    OnRun=VAR
+            DataMigrationStatusFacade@1001 : Codeunit 6101;
+            ChartOfAccountsMigrated@1000 : Boolean;
+          BEGIN
+            FINDSET;
+            ChartOfAccountsMigrated := DataMigrationStatusFacade.HasMigratedChartOfAccounts(Rec);
+            REPEAT
+              OnMigrateCustomer("Staging Table RecId To Process");
+              OnMigrateCustomerDimensions("Staging Table RecId To Process");
+
+              // migrate transactions for this customer
+              OnMigrateCustomerPostingGroups("Staging Table RecId To Process",ChartOfAccountsMigrated);
+              OnMigrateCustomerTransactions("Staging Table RecId To Process",ChartOfAccountsMigrated);
+              GenJournalLineIsSet := FALSE;
+              CustomerIsSet := FALSE;
+            UNTIL NEXT = 0;
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      InternalCustomerNotSetErr@1000 : TextConst 'ENU=Internal Customer is not set. Create it first.';
+      GlobalCustomer@1002 : Record 18;
+      GlobalGenJournalLine@1004 : Record 81;
+      DataMigrationFacadeHelper@1003 : Codeunit 1797;
+      CustomerIsSet@1001 : Boolean;
+      GenJournalLineIsSet@1005 : Boolean;
+      InternalGenJournalLineNotSetErr@1006 : TextConst 'ENU=Internal Gen. Journal Line is not set. Create it first.';
+      InternalCustomerPostingSetupNotSetErr@1007 : TextConst 'ENU=Internal Customer Posting Setup is not set. Create it first.';
+
+    [Integration(TRUE)]
+    LOCAL PROCEDURE OnMigrateCustomer@1(RecordIdToMigrate@1000 : RecordID);
+    BEGIN
+    END;
+
+    [Integration(TRUE)]
+    LOCAL PROCEDURE OnMigrateCustomerDimensions@23(RecordIdToMigrate@1000 : RecordID);
+    BEGIN
+    END;
+
+    [External]
+    PROCEDURE CreateCustomerIfNeeded@13(CustomerNoToSet@1000 : Code[20];CustomerNameToSet@1003 : Text[50]) : Boolean;
+    VAR
+      Customer@1001 : Record 18;
+    BEGIN
+      IF Customer.GET(CustomerNoToSet) THEN BEGIN
+        GlobalCustomer := Customer;
+        CustomerIsSet := TRUE;
+        EXIT;
+      END;
+
+      Customer.INIT;
+
+      Customer.VALIDATE("No.",CustomerNoToSet);
+      Customer.VALIDATE(Name,CustomerNameToSet);
+
+      Customer.INSERT(TRUE);
+
+      GlobalCustomer := Customer;
+      CustomerIsSet := TRUE;
+      EXIT(TRUE);
+    END;
+
+    [External]
+    PROCEDURE CreatePostingSetupIfNeeded@90(CustomerPostingGroupCode@1000 : Code[20];CustomerPostingGroupDescription@1001 : Text[50];ReceivablesAccount@1003 : Code[20]);
+    VAR
+      CustomerPostingGroup@1002 : Record 92;
+    BEGIN
+      IF NOT CustomerPostingGroup.GET(CustomerPostingGroupCode) THEN BEGIN
+        CustomerPostingGroup.INIT;
+        CustomerPostingGroup.VALIDATE(Code,CustomerPostingGroupCode);
+        CustomerPostingGroup.VALIDATE(Description,CustomerPostingGroupDescription);
+        CustomerPostingGroup.VALIDATE("Receivables Account",ReceivablesAccount);
+        CustomerPostingGroup.INSERT(TRUE);
+      END ELSE
+        IF CustomerPostingGroup."Receivables Account" <> ReceivablesAccount THEN BEGIN
+          CustomerPostingGroup.VALIDATE("Receivables Account",ReceivablesAccount);
+          CustomerPostingGroup.MODIFY(TRUE);
+        END;
+    END;
+
+    [External]
+    PROCEDURE CreateGeneralJournalBatchIfNeeded@89(GeneralJournalBatchCode@1000 : Code[10];NoSeriesCode@1002 : Code[20];PostingNoSeriesCode@1001 : Code[20]);
+    BEGIN
+      DataMigrationFacadeHelper.CreateGeneralJournalBatchIfNeeded(GeneralJournalBatchCode,NoSeriesCode,PostingNoSeriesCode);
+    END;
+
+    [External]
+    PROCEDURE CreateGeneralJournalLine@88(GeneralJournalBatchCode@1000 : Code[10];DocumentNo@1001 : Code[20];Description@1002 : Text[50];PostingDate@1003 : Date;DueDate@1005 : Date;Amount@1004 : Decimal;AmountLCY@1006 : Decimal;Currency@1007 : Code[10];BalancingAccount@1008 : Code[20]);
+    BEGIN
+      DataMigrationFacadeHelper.CreateGeneralJournalLine(GlobalGenJournalLine,
+        GeneralJournalBatchCode,
+        DocumentNo,
+        Description,
+        GlobalGenJournalLine."Account Type"::Customer,
+        GlobalCustomer."No.",
+        PostingDate,
+        DueDate,
+        Amount,
+        AmountLCY,
+        Currency,
+        BalancingAccount);
+      GenJournalLineIsSet := TRUE;
+    END;
+
+    [External]
+    PROCEDURE SetGeneralJournalLineDimension@60(DimensionCode@1001 : Code[20];DimensionDescription@1003 : Text[50];DimensionValueCode@1002 : Code[20];DimensionValueName@1004 : Text[50]);
+    VAR
+      DataMigrationFacadeHelper@1000 : Codeunit 1797;
+    BEGIN
+      IF NOT GenJournalLineIsSet THEN
+        ERROR(InternalGenJournalLineNotSetErr);
+
+      GlobalGenJournalLine.VALIDATE("Dimension Set ID",
+        DataMigrationFacadeHelper.CreateDimensionSetId(GlobalGenJournalLine."Dimension Set ID",
+          DimensionCode,DimensionDescription,
+          DimensionValueCode,DimensionValueName));
+      GlobalGenJournalLine.MODIFY(TRUE);
+    END;
+
+    PROCEDURE SetGeneralJournalLineDocumentType@42(DocumentTypeToSet@1000 : ' ,Payment,Invoice,Credit Memo,Finance Charge Memo,Reminder,Refund');
+    BEGIN
+      IF NOT GenJournalLineIsSet THEN
+        ERROR(InternalGenJournalLineNotSetErr);
+
+      GlobalGenJournalLine.VALIDATE("Document Type",DocumentTypeToSet);
+      GlobalGenJournalLine.MODIFY(TRUE);
+    END;
+
+    PROCEDURE SetGeneralJournalLineSourceCode@57(SourceCodeToSet@1000 : Code[10]);
+    BEGIN
+      IF NOT GenJournalLineIsSet THEN
+        ERROR(InternalGenJournalLineNotSetErr);
+
+      GlobalGenJournalLine.VALIDATE("Source Code",SourceCodeToSet);
+      GlobalGenJournalLine.MODIFY(TRUE);
+    END;
+
+    PROCEDURE SetGeneralJournalLineExternalDocumentNo@66(ExternalDocumentNoToSet@1000 : Code[35]);
+    BEGIN
+      IF NOT GenJournalLineIsSet THEN
+        ERROR(InternalGenJournalLineNotSetErr);
+
+      GlobalGenJournalLine.VALIDATE("External Document No.",ExternalDocumentNoToSet);
+      GlobalGenJournalLine.MODIFY(TRUE);
+    END;
+
+    [External]
+    PROCEDURE SetGlobalCustomer@40(CustomerNo@1000 : Code[20]) : Boolean;
+    BEGIN
+      CustomerIsSet := GlobalCustomer.GET(CustomerNo);
+      EXIT(CustomerIsSet);
+    END;
+
+    [External]
+    PROCEDURE ModifyCustomer@2(RunTrigger@1000 : Boolean);
+    BEGIN
+      IF NOT CustomerIsSet THEN
+        ERROR(InternalCustomerNotSetErr);
+
+      GlobalCustomer.MODIFY(RunTrigger);
+    END;
+
+    [External]
+    PROCEDURE SetSearchName@18(SearchNameToSet@1000 : Code[50]);
+    BEGIN
+      IF NOT CustomerIsSet THEN
+        ERROR(InternalCustomerNotSetErr);
+
+      GlobalCustomer.VALIDATE("Search Name",SearchNameToSet);
+    END;
+
+    [External]
+    PROCEDURE DoesCustomerExist@52(CustomerNo@1000 : Code[20]) : Boolean;
+    VAR
+      Customer@1001 : Record 18;
+    BEGIN
+      EXIT(Customer.GET(CustomerNo));
+    END;
+
+    [External]
+    PROCEDURE SetAddress@3(AdressToSet@1000 : Text[50];Adress2ToSet@1001 : Text[50];CountryRegionCodeToSet@1003 : Code[10];PostCodeToSet@1002 : Code[20];CityToSet@1004 : Text[30]);
+    BEGIN
+      IF NOT CustomerIsSet THEN
+        ERROR(InternalCustomerNotSetErr);
+
+      GlobalCustomer.VALIDATE(Address,AdressToSet);
+      GlobalCustomer.VALIDATE("Address 2",Adress2ToSet);
+      GlobalCustomer.VALIDATE("Country/Region Code",CountryRegionCodeToSet);
+      GlobalCustomer.VALIDATE("Post Code",PostCodeToSet);
+      GlobalCustomer.VALIDATE(City,CityToSet);
+    END;
+
+    [External]
+    PROCEDURE SetPhoneNo@4(PhoneNoToSet@1000 : Text[30]);
+    BEGIN
+      IF NOT CustomerIsSet THEN
+        ERROR(InternalCustomerNotSetErr);
+
+      GlobalCustomer.VALIDATE("Phone No.",PhoneNoToSet);
+    END;
+
+    [External]
+    PROCEDURE SetTelexNo@5(TelexNoToSet@1000 : Text[20]);
+    BEGIN
+      IF NOT CustomerIsSet THEN
+        ERROR(InternalCustomerNotSetErr);
+
+      GlobalCustomer.VALIDATE("Telex No.",TelexNoToSet);
+    END;
+
+    [External]
+    PROCEDURE SetCreditLimitLCY@27(CreditLimitToSet@1000 : Decimal);
+    BEGIN
+      IF NOT CustomerIsSet THEN
+        ERROR(InternalCustomerNotSetErr);
+
+      GlobalCustomer.VALIDATE("Credit Limit (LCY)",CreditLimitToSet);
+    END;
+
+    [External]
+    PROCEDURE SetCurrencyCode@7(CurrencyCodeToSet@1000 : Code[10]);
+    BEGIN
+      IF NOT CustomerIsSet THEN
+        ERROR(InternalCustomerNotSetErr);
+
+      GlobalCustomer.VALIDATE("Currency Code",DataMigrationFacadeHelper.FixIfLcyCode(CurrencyCodeToSet));
+    END;
+
+    [External]
+    PROCEDURE SetCustomerPriceGroup@29(CustomerPriceGroupToSet@1000 : Code[10]);
+    BEGIN
+      IF NOT CustomerIsSet THEN
+        ERROR(InternalCustomerNotSetErr);
+
+      GlobalCustomer.VALIDATE("Customer Price Group",CustomerPriceGroupToSet);
+    END;
+
+    [External]
+    PROCEDURE SetGenBusPostingGroup@39(GenBusPostingGroupToSet@1000 : Code[10]);
+    BEGIN
+      IF NOT CustomerIsSet THEN
+        ERROR(InternalCustomerNotSetErr);
+
+      GlobalCustomer.VALIDATE("Gen. Bus. Posting Group",GenBusPostingGroupToSet);
+    END;
+
+    [External]
+    PROCEDURE SetLanguageCode@8(LanguageCodeToSet@1000 : Code[10]);
+    BEGIN
+      IF NOT CustomerIsSet THEN
+        ERROR(InternalCustomerNotSetErr);
+
+      GlobalCustomer.VALIDATE("Language Code",LanguageCodeToSet);
+    END;
+
+    [External]
+    PROCEDURE SetShipmentMethodCode@11(ShipmentMethodCodeToSet@1000 : Code[10]);
+    BEGIN
+      IF NOT CustomerIsSet THEN
+        ERROR(InternalCustomerNotSetErr);
+
+      GlobalCustomer.VALIDATE("Shipment Method Code",ShipmentMethodCodeToSet);
+    END;
+
+    [External]
+    PROCEDURE SetPaymentTermsCode@9(PaymentTermsCodeToSet@1000 : Code[10]);
+    BEGIN
+      IF NOT CustomerIsSet THEN
+        ERROR(InternalCustomerNotSetErr);
+
+      GlobalCustomer.VALIDATE("Payment Terms Code",PaymentTermsCodeToSet);
+    END;
+
+    [External]
+    PROCEDURE SetSalesPersonCode@10(SalespersonCodeToSet@1000 : Code[20]);
+    BEGIN
+      IF NOT CustomerIsSet THEN
+        ERROR(InternalCustomerNotSetErr);
+
+      GlobalCustomer.VALIDATE("Salesperson Code",SalespersonCodeToSet);
+    END;
+
+    [External]
+    PROCEDURE SetInvoiceDiscCode@12(InvoiceDiscCodeToSet@1000 : Code[20]);
+    BEGIN
+      IF NOT CustomerIsSet THEN
+        ERROR(InternalCustomerNotSetErr);
+
+      GlobalCustomer.VALIDATE("Invoice Disc. Code",InvoiceDiscCodeToSet);
+    END;
+
+    [External]
+    PROCEDURE SetBlockedType@14(BlockedTypeToSet@1000 : ' ,Ship,Invoice,All');
+    BEGIN
+      IF NOT CustomerIsSet THEN
+        ERROR(InternalCustomerNotSetErr);
+
+      GlobalCustomer.VALIDATE(Blocked,BlockedTypeToSet);
+    END;
+
+    [External]
+    PROCEDURE SetFaxNo@15(FaxNoToSet@1000 : Text[30]);
+    BEGIN
+      IF NOT CustomerIsSet THEN
+        ERROR(InternalCustomerNotSetErr);
+
+      GlobalCustomer.VALIDATE("Fax No.",FaxNoToSet);
+    END;
+
+    [External]
+    PROCEDURE SetVATRegistrationNo@16(VatRegistrationNoToSet@1000 : Text[20]);
+    BEGIN
+      IF NOT CustomerIsSet THEN
+        ERROR(InternalCustomerNotSetErr);
+
+      GlobalCustomer.VALIDATE("VAT Registration No.",VatRegistrationNoToSet);
+    END;
+
+    [External]
+    PROCEDURE SetHomePage@17(HomePageToSet@1000 : Text[80]);
+    BEGIN
+      IF NOT CustomerIsSet THEN
+        ERROR(InternalCustomerNotSetErr);
+
+      GlobalCustomer.VALIDATE("Home Page",HomePageToSet);
+    END;
+
+    [External]
+    PROCEDURE SetBillToCustomerNo@25(BillToCustomerToSet@1000 : Code[20]);
+    BEGIN
+      IF NOT CustomerIsSet THEN
+        ERROR(InternalCustomerNotSetErr);
+
+      GlobalCustomer.VALIDATE("Bill-to Customer No.",BillToCustomerToSet);
+    END;
+
+    [External]
+    PROCEDURE SetPaymentMethodCode@19(PaymentMethodCodeToSet@1000 : Code[10]);
+    BEGIN
+      IF NOT CustomerIsSet THEN
+        ERROR(InternalCustomerNotSetErr);
+
+      GlobalCustomer.VALIDATE("Payment Method Code",PaymentMethodCodeToSet);
+    END;
+
+    [External]
+    PROCEDURE SetContact@20(ContactToSet@1000 : Text[50]);
+    BEGIN
+      IF NOT CustomerIsSet THEN
+        ERROR(InternalCustomerNotSetErr);
+
+      GlobalCustomer.VALIDATE(Contact,ContactToSet);
+    END;
+
+    [External]
+    PROCEDURE SetLastDateModified@21(LastDateModifiedToSet@1000 : Date);
+    BEGIN
+      IF NOT CustomerIsSet THEN
+        ERROR(InternalCustomerNotSetErr);
+
+      GlobalCustomer.VALIDATE("Last Date Modified",LastDateModifiedToSet);
+    END;
+
+    [External]
+    PROCEDURE SetLastModifiedDateTime@22(LastModifiedDateTimeToSet@1000 : DateTime);
+    BEGIN
+      IF NOT CustomerIsSet THEN
+        ERROR(InternalCustomerNotSetErr);
+
+      GlobalCustomer.VALIDATE("Last Modified Date Time",LastModifiedDateTimeToSet);
+    END;
+
+    [External]
+    PROCEDURE SetTaxLiable@31(TaxLiable@1000 : Boolean);
+    BEGIN
+      IF NOT CustomerIsSet THEN
+        ERROR(InternalCustomerNotSetErr);
+
+      GlobalCustomer.VALIDATE("Tax Liable",TaxLiable);
+    END;
+
+    [External]
+    PROCEDURE SetTaxAreaCode@37(TaxAreaCodeToSet@1000 : Code[20]);
+    BEGIN
+      IF NOT CustomerIsSet THEN
+        ERROR(InternalCustomerNotSetErr);
+
+      GlobalCustomer.VALIDATE("Tax Area Code",TaxAreaCodeToSet);
+    END;
+
+    [External]
+    PROCEDURE SetEmail@44(EmailToSet@1000 : Text[80]);
+    BEGIN
+      IF NOT CustomerIsSet THEN
+        ERROR(InternalCustomerNotSetErr);
+
+      GlobalCustomer.VALIDATE("E-Mail",EmailToSet);
+    END;
+
+    [External]
+    PROCEDURE CreateDefaultDimensionAndRequirementsIfNeeded@26(DimensionCode@1003 : Text[20];DimensionDescription@1004 : Text[50];DimensionValueCode@1005 : Code[20];DimensionValueName@1006 : Text[30]);
+    VAR
+      Dimension@1000 : Record 348;
+      DimensionValue@1001 : Record 349;
+    BEGIN
+      IF NOT CustomerIsSet THEN
+        ERROR(InternalCustomerNotSetErr);
+
+      DataMigrationFacadeHelper.GetOrCreateDimension(DimensionCode,DimensionDescription,Dimension);
+      DataMigrationFacadeHelper.GetOrCreateDimensionValue(Dimension.Code,DimensionValueCode,DimensionValueName,
+        DimensionValue);
+      DataMigrationFacadeHelper.CreateOnlyDefaultDimensionIfNeeded(Dimension.Code,DimensionValue.Code,
+        DATABASE::Customer,GlobalCustomer."No.");
+    END;
+
+    [External]
+    PROCEDURE CreateCustomerDiscountGroupIfNeeded@6(CodeToSet@1000 : Code[20];DescriptionToSet@1001 : Text[50]) : Code[20];
+    VAR
+      CustomerDiscountGroup@1002 : Record 340;
+    BEGIN
+      IF CustomerDiscountGroup.GET(CodeToSet) THEN
+        EXIT(CodeToSet);
+
+      CustomerDiscountGroup.INIT;
+      CustomerDiscountGroup.VALIDATE(Code,CodeToSet);
+      CustomerDiscountGroup.VALIDATE(Description,DescriptionToSet);
+      CustomerDiscountGroup.INSERT(TRUE);
+      EXIT(CustomerDiscountGroup.Code);
+    END;
+
+    [External]
+    PROCEDURE CreateShipmentMethodIfNeeded@28(CodeToSet@1000 : Code[10];DescriptionToSet@1001 : Text[50]) : Code[10];
+    BEGIN
+      EXIT(DataMigrationFacadeHelper.CreateShipmentMethodIfNeeded(CodeToSet,DescriptionToSet));
+    END;
+
+    [External]
+    PROCEDURE CreateSalespersonPurchaserIfNeeded@87(CodeToSet@1000 : Code[20];NameToSet@1001 : Text[50];PhoneNoToSet@1002 : Text[30];EmailToSet@1003 : Text[80]) : Code[20];
+    BEGIN
+      EXIT(DataMigrationFacadeHelper.CreateSalespersonPurchaserIfNeeded(CodeToSet,NameToSet,PhoneNoToSet,EmailToSet));
+    END;
+
+    [External]
+    PROCEDURE CreateCustomerPriceGroupIfNeeded@34(CodeToSet@1002 : Code[10];DescriptionToSet@1001 : Text[50];PriceIncludesVatToSet@1000 : Boolean) : Code[10];
+    BEGIN
+      EXIT(DataMigrationFacadeHelper.CreateCustomerPriceGroupIfNeeded(CodeToSet,DescriptionToSet,PriceIncludesVatToSet));
+    END;
+
+    [External]
+    PROCEDURE CreatePaymentTermsIfNeeded@38(CodeToSet@1000 : Code[10];DescriptionToSet@1001 : Text[50];DueDateCalculationToSet@1002 : DateFormula) : Code[10];
+    BEGIN
+      EXIT(DataMigrationFacadeHelper.CreatePaymentTermsIfNeeded(CodeToSet,DescriptionToSet,DueDateCalculationToSet));
+    END;
+
+    [External]
+    PROCEDURE CreatePaymentMethodIfNeeded@41(CodeToSet@1000 : Code[10];DescriptionToSet@1001 : Text[50]) : Code[10];
+    BEGIN
+      EXIT(DataMigrationFacadeHelper.CreatePaymentMethodIfNeeded(CodeToSet,DescriptionToSet));
+    END;
+
+    [External]
+    PROCEDURE DoesPostCodeExist@32(CodeToSearch@1002 : Code[20];CityToSearch@1001 : Text[30]) : Boolean;
+    BEGIN
+      EXIT(DataMigrationFacadeHelper.DoesPostCodeExist(CodeToSearch,CityToSearch));
+    END;
+
+    [External]
+    PROCEDURE CreatePostCodeIfNeeded@30(CodeToSet@1002 : Code[20];CityToSet@1001 : Text[30];CountyToSet@1003 : Text[30];CountryRegionCodeToSet@1004 : Code[10]) : Boolean;
+    BEGIN
+      EXIT(DataMigrationFacadeHelper.CreatePostCodeIfNeeded(CodeToSet,CityToSet,CountyToSet,CountryRegionCodeToSet));
+    END;
+
+    [External]
+    PROCEDURE CreateCountryIfNeeded@24(CodeToSet@1002 : Code[10];NameToSet@1001 : Text[50];AddressFormatToSet@1005 : 'Post Code+City,City+Post Code,City+County+Post Code,Blank Line+Post Code+City';ContactAddressFormatToSet@1006 : 'First,After Company Name,Last') : Code[10];
+    BEGIN
+      EXIT(DataMigrationFacadeHelper.CreateCountryIfNeeded(CodeToSet,NameToSet,AddressFormatToSet,ContactAddressFormatToSet));
+    END;
+
+    [External]
+    PROCEDURE SearchCountry@33(CodeToSearch@1001 : Code[10];NameToSearch@1003 : Text[50];EUCountryRegionCodeToSearch@1004 : Code[10];IntrastatCodeToSet@1005 : Code[10];VAR CodeToGet@1002 : Code[10]) : Boolean;
+    BEGIN
+      EXIT(
+        DataMigrationFacadeHelper.SearchCountry(CodeToSearch,NameToSearch,EUCountryRegionCodeToSearch,IntrastatCodeToSet,CodeToGet));
+    END;
+
+    [External]
+    PROCEDURE SearchLanguage@35(AbbreviatedNameToSearch@1000 : Code[3];VAR CodeToGet@1003 : Code[10]) : Boolean;
+    BEGIN
+      EXIT(DataMigrationFacadeHelper.SearchLanguage(AbbreviatedNameToSearch,CodeToGet));
+    END;
+
+    [External]
+    PROCEDURE SetCustomerPostingGroup@43(CustomerPostingGroupCode@1000 : Code[20]) : Boolean;
+    VAR
+      CustomerPostingGroup@1001 : Record 92;
+    BEGIN
+      IF NOT CustomerIsSet THEN
+        ERROR(InternalCustomerNotSetErr);
+
+      IF NOT CustomerPostingGroup.GET(CustomerPostingGroupCode) THEN
+        EXIT;
+
+      GlobalCustomer.VALIDATE("Customer Posting Group",CustomerPostingGroupCode);
+
+      EXIT(TRUE);
+    END;
+
+    [Integration(TRUE)]
+    LOCAL PROCEDURE OnMigrateCustomerPostingGroups@98(RecordIdToMigrate@1001 : RecordID;ChartOfAccountsMigrated@1000 : Boolean);
+    BEGIN
+    END;
+
+    [Integration(TRUE)]
+    LOCAL PROCEDURE OnMigrateCustomerTransactions@99(RecordIdToMigrate@1001 : RecordID;ChartOfAccountsMigrated@1000 : Boolean);
+    BEGIN
+    END;
+
+    [External]
+    PROCEDURE SetCustomerPostingGroupAccounts@36(CustomerPostingGroupCode@1002 : Code[20];ReceivablesAccount@1001 : Code[20];ServiceChargeAcc@1003 : Code[20];PaymentDiscDebitAcc@1004 : Code[20];InvoiceRoundingAccount@1005 : Code[20];AdditionalFeeAccount@1006 : Code[20];InterestAccount@1007 : Code[20];DebitCurrApplnRndgAcc@1008 : Code[20];CreditCurrApplnRndgAcc@1009 : Code[20];DebitRoundingAccount@1010 : Code[20];CreditRoundingAccount@1011 : Code[20];PaymentDiscCreditAcc@1012 : Code[20];PaymentToleranceDebitAcc@1013 : Code[20];PaymentToleranceCreditAcc@1014 : Code[20];AddFeePerLineAccount@1015 : Code[20]);
+    VAR
+      CustomerPostingGroup@1000 : Record 92;
+    BEGIN
+      IF NOT CustomerPostingGroup.GET(CustomerPostingGroupCode) THEN
+        EXIT;
+
+      CustomerPostingGroup.VALIDATE("Receivables Account",ReceivablesAccount);
+      CustomerPostingGroup.VALIDATE("Service Charge Acc.",ServiceChargeAcc);
+      CustomerPostingGroup.VALIDATE("Payment Disc. Debit Acc.",PaymentDiscDebitAcc);
+      CustomerPostingGroup.VALIDATE("Invoice Rounding Account",InvoiceRoundingAccount);
+      CustomerPostingGroup.VALIDATE("Additional Fee Account",AdditionalFeeAccount);
+      CustomerPostingGroup.VALIDATE("Interest Account",InterestAccount);
+      CustomerPostingGroup.VALIDATE("Debit Curr. Appln. Rndg. Acc.",DebitCurrApplnRndgAcc);
+      CustomerPostingGroup.VALIDATE("Credit Curr. Appln. Rndg. Acc.",CreditCurrApplnRndgAcc);
+      CustomerPostingGroup.VALIDATE("Debit Rounding Account",DebitRoundingAccount);
+      CustomerPostingGroup.VALIDATE("Credit Rounding Account",CreditRoundingAccount);
+      CustomerPostingGroup.VALIDATE("Payment Disc. Credit Acc.",PaymentDiscCreditAcc);
+      CustomerPostingGroup.VALIDATE("Payment Tolerance Debit Acc.",PaymentToleranceDebitAcc);
+      CustomerPostingGroup.VALIDATE("Payment Tolerance Credit Acc.",PaymentToleranceCreditAcc);
+      CustomerPostingGroup.VALIDATE("Add. Fee per Line Account",AddFeePerLineAccount);
+      CustomerPostingGroup.MODIFY(TRUE);
+    END;
+
+    [External]
+    PROCEDURE SetCustomerPostingGroupServiceChargeAcc@50(CustomerPostingGroupCode@1002 : Code[20];ServiceChargeAcc@1001 : Code[20]);
+    VAR
+      CustomerPostingGroup@1003 : Record 92;
+    BEGIN
+      IF NOT CustomerPostingGroup.GET(CustomerPostingGroupCode) THEN
+        ERROR(InternalCustomerPostingSetupNotSetErr);
+
+      CustomerPostingGroup.VALIDATE("Service Charge Acc.",ServiceChargeAcc);
+      CustomerPostingGroup.MODIFY(TRUE);
+    END;
+
+    [External]
+    PROCEDURE SetCustomerPostingGroupPaymentDiscDebitAcc@55(CustomerPostingGroupCode@1002 : Code[20];PaymentDiscDebitAcc@1001 : Code[20]);
+    VAR
+      CustomerPostingGroup@1000 : Record 92;
+    BEGIN
+      IF NOT CustomerPostingGroup.GET(CustomerPostingGroupCode) THEN
+        ERROR(InternalCustomerPostingSetupNotSetErr);
+
+      CustomerPostingGroup.VALIDATE("Payment Disc. Debit Acc.",PaymentDiscDebitAcc);
+      CustomerPostingGroup.MODIFY(TRUE);
+    END;
+
+    [External]
+    PROCEDURE SetCustomerPostingGroupInvoiceRoundingAccount@54(CustomerPostingGroupCode@1002 : Code[20];InvoiceRoundingAccount@1001 : Code[20]);
+    VAR
+      CustomerPostingGroup@1000 : Record 92;
+    BEGIN
+      IF NOT CustomerPostingGroup.GET(CustomerPostingGroupCode) THEN
+        ERROR(InternalCustomerPostingSetupNotSetErr);
+
+      CustomerPostingGroup.VALIDATE("Invoice Rounding Account",InvoiceRoundingAccount);
+      CustomerPostingGroup.MODIFY(TRUE);
+    END;
+
+    [External]
+    PROCEDURE SetCustomerPostingGroupAdditionalFeeAccount@61(CustomerPostingGroupCode@1002 : Code[20];AdditionalFeeAccount@1001 : Code[20]);
+    VAR
+      CustomerPostingGroup@1000 : Record 92;
+    BEGIN
+      IF NOT CustomerPostingGroup.GET(CustomerPostingGroupCode) THEN
+        ERROR(InternalCustomerPostingSetupNotSetErr);
+
+      CustomerPostingGroup.VALIDATE("Additional Fee Account",AdditionalFeeAccount);
+      CustomerPostingGroup.MODIFY(TRUE);
+    END;
+
+    [External]
+    PROCEDURE SetCustomerPostingGroupInterestAccount@59(CustomerPostingGroupCode@1002 : Code[20];InterestAccount@1001 : Code[20]);
+    VAR
+      CustomerPostingGroup@1000 : Record 92;
+    BEGIN
+      IF NOT CustomerPostingGroup.GET(CustomerPostingGroupCode) THEN
+        ERROR(InternalCustomerPostingSetupNotSetErr);
+
+      CustomerPostingGroup.VALIDATE("Interest Account",InterestAccount);
+      CustomerPostingGroup.MODIFY(TRUE);
+    END;
+
+    [External]
+    PROCEDURE SetCustomerPostingGroupDebitCurrApplnRndgAcc@53(CustomerPostingGroupCode@1002 : Code[20];DebitCurrApplnRndgAcc@1001 : Code[20]);
+    VAR
+      CustomerPostingGroup@1000 : Record 92;
+    BEGIN
+      IF NOT CustomerPostingGroup.GET(CustomerPostingGroupCode) THEN
+        ERROR(InternalCustomerPostingSetupNotSetErr);
+
+      CustomerPostingGroup.VALIDATE("Debit Curr. Appln. Rndg. Acc.",DebitCurrApplnRndgAcc);
+      CustomerPostingGroup.MODIFY(TRUE);
+    END;
+
+    [External]
+    PROCEDURE SetCustomerPostingGroupCreditCurrApplnRndgAcc@51(CustomerPostingGroupCode@1002 : Code[20];CreditCurrApplnRndgAcc@1001 : Code[20]);
+    VAR
+      CustomerPostingGroup@1000 : Record 92;
+    BEGIN
+      IF NOT CustomerPostingGroup.GET(CustomerPostingGroupCode) THEN
+        ERROR(InternalCustomerPostingSetupNotSetErr);
+
+      CustomerPostingGroup.VALIDATE("Credit Curr. Appln. Rndg. Acc.",CreditCurrApplnRndgAcc);
+      CustomerPostingGroup.MODIFY(TRUE);
+    END;
+
+    [External]
+    PROCEDURE SetCustomerPostingGroupDebitRoundingAccount@49(CustomerPostingGroupCode@1002 : Code[20];DebitRoundingAccount@1001 : Code[20]);
+    VAR
+      CustomerPostingGroup@1000 : Record 92;
+    BEGIN
+      IF NOT CustomerPostingGroup.GET(CustomerPostingGroupCode) THEN
+        ERROR(InternalCustomerPostingSetupNotSetErr);
+
+      CustomerPostingGroup.VALIDATE("Debit Rounding Account",DebitRoundingAccount);
+      CustomerPostingGroup.MODIFY(TRUE);
+    END;
+
+    [External]
+    PROCEDURE SetCustomerPostingGroupCreditRoundingAccount@48(CustomerPostingGroupCode@1002 : Code[20];CreditRoundingAccount@1001 : Code[20]);
+    VAR
+      CustomerPostingGroup@1000 : Record 92;
+    BEGIN
+      IF NOT CustomerPostingGroup.GET(CustomerPostingGroupCode) THEN
+        ERROR(InternalCustomerPostingSetupNotSetErr);
+
+      CustomerPostingGroup.VALIDATE("Credit Rounding Account",CreditRoundingAccount);
+      CustomerPostingGroup.MODIFY(TRUE);
+    END;
+
+    [External]
+    PROCEDURE SetCustomerPostingGroupPaymentDiscCreditAcc@47(CustomerPostingGroupCode@1002 : Code[20];PaymentDiscCreditAcc@1001 : Code[20]);
+    VAR
+      CustomerPostingGroup@1000 : Record 92;
+    BEGIN
+      IF NOT CustomerPostingGroup.GET(CustomerPostingGroupCode) THEN
+        ERROR(InternalCustomerPostingSetupNotSetErr);
+
+      CustomerPostingGroup.VALIDATE("Payment Disc. Credit Acc.",PaymentDiscCreditAcc);
+      CustomerPostingGroup.MODIFY(TRUE);
+    END;
+
+    [External]
+    PROCEDURE SetCustomerPostingGroupPaymentToleranceDebitAcc@46(CustomerPostingGroupCode@1002 : Code[20];PaymentToleranceDebitAcc@1001 : Code[20]);
+    VAR
+      CustomerPostingGroup@1000 : Record 92;
+    BEGIN
+      IF NOT CustomerPostingGroup.GET(CustomerPostingGroupCode) THEN
+        ERROR(InternalCustomerPostingSetupNotSetErr);
+
+      CustomerPostingGroup.VALIDATE("Payment Tolerance Debit Acc.",PaymentToleranceDebitAcc);
+      CustomerPostingGroup.MODIFY(TRUE);
+    END;
+
+    [External]
+    PROCEDURE SetCustomerPostingGroupPaymentToleranceCreditAcc@45(CustomerPostingGroupCode@1002 : Code[20];PaymentToleranceCreditAcc@1001 : Code[20]);
+    VAR
+      CustomerPostingGroup@1000 : Record 92;
+    BEGIN
+      IF NOT CustomerPostingGroup.GET(CustomerPostingGroupCode) THEN
+        ERROR(InternalCustomerPostingSetupNotSetErr);
+
+      CustomerPostingGroup.VALIDATE("Payment Tolerance Credit Acc.",PaymentToleranceCreditAcc);
+      CustomerPostingGroup.MODIFY(TRUE);
+    END;
+
+    [External]
+    PROCEDURE SetCustomerPostingGroupAddFeePerLineAccount@62(CustomerPostingGroupCode@1002 : Code[20];AddFeePerLineAccount@1001 : Code[20]);
+    VAR
+      CustomerPostingGroup@1000 : Record 92;
+    BEGIN
+      IF NOT CustomerPostingGroup.GET(CustomerPostingGroupCode) THEN
+        ERROR(InternalCustomerPostingSetupNotSetErr);
+
+      CustomerPostingGroup.VALIDATE("Add. Fee per Line Account",AddFeePerLineAccount);
+      CustomerPostingGroup.MODIFY(TRUE);
+    END;
+
+    [External]
+    PROCEDURE SetCustomerAlternativeContact@56(NameToSet@1003 : Text[50];AddressToSet@1004 : Text[50];Address2ToSet@1005 : Text[50];PostCodeToSet@1006 : Code[20];CityToSet@1007 : Text[30];CountryToSet@1012 : Code[10];EmailToset@1008 : Text[80];PhoneNoToSet@1009 : Text[30];FaxToSet@1010 : Text[30];MobileNoToSet@1011 : Text[30]);
+    BEGIN
+      IF NOT CustomerIsSet THEN
+        ERROR(InternalCustomerNotSetErr);
+
+      DataMigrationFacadeHelper.SetAlternativeContact(NameToSet,AddressToSet,Address2ToSet,PostCodeToSet,CityToSet,CountryToSet,
+        EmailToset,PhoneNoToSet,FaxToSet,MobileNoToSet,DATABASE::Customer,GlobalCustomer."No.");
+    END;
+
+    BEGIN
+    END.
+  }
+}
+
