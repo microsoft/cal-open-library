@@ -1,0 +1,274 @@
+OBJECT Codeunit 50920 Json Interface Mgt.
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      JSON@1000 : Text;
+
+    [External]
+    PROCEDURE Initialize@2();
+    VAR
+      JSONMgt@1001 : Codeunit 5459;
+    BEGIN
+      WITH JSONMgt DO BEGIN
+        InitializeEmptyCollection;
+        JSON := WriteCollectionToString;
+      END;
+    END;
+
+    [External]
+    PROCEDURE InitializeFromTempBlob@5(TempBlob@1000 : Record 99008535);
+    VAR
+      JSONMgt@1001 : Codeunit 5459;
+    BEGIN
+      JSON := TempBlob.ReadAsTextWithCRLFLineSeparator;
+    END;
+
+    [External]
+    PROCEDURE AddRecordID@3(Variant@1000 : Variant);
+    VAR
+      JSONMgt@1004 : Codeunit 5459;
+      DataTypeMgt@1005 : Codeunit 701;
+      JsonObject@1002 : DotNet "'Newtonsoft.Json'.Newtonsoft.Json.Linq.JObject";
+      RecRef@1001 : RecordRef;
+    BEGIN
+      IF NOT DataTypeMgt.GetRecordRef(Variant, RecRef) THEN
+        EXIT;
+
+      WITH JSONMgt DO BEGIN
+        InitializeCollection(JSON);
+        InitializeEmptyObject;
+        GetJSONObject(JsonObject);
+        AddJPropertyToJObject(JsonObject,'TableNo',RecRef.NUMBER);
+        AddJPropertyToJObject(JsonObject,'TableName',RecRef.NAME);
+        AddJPropertyToJObject(JsonObject,'RecordId',RecRef.RECORDID);
+        AddJObjectToCollection(JsonObject);
+        JSON := WriteCollectionToString;
+      END;
+    END;
+
+    [External]
+    PROCEDURE AddTempTable@4(TableName@1007 : Text;Variant@1000 : Variant);
+    VAR
+      JSONMgt@1004 : Codeunit 5459;
+      DataTypeMgt@1006 : Codeunit 701;
+      RecRef@1001 : RecordRef;
+      JsonArray@1005 : DotNet "'Newtonsoft.Json, Version=9.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed'.Newtonsoft.Json.Linq.JArray";
+      JsonObject@1002 : DotNet "'Newtonsoft.Json'.Newtonsoft.Json.Linq.JObject";
+      TableView@1008 : Text;
+    BEGIN
+      IF NOT DataTypeMgt.GetRecordRef(Variant, RecRef) THEN
+        EXIT;
+
+      IF NOT RecRef.ISTEMPORARY THEN
+        EXIT;
+
+      TableView := RecRef.GETVIEW(FALSE);
+      RecRef.RESET;
+
+      WITH JSONMgt DO BEGIN
+        InitializeEmptyCollection;
+        GetJsonArray(JsonArray);
+        IF RecRef.FINDSET THEN REPEAT
+          InitializeEmptyObject;
+          GetJSONObject(JsonObject);
+          PopulateJsonFromAnyTable(RecRef,JsonObject);
+          AddJObjectToJArray(JsonArray,JsonObject);
+        UNTIL RecRef.NEXT = 0;
+        InitializeCollection(JSON);
+        InitializeEmptyObject;
+        GetJSONObject(JsonObject);
+        AddJPropertyToJObject(JsonObject,'TableNo',RecRef.NUMBER);
+        AddJPropertyToJObject(JsonObject,'TableName',TableName);
+        AddJPropertyToJObject(JsonObject,'TableView',TableView);
+        AddJPropertyToJObject(JsonObject,'RecordId',RecRef.RECORDID);
+        AddJArrayToJObject(JsonObject,'Records',JsonArray);
+        AddJObjectToCollection(JsonObject);
+        JSON := WriteCollectionToString;
+      END;
+    END;
+
+    [External]
+    PROCEDURE AddRecordFields@1(Variant@1000 : Variant);
+    VAR
+      JSONMgt@1004 : Codeunit 5459;
+      DataTypeMgt@1006 : Codeunit 701;
+      RecRef@1001 : RecordRef;
+      JsonArray@1005 : DotNet "'Newtonsoft.Json, Version=9.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed'.Newtonsoft.Json.Linq.JArray";
+      JsonObject@1002 : DotNet "'Newtonsoft.Json'.Newtonsoft.Json.Linq.JObject";
+    BEGIN
+      IF NOT DataTypeMgt.GetRecordRef(Variant, RecRef) THEN
+        EXIT;
+
+      WITH JSONMgt DO BEGIN
+        InitializeEmptyCollection;
+        GetJsonArray(JsonArray);
+        InitializeEmptyObject;
+        GetJSONObject(JsonObject);
+        PopulateJsonFromAnyTable(RecRef,JsonObject);
+        AddJObjectToJArray(JsonArray,JsonObject);
+        InitializeCollection(JSON);
+        InitializeEmptyObject;
+        GetJSONObject(JsonObject);
+        AddJPropertyToJObject(JsonObject,'TableNo',RecRef.NUMBER);
+        AddJPropertyToJObject(JsonObject,'TableName',RecRef.NAME);
+        AddJArrayToJObject(JsonObject,'Records',JsonArray);
+        AddJObjectToCollection(JsonObject);
+        JSON := WriteCollectionToString;
+      END;
+    END;
+
+    [External]
+    PROCEDURE GetRecord@7(VAR RecRef@1001 : RecordRef) : Boolean;
+    VAR
+      JSONMgt@1005 : Codeunit 5459;
+      JsonObject@1003 : DotNet "'Newtonsoft.Json'.Newtonsoft.Json.Linq.JObject";
+      TempRecId@1002 : RecordID;
+      TableRecordId@1000 : Text;
+    BEGIN
+      WITH JSONMgt DO BEGIN
+        InitializeCollection(JSON);
+        IF GetJObjectFromCollectionByPropertyValue(JsonObject,'TableName',RecRef.NAME) THEN
+          IF GetStringPropertyValueFromJObjectByName(JsonObject,'RecordId',TableRecordId) THEN
+            IF EVALUATE(TempRecId,TableRecordId) THEN BEGIN
+              RecRef.GET(TempRecId);
+              EXIT(TRUE);
+            END;
+      END;
+    END;
+
+    [External]
+    PROCEDURE GetTempTable@10(TableName@1001 : Text;VAR RecRef@1000 : RecordRef) : Boolean;
+    VAR
+      JSONMgt@1004 : Codeunit 5459;
+      JsonObject@1005 : DotNet "'Newtonsoft.Json'.Newtonsoft.Json.Linq.JObject";
+      TempRecId@1009 : RecordID;
+      JSONCollection@1002 : Text;
+      TableView@1006 : Text;
+      TableRecordId@1007 : Text;
+      CollectionIndex@1003 : Integer;
+    BEGIN
+      IF NOT RecRef.ISTEMPORARY THEN
+        EXIT;
+
+      RecRef.RESET;
+      RecRef.DELETEALL;
+
+      WITH JSONMgt DO BEGIN
+        InitializeCollection(JSON);
+        IF GetJObjectFromCollectionByPropertyValue(JsonObject,'TableName',TableName) THEN BEGIN
+          GetStringPropertyValueFromJObjectByName(JsonObject,'TableView',TableView);
+          GetStringPropertyValueFromJObjectByName(JsonObject,'RecordId',TableRecordId);
+          IF GetStringPropertyValueFromJObjectByName(JsonObject,'Records',JSONCollection) THEN BEGIN
+            InitializeCollection(JSONCollection);
+            FOR CollectionIndex := 1 TO GetCollectionCount DO BEGIN
+              GetJObjectFromCollectionByIndex(JsonObject,CollectionIndex - 1);
+              PopulateAnyTableFromJson(JsonObject,RecRef);
+              RecRef.INSERT;
+            END;
+          END;
+          IF EVALUATE(TempRecId,TableRecordId) THEN
+            RecRef.GET(TempRecId);
+          EXIT(TRUE);
+        END;
+      END;
+
+      RecRef.SETVIEW(TableView);
+    END;
+
+    [External]
+    PROCEDURE GetRecordFields@6(VAR RecRef@1000 : RecordRef) : Boolean;
+    VAR
+      JSONMgt@1004 : Codeunit 5459;
+      JsonObject@1005 : DotNet "'Newtonsoft.Json'.Newtonsoft.Json.Linq.JObject";
+      JSONCollection@1001 : Text;
+      CollectionIndex@1003 : Integer;
+    BEGIN
+      WITH JSONMgt DO BEGIN
+        InitializeCollection(JSON);
+        IF GetJObjectFromCollectionByPropertyValue(JsonObject,'TableName',RecRef.NAME) THEN
+          IF GetStringPropertyValueFromJObjectByName(JsonObject,'Records',JSONCollection) THEN BEGIN
+            InitializeCollection(JSONCollection);
+            FOR CollectionIndex := 1 TO GetCollectionCount DO BEGIN
+              GetJObjectFromCollectionByIndex(JsonObject,CollectionIndex - 1);
+              PopulateAnyTableFromJson(JsonObject,RecRef);
+            END;
+            EXIT(TRUE);
+          END;
+      END;
+    END;
+
+    [External]
+    PROCEDURE GetAsTempBlob@11(VAR TempBlob@1000 : Record 99008535);
+    BEGIN
+      TempBlob.WriteAsText(JSON,TEXTENCODING::UTF8);
+    END;
+
+    LOCAL PROCEDURE PopulateAnyTableFromJson@14(JsonObject@1000 : DotNet "'Newtonsoft.Json'.Newtonsoft.Json.Linq.JObject";VAR RecRef@1001 : RecordRef);
+    VAR
+      Field@10017208 : Record 2000000041;
+      JSONMgt@10017206 : Codeunit 5459;
+      FldRef@10017205 : FieldRef;
+      FldIndex@10017204 : Integer;
+    BEGIN
+      WITH JSONMgt DO BEGIN
+        FOR FldIndex := 1 TO RecRef.FIELDCOUNT DO BEGIN
+          FldRef := RecRef.FIELDINDEX(FldIndex);
+          Field.GET(RecRef.NUMBER,FldRef.NUMBER);
+          IF Field.Class = Field.Class::Normal THEN
+            GetPropertyValueFromJObjectByPathSetToFieldRef(JsonObject,RemoveNonAplhaNumericCharacters(FldRef.NAME),FldRef);
+        END;
+      END;
+    END;
+
+    LOCAL PROCEDURE PopulateJsonFromAnyTable@15(RecRef@1000 : RecordRef;VAR JsonObject@10017201 : DotNet "'Newtonsoft.Json'.Newtonsoft.Json.Linq.JObject");
+    VAR
+      Field@10017209 : Record 2000000041;
+      JSONMgt@10017207 : Codeunit 5459;
+      FldRef@10017204 : FieldRef;
+      FldIndex@10017203 : Integer;
+    BEGIN
+      WITH JSONMgt DO BEGIN
+        InitializeEmptyObject;
+        GetJSONObject(JsonObject);
+        FOR FldIndex := 1 TO RecRef.FIELDCOUNT DO BEGIN
+          FldRef := RecRef.FIELDINDEX(FldIndex);
+          Field.GET(RecRef.NUMBER,FldRef.NUMBER);
+          IF Field.Class = Field.Class::Normal THEN
+            AddJPropertyToJObject(JsonObject,RemoveNonAplhaNumericCharacters(FldRef.NAME),FldRef.VALUE);
+        END;
+      END;
+    END;
+
+    LOCAL PROCEDURE RemoveNonAplhaNumericCharacters@19(OldValue@1003 : Text) : Text;
+    VAR
+      DotNetChar@1002 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Char";
+      NewValue@1001 : Text;
+      I@1000 : Integer;
+    BEGIN
+      NewValue := '';
+      FOR I := 1 TO STRLEN(OldValue) DO BEGIN
+        IF DotNetChar.IsLetterOrDigit(OldValue[I]) THEN
+          NewValue += FORMAT(OldValue[I]);
+      END;
+
+      EXIT(NewValue);
+    END;
+
+    BEGIN
+    END.
+  }
+}
+
