@@ -34,6 +34,7 @@ OBJECT Codeunit 50900 Soap Proxy Client Mgt.
       ResponseMsg@1021 : TextConst 'ENU=Response';
       ServiceNotFoundErr@1022 : TextConst 'ENU=Service not found: %1';
       MethodNotFoundErr@1023 : TextConst 'ENU=Method not found: %1';
+      PropertyNotFoundErr@1028 : TextConst 'ENU=Property not found: %1';
       ServerX509CertErr@1032 : TextConst 'ENU=Server Certificate is not valid!';
       FileManagement@10000230 : Codeunit 419;
 
@@ -231,6 +232,7 @@ OBJECT Codeunit 50900 Soap Proxy Client Mgt.
           GlobalParameter := Activator.CreateInstance(Type);
           EXIT;
         END;
+      ERROR(TypeNotFoundErr,TypeName);
     END;
 
     [External]
@@ -244,8 +246,13 @@ OBJECT Codeunit 50900 Soap Proxy Client Mgt.
     VAR
       PropertyInfo@1005 : DotNet "'mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Reflection.PropertyInfo";
     BEGIN
-      PropertyInfo := GlobalParameter.GetType.GetProperty(PropertyName);
-      PropertyInfo.SetValue(GlobalParameter,PropertyValue);
+      FOREACH PropertyInfo IN GlobalParameter.GetType.GetProperties DO BEGIN
+        IF PropertyInfo.Name = PropertyName THEN BEGIN
+          PropertyInfo.SetValue(GlobalParameter,PropertyValue);
+          EXIT;
+        END;
+      END;
+      ERROR(PropertyNotFoundErr,PropertyName);
     END;
 
     [External]
@@ -385,7 +392,7 @@ OBJECT Codeunit 50900 Soap Proxy Client Mgt.
       FOREACH ParameterInfo IN MethodInfo.GetParameters DO BEGIN
         Parameters.ID += 1;
         Parameters.Name := ParameterInfo.Name;
-        Parameters.Value := ParameterInfo.ParameterType.ToString;
+                Parameters.Value := ParameterInfo.ParameterType.ToString;
         Parameters.INSERT;
       END;
     END;
@@ -590,10 +597,13 @@ OBJECT Codeunit 50900 Soap Proxy Client Mgt.
     [TryFunction]
     LOCAL PROCEDURE CompileSVC@61(Uri@1020 : Text);
     VAR
+      EndpointAddress@1090 : DotNet "'System.ServiceModel, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.ServiceModel.EndpointAddress";
+      HttpBinding@1091 : DotNet "'System.ServiceModel, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.ServiceModel.WSHttpBinding";
       ServiceContractGenerator@1000 : DotNet "'System.ServiceModel, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.ServiceModel.Description.ServiceContractGenerator";
       WsdlImporter@1001 : DotNet "'System.ServiceModel, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.ServiceModel.Description.WsdlImporter";
       MetadataExchangeClient@1002 : DotNet "'System.ServiceModel, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.ServiceModel.Description.MetadataExchangeClient";
       MetadataExchangeClientMode@1012 : DotNet "'System.ServiceModel, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.ServiceModel.Description.MetadataExchangeClientMode";
+      MetadataSet@1092 : DotNet "'System.ServiceModel, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.ServiceModel.Description.MetadataSet";
       Contracts@1003 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Collections.ObjectModel.Collection`1";
       ContractDescription@1004 : DotNet "'System.ServiceModel, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.ServiceModel.Description.ContractDescription";
       CodeCompileUnit@1013 : DotNet "'System, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.CodeDom.CodeCompileUnit";
@@ -601,13 +611,20 @@ OBJECT Codeunit 50900 Soap Proxy Client Mgt.
       WebServiceUri@1032 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Uri";
       CodeNamespace@1050 : DotNet "'System, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.CodeDom.CodeNamespace";
     BEGIN
-      MetadataExchangeClient := MetadataExchangeClient.MetadataExchangeClient(WebServiceUri.Uri(Uri),MetadataExchangeClientMode.HttpGet);
-      MetadataExchangeClient.ResolveMetadataReferences := TRUE;
+      IF ISNULL(Credential) THEN
+        CreateBasicBinding(Uri,'None')
+      ELSE
+        CreateBasicBinding(Uri,'Basic');
+      HttpBinding := Constructor.GetValue(0);
+      EndpointAddress := Constructor.GetValue(1);
 
+      MetadataExchangeClient := MetadataExchangeClient.MetadataExchangeClient(HttpBinding);
+      MetadataExchangeClient.ResolveMetadataReferences := TRUE;
       IF NOT ISNULL(Credential) THEN
         MetadataExchangeClient.HttpCredentials(Credential);
 
-      WsdlImporter := WsdlImporter.WsdlImporter(MetadataExchangeClient.GetMetadata);
+      MetadataSet := MetadataExchangeClient.GetMetadata(EndpointAddress.Uri,MetadataExchangeClientMode.HttpGet);
+      WsdlImporter := WsdlImporter.WsdlImporter(MetadataSet);
 
       CodeNamespace := CodeNamespace.CodeNamespace;
       CodeCompileUnit := CodeCompileUnit.CodeCompileUnit;

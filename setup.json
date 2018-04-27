@@ -1,0 +1,13 @@
+﻿{
+    "branchId":  "8cc9377a-946f-411f-990f-fefd9a08583d",
+    "projectName":  "JsonBufferExternal",
+    "baseBranch":  "master",        
+    "navSolution":  "W1",    
+    "storeAllObjects":  "true",
+    "uidOffset":  "1000",
+    "objectProperties":  "true",
+    "datetimeCulture":  "is-IS",
+    "targetPlatform":  "Dynamics365",
+    "dockerImage":  "navinsider.azurecr.io/dynamics-nav:12.0.21229.0",
+    "navVersion":  "12.0.21229.0"
+}
