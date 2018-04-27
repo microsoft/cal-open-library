@@ -25,6 +25,8 @@ OBJECT Table 1235 XML Buffer
     { 13  ;   ;Node Number         ;Integer       ;DataClassification=SystemMetadata }
     { 14  ;   ;Namespace           ;Text250       ;DataClassification=SystemMetadata }
     { 15  ;   ;Import ID           ;GUID          ;DataClassification=SystemMetadata }
+    { 16  ;   ;Value BLOB          ;BLOB          ;DataClassification=ToBeClassified;
+                                                   CaptionML=ENU=Value BLOB }
   }
   KEYS
   {
