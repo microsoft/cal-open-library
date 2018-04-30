@@ -250,7 +250,7 @@ OBJECT Codeunit 1235 XML Buffer Writer
       IF XMLBuffer.Value <> '' THEN
         EXIT;
 
-      XMLBuffer.VALIDATE(Value,COPYSTR(XmlReader.Value,1,MAXSTRLEN(XMLBuffer.Value)));
+      XMLBuffer.SetValueWithoutModifying(XmlReader.Value);
       XMLBuffer.VALIDATE("Data Type",GetType(XMLBuffer.Value));
       XMLBuffer.MODIFY;
     END;
@@ -278,7 +278,7 @@ OBJECT Codeunit 1235 XML Buffer Writer
     END;
 
     [External]
-    PROCEDURE InsertElement@21(VAR XMLBuffer@1010 : Record 1235;ParentXMLBuffer@1009 : Record 1235;ElementNumber@1003 : Integer;ElementDepth@1006 : Integer;ElementNameAndNamespace@1008 : Text[250];ElementValue@1007 : Text[250]);
+    PROCEDURE InsertElement@21(VAR XMLBuffer@1010 : Record 1235;ParentXMLBuffer@1009 : Record 1235;ElementNumber@1003 : Integer;ElementDepth@1006 : Integer;ElementNameAndNamespace@1008 : Text[250];ElementValue@1007 : Text);
     VAR
       ElementName@1000 : Text[250];
       ElementNamespace@1005 : Text[250];
@@ -298,7 +298,7 @@ OBJECT Codeunit 1235 XML Buffer Writer
         "Node Number" := ElementNumber;
         Depth := ElementDepth;
         Name := ElementName;
-        Value := ElementValue;
+        SetValueWithoutModifying(ElementValue);
         Type := Type::Element;
         Namespace := ElementNamespace;
         "Import ID" := ParentXMLBuffer."Import ID";
