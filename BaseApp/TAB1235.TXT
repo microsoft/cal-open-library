@@ -14,7 +14,7 @@ OBJECT Table 1235 XML Buffer
     { 1   ;   ;Entry No.           ;Integer       ;AutoIncrement=Yes;
                                                    DataClassification=SystemMetadata }
     { 2   ;   ;Type                ;Option        ;DataClassification=SystemMetadata;
-                                                   OptionString=[ ,Element,Attribute] }
+                                                   OptionString=[ ,Element,Attribute,Processing Instruction] }
     { 3   ;   ;Name                ;Text250       ;DataClassification=SystemMetadata }
     { 4   ;   ;Path                ;Text250       ;DataClassification=SystemMetadata }
     { 5   ;   ;Value               ;Text250       ;DataClassification=SystemMetadata }
@@ -112,6 +112,15 @@ OBJECT Table 1235 XML Buffer
     END;
 
     [External]
+    PROCEDURE AddProcessingInstruction@33(InstructionName@1000 : Text[250];InstructionValue@1001 : Text[250]);
+    VAR
+      XMLBufferWriter@1002 : Codeunit 1235;
+    BEGIN
+      XMLBufferWriter.InsertProcessingInstruction(Rec,Rec,CountProcessingInstructions + 1,Depth + 1,InstructionName,InstructionValue);
+      GetParent;
+    END;
+
+    [External]
     PROCEDURE AddAttribute@7(AttributeName@1001 : Text[250];AttributeValue@1000 : Text[250]);
     VAR
       XMLBufferWriter@1002 : Codeunit 1235;
@@ -157,7 +166,8 @@ OBJECT Table 1235 XML Buffer
     PROCEDURE AddElement@5(ElementNameWithNamespace@1007 : Text[250];ElementValue@1006 : Text) ElementEntryNo : Integer;
     BEGIN
       ElementEntryNo := AddGroupElement(ElementNameWithNamespace);
-      SetValue(ElementValue);
+      SetValueWithoutModifying(ElementValue);
+      MODIFY(TRUE);
       GetParent;
     END;
 
@@ -225,6 +235,25 @@ OBJECT Table 1235 XML Buffer
       SETRANGE(Type,Type::Attribute);
       NumAttributes := COUNT;
       SETVIEW(CurrentView);
+    END;
+
+    [External]
+    PROCEDURE CountProcessingInstructions@34() NumAttributes : Integer;
+    VAR
+      CurrentView@1000 : Text;
+    BEGIN
+      CurrentView := GETVIEW;
+      RESET;
+      SETRANGE("Parent Entry No.","Entry No.");
+      SETRANGE(Type,Type::"Processing Instruction");
+      NumAttributes := COUNT;
+      SETVIEW(CurrentView);
+    END;
+
+    [External]
+    PROCEDURE FindProcessingInstructions@10000001(VAR TempResultPIXMLBuffer@1000 : TEMPORARY Record 1235) : Boolean;
+    BEGIN
+      EXIT(FindChildNodes(TempResultPIXMLBuffer,Type::"Processing Instruction",''));
     END;
 
     [External]
