@@ -18,6 +18,17 @@ OBJECT Codeunit 1239 XML Buffer Reader
       DefaultNamespace@1000 : Text;
 
     [TryFunction]
+    [Internal]
+    PROCEDURE SaveToFile@7(FilePath@1000 : Text;VAR XMLBuffer@1001 : Record 1235);
+    VAR
+      TempBlob@1003 : Record 99008535;
+      FileMgt@1002 : Codeunit 419;
+    BEGIN
+      SaveToTempBlobWithEncoding(TempBlob,XMLBuffer,'UTF-8');
+      FileMgt.BLOBExportToServerFile(TempBlob,FilePath);
+    END;
+
+    [TryFunction]
     [External]
     PROCEDURE SaveToTempBlob@1(VAR TempBlob@1000 : Record 99008535;VAR XMLBuffer@1001 : Record 1235);
     BEGIN
@@ -56,17 +67,6 @@ OBJECT Codeunit 1239 XML Buffer Reader
 
       TempBlob.Blob.CREATEOUTSTREAM(OutStr);
       XmlDocument.Save(OutStr);
-    END;
-
-    [TryFunction]
-    [Internal]
-    PROCEDURE SaveToFile@7(FilePath@1000 : Text;VAR XMLBuffer@1001 : Record 1235);
-    VAR
-      TempBlob@1003 : Record 99008535;
-      FileMgt@1002 : Codeunit 419;
-    BEGIN
-      SaveToTempBlobWithEncoding(TempBlob,XMLBuffer,'UTF-8');
-      FileMgt.BLOBExportToServerFile(TempBlob,FilePath);
     END;
 
     LOCAL PROCEDURE SaveChildElements@33(VAR TempParentElementXMLBuffer@1000 : TEMPORARY Record 1235;XMLCurrElement@1002 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlNode";XmlDocument@1003 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlDocument");

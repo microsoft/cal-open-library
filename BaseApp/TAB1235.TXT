@@ -25,8 +25,7 @@ OBJECT Table 1235 XML Buffer
     { 13  ;   ;Node Number         ;Integer       ;DataClassification=SystemMetadata }
     { 14  ;   ;Namespace           ;Text250       ;DataClassification=SystemMetadata }
     { 15  ;   ;Import ID           ;GUID          ;DataClassification=SystemMetadata }
-    { 16  ;   ;Value BLOB          ;BLOB          ;DataClassification=ToBeClassified;
-                                                   CaptionML=ENU=Value BLOB }
+    { 16  ;   ;Value BLOB          ;BLOB          ;DataClassification=SystemMetadata }
   }
   KEYS
   {
@@ -158,8 +157,7 @@ OBJECT Table 1235 XML Buffer
     PROCEDURE AddElement@5(ElementNameWithNamespace@1007 : Text[250];ElementValue@1006 : Text) ElementEntryNo : Integer;
     BEGIN
       ElementEntryNo := AddGroupElement(ElementNameWithNamespace);
-      SetValueWithoutModifying(ElementValue);
-      MODIFY(TRUE);
+      SetValue(ElementValue);
       GetParent;
     END;
 
@@ -299,6 +297,7 @@ OBJECT Table 1235 XML Buffer
       EXIT(TempResultXMLBuffer.FINDSET);
     END;
 
+    [External]
     PROCEDURE GetValue@22() : Text;
     VAR
       TempBlob@1001 : Record 99008535;
@@ -312,12 +311,14 @@ OBJECT Table 1235 XML Buffer
       EXIT(TempBlob.ReadAsText(CR,TEXTENCODING::Windows));
     END;
 
+    [External]
     PROCEDURE SetValue@24(NewValue@1000 : Text);
     BEGIN
       SetValueWithoutModifying(NewValue);
       MODIFY;
     END;
 
+    [External]
     PROCEDURE SetValueWithoutModifying@25(NewValue@1000 : Text);
     VAR
       TempBlob@1001 : Record 99008535;
