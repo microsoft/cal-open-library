@@ -15,6 +15,7 @@ OBJECT Codeunit 50920 Json Interface Mgt.
   CODE
   {
     VAR
+      Variables@1001 : DotNet "'Newtonsoft.Json'.Newtonsoft.Json.Linq.JObject";
       JSON@1000 : Text;
 
     [External]
@@ -25,6 +26,8 @@ OBJECT Codeunit 50920 Json Interface Mgt.
       WITH JSONMgt DO BEGIN
         InitializeEmptyCollection;
         JSON := WriteCollectionToString;
+        InitializeEmptyObject;
+        GetJSONObject(Variables);
       END;
     END;
 
@@ -131,6 +134,14 @@ OBJECT Codeunit 50920 Json Interface Mgt.
     END;
 
     [External]
+    PROCEDURE AddVariable@21(VariableName@1000 : Text;Value@1003 : Variant);
+    VAR
+      JSONMgt@1002 : Codeunit 5459;
+    BEGIN
+      JSONMgt.AddJPropertyToJObject(Variables,VariableName,Value);
+    END;
+
+    [External]
     PROCEDURE GetRecord@7(VAR RecRef@1001 : RecordRef) : Boolean;
     VAR
       JSONMgt@1005 : Codeunit 5459;
@@ -179,9 +190,6 @@ OBJECT Codeunit 50920 Json Interface Mgt.
               RecRef.INSERT;
             END;
           END;
-          IF EVALUATE(TempRecId,TableRecordId) THEN
-            RecRef.GET(TempRecId);
-          EXIT(TRUE);
         END;
       END;
 
@@ -212,11 +220,136 @@ OBJECT Codeunit 50920 Json Interface Mgt.
 
     [External]
     PROCEDURE GetAsTempBlob@11(VAR TempBlob@1000 : Record 99008535);
+    VAR
+      JSONMgt@1001 : Codeunit 5459;
+      JArray@1002 : DotNet "'Newtonsoft.Json'.Newtonsoft.Json.Linq.JArray";
     BEGIN
-      TempBlob.WriteAsText(JSON,TEXTENCODING::UTF8);
+      WITH JSONMgt DO BEGIN
+        InitializeCollection(JSON);
+        GetJsonArray(JArray);
+        JArray.AddFirst(Variables);
+        JSON := JArray.ToString;
+        TempBlob.WriteAsText(JSON,TEXTENCODING::UTF8);
+      END;
     END;
 
-    LOCAL PROCEDURE PopulateAnyTableFromJson@14(JsonObject@1000 : DotNet "'Newtonsoft.Json'.Newtonsoft.Json.Linq.JObject";VAR RecRef@1001 : RecordRef);
+    [External]
+    PROCEDURE GetVariableValue@22(VAR Value@1000 : Variant;VariableName@1001 : Text) : Boolean;
+    VAR
+      JSONMgt@1002 : Codeunit 5459;
+    BEGIN
+      WITH JSONMgt DO BEGIN
+        InitializeCollection(JSON);
+        IF GetJObjectFromCollectionByIndex(Variables,0) THEN
+          EXIT(GetPropertyValueFromJObjectByName(Variables,VariableName,Value));
+      END;
+    END;
+
+    [External]
+    PROCEDURE GetVariableTextValue@23(VAR TextValue@1002 : Text;VariableName@1000 : Text) : Boolean;
+    VAR
+      Value@1001 : Variant;
+    BEGIN
+      IF GetVariableValue(Value,VariableName) THEN BEGIN
+        TextValue := FORMAT(Value);
+        EXIT(TRUE);
+      END;
+    END;
+
+    [External]
+    PROCEDURE GetVariableBooleanValue@24(VAR BooleanValue@1002 : Boolean;VariableName@1000 : Text) : Boolean;
+    VAR
+      TextValue@1001 : Text;
+    BEGIN
+      IF GetVariableTextValue(TextValue,VariableName) THEN
+        EXIT(EVALUATE(BooleanValue,TextValue));
+    END;
+
+    [External]
+    PROCEDURE GetVariableDateValue@25(VAR DateValue@1002 : Date;VariableName@1000 : Text) : Boolean;
+    VAR
+      TextValue@1001 : Text;
+    BEGIN
+      IF GetVariableTextValue(TextValue,VariableName) THEN
+        EXIT(EVALUATE(DateValue,TextValue));
+    END;
+
+    [External]
+    PROCEDURE GetVariableDateTimeValue@26(VAR DateTimeValue@1002 : DateTime;VariableName@1000 : Text) : Boolean;
+    VAR
+      TextValue@1001 : Text;
+    BEGIN
+      IF GetVariableTextValue(TextValue,VariableName) THEN
+        EXIT(EVALUATE(DateTimeValue,TextValue));
+    END;
+
+    [External]
+    PROCEDURE GetVariableDecimalValue@27(VAR DecimalValue@1002 : Decimal;VariableName@1000 : Text) : Boolean;
+    VAR
+      TextValue@1001 : Text;
+    BEGIN
+      IF GetVariableTextValue(TextValue,VariableName) THEN
+        EXIT(EVALUATE(DecimalValue,TextValue));
+    END;
+
+    [External]
+    PROCEDURE GetVariableIntegerValue@28(VAR IntegerValue@1002 : Integer;VariableName@1000 : Text) : Boolean;
+    VAR
+      TextValue@1001 : Text;
+    BEGIN
+      IF GetVariableTextValue(TextValue,VariableName) THEN
+        EXIT(EVALUATE(IntegerValue,TextValue));
+    END;
+
+    [External]
+    PROCEDURE GetVariableGUIDValue@29(VAR GuidValue@1002 : GUID;VariableName@1000 : Text) : Boolean;
+    VAR
+      TextValue@1001 : Text;
+    BEGIN
+      IF GetVariableTextValue(TextValue,VariableName) THEN
+        EXIT(EVALUATE(GuidValue,TextValue));
+    END;
+
+    [External]
+    PROCEDURE FindInterfaceCodeunit@12(CodeunitName@1000 : Text) : Boolean;
+    VAR
+      CodeUnitMetadata@1001 : Record 2000000137;
+    BEGIN
+      CodeUnitMetadata.SETRANGE(Name, CodeunitName);
+      EXIT(CodeUnitMetadata.FINDFIRST);
+    END;
+
+    [External]
+    PROCEDURE GetInterfaceCodeunitID@13(CodeunitName@1000 : Text) : Integer;
+    VAR
+      CodeUnitMetadata@1001 : Record 2000000137;
+    BEGIN
+      CodeUnitMetadata.SETRANGE(Name, CodeunitName);
+      CodeUnitMetadata.FINDFIRST;
+      EXIT(CodeUnitMetadata.ID);
+    END;
+
+    [External]
+    PROCEDURE ExecuteInterfaceCodeunitIfExists@14(CodeunitName@1000 : Text;VAR TempBlob@1001 : Record 99008535;ErrorIfNotFound@1002 : Text);
+    BEGIN
+      IF NOT TryExecuteInterfaceCodeunitIfExists(CodeunitName,TempBlob,ErrorIfNotFound) THEN
+        ERROR(GETLASTERRORTEXT);
+    END;
+
+    [External]
+    PROCEDURE TryExecuteInterfaceCodeunitIfExists@15(CodeunitName@1000 : Text;VAR TempBlob@1001 : Record 99008535;ErrorIfNotFound@1002 : Text) : Boolean;
+    VAR
+      CodeUnitMetadata@1004 : Record 2000000137;
+    BEGIN
+      CodeUnitMetadata.SETRANGE(Name, CodeunitName);
+      IF CodeUnitMetadata.FINDFIRST THEN
+        EXIT(CODEUNIT.RUN(CodeUnitMetadata.ID,TempBlob))
+      ELSE
+        IF ErrorIfNotFound <> '' THEN
+          ERROR(ErrorIfNotFound);
+    END;
+
+    LOCAL PROCEDURE PopulateAnyTableFromJson@57(JsonObject@1000 : DotNet "'Newtonsoft.Json'.Newtonsoft.Json.Linq.JObject";VAR RecRef@1001 : RecordRef);
     VAR
       Field@10017208 : Record 2000000041;
       JSONMgt@10017206 : Codeunit 5459;
@@ -233,7 +366,7 @@ OBJECT Codeunit 50920 Json Interface Mgt.
       END;
     END;
 
-    LOCAL PROCEDURE PopulateJsonFromAnyTable@15(RecRef@1000 : RecordRef;VAR JsonObject@10017201 : DotNet "'Newtonsoft.Json'.Newtonsoft.Json.Linq.JObject");
+    LOCAL PROCEDURE PopulateJsonFromAnyTable@58(RecRef@1000 : RecordRef;VAR JsonObject@10017201 : DotNet "'Newtonsoft.Json'.Newtonsoft.Json.Linq.JObject");
     VAR
       Field@10017209 : Record 2000000041;
       JSONMgt@10017207 : Codeunit 5459;
@@ -252,7 +385,7 @@ OBJECT Codeunit 50920 Json Interface Mgt.
       END;
     END;
 
-    LOCAL PROCEDURE RemoveNonAplhaNumericCharacters@19(OldValue@1003 : Text) : Text;
+    LOCAL PROCEDURE RemoveNonAplhaNumericCharacters@59(OldValue@1003 : Text) : Text;
     VAR
       DotNetChar@1002 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Char";
       NewValue@1001 : Text;
