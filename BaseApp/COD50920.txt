@@ -349,6 +349,19 @@ OBJECT Codeunit 50920 Json Interface Mgt.
           ERROR(ErrorIfNotFound);
     END;
 
+    [External]
+    PROCEDURE TryExecuteCodeunitIfExists@17(CodeunitName@1000 : Text;ErrorIfNotFound@1002 : Text) : Boolean;
+    VAR
+      CodeUnitMetadata@1004 : Record 2000000137;
+    BEGIN
+      CodeUnitMetadata.SETRANGE(Name, CodeunitName);
+      IF CodeUnitMetadata.FINDFIRST THEN
+        EXIT(CODEUNIT.RUN(CodeUnitMetadata.ID))
+      ELSE
+        IF ErrorIfNotFound <> '' THEN
+          ERROR(ErrorIfNotFound);
+    END;
+
     LOCAL PROCEDURE PopulateAnyTableFromJson@57(JsonObject@1000 : DotNet "'Newtonsoft.Json'.Newtonsoft.Json.Linq.JObject";VAR RecRef@1001 : RecordRef);
     VAR
       Field@10017208 : Record 2000000041;
