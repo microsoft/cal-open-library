@@ -1,0 +1,35 @@
+OBJECT Codeunit 145023 Test_DotNet_Uri
+{
+  OBJECT-PROPERTIES
+  {
+  }
+  PROPERTIES
+  {
+    Subtype=Test;
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      Assert@1000 : Codeunit 130000;
+      DotNet_Uri@1001 : Codeunit 3023;
+
+    [Test]
+    PROCEDURE EscapeAndUnescapeDataString@1000();
+    VAR
+      Text@1000 : Text;
+      EscapedText@1001 : Text;
+    BEGIN
+      Text := 'http://<some%url.com>';
+      EscapedText := 'http%3A%2F%2F%3Csome%25url.com%3E';
+      Assert.AreEqual(EscapedText, DotNet_Uri.EscapeDataString(Text), 'EscapeDataString fails');
+      Assert.AreEqual(Text, DotNet_Uri.UnescapeDataString(EscapedText), 'UnescapeDataString fails');
+    END;
+
+    BEGIN
+    END.
+  }
+}
+
