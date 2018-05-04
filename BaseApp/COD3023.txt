@@ -1,0 +1,39 @@
+OBJECT Codeunit 3023 DotNet_Uri
+{
+  OBJECT-PROPERTIES
+  {
+    Date=04-05-18;
+    Time=09:10:02;
+    Modified=Yes;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      DotNetUri@1000 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Uri";
+
+    [External]
+    PROCEDURE EscapeDataString@1(Text@1000 : Text) : Text;
+    VAR
+      DotNetArray@1001 : DotNet "'mscorlib'.System.Array";
+    BEGIN
+      EXIT(DotNetUri.EscapeDataString(Text));
+    END;
+
+    [External]
+    PROCEDURE UnescapeDataString@4(Text@1000 : Text) : Text;
+    BEGIN
+      EXIT(DotNetUri.UnescapeDataString(Text));
+    END;
+
+    BEGIN
+    END.
+  }
+}
+
