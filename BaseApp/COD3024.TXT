@@ -1,4 +1,4 @@
-OBJECT Codeunit 3023 DotNet_Uri
+OBJECT Codeunit 3024 DotNet_Uri
 {
   OBJECT-PROPERTIES
   {
@@ -16,14 +16,12 @@ OBJECT Codeunit 3023 DotNet_Uri
 
     [External]
     PROCEDURE EscapeDataString@1(Text@1000 : Text) : Text;
-    VAR
-      DotNetArray@1001 : DotNet "'mscorlib'.System.Array";
     BEGIN
       EXIT(DotNetUri.EscapeDataString(Text));
     END;
 
     [External]
-    PROCEDURE UnescapeDataString@4(Text@1000 : Text) : Text;
+    PROCEDURE UnescapeDataString@2(Text@1000 : Text) : Text;
     BEGIN
       EXIT(DotNetUri.UnescapeDataString(Text));
     END;
