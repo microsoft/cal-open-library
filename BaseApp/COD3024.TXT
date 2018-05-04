@@ -2,6 +2,9 @@ OBJECT Codeunit 3024 DotNet_Uri
 {
   OBJECT-PROPERTIES
   {
+    Date=;
+    Time=;
+    Version List=;
   }
   PROPERTIES
   {
