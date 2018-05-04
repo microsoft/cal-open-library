@@ -2,10 +2,6 @@ OBJECT Codeunit 3023 DotNet_Uri
 {
   OBJECT-PROPERTIES
   {
-    Date=04-05-18;
-    Time=09:10:02;
-    Modified=Yes;
-    Version List=;
   }
   PROPERTIES
   {

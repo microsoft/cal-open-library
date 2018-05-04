@@ -2,10 +2,6 @@ OBJECT Codeunit 145023 Test_DotNet_Uri
 {
   OBJECT-PROPERTIES
   {
-    Date=04-05-18;
-    Time=09:58:06;
-    Modified=Yes;
-    Version List=;
   }
   PROPERTIES
   {
@@ -17,14 +13,14 @@ OBJECT Codeunit 145023 Test_DotNet_Uri
   CODE
   {
     VAR
-      Assert@1170000000 : Codeunit 130000;
-      DotNet_Uri@1170000001 : Codeunit 3023;
+      Assert@1000 : Codeunit 130000;
+      DotNet_Uri@1001 : Codeunit 3023;
 
     [Test]
-    PROCEDURE EscapeAndUnescapeDataString@1170000000();
+    PROCEDURE EscapeAndUnescapeDataString@1000();
     VAR
-      Text@1170000000 : Text;
-      EscapedText@1170000001 : Text;
+      Text@1000 : Text;
+      EscapedText@1001 : Text;
     BEGIN
       Text := 'http://<some%url.com>';
       EscapedText := 'http%3A%2F%2F%3Csome%25url.com%3E';
