@@ -1,10 +1,10 @@
-OBJECT Codeunit 145024 Test_DotNet_Uri
+OBJECT Codeunit 146024 Test_DotNet_Uri
 {
   OBJECT-PROPERTIES
   {
     Date=;
     Time=;
-    Version List=;
+    Version List=Test,W1,All;
   }
   PROPERTIES
   {
