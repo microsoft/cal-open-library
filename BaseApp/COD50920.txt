@@ -381,6 +381,7 @@ OBJECT Codeunit 50920 Json Interface Mgt.
 
     LOCAL PROCEDURE PopulateJsonFromAnyTable@58(RecRef@1000 : RecordRef;VAR JsonObject@10017201 : DotNet "'Newtonsoft.Json'.Newtonsoft.Json.Linq.JObject");
     VAR
+      TempBlob@10018400 : Record 99008535;
       Field@10017209 : Record 2000000041;
       JSONMgt@10017207 : Codeunit 5459;
       FldRef@10017204 : FieldRef;
@@ -393,7 +394,11 @@ OBJECT Codeunit 50920 Json Interface Mgt.
           FldRef := RecRef.FIELDINDEX(FldIndex);
           Field.GET(RecRef.NUMBER,FldRef.NUMBER);
           IF Field.Class = Field.Class::Normal THEN
-            AddJPropertyToJObject(JsonObject,RemoveNonAplhaNumericCharacters(FldRef.NAME),FldRef.VALUE);
+            IF FORMAT(FldRef.TYPE) = 'BLOB' THEN BEGIN
+              TempBlob.Blob := FldRef.VALUE;
+              AddJPropertyToJObject(JsonObject,RemoveNonAplhaNumericCharacters(FldRef.NAME),TempBlob.ToBase64String);
+            END ELSE
+              AddJPropertyToJObject(JsonObject,RemoveNonAplhaNumericCharacters(FldRef.NAME),FldRef.VALUE);
         END;
       END;
     END;
