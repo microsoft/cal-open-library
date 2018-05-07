@@ -1,0 +1,46 @@
+OBJECT Codeunit 3010 DotNet_Image
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      DotNetImage@1000 : DotNet "'System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a'.System.Drawing.Image";
+
+    [External]
+    PROCEDURE FromStream@2(InStream@1000 : InStream);
+    BEGIN
+      DotNetImage := DotNetImage.FromStream(InStream)
+    END;
+
+    [External]
+    PROCEDURE RawFormat@3(VAR DotNet_ImageFormat@1000 : Codeunit 3012);
+    BEGIN
+      DotNet_ImageFormat.SetImageFormat(DotNetImage.RawFormat)
+    END;
+
+    PROCEDURE GetImage@4(VAR DotNetImage2@1000 : DotNet "'System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a'.System.Drawing.Image");
+    BEGIN
+      DotNetImage2 := DotNetImage
+    END;
+
+    PROCEDURE SetImage@5(DotNetImage2@1000 : DotNet "'System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a'.System.Drawing.Image");
+    BEGIN
+      DotNetImage := DotNetImage2
+    END;
+
+    BEGIN
+    END.
+  }
+}
+
