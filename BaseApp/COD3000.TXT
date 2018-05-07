@@ -1,0 +1,46 @@
+OBJECT Codeunit 3000 DotNet_Array
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      DotNetArray@1000 : DotNet "'mscorlib'.System.Array";
+
+    [External]
+    PROCEDURE Length@4() : Integer;
+    BEGIN
+      EXIT(DotNetArray.Length)
+    END;
+
+    [External]
+    PROCEDURE GetValueAsText@5(Index@1000 : Integer) : Text;
+    BEGIN
+      EXIT(DotNetArray.GetValue(Index))
+    END;
+
+    PROCEDURE GetArray@2(VAR DotNetArray2@1000 : DotNet "'mscorlib'.System.Array");
+    BEGIN
+      DotNetArray2 := DotNetArray
+    END;
+
+    PROCEDURE SetArray@3(DotNetArray2@1000 : DotNet "'mscorlib'.System.Array");
+    BEGIN
+      DotNetArray := DotNetArray2
+    END;
+
+    BEGIN
+    END.
+  }
+}
+

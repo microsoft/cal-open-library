@@ -1,0 +1,40 @@
+OBJECT Codeunit 3017 DotNet_ExtLicInfoProvider
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      DotNetExtensionLicenseInformationProvider@1000 : DotNet "'Microsoft.Dynamics.Nav.Ncl, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.Microsoft.Dynamics.Nav.Runtime.ExtensionLicenseInformationProvider";
+
+    PROCEDURE ALLicenseCount@2(ProductId@1000 : Text;SkuId@1001 : Text;IsvPrefix@1002 : Text) : Integer;
+    BEGIN
+      // do not make external
+      EXIT(DotNetExtensionLicenseInformationProvider.ALLicenseCount(ProductId,SkuId,IsvPrefix))
+    END;
+
+    PROCEDURE GetExtensionLicenseInformationProvider@1(VAR DotNetExtensionLicenseInformationProvider2@1000 : DotNet "'Microsoft.Dynamics.Nav.Ncl, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.Microsoft.Dynamics.Nav.Runtime.ExtensionLicenseInformationProvider");
+    BEGIN
+      DotNetExtensionLicenseInformationProvider2 := DotNetExtensionLicenseInformationProvider
+    END;
+
+    PROCEDURE SetExtensionLicenseInformationProvider@3(DotNetExtensionLicenseInformationProvider2@1000 : DotNet "'Microsoft.Dynamics.Nav.Ncl, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.Microsoft.Dynamics.Nav.Runtime.ExtensionLicenseInformationProvider");
+    BEGIN
+      DotNetExtensionLicenseInformationProvider := DotNetExtensionLicenseInformationProvider2
+    END;
+
+    BEGIN
+    END.
+  }
+}
+

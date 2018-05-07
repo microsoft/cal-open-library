@@ -1,0 +1,73 @@
+OBJECT Codeunit 3009 DotNet_MemoryStream
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      DotNetMemoryStream@1000 : DotNet "'mscorlib'.System.IO.MemoryStream";
+
+    [External]
+    PROCEDURE InitMemoryStream@2();
+    BEGIN
+      DotNetMemoryStream := DotNetMemoryStream.MemoryStream
+    END;
+
+    [External]
+    PROCEDURE InitMemoryStreamFromArray@7(VAR DotNet_Array@1000 : Codeunit 3000);
+    VAR
+      DotNetArray@1001 : DotNet "'mscorlib'.System.Array";
+    BEGIN
+      DotNet_Array.GetArray(DotNetArray);
+      DotNetMemoryStream := DotNetMemoryStream.MemoryStream(DotNetArray)
+    END;
+
+    [External]
+    PROCEDURE ToArray@1(VAR DotNet_Array@1000 : Codeunit 3000);
+    BEGIN
+      DotNet_Array.SetArray(DotNetMemoryStream.ToArray)
+    END;
+
+    [External]
+    PROCEDURE WriteTo@8(VAR OutStream@1000 : OutStream);
+    BEGIN
+      DotNetMemoryStream.WriteTo(OutStream)
+    END;
+
+    [External]
+    PROCEDURE Close@3();
+    BEGIN
+      DotNetMemoryStream.Close
+    END;
+
+    [External]
+    PROCEDURE CopyToInStream@6(VAR InStream@1000 : InStream);
+    BEGIN
+      COPYSTREAM(DotNetMemoryStream,InStream)
+    END;
+
+    PROCEDURE GetMemoryStream@4(VAR DotNetMemoryStream2@1000 : DotNet "'mscorlib'.System.IO.MemoryStream");
+    BEGIN
+      DotNetMemoryStream2 := DotNetMemoryStream
+    END;
+
+    PROCEDURE SetMemoryStream@5(DotNetMemoryStream2@1000 : DotNet "'mscorlib'.System.IO.MemoryStream");
+    BEGIN
+      DotNetMemoryStream := DotNetMemoryStream2
+    END;
+
+    BEGIN
+    END.
+  }
+}
+
