@@ -1,0 +1,121 @@
+OBJECT Codeunit 3003 DotNet_DateTime
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      DotNetDateTime@1000 : DotNet "'mscorlib'.System.DateTime";
+
+    [External]
+    PROCEDURE TryParse@2(DateTimeText@1000 : Text;DotNet_CultureInfo@1001 : Codeunit 3002;DotNet_DateTimeStyles@1005 : Codeunit 3004) : Boolean;
+    VAR
+      DotNetCultureInfo@1003 : DotNet "'mscorlib'.System.Globalization.CultureInfo";
+      DotNetDateTimeStyles@1004 : DotNet "'mscorlib'.System.Globalization.DateTimeStyles";
+    BEGIN
+      DateTimeFromInt(0);
+      DotNet_CultureInfo.GetCultureInfo(DotNetCultureInfo);
+      DotNet_DateTimeStyles.GetDateTimeStyles(DotNetDateTimeStyles);
+      EXIT(DotNetDateTime.TryParse(DateTimeText,DotNetCultureInfo,DotNetDateTimeStyles,DotNetDateTime))
+    END;
+
+    [External]
+    PROCEDURE TryParseExact@3(DateTimeText@1001 : Text;Format@1000 : Text;DotNet_CultureInfo@1002 : Codeunit 3002;DotNet_DateTimeStyles@1003 : Codeunit 3004) : Boolean;
+    VAR
+      DotNetCultureInfo@1005 : DotNet "'mscorlib'.System.Globalization.CultureInfo";
+      DotNetDateTimeStyles@1004 : DotNet "'mscorlib'.System.Globalization.DateTimeStyles";
+    BEGIN
+      DateTimeFromInt(0);
+      DotNet_CultureInfo.GetCultureInfo(DotNetCultureInfo);
+      DotNet_DateTimeStyles.GetDateTimeStyles(DotNetDateTimeStyles);
+      EXIT(DotNetDateTime.TryParseExact(DateTimeText,Format,DotNetCultureInfo,DotNetDateTimeStyles,DotNetDateTime))
+    END;
+
+    [External]
+    PROCEDURE DateTimeFromInt@8(IntegerDateTime@1000 : Integer);
+    BEGIN
+      DotNetDateTime := DotNetDateTime.DateTime(IntegerDateTime)
+    END;
+
+    [External]
+    PROCEDURE DateTimeFromYMD@9(Year@1000 : Integer;Month@1001 : Integer;Day@1002 : Integer);
+    BEGIN
+      DotNetDateTime := DotNetDateTime.DateTime(Year,Month,Day)
+    END;
+
+    [External]
+    PROCEDURE Day@5() : Integer;
+    BEGIN
+      EXIT(DotNetDateTime.Day)
+    END;
+
+    [External]
+    PROCEDURE Month@6() : Integer;
+    BEGIN
+      EXIT(DotNetDateTime.Month)
+    END;
+
+    [External]
+    PROCEDURE Year@7() : Integer;
+    BEGIN
+      EXIT(DotNetDateTime.Year)
+    END;
+
+    [External]
+    PROCEDURE Hour@12() : Integer;
+    BEGIN
+      EXIT(DotNetDateTime.Hour)
+    END;
+
+    [External]
+    PROCEDURE Minute@13() : Integer;
+    BEGIN
+      EXIT(DotNetDateTime.Minute)
+    END;
+
+    [External]
+    PROCEDURE Second@14() : Integer;
+    BEGIN
+      EXIT(DotNetDateTime.Second)
+    END;
+
+    [External]
+    PROCEDURE Millisecond@15() : Integer;
+    BEGIN
+      EXIT(DotNetDateTime.Millisecond)
+    END;
+
+    [External]
+    PROCEDURE ToString@11(DotNet_DateTimeFormatInfo@1001 : Codeunit 3022) : Text;
+    VAR
+      DotNetDateTimeFormatInfo@1002 : DotNet "'mscorlib'.System.Globalization.DateTimeFormatInfo";
+    BEGIN
+      DotNet_DateTimeFormatInfo.GetDateTimeFormatInfo(DotNetDateTimeFormatInfo);
+      EXIT(DotNetDateTime.ToString('d',DotNetDateTimeFormatInfo))
+    END;
+
+    PROCEDURE GetDateTime@1(VAR DotNetDateTime2@1000 : DotNet "'mscorlib'.System.DateTime");
+    BEGIN
+      DotNetDateTime2 := DotNetDateTime
+    END;
+
+    PROCEDURE SetDateTime@4(DotNetDateTime2@1000 : DotNet "'mscorlib'.System.DateTime");
+    BEGIN
+      DotNetDateTime := DotNetDateTime2
+    END;
+
+    BEGIN
+    END.
+  }
+}
+

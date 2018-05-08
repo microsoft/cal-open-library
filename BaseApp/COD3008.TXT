@@ -1,0 +1,49 @@
+OBJECT Codeunit 3008 DotNet_Convert
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      DotNetConvert@1000 : DotNet "'mscorlib'.System.Convert";
+
+    [External]
+    PROCEDURE ToBase64String@1(VAR DotNet_Array@1000 : Codeunit 3000) : Text;
+    VAR
+      DotNetArray@1001 : DotNet "'mscorlib'.System.Array";
+    BEGIN
+      DotNet_Array.GetArray(DotNetArray);
+      EXIT(DotNetConvert.ToBase64String(DotNetArray))
+    END;
+
+    [External]
+    PROCEDURE FromBase64String@4(Base64String@1000 : Text;VAR DotNet_Array@1001 : Codeunit 3000);
+    BEGIN
+      DotNet_Array.SetArray(DotNetConvert.FromBase64String(Base64String))
+    END;
+
+    PROCEDURE GetConvert@2(VAR DotNetConvert2@1000 : DotNet "'mscorlib'.System.Convert");
+    BEGIN
+      DotNetConvert2 := DotNetConvert
+    END;
+
+    PROCEDURE SetConvert@3(DotNetConvert2@1000 : DotNet "'mscorlib'.System.Convert");
+    BEGIN
+      DotNetConvert := DotNetConvert2
+    END;
+
+    BEGIN
+    END.
+  }
+}
+

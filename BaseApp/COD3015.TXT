@@ -1,0 +1,40 @@
+OBJECT Codeunit 3015 DotNet_StringComparison
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      DotNetStringComparison@1000 : DotNet "'mscorlib'.System.StringComparison";
+
+    [External]
+    PROCEDURE OrdinalIgnoreCase@2() : Integer;
+    BEGIN
+      EXIT(DotNetStringComparison.OrdinalIgnoreCase)
+    END;
+
+    PROCEDURE GetStringComparison@3(VAR DotNetStringComparison2@1000 : DotNet "'mscorlib'.System.StringComparison");
+    BEGIN
+      DotNetStringComparison2 := DotNetStringComparison
+    END;
+
+    PROCEDURE SetStringComparison@4(DotNetStringComparison2@1000 : DotNet "'mscorlib'.System.StringComparison");
+    BEGIN
+      DotNetStringComparison := DotNetStringComparison2
+    END;
+
+    BEGIN
+    END.
+  }
+}
+

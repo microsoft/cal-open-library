@@ -1,0 +1,52 @@
+OBJECT Codeunit 3021 DotNet_AppSource
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      DotNetAppSource@1000 : DotNet "'Microsoft.Dynamics.Nav.ClientExtensions, Version=13.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.Microsoft.Dynamics.Nav.Client.Capabilities.AppSource" RUNONCLIENT;
+
+    PROCEDURE IsAvailable@2() : Boolean;
+    BEGIN
+      // do not make external
+      EXIT(DotNetAppSource.IsAvailable)
+    END;
+
+    PROCEDURE Create@3();
+    BEGIN
+      // do not make external
+      DotNetAppSource := DotNetAppSource.Create
+    END;
+
+    PROCEDURE ShowAppSource@4();
+    BEGIN
+      // do not make external
+      DotNetAppSource.ShowAppSource
+    END;
+
+    PROCEDURE GetAppSource@1(VAR DotNetAppSource2@1000 : DotNet "'Microsoft.Dynamics.Nav.ClientExtensions, Version=13.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.Microsoft.Dynamics.Nav.Client.Capabilities.AppSource" RUNONCLIENT);
+    BEGIN
+      DotNetAppSource2 := DotNetAppSource
+    END;
+
+    PROCEDURE SetAppSource@5(DotNetAppSource2@1000 : DotNet "'Microsoft.Dynamics.Nav.ClientExtensions, Version=13.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.Microsoft.Dynamics.Nav.Client.Capabilities.AppSource" RUNONCLIENT);
+    BEGIN
+      DotNetAppSource := DotNetAppSource2
+    END;
+
+    BEGIN
+    END.
+  }
+}
+

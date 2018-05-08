@@ -1,0 +1,34 @@
+OBJECT Codeunit 3012 DotNet_ImageFormat
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      DotNetImageFormat@1000 : DotNet "'System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a'.System.Drawing.Imaging.ImageFormat";
+
+    PROCEDURE GetImageFormat@2(VAR DotNetImageFormat2@1000 : DotNet "'System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a'.System.Drawing.Imaging.ImageFormat");
+    BEGIN
+      DotNetImageFormat2 := DotNetImageFormat
+    END;
+
+    PROCEDURE SetImageFormat@3(DotNetImageFormat2@1000 : DotNet "'System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a'.System.Drawing.Imaging.ImageFormat");
+    BEGIN
+      DotNetImageFormat := DotNetImageFormat2
+    END;
+
+    BEGIN
+    END.
+  }
+}
+
