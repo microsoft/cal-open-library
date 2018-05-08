@@ -1,0 +1,89 @@
+OBJECT Codeunit 3002 DotNet_CultureInfo
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      DotNetCultureInfo@1000 : DotNet "'mscorlib'.System.Globalization.CultureInfo";
+
+    [External]
+    PROCEDURE GetCultureInfoByName@1(CultureName@1000 : Text);
+    BEGIN
+      DotNetCultureInfo := DotNetCultureInfo.GetCultureInfo(CultureName)
+    END;
+
+    [External]
+    PROCEDURE GetCultureInfoById@3(LanguageId@1000 : Integer);
+    BEGIN
+      DotNetCultureInfo := DotNetCultureInfo.GetCultureInfo(LanguageId)
+    END;
+
+    [External]
+    PROCEDURE InvariantCulture@2();
+    BEGIN
+      DotNetCultureInfo := DotNetCultureInfo.InvariantCulture
+    END;
+
+    [External]
+    PROCEDURE Name@5() : Text;
+    BEGIN
+      EXIT(DotNetCultureInfo.Name)
+    END;
+
+    [External]
+    PROCEDURE CurrentCultureName@6() : Text;
+    BEGIN
+      CLEAR(DotNetCultureInfo);
+      EXIT(DotNetCultureInfo.CurrentCulture.Name)
+    END;
+
+    [External]
+    PROCEDURE ToString@8() : Text;
+    BEGIN
+      EXIT(DotNetCultureInfo.ToString)
+    END;
+
+    [External]
+    PROCEDURE TwoLetterISOLanguageName@9() : Text;
+    BEGIN
+      EXIT(DotNetCultureInfo.TwoLetterISOLanguageName)
+    END;
+
+    [External]
+    PROCEDURE ThreeLetterWindowsLanguageName@11() : Text;
+    BEGIN
+      EXIT(DotNetCultureInfo.ThreeLetterWindowsLanguageName)
+    END;
+
+    [External]
+    PROCEDURE DateTimeFormat@10(VAR DotNet_DateTimeFormatInfo@1000 : Codeunit 3022);
+    BEGIN
+      DotNet_DateTimeFormatInfo.SetDateTimeFormatInfo(DotNetCultureInfo.DateTimeFormat)
+    END;
+
+    PROCEDURE GetCultureInfo@4(VAR DotNetCultureInfo2@1001 : DotNet "'mscorlib'.System.Globalization.CultureInfo");
+    BEGIN
+      DotNetCultureInfo2 := DotNetCultureInfo
+    END;
+
+    PROCEDURE SetCultureInfo@7(DotNetCultureInfo2@1000 : DotNet "'mscorlib'.System.Globalization.CultureInfo");
+    BEGIN
+      DotNetCultureInfo := DotNetCultureInfo2
+    END;
+
+    BEGIN
+    END.
+  }
+}
+

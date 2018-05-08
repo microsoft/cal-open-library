@@ -1,0 +1,58 @@
+OBJECT Codeunit 3013 DotNet_XmlDocument
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      DotNetXmlDocument@1000 : DotNet "'System.Xml, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlDocument";
+
+    [External]
+    PROCEDURE InitXmlDocument@3();
+    BEGIN
+      DotNetXmlDocument := DotNetXmlDocument.XmlDocument
+    END;
+
+    [External]
+    PROCEDURE PreserveWhitespace@4(PreserveWhitespace@1000 : Boolean);
+    BEGIN
+      DotNetXmlDocument.PreserveWhitespace := PreserveWhitespace
+    END;
+
+    [External]
+    PROCEDURE Load@5(InStream@1000 : InStream);
+    BEGIN
+      DotNetXmlDocument.Load(InStream)
+    END;
+
+    [External]
+    PROCEDURE OuterXml@6() : Text;
+    BEGIN
+      EXIT(DotNetXmlDocument.OuterXml)
+    END;
+
+    PROCEDURE GetXmlDocument@7(VAR DotNetXmlDocument2@1000 : DotNet "'System.Xml, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlDocument");
+    BEGIN
+      DotNetXmlDocument2 := DotNetXmlDocument
+    END;
+
+    PROCEDURE SetXmlDocument@8(DotNetXmlDocument2@1000 : DotNet "'System.Xml, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlDocument");
+    BEGIN
+      DotNetXmlDocument := DotNetXmlDocument2
+    END;
+
+    BEGIN
+    END.
+  }
+}
+

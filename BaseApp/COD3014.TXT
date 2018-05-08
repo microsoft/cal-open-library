@@ -1,0 +1,58 @@
+OBJECT Codeunit 3014 DotNet_StringBuilder
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      DotNetStringBuilder@1000 : DotNet "'mscorlib'.System.Text.StringBuilder";
+
+    [External]
+    PROCEDURE InitStringBuilder@2(value@1000 : Text);
+    BEGIN
+      DotNetStringBuilder := DotNetStringBuilder.StringBuilder(value)
+    END;
+
+    [External]
+    PROCEDURE Append@3(value@1000 : Text);
+    BEGIN
+      DotNetStringBuilder.Append(value)
+    END;
+
+    [External]
+    PROCEDURE ToString@4() : Text;
+    BEGIN
+      EXIT(DotNetStringBuilder.ToString())
+    END;
+
+    [External]
+    PROCEDURE AppendLine@5();
+    BEGIN
+      DotNetStringBuilder.AppendLine
+    END;
+
+    PROCEDURE GetStringBuilder@6(VAR DotNetStringBuilder2@1000 : DotNet "'mscorlib'.System.Text.StringBuilder");
+    BEGIN
+      DotNetStringBuilder2 := DotNetStringBuilder
+    END;
+
+    PROCEDURE SetStringBuilder@7(DotNetStringBuilder2@1000 : DotNet "'mscorlib'.System.Text.StringBuilder");
+    BEGIN
+      DotNetStringBuilder := DotNetStringBuilder2
+    END;
+
+    BEGIN
+    END.
+  }
+}
+

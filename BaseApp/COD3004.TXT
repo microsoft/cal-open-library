@@ -1,0 +1,40 @@
+OBJECT Codeunit 3004 DotNet_DateTimeStyles
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      DotNetDateTimeStyles@1000 : DotNet "'mscorlib'.System.Globalization.DateTimeStyles";
+
+    [External]
+    PROCEDURE None@2();
+    BEGIN
+      DotNetDateTimeStyles := DotNetDateTimeStyles.None
+    END;
+
+    PROCEDURE GetDateTimeStyles@1(VAR DotNetDateTimeStyles2@1000 : DotNet "'mscorlib'.System.Globalization.DateTimeStyles");
+    BEGIN
+      DotNetDateTimeStyles2 := DotNetDateTimeStyles
+    END;
+
+    PROCEDURE SetDateTimeStyles@3(DotNetDateTimeStyles2@1000 : DotNet "'mscorlib'.System.Globalization.DateTimeStyles");
+    BEGIN
+      DotNetDateTimeStyles := DotNetDateTimeStyles2
+    END;
+
+    BEGIN
+    END.
+  }
+}
+

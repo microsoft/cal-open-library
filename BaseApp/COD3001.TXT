@@ -1,0 +1,55 @@
+OBJECT Codeunit 3001 DotNet_RegEx
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      DotNetRegEx@1000 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.RegularExpressions.Regex";
+
+    [External]
+    PROCEDURE Split@4(Input@1000 : Text;Pattern@1001 : Text;VAR DotNet_Array@1003 : Codeunit 3000);
+    VAR
+      DotNetArray@1002 : DotNet "'mscorlib'.System.Array";
+    BEGIN
+      DotNetArray := DotNetRegEx.Split(Input,Pattern);
+      DotNet_Array.SetArray(DotNetArray)
+    END;
+
+    [External]
+    PROCEDURE Regex@5(pattern@1000 : Text);
+    BEGIN
+      DotNetRegEx := DotNetRegEx.Regex(pattern)
+    END;
+
+    [External]
+    PROCEDURE Replace@1(input@1000 : Text;evaluator@1001 : Text) : Text;
+    BEGIN
+      EXIT(DotNetRegEx.Replace(input,evaluator))
+    END;
+
+    PROCEDURE GetRegEx@2(VAR DotNetRegEx2@1000 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.RegularExpressions.Regex");
+    BEGIN
+      DotNetRegEx2 := DotNetRegEx
+    END;
+
+    PROCEDURE SetRegEx@3(DotNetRegEx2@1000 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.RegularExpressions.Regex");
+    BEGIN
+      DotNetRegEx := DotNetRegEx2
+    END;
+
+    BEGIN
+    END.
+  }
+}
+

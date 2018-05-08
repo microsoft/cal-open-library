@@ -1,0 +1,40 @@
+OBJECT Codeunit 3005 DotNet_XMLConvert
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      DotNetXMLConvert@1000 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlConvert";
+
+    [External]
+    PROCEDURE ToDateTimeOffset@2(DateText@1000 : Text;VAR DotNet_DateTimeOffset@1001 : Codeunit 3006);
+    BEGIN
+      DotNet_DateTimeOffset.SetDateTimeOffset(DotNetXMLConvert.ToDateTimeOffset(DateText))
+    END;
+
+    PROCEDURE GetXMLConvert@3(VAR DotNetXMLConvert2@1000 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlConvert");
+    BEGIN
+      DotNetXMLConvert2 := DotNetXMLConvert
+    END;
+
+    PROCEDURE SetXMLConvert@4(DotNetXMLConvert2@1000 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlConvert");
+    BEGIN
+      DotNetXMLConvert := DotNetXMLConvert2
+    END;
+
+    BEGIN
+    END.
+  }
+}
+

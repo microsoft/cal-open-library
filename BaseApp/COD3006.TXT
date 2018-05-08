@@ -1,0 +1,40 @@
+OBJECT Codeunit 3006 DotNet_DateTimeOffset
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      DotNetDateTimeOffset@1000 : DotNet "'mscorlib'.System.DateTimeOffset";
+
+    [External]
+    PROCEDURE DateTime@2(VAR DotNet_DateTime@1000 : Codeunit 3003);
+    BEGIN
+      DotNet_DateTime.SetDateTime(DotNetDateTimeOffset.DateTime)
+    END;
+
+    PROCEDURE GetDateTimeOffset@4(VAR DotNetDateTimeOffset2@1000 : DotNet "'mscorlib'.System.DateTimeOffset");
+    BEGIN
+      DotNetDateTimeOffset2 := DotNetDateTimeOffset
+    END;
+
+    PROCEDURE SetDateTimeOffset@3(DotNetDateTimeOffset2@1000 : DotNet "'mscorlib'.System.DateTimeOffset");
+    BEGIN
+      DotNetDateTimeOffset := DotNetDateTimeOffset2
+    END;
+
+    BEGIN
+    END.
+  }
+}
+
