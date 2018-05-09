@@ -1,0 +1,108 @@
+OBJECT Codeunit 50000 Image Processing
+{
+  OBJECT-PROPERTIES
+  {
+    Date=01/12/18;
+    Time=[ 6:35:24 AM];
+    Modified=Yes;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+
+    PROCEDURE ResizeImage@1101766001(VAR TempBlob@1101766000 : TEMPORARY Record 99008535;NewWidth@1101766001 : Integer;NewHeight@1101766002 : Integer;PreserveAspectRatio@1101766003 : Boolean);
+    VAR
+      Bitmap@1101766004 : DotNet "'System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a'.System.Drawing.Bitmap";
+      ImageFormat@1101766007 : DotNet "'System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a'.System.Drawing.Imaging.ImageFormat";
+      InStr@1101766005 : InStream;
+      OutStr@1101766006 : OutStream;
+    BEGIN
+      IF NOT TempBlob.Blob.HASVALUE THEN
+        EXIT;
+
+      IF NOT ImageSizeValid(NewWidth,NewHeight) THEN
+        EXIT;
+
+      TempBlob.Blob.CREATEINSTREAM(InStr);
+      Bitmap := Bitmap.Bitmap(InStr);
+
+      IF PreserveAspectRatio THEN
+        UpdateSizeToPreserveRatio(NewWidth,NewHeight,Bitmap.Width,Bitmap.Height);
+
+      CLEAR(TempBlob.Blob);
+      TempBlob.Blob.CREATEOUTSTREAM(OutStr);
+      Bitmap := Bitmap.Bitmap(Bitmap,NewWidth,NewHeight);
+
+      Bitmap.Save(OutStr,ImageFormat.Jpeg);
+    END;
+
+    LOCAL PROCEDURE GetImageSize@1101766000(TempBlob@1101766002 : Record 99008535;VAR Width@1101766001 : Integer;VAR Height@1101766000 : Integer);
+    VAR
+      Bitmap@1101766004 : DotNet "'System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a'.System.Drawing.Bitmap";
+      InStr@1101766003 : InStream;
+    BEGIN
+      IF NOT TempBlob.Blob.HASVALUE THEN
+        EXIT;
+
+      TempBlob.Blob.CREATEINSTREAM(InStr);
+      Bitmap := Bitmap.Bitmap(InStr);
+
+      Width := Bitmap.Width;
+      Height := Bitmap.Height;
+    END;
+
+    LOCAL PROCEDURE GetImageResizeRatio@1101766004(NewWidth@1101766004 : Integer;NewHeight@1101766003 : Integer;Width@1101766001 : Integer;Height@1101766000 : Integer) : Decimal;
+    BEGIN
+      ErrorIfHeightZero(NewHeight);
+      ErrorIfWidthZero(NewWidth);
+
+      IF Width > Height THEN
+        EXIT(Width / NewWidth)
+      ELSE
+        EXIT(Height / NewHeight);
+    END;
+
+    LOCAL PROCEDURE UpdateSizeToPreserveRatio@1101766008(VAR NewWidth@1101766003 : Integer;VAR NewHeight@1101766001 : Integer;Width@1101766002 : Integer;Height@1101766000 : Integer);
+    VAR
+      ResizeRatio@1101766004 : Decimal;
+    BEGIN
+      ResizeRatio := GetImageResizeRatio(NewWidth,NewHeight,Width,Height);
+      IF ResizeRatio = 0 THEN
+        EXIT;
+
+      NewWidth := ROUND(Width / ResizeRatio,1);
+      NewHeight := ROUND(Height / ResizeRatio,1);
+    END;
+
+    LOCAL PROCEDURE ImageSizeValid@1101766002(Width@1101766001 : Integer;Height@1101766000 : Integer) : Boolean;
+    BEGIN
+      EXIT((Width <> 0) AND (Height <> 0));
+    END;
+
+    LOCAL PROCEDURE ErrorIfHeightZero@1101766009(Height@1101766000 : Integer);
+    VAR
+      ImageHeightNotValidErr@1101766001 : TextConst 'ENU=Image height: ''%1'' is not valid.;ENC=Image height: ''%1'' is not valid.';
+    BEGIN
+      IF Height = 0 THEN
+        ERROR(ImageHeightNotValidErr,Height);
+    END;
+
+    LOCAL PROCEDURE ErrorIfWidthZero@1101766010(Width@1101766000 : Integer);
+    VAR
+      ImageWidthNotValidErr@1101766001 : TextConst 'ENU=Image width: ''%1'' is not valid.;ENC=Image width: ''%1'' is not valid.';
+    BEGIN
+      IF Width = 0 THEN
+        ERROR(ImageWidthNotValidErr,Width);
+    END;
+
+    BEGIN
+    END.
+  }
+}
+
