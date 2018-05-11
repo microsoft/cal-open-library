@@ -8,11 +8,12 @@ OBJECT Table 1235 XML Buffer
   }
   PROPERTIES
   {
+    CaptionML=ENU=XML Buffer;
   }
   FIELDS
   {
     { 1   ;   ;Entry No.           ;Integer       ;AutoIncrement=Yes;
-                                                   DataClassification=SystemMetadata }
+                                                     DataClassification=SystemMetadata }
     { 2   ;   ;Type                ;Option        ;DataClassification=SystemMetadata;
                                                    OptionString=[ ,Element,Attribute,Processing Instruction] }
     { 3   ;   ;Name                ;Text250       ;DataClassification=SystemMetadata }
@@ -26,7 +27,7 @@ OBJECT Table 1235 XML Buffer
     { 14  ;   ;Namespace           ;Text250       ;DataClassification=SystemMetadata }
     { 15  ;   ;Import ID           ;GUID          ;DataClassification=SystemMetadata }
     { 16  ;   ;Value BLOB          ;BLOB          ;DataClassification=SystemMetadata }
-  }
+}
   KEYS
   {
     {    ;Entry No.                               ;Clustered=Yes }
@@ -112,7 +113,7 @@ OBJECT Table 1235 XML Buffer
     END;
 
     [External]
-    PROCEDURE AddProcessingInstruction@33(InstructionName@1000 : Text[250];InstructionValue@1001 : Text[250]);
+    PROCEDURE AddProcessingInstruction@33(InstructionName@1000 : Text[250];InstructionValue@1001 : Text);
     VAR
       XMLBufferWriter@1002 : Codeunit 1235;
     BEGIN
@@ -238,7 +239,7 @@ OBJECT Table 1235 XML Buffer
     END;
 
     [External]
-    PROCEDURE CountProcessingInstructions@34() NumAttributes : Integer;
+    PROCEDURE CountProcessingInstructions@34() NumElements : Integer;
     VAR
       CurrentView@1000 : Text;
     BEGIN
@@ -246,7 +247,7 @@ OBJECT Table 1235 XML Buffer
       RESET;
       SETRANGE("Parent Entry No.","Entry No.");
       SETRANGE(Type,Type::"Processing Instruction");
-      NumAttributes := COUNT;
+      NumElements := COUNT;
       SETVIEW(CurrentView);
     END;
 

@@ -131,24 +131,25 @@ OBJECT Codeunit 1235 XML Buffer Writer
       LastInsertedXMLBufferElement@1003 : Record 1235;
       ElementNumber@1002 : Integer;
       Depth@1004 : Integer;
+      ProcessingInstructionNumber@1005 : Integer;
     BEGIN
       Depth := XmlReader.Depth;
       REPEAT
         IF IsParentElement(Depth) THEN
           EXIT;
-        ParseCurrentXmlNode(XMLBuffer,ParentXMLBuffer,LastInsertedXMLBufferElement,ElementNumber,Depth);
+        ParseCurrentXmlNode(XMLBuffer,ParentXMLBuffer,LastInsertedXMLBufferElement,ElementNumber,Depth,ProcessingInstructionNumber);
       UNTIL NOT XmlReader.Read;
     END;
 
-    LOCAL PROCEDURE ParseCurrentXmlNode@16(VAR XMLBuffer@1001 : Record 1235;ParentXMLBuffer@1000 : Record 1235;VAR LastInsertedXMLBufferElement@1003 : Record 1235;VAR ElementNumber@1002 : Integer;Depth@1004 : Integer);
+    LOCAL PROCEDURE ParseCurrentXmlNode@16(VAR XMLBuffer@1001 : Record 1235;ParentXMLBuffer@1000 : Record 1235;VAR LastInsertedXMLBufferElement@1003 : Record 1235;VAR ElementNumber@1002 : Integer;Depth@1004 : Integer;VAR ProcessingInstructionNumber@1005 : Integer);
     BEGIN
       IF IsParentElement(Depth) THEN
         EXIT;
       IF IsChildElement(Depth) THEN BEGIN
         ParseXMLIteratively(XMLBuffer,LastInsertedXMLBufferElement);
-        ParseCurrentXmlNode(XMLBuffer,ParentXMLBuffer,LastInsertedXMLBufferElement,ElementNumber,Depth);
+        ParseCurrentXmlNode(XMLBuffer,ParentXMLBuffer,LastInsertedXMLBufferElement,ElementNumber,Depth,ProcessingInstructionNumber);
       END ELSE
-        ReadAndInsertXmlElement(XMLBuffer,ParentXMLBuffer,ElementNumber,LastInsertedXMLBufferElement);
+        ReadAndInsertXmlElement(XMLBuffer,ParentXMLBuffer,ElementNumber,LastInsertedXMLBufferElement,ProcessingInstructionNumber);
     END;
 
     LOCAL PROCEDURE IsChildElement@10(CurrentDepth@1000 : Integer) : Boolean;
@@ -161,7 +162,7 @@ OBJECT Codeunit 1235 XML Buffer Writer
       EXIT(XmlReader.Depth < CurrentDepth)
     END;
 
-    LOCAL PROCEDURE ReadAndInsertXmlElement@19(VAR XMLBuffer@1001 : Record 1235;ParentXMLBuffer@1000 : Record 1235;VAR ElementNumber@1002 : Integer;VAR InsertedXMLBufferElement@1003 : Record 1235);
+    LOCAL PROCEDURE ReadAndInsertXmlElement@19(VAR XMLBuffer@1001 : Record 1235;ParentXMLBuffer@1000 : Record 1235;VAR ElementNumber@1002 : Integer;VAR InsertedXMLBufferElement@1003 : Record 1235;VAR ProcessingInstructionNumber@1005 : Integer);
     VAR
       TempXMLBuffer@1004 : TEMPORARY Record 1235;
     BEGIN
@@ -178,9 +179,10 @@ OBJECT Codeunit 1235 XML Buffer Writer
           END ELSE
             AddXmlTextNodeIntoParentXMLBuffer(ParentXMLBuffer);
         END ELSE
-          IF XmlNodeType.Equals(XmlNodeType.ProcessingInstruction) THEN
-            InsertXmlProcessingInstruction(XMLBuffer,ParentXMLBuffer,ElementNumber)
-          ELSE
+          IF XmlNodeType.Equals(XmlNodeType.ProcessingInstruction) THEN BEGIN
+            ProcessingInstructionNumber += 1;
+            InsertXmlProcessingInstruction(XMLBuffer,ParentXMLBuffer,ProcessingInstructionNumber)
+          END ELSE
             IF XmlNodeType.Equals(XmlNodeType.XmlDeclaration) OR
                XmlNodeType.Equals(XmlNodeType.Comment)
             THEN
@@ -326,7 +328,7 @@ OBJECT Codeunit 1235 XML Buffer Writer
     END;
 
     [External]
-    PROCEDURE InsertProcessingInstruction@34(VAR XMLBuffer@1005 : Record 1235;ParentXMLBuffer@1004 : Record 1235;NodeNumber@1003 : Integer;NodeDepth@1002 : Integer;InstructionName@1001 : Text[250];InstructionValue@1000 : Text[250]);
+    PROCEDURE InsertProcessingInstruction@34(VAR XMLBuffer@1005 : Record 1235;ParentXMLBuffer@1004 : Record 1235;NodeNumber@1003 : Integer;NodeDepth@1002 : Integer;InstructionName@1001 : Text[250];InstructionValue@1000 : Text);
     BEGIN
       WITH XMLBuffer DO BEGIN
         RESET;

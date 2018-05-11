@@ -52,7 +52,6 @@ OBJECT Codeunit 1239 XML Buffer Reader
       TempXMLBuffer.SETCURRENTKEY("Parent Entry No.",Type,"Node Number");
       Header := '<?xml version="1.0" encoding="' + Encoding + '"?>' +
         '<' + TempXMLBuffer.GetElementName + ' ';
-
       DefaultNamespace := TempXMLBuffer.GetAttributeValue('xmlns');
       IF TempXMLBuffer.FindAttributes(TempAttributeXMLBuffer) THEN
         REPEAT
@@ -113,7 +112,7 @@ OBJECT Codeunit 1239 XML Buffer Reader
     BEGIN
       IF TempParentElementXMLBuffer.FindProcessingInstructions(TempPIXMLBuffer) THEN
         REPEAT
-          ProcessingInstruction := XmlDocument.CreateProcessingInstruction(TempPIXMLBuffer.Name, TempPIXMLBuffer.Value);
+          ProcessingInstruction := XmlDocument.CreateProcessingInstruction(TempPIXMLBuffer.Name, TempPIXMLBuffer.GetValue);
           XMLCurrElement.AppendChild(ProcessingInstruction);
         UNTIL TempPIXMLBuffer.NEXT = 0;
     END;
