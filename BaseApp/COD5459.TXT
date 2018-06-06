@@ -136,7 +136,7 @@ OBJECT Codeunit 5459 JSON Management
       IF ISNULL(JProperty) THEN
         EXIT(FALSE);
 
-      Value := FORMAT(JProperty.Value);
+      Value := FORMAT(JProperty.Value,0,9);
 
       CASE FORMAT(FieldRef.TYPE) OF
         'Integer',
@@ -342,11 +342,14 @@ OBJECT Codeunit 5459 JSON Management
       JProperty@1001 : DotNet "'Newtonsoft.Json'.Newtonsoft.Json.Linq.JProperty";
       ValueText@1004 : Text;
     BEGIN
-      IF value.ISINTEGER THEN
-        JProperty := JProperty.JProperty(propertyName,value)
-      ELSE BEGIN
-        ValueText := FORMAT(value,0,9);
-        JProperty := JProperty.JProperty(propertyName,ValueText);
+      CASE TRUE OF
+        value.ISINTEGER,
+        value.ISDECIMAL:
+          JProperty := JProperty.JProperty(propertyName,value);
+        ELSE BEGIN
+          ValueText := FORMAT(value,0,9);
+          JProperty := JProperty.JProperty(propertyName,ValueText);
+        END;
       END;
 
       JObject.Add(JProperty);
@@ -421,6 +424,15 @@ OBJECT Codeunit 5459 JSON Management
       EXIT(JsonObject.ToString);
     END;
 
+    [External]
+    PROCEDURE FormatDecimalToJSONProperty@40(Value@1000 : Decimal;PropertyName@1001 : Text) : Text;
+    VAR
+      JProperty@1002 : DotNet "'Newtonsoft.Json'.Newtonsoft.Json.Linq.JProperty";
+    BEGIN
+      JProperty := JProperty.JProperty(PropertyName,Value);
+      EXIT(JProperty.ToString);
+    END;
+
     LOCAL PROCEDURE GetLastIndexOfPeriod@31(String@1000 : Text) LastIndex : Integer;
     VAR
       Index@1001 : Integer;
@@ -493,7 +505,7 @@ OBJECT Codeunit 5459 JSON Management
     END;
 
     [TryFunction]
-    LOCAL PROCEDURE TryReadAsBase64@40(VAR TempBlob@1000 : Record 99008535;Value@1001 : Text);
+    LOCAL PROCEDURE TryReadAsBase64@48(VAR TempBlob@1000 : Record 99008535;Value@1001 : Text);
     BEGIN
       TempBlob.FromBase64String(Value);
     END;
