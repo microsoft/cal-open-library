@@ -1,0 +1,201 @@
+OBJECT Codeunit 132544 Data Exch. Column Def UT
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=Test,Dev,ERM,All;
+  }
+  PROPERTIES
+  {
+    Subtype=Test;
+    TestPermissions=Disabled;
+    OnRun=BEGIN
+            // [FEATURE] [Data Exchange] [Column] [UT]
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      LibraryUtility@1003 : Codeunit 131000;
+      LibraryRandom@1002 : Codeunit 130440;
+      Assert@1001 : Codeunit 130000;
+      LengthErr@1004 : TextConst 'ENU="Length must have a value in Data Exch. Column Def: "';
+      DataFormatErr@1005 : TextConst 'ENU=Data Format must have a value in Data Exch. Column Def:';
+      DataFormattingCultureErr@1006 : TextConst 'ENU=Data Formatting Culture must have a value in Data Exch. Column Def:';
+
+    [Test]
+    PROCEDURE ValidateRecFixedText@6();
+    VAR
+      DataExchDef@1002 : Record 1222;
+      DataExchColumnDef@1000 : Record 1223;
+    BEGIN
+      // Setup
+      CreateDataExchDef(DataExchDef,DataExchDef.Type::"Payment Export");
+      DataExchDef.VALIDATE("File Type",DataExchDef."File Type"::"Fixed Text");
+      DataExchDef.MODIFY(TRUE);
+
+      DataExchColumnDef."Data Exch. Def Code" := DataExchDef.Code;
+      DataExchColumnDef."Column No." := LibraryRandom.RandIntInRange(1,10);
+      ASSERTERROR DataExchColumnDef.ValidateRec;
+      Assert.ExpectedError(LengthErr);
+    END;
+
+    [Test]
+    PROCEDURE ValidateRecPaymentExportDataTypeNotText@10();
+    VAR
+      DataExchDef@1002 : Record 1222;
+      DataExchColumnDef@1000 : Record 1223;
+    BEGIN
+      // Setup
+      CreateDataExchDef(DataExchDef,DataExchDef.Type::"Payment Export");
+
+      DataExchColumnDef."Data Exch. Def Code" := DataExchDef.Code;
+      DataExchColumnDef."Column No." := LibraryRandom.RandIntInRange(1,10);
+      DataExchColumnDef."Data Type" := DataExchColumnDef."Data Type"::Decimal;
+      ASSERTERROR DataExchColumnDef.ValidateRec;
+      Assert.ExpectedError(DataFormatErr);
+    END;
+
+    [Test]
+    PROCEDURE ValidateRecImportDataTypeDecimal@11();
+    VAR
+      DataExchDef@1002 : Record 1222;
+      DataExchColumnDef@1000 : Record 1223;
+    BEGIN
+      // Setup
+      CreateDataExchDef(DataExchDef,DataExchDef.Type::"Payroll Import");
+
+      DataExchColumnDef."Data Exch. Def Code" := DataExchDef.Code;
+      DataExchColumnDef."Column No." := LibraryRandom.RandIntInRange(1,10);
+      DataExchColumnDef."Data Type" := DataExchColumnDef."Data Type"::Decimal;
+      ASSERTERROR DataExchColumnDef.ValidateRec;
+      Assert.ExpectedError(DataFormattingCultureErr);
+    END;
+
+    [Test]
+    PROCEDURE ValidateRecImportDataTypeDate@12();
+    VAR
+      DataExchDef@1002 : Record 1222;
+      DataExchColumnDef@1000 : Record 1223;
+    BEGIN
+      // Setup
+      CreateDataExchDef(DataExchDef,DataExchDef.Type::"Bank Statement Import");
+
+      DataExchColumnDef."Data Exch. Def Code" := DataExchDef.Code;
+      DataExchColumnDef."Column No." := LibraryRandom.RandIntInRange(1,10);
+      DataExchColumnDef."Data Formatting Culture" := 'da-DK';
+      DataExchColumnDef."Data Type" := DataExchColumnDef."Data Type"::Date;
+      ASSERTERROR DataExchColumnDef.ValidateRec;
+      Assert.ExpectedError(DataFormatErr);
+    END;
+
+    [Test]
+    [HandlerFunctions(ConfirmHandlerYes)]
+    PROCEDURE DeleteColumnDefinitionYes@14();
+    VAR
+      DataExchDef@1001 : Record 1222;
+      DataExchLineDef@1000 : Record 1227;
+      DataExchColumnDef@1003 : Record 1223;
+      DataExchFieldMapping@1002 : Record 1225;
+    BEGIN
+      // Setup
+      CreateDataExchDef(DataExchDef,DataExchDef.Type::"Payment Export");
+      CreateDataExchLineDef(DataExchDef,DataExchLineDef);
+      CreateDataExchColumnDef(DataExchColumnDef,DataExchLineDef);
+      CreateDataExchFieldMapping(DataExchFieldMapping,DataExchColumnDef);
+
+      // Exercise
+      DataExchColumnDef.DELETE(TRUE);
+
+      // Verify
+      DataExchFieldMapping.SETRANGE("Data Exch. Def Code",DataExchColumnDef."Data Exch. Def Code");
+      DataExchFieldMapping.SETRANGE("Data Exch. Line Def Code",DataExchColumnDef."Data Exch. Line Def Code");
+      DataExchFieldMapping.SETRANGE("Column No.",DataExchColumnDef."Column No.");
+      Assert.IsTrue(DataExchFieldMapping.ISEMPTY,'Data Exch. Field Mapping should be deleted.')
+    END;
+
+    [Test]
+    [HandlerFunctions(ConfirmHandlerNo)]
+    PROCEDURE DeleteColumnDefinitionNo@15();
+    VAR
+      DataExchDef@1001 : Record 1222;
+      DataExchLineDef@1000 : Record 1227;
+      DataExchColumnDef@1002 : Record 1223;
+      DataExchFieldMapping@1003 : Record 1225;
+    BEGIN
+      CreateDataExchDef(DataExchDef,DataExchDef.Type::"Payment Export");
+      CreateDataExchLineDef(DataExchDef,DataExchLineDef);
+      CreateDataExchColumnDef(DataExchColumnDef,DataExchLineDef);
+      CreateDataExchFieldMapping(DataExchFieldMapping,DataExchColumnDef);
+      COMMIT;
+
+      // Exercise
+      ASSERTERROR DataExchColumnDef.DELETE(TRUE);
+
+      // Verify
+      DataExchFieldMapping.SETRANGE("Data Exch. Def Code",DataExchColumnDef."Data Exch. Def Code");
+      DataExchFieldMapping.SETRANGE("Data Exch. Line Def Code",DataExchColumnDef."Data Exch. Line Def Code");
+      DataExchFieldMapping.SETRANGE("Column No.",DataExchColumnDef."Column No.");
+      Assert.IsFalse(DataExchFieldMapping.ISEMPTY,'Data Exch. Field Mapping should not be deleted.')
+    END;
+
+    LOCAL PROCEDURE CreateDataExchDef@4(VAR DataExchDef@1000 : Record 1222;ParamaterType@1001 : Option);
+    BEGIN
+      DataExchDef.INIT;
+      DataExchDef.Code :=
+        LibraryUtility.GenerateRandomCode(DataExchDef.FIELDNO(Code),DATABASE::"Data Exch. Def");
+      DataExchDef."File Type" := DataExchDef."File Type"::"Variable Text";
+      DataExchDef.VALIDATE(Type,ParamaterType);
+      DataExchDef.INSERT(TRUE);
+    END;
+
+    LOCAL PROCEDURE CreateDataExchLineDef@8(VAR DataExchDef@1000 : Record 1222;VAR DataExchLineDef@1001 : Record 1227);
+    BEGIN
+      DataExchLineDef.INIT;
+      DataExchLineDef."Data Exch. Def Code" := DataExchDef.Code;
+      DataExchLineDef.Code :=
+        LibraryUtility.GenerateRandomCode(DataExchLineDef.FIELDNO(Code),DATABASE::"Data Exch. Line Def");
+      DataExchLineDef.INSERT
+    END;
+
+    LOCAL PROCEDURE CreateDataExchColumnDef@17(VAR DataExchColumnDef@1000 : Record 1223;DataExchLineDef@1001 : Record 1227);
+    BEGIN
+      DataExchColumnDef.INIT;
+      DataExchColumnDef."Data Exch. Def Code" := DataExchLineDef."Data Exch. Def Code";
+      DataExchColumnDef."Data Exch. Line Def Code" := DataExchLineDef.Code;
+      DataExchColumnDef."Column No." := LibraryRandom.RandIntInRange(1,10);
+      DataExchColumnDef.INSERT;
+    END;
+
+    LOCAL PROCEDURE CreateDataExchFieldMapping@20(VAR DataExchFieldMapping@1000 : Record 1225;DataExchColumnDef@1001 : Record 1223);
+    VAR
+      GenJnlLine@1002 : Record 81;
+    BEGIN
+      DataExchFieldMapping.INIT;
+      DataExchFieldMapping."Data Exch. Def Code" := DataExchColumnDef."Data Exch. Def Code";
+      DataExchFieldMapping."Data Exch. Line Def Code" := DataExchColumnDef."Data Exch. Line Def Code";
+      DataExchFieldMapping."Table ID" := DATABASE::"Gen. Journal Line";
+      DataExchFieldMapping."Column No." := DataExchColumnDef."Column No.";
+      DataExchFieldMapping."Field ID" := GenJnlLine.FIELDNO(Amount);
+      DataExchFieldMapping.INSERT;
+    END;
+
+    [ConfirmHandler]
+    PROCEDURE ConfirmHandlerYes@9(Question@1000 : Text[1024];VAR Reply@1001 : Boolean);
+    BEGIN
+      Reply := TRUE;
+    END;
+
+    [ConfirmHandler]
+    PROCEDURE ConfirmHandlerNo@13(Question@1001 : Text[1024];VAR Reply@1000 : Boolean);
+    BEGIN
+      Reply := FALSE;
+    END;
+
+    BEGIN
+    END.
+  }
+}
+

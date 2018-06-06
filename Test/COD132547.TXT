@@ -1,0 +1,1037 @@
+OBJECT Codeunit 132547 Test Data Exch.Import - XML
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=Test,ERM,W1,All;
+  }
+  PROPERTIES
+  {
+    Subtype=Test;
+    TestPermissions=Disabled;
+    Permissions=TableData 1220=m;
+    OnRun=BEGIN
+            // [FEATURE] [Data Exchange] [XML] [Import]
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      LibraryUtility@1003 : Codeunit 131000;
+      Assert@1000 : Codeunit 130000;
+      AssertMsg@1004 : TextConst 'ENU=%1 Field:"%2" different from expected.';
+      TableErrorMsg@1002 : TextConst 'ENU=%1 Line:%2';
+      BlobKey@1001 : Integer;
+      NamespaceTxt@1005 : TextConst 'ENU=urn:iso:std:iso:20022:tech:xsd:camt.053.001.02';
+      IncorrectNamespaceTxt@1006 : TextConst 'ENU=incorrect namespace';
+      IncorrectNamespaceErr@1007 : TextConst '@@@="%1=File XML Namespace,%2=Supported XML Namespace";ENU=The imported file contains unsupported namespace "%1". The supported namespace is ''%2''.';
+      LongValueIncorrectlyProcessedErr@1008 : TextConst 'ENU=Long value incorrectly processed.';
+
+    [Test]
+    PROCEDURE ReadElementFromXMLFileUTF8@1();
+    VAR
+      DataExch@1001 : Record 1220;
+      DataExchDef@1003 : Record 1222;
+      DataExchField@1002 : Record 1221;
+      TempBlobOEM@1005 : Record 99008535;
+      TempBlobUTF8@1000 : Record 99008535;
+      TempExpectedDataExchField@1004 : TEMPORARY Record 1221;
+      OutStream@1006 : OutStream;
+      Encoding@1009 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.Encoding";
+    BEGIN
+      // Pre-Setup
+      TempBlobOEM.Blob.CREATEOUTSTREAM(OutStream);
+      WriteCAMTFile(OutStream,'UTF-8',NamespaceTxt);
+      ConvertEncoding(TempBlobOEM,TempBlobUTF8,Encoding.UTF8);
+
+      // Setup
+      CreateFormatDefinition(DataExch,DataExchDef,TempBlobUTF8,'/Document/BkToCstmrStmt/GrpHdr/MsgId');
+
+      // Execute
+      CODEUNIT.RUN(DataExchDef."Reading/Writing Codeunit",DataExch);
+
+      // Verify
+      TempExpectedDataExchField.InsertRecXMLField(DataExch."Entry No.",0,1,'0001000100010001','AAAASESS-FP-STAT001',
+        DataExch."Data Exch. Line Def Code");
+      DataExchField.SETRANGE("Data Exch. No.",DataExch."Entry No.");
+      AssertDataInTable(TempExpectedDataExchField,DataExchField,'');
+    END;
+
+    [Test]
+    PROCEDURE ReadElementFromXMLFileUTF16@51();
+    VAR
+      DataExch@1001 : Record 1220;
+      DataExchDef@1002 : Record 1222;
+      DataExchField@1003 : Record 1221;
+      TempBlobOEM@1005 : Record 99008535;
+      TempBlobUTF8@1000 : Record 99008535;
+      TempExpectedDataExchField@1004 : TEMPORARY Record 1221;
+      OutStream@1006 : OutStream;
+      Encoding@1009 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.Encoding";
+    BEGIN
+      // Pre-Setup
+      TempBlobOEM.Blob.CREATEOUTSTREAM(OutStream);
+      WriteCAMTFile(OutStream,'UTF-16',NamespaceTxt);
+      ConvertEncoding(TempBlobOEM,TempBlobUTF8,Encoding.Unicode);
+
+      // Setup
+      CreateFormatDefinition(DataExch,DataExchDef,TempBlobUTF8,'/Document/BkToCstmrStmt/GrpHdr/MsgId');
+
+      // Execute
+      CODEUNIT.RUN(DataExchDef."Reading/Writing Codeunit",DataExch);
+
+      // Verify
+      TempExpectedDataExchField.InsertRecXMLField(DataExch."Entry No.",0,1,'0001000100010001','AAAASESS-FP-STAT001',
+        DataExch."Data Exch. Line Def Code");
+      DataExchField.SETRANGE("Data Exch. No.",DataExch."Entry No.");
+      AssertDataInTable(TempExpectedDataExchField,DataExchField,'');
+    END;
+
+    [Test]
+    PROCEDURE ReadRepeatedLineFromXMLFile@69();
+    VAR
+      DataExch@1001 : Record 1220;
+      DataExchDef@1002 : Record 1222;
+      DataExchField@1003 : Record 1221;
+      TempBlobOEM@1005 : Record 99008535;
+      TempBlobUTF8@1000 : Record 99008535;
+      TempExpectedDataExchField@1004 : TEMPORARY Record 1221;
+      OutStream@1006 : OutStream;
+      Encoding@1009 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.Encoding";
+    BEGIN
+      // Pre-Setup
+      TempBlobOEM.Blob.CREATEOUTSTREAM(OutStream);
+      WriteCAMTFileWithMultiLineBankStatement(OutStream,'UTF-8');
+      ConvertEncoding(TempBlobOEM,TempBlobUTF8,Encoding.UTF8);
+
+      // Setup
+      CreateFormatDefinition(DataExch,DataExchDef,TempBlobUTF8,'/Document/BkToCstmrStmt/Stmt/Ntry/Sts');
+
+      // Execute
+      CODEUNIT.RUN(DataExchDef."Reading/Writing Codeunit",DataExch);
+
+      // Verify
+      TempExpectedDataExchField.InsertRecXMLField(DataExch."Entry No.",1,1,'00010002000200030001','BOOK',
+        DataExch."Data Exch. Line Def Code");
+      TempExpectedDataExchField.InsertRecXMLField(DataExch."Entry No.",2,1,'00010002000300030001','PDNG',
+        DataExch."Data Exch. Line Def Code");
+      DataExchField.SETRANGE("Data Exch. No.",DataExch."Entry No.");
+      AssertDataInTable(TempExpectedDataExchField,DataExchField,'');
+    END;
+
+    [Test]
+    PROCEDURE ReadRepeatedElementFromXMLFile@9();
+    VAR
+      DataExch@1008 : Record 1220;
+      DataExchDef@1007 : Record 1222;
+      DataExchField@1006 : Record 1221;
+      TempBlobOEM@1005 : Record 99008535;
+      TempBlobUTF8@1004 : Record 99008535;
+      TempExpectedDataExchField@1003 : TEMPORARY Record 1221;
+      OutStream@1001 : OutStream;
+      Encoding@1000 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.Encoding";
+    BEGIN
+      // Pre-Setup
+      TempBlobOEM.Blob.CREATEOUTSTREAM(OutStream);
+      WriteCAMTFileWithRepeatedElement(OutStream,'UTF-8');
+      ConvertEncoding(TempBlobOEM,TempBlobUTF8,Encoding.UTF8);
+
+      // Setup
+      CreateFormatDefinition(DataExch,DataExchDef,TempBlobUTF8,'/Document/BkToCstmrStmt/Stmt/Bal/CdtDbtInd');
+
+      // Execute
+      CODEUNIT.RUN(DataExchDef."Reading/Writing Codeunit",DataExch);
+
+      // Verify
+      TempExpectedDataExchField.InsertRecXMLField(DataExch."Entry No.",0,1,'00010002000200020001','CRDT',
+        DataExch."Data Exch. Line Def Code");
+      TempExpectedDataExchField.InsertRecXMLField(DataExch."Entry No.",0,1,'00010002000300020001','CRDT',
+        DataExch."Data Exch. Line Def Code");
+      DataExchField.SETRANGE("Data Exch. No.",DataExch."Entry No.");
+      AssertDataInTable(TempExpectedDataExchField,DataExchField,'');
+    END;
+
+    [Test]
+    PROCEDURE ReadSubElementFromXMLFile@61();
+    VAR
+      DataExch@1001 : Record 1220;
+      DataExchDef@1002 : Record 1222;
+      DataExchField@1003 : Record 1221;
+      TempBlobOEM@1005 : Record 99008535;
+      TempBlobUTF8@1000 : Record 99008535;
+      TempExpectedDataExchField@1004 : TEMPORARY Record 1221;
+      OutStream@1006 : OutStream;
+      Encoding@1009 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.Encoding";
+    BEGIN
+      // Pre-Setup
+      TempBlobOEM.Blob.CREATEOUTSTREAM(OutStream);
+      WriteCAMTFile(OutStream,'UTF-8',NamespaceTxt);
+      ConvertEncoding(TempBlobOEM,TempBlobUTF8,Encoding.UTF8);
+
+      // Setup
+      CreateFormatDefinition(DataExch,DataExchDef,TempBlobUTF8,'/Document/BkToCstmrStmt/Stmt/Ntry/Sts');
+
+      // Execute
+      CODEUNIT.RUN(DataExchDef."Reading/Writing Codeunit",DataExch);
+
+      // Verify
+      TempExpectedDataExchField.InsertRecXMLField(DataExch."Entry No.",1,1,'00010002000200030001','BOOK',
+        DataExch."Data Exch. Line Def Code");
+      DataExchField.SETRANGE("Data Exch. No.",DataExch."Entry No.");
+      AssertDataInTable(TempExpectedDataExchField,DataExchField,'');
+    END;
+
+    [Test]
+    PROCEDURE ReadSubElementWithAttributeFromXMLFile@2();
+    VAR
+      DataExch@1001 : Record 1220;
+      DataExchDef@1002 : Record 1222;
+      DataExchField@1003 : Record 1221;
+      TempBlobOEM@1005 : Record 99008535;
+      TempBlobUTF8@1000 : Record 99008535;
+      TempExpectedDataExchField@1004 : TEMPORARY Record 1221;
+      OutStream@1006 : OutStream;
+      Encoding@1009 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.Encoding";
+    BEGIN
+      // Pre-Setup
+      TempBlobOEM.Blob.CREATEOUTSTREAM(OutStream);
+      WriteCAMTFile(OutStream,'UTF-8',NamespaceTxt);
+      ConvertEncoding(TempBlobOEM,TempBlobUTF8,Encoding.UTF8);
+
+      // Setup
+      CreateFormatDefinition(DataExch,DataExchDef,TempBlobUTF8,'/Document/BkToCstmrStmt/Stmt/Ntry/Amt[@Ccy]');
+
+      // Execute
+      CODEUNIT.RUN(DataExchDef."Reading/Writing Codeunit",DataExch);
+
+      // Verify
+      TempExpectedDataExchField.InsertRecXMLField(DataExch."Entry No.",1,1,'0001000200020001','SEK',
+        DataExch."Data Exch. Line Def Code");
+      DataExchField.SETRANGE("Data Exch. No.",DataExch."Entry No.");
+      AssertDataInTable(TempExpectedDataExchField,DataExchField,'');
+    END;
+
+    [Test]
+    PROCEDURE ReadElementFromXMLFileWithNamedNamespace@14();
+    VAR
+      DataExch@1001 : Record 1220;
+      DataExchDef@1002 : Record 1222;
+      DataExchField@1003 : Record 1221;
+      TempBlobOEM@1005 : Record 99008535;
+      TempBlobUTF8@1000 : Record 99008535;
+      TempExpectedDataExchField@1004 : TEMPORARY Record 1221;
+      OutStream@1006 : OutStream;
+      Encoding@1009 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.Encoding";
+    BEGIN
+      // Pre-Setup
+      TempBlobOEM.Blob.CREATEOUTSTREAM(OutStream);
+      WriteCAMTFileWithNamedNamespace(OutStream,'UTF-8');
+      ConvertEncoding(TempBlobOEM,TempBlobUTF8,Encoding.UTF8);
+
+      // Setup
+      CreateFormatDefinition(DataExch,DataExchDef,TempBlobUTF8,'/Document/BkToCstmrStmt/GrpHdr/MsgId');
+
+      // Execute
+      CODEUNIT.RUN(DataExchDef."Reading/Writing Codeunit",DataExch);
+
+      // Verify
+      TempExpectedDataExchField.InsertRecXMLField(DataExch."Entry No.",0,1,'0001000100010001','AAAASESS-FP-STAT001',
+        DataExch."Data Exch. Line Def Code");
+      DataExchField.SETRANGE("Data Exch. No.",DataExch."Entry No.");
+      AssertDataInTable(TempExpectedDataExchField,DataExchField,'');
+    END;
+
+    [Test]
+    PROCEDURE ReadElementFromXMLFileWithNamespaceOverride@40();
+    VAR
+      DataExch@1001 : Record 1220;
+      DataExchDef@1002 : Record 1222;
+      DataExchField@1003 : Record 1221;
+      TempBlobOEM@1005 : Record 99008535;
+      TempBlobUTF8@1000 : Record 99008535;
+      TempExpectedDataExchField@1004 : TEMPORARY Record 1221;
+      OutStream@1006 : OutStream;
+      Encoding@1009 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.Encoding";
+    BEGIN
+      // Pre-Setup
+      TempBlobOEM.Blob.CREATEOUTSTREAM(OutStream);
+      WriteCAMTFileWithNamespaceOverride(OutStream,'UTF-8');
+      ConvertEncoding(TempBlobOEM,TempBlobUTF8,Encoding.UTF8);
+
+      // Setup
+      CreateFormatDefinition(DataExch,DataExchDef,TempBlobUTF8,'/Document/BkToCstmrStmt/GrpHdr/MsgId');
+
+      // Execute
+      CODEUNIT.RUN(DataExchDef."Reading/Writing Codeunit",DataExch);
+
+      // Verify
+      TempExpectedDataExchField.InsertRecXMLField(DataExch."Entry No.",0,1,'0001000100010001','AAAASESS-FP-STAT001',
+        DataExch."Data Exch. Line Def Code");
+      DataExchField.SETRANGE("Data Exch. No.",DataExch."Entry No.");
+      AssertDataInTable(TempExpectedDataExchField,DataExchField,'');
+    END;
+
+    [Test]
+    PROCEDURE ReadElementFromXMLFileWithInnerNamedNamespace@37();
+    VAR
+      DataExch@1001 : Record 1220;
+      DataExchDef@1002 : Record 1222;
+      DataExchField@1003 : Record 1221;
+      TempBlobOEM@1005 : Record 99008535;
+      TempBlobUTF8@1000 : Record 99008535;
+      TempExpectedDataExchField@1004 : TEMPORARY Record 1221;
+      OutStream@1006 : OutStream;
+      Encoding@1009 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.Encoding";
+    BEGIN
+      // Pre-Setup
+      TempBlobOEM.Blob.CREATEOUTSTREAM(OutStream);
+      WriteCAMTFileWithInnerNamedNamespace(OutStream,'UTF-8');
+      ConvertEncoding(TempBlobOEM,TempBlobUTF8,Encoding.UTF8);
+
+      // Setup
+      CreateFormatDefinition(DataExch,DataExchDef,TempBlobUTF8,'/Document/BkToCstmrStmt/GrpHdr/MsgId');
+
+      // Execute
+      CODEUNIT.RUN(DataExchDef."Reading/Writing Codeunit",DataExch);
+
+      // Verify
+      TempExpectedDataExchField.InsertRecXMLField(DataExch."Entry No.",0,1,'0001000100010001','AAAASESS-FP-STAT001',
+        DataExch."Data Exch. Line Def Code");
+      DataExchField.SETRANGE("Data Exch. No.",DataExch."Entry No.");
+      AssertDataInTable(TempExpectedDataExchField,DataExchField,'');
+    END;
+
+    [Test]
+    PROCEDURE ReadElementFromXMLFileWithInnerDefaultNamespace@19();
+    VAR
+      DataExch@1001 : Record 1220;
+      DataExchDef@1002 : Record 1222;
+      DataExchField@1003 : Record 1221;
+      TempBlobOEM@1005 : Record 99008535;
+      TempBlobUTF8@1000 : Record 99008535;
+      TempExpectedDataExchField@1004 : TEMPORARY Record 1221;
+      OutStream@1006 : OutStream;
+      Encoding@1009 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.Encoding";
+    BEGIN
+      // Pre-Setup
+      TempBlobOEM.Blob.CREATEOUTSTREAM(OutStream);
+      WriteCAMTFileWithInnerDefaultNamespace(OutStream,'UTF-8');
+      ConvertEncoding(TempBlobOEM,TempBlobUTF8,Encoding.UTF8);
+
+      // Setup
+      CreateFormatDefinition(DataExch,DataExchDef,TempBlobUTF8,'/Document/BkToCstmrStmt/GrpHdr/MsgId');
+
+      // Execute
+      CODEUNIT.RUN(DataExchDef."Reading/Writing Codeunit",DataExch);
+
+      // Verify
+      TempExpectedDataExchField.InsertRecXMLField(DataExch."Entry No.",0,1,'0001000100010001','AAAASESS-FP-STAT001',
+        DataExch."Data Exch. Line Def Code");
+      DataExchField.SETRANGE("Data Exch. No.",DataExch."Entry No.");
+      AssertDataInTable(TempExpectedDataExchField,DataExchField,'');
+    END;
+
+    [Test]
+    PROCEDURE ReadElementValueWithDataTypeMismatch@10();
+    VAR
+      DataExch@1007 : Record 1220;
+      DataExchDef@1006 : Record 1222;
+      DataExchField@1005 : Record 1221;
+      TempBlobOEM@1004 : Record 99008535;
+      TempBlobUTF8@1003 : Record 99008535;
+      TempExpectedDataExchField@1002 : TEMPORARY Record 1221;
+      OutStream@1001 : OutStream;
+      Encoding@1000 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.Encoding";
+    BEGIN
+      // Pre-Setup
+      TempBlobOEM.Blob.CREATEOUTSTREAM(OutStream);
+      WriteCAMTFileWithDataTypeMismatch(OutStream,'UTF-8');
+      ConvertEncoding(TempBlobOEM,TempBlobUTF8,Encoding.UTF8);
+
+      // Setup
+      CreateFormatDefinition(DataExch,DataExchDef,TempBlobUTF8,'/Document/BkToCstmrStmt/Stmt/Ntry/Amt');
+
+      // Execute
+      CODEUNIT.RUN(DataExchDef."Reading/Writing Codeunit",DataExch);
+
+      // Verify
+      TempExpectedDataExchField.InsertRecXMLField(DataExch."Entry No.",1,1,'00010002000200010001','Hello, World!',
+        DataExch."Data Exch. Line Def Code");
+      DataExchField.SETRANGE("Data Exch. No.",DataExch."Entry No.");
+      AssertDataInTable(TempExpectedDataExchField,DataExchField,'');
+    END;
+
+    [Test]
+    PROCEDURE IgnorePreHeaderComment@88();
+    VAR
+      DataExch@1001 : Record 1220;
+      DataExchDef@1002 : Record 1222;
+      DataExchField@1003 : Record 1221;
+      TempBlobOEM@1005 : Record 99008535;
+      TempBlobUTF8@1000 : Record 99008535;
+      TempExpectedDataExchField@1004 : TEMPORARY Record 1221;
+      OutStream@1006 : OutStream;
+      Encoding@1009 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.Encoding";
+    BEGIN
+      // Pre-Setup
+      TempBlobOEM.Blob.CREATEOUTSTREAM(OutStream);
+      WriteCAMTFileWithPreHeaderComment(OutStream,'UTF-8');
+      ConvertEncoding(TempBlobOEM,TempBlobUTF8,Encoding.UTF8);
+
+      // Setup
+      CreateFormatDefinition(DataExch,DataExchDef,TempBlobUTF8,'/Document/BkToCstmrStmt/GrpHdr/MsgId');
+
+      // Execute
+      CODEUNIT.RUN(DataExchDef."Reading/Writing Codeunit",DataExch);
+
+      // Verify
+      TempExpectedDataExchField.InsertRecXMLField(DataExch."Entry No.",0,1,'0001000100010001','AAAASESS-FP-STAT001',
+        DataExch."Data Exch. Line Def Code");
+      DataExchField.SETRANGE("Data Exch. No.",DataExch."Entry No.");
+      AssertDataInTable(TempExpectedDataExchField,DataExchField,'');
+    END;
+
+    [Test]
+    PROCEDURE IgnoreValuesInParentElement@86();
+    VAR
+      DataExch@1001 : Record 1220;
+      DataExchDef@1002 : Record 1222;
+      DataExchField@1003 : Record 1221;
+      TempBlobOEM@1005 : Record 99008535;
+      TempBlobUTF8@1000 : Record 99008535;
+      TempExpectedDataExchField@1004 : TEMPORARY Record 1221;
+      OutStream@1006 : OutStream;
+      Encoding@1009 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.Encoding";
+    BEGIN
+      // Pre-Setup
+      TempBlobOEM.Blob.CREATEOUTSTREAM(OutStream);
+      WriteCAMTFileWithTextValueInParentElement(OutStream,'UTF-8');
+      ConvertEncoding(TempBlobOEM,TempBlobUTF8,Encoding.UTF8);
+
+      // Setup
+      CreateFormatDefinition(DataExch,DataExchDef,TempBlobUTF8,'/Document/BkToCstmrStmt/GrpHdr/MsgId');
+
+      // Execute
+      CODEUNIT.RUN(DataExchDef."Reading/Writing Codeunit",DataExch);
+
+      // Verify
+      TempExpectedDataExchField.InsertRecXMLField(DataExch."Entry No.",0,1,'0001000100010001','AAAASESS-FP-STAT001',
+        DataExch."Data Exch. Line Def Code");
+      DataExchField.SETRANGE("Data Exch. No.",DataExch."Entry No.");
+      AssertDataInTable(TempExpectedDataExchField,DataExchField,'');
+    END;
+
+    [Test]
+    PROCEDURE IgnoreUnmappedColumns@75();
+    VAR
+      DataExch@1001 : Record 1220;
+      DataExchDef@1002 : Record 1222;
+      DataExchField@1003 : Record 1221;
+      DataExchLineDef@1004 : Record 1227;
+      TempBlobOEM@1005 : Record 99008535;
+      TempBlobUTF8@1000 : Record 99008535;
+      OutStream@1006 : OutStream;
+      Encoding@1009 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.Encoding";
+    BEGIN
+      // Pre-Setup
+      TempBlobOEM.Blob.CREATEOUTSTREAM(OutStream);
+      WriteCAMTFile(OutStream,'UTF-8',NamespaceTxt);
+      ConvertEncoding(TempBlobOEM,TempBlobUTF8,Encoding.UTF8);
+
+      // Setup
+      CreateDataExchDef(DataExchDef);
+      CreateDataExchLineDef(DataExchLineDef,DataExchDef.Code,NamespaceTxt);
+      CreateDataExch(DataExch,DataExchDef.Code,DataExchLineDef.Code,TempBlobUTF8);
+
+      // Execute
+      CODEUNIT.RUN(DataExchDef."Reading/Writing Codeunit",DataExch);
+
+      // Verify
+      DataExchField.SETRANGE("Data Exch. No.",DataExch."Entry No.");
+      Assert.IsTrue(DataExchField.ISEMPTY,'No line should be imported.');
+    END;
+
+    [Test]
+    PROCEDURE MapToTableWithCodeKey@12();
+    VAR
+      Customer@1010 : Record 18;
+      DataExch@1001 : Record 1220;
+      DataExchDef@1002 : Record 1222;
+      DataExchLineDef@1007 : Record 1227;
+      DataExchMapping@1011 : Record 1224;
+      TempBlobOEM@1005 : Record 99008535;
+      TempBlobUTF8@1000 : Record 99008535;
+      ProcessDataExch@1003 : Codeunit 1201;
+      RecRef@1008 : RecordRef;
+      OutStream@1006 : OutStream;
+      Encoding@1009 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.Encoding";
+      Reference@1004 : Text;
+    BEGIN
+      // Pre-Setup
+      TempBlobOEM.Blob.CREATEOUTSTREAM(OutStream);
+      Reference := LibraryUtility.GenerateRandomCode(Customer.FIELDNO(Name),DATABASE::Customer);
+      WriteCAMTFileWithReference(OutStream,'UTF-8',Reference);
+      ConvertEncoding(TempBlobOEM,TempBlobUTF8,Encoding.UTF8);
+
+      // Setup
+      CreateFormatDefinition(DataExch,DataExchDef,TempBlobUTF8,'/Document/BkToCstmrStmt/Stmt/Ntry/NtryRef');
+      CreateDataExchMapping(DataExchMapping,DataExchDef,DATABASE::Customer,Customer.FIELDNO(Name),1);
+      CODEUNIT.RUN(DataExchDef."Reading/Writing Codeunit",DataExch);
+
+      // Exercise.
+      RecRef.GETTABLE(Customer);
+      DataExchLineDef.SETRANGE("Data Exch. Def Code",DataExch."Data Exch. Def Code");
+      DataExchLineDef.FINDFIRST;
+      ProcessDataExch.ProcessColumnMapping(DataExch,DataExchLineDef,RecRef);
+
+      // Verify.
+      Customer.SETRANGE(Name,Reference);
+      Customer.FINDFIRST;
+    END;
+
+    [Test]
+    PROCEDURE RejectEmptyXMLFile@4();
+    VAR
+      DataExch@1001 : Record 1220;
+      DataExchDef@1002 : Record 1222;
+      DataExchField@1003 : Record 1221;
+      TempBlob@1004 : Record 99008535;
+    BEGIN
+      // Pre-Setup
+      TempBlob.INIT;
+
+      // Setup
+      CreateDataExchDef(DataExchDef);
+      CreateDataExch(DataExch,DataExchDef.Code,'',TempBlob);
+      SetupSourceMoq(DataExchDef,TempBlob);
+
+      // Execute
+      ASSERTERROR CODEUNIT.RUN(DataExchDef."Reading/Writing Codeunit",DataExch);
+
+      // Verify
+      Assert.ExpectedError('System.Xml.XmlDocument.Load failed');
+      DataExchField.SETRANGE("Data Exch. No.",DataExch."Entry No.");
+      Assert.IsTrue(DataExchField.ISEMPTY,'No line should be imported.');
+    END;
+
+    [Test]
+    PROCEDURE TestImportFileContentWhenNoFileChosen@21();
+    VAR
+      DataExch@1001 : Record 1220;
+      DataExchDef@1002 : Record 1222;
+      TempBlob@1000 : Record 99008535;
+    BEGIN
+      // Pre-Setup
+      TempBlob.INIT;
+
+      // Setup
+      CreateDataExchDef(DataExchDef);
+      SetupEmptySourceMoq(DataExchDef);
+
+      Assert.IsFalse(DataExch.ImportFileContent(DataExchDef),'Unexpected return value if user fails to choose a source file.');
+    END;
+
+    [Test]
+    PROCEDURE TestImportFileContentWhenFileChosen@25();
+    VAR
+      DataExch@1001 : Record 1220;
+      DataExchDef@1002 : Record 1222;
+      DataExchLineDef@1007 : Record 1227;
+      TempBlobOEM@1004 : Record 99008535;
+      TempBlobUTF8@1000 : Record 99008535;
+      OutStream@1006 : OutStream;
+      Encoding@1005 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.Encoding";
+      ReadFileContentStream@1008 : InStream;
+      ReadTempBlobStream@1009 : InStream;
+      FileContentTxt@1010 : Text;
+      TempBlobTxt@1011 : Text;
+    BEGIN
+      // Pre-Setup
+      TempBlobOEM.Blob.CREATEOUTSTREAM(OutStream);
+      WriteCAMTFile(OutStream,'UTF-8',NamespaceTxt);
+      ConvertEncoding(TempBlobOEM,TempBlobUTF8,Encoding.UTF8);
+
+      // Setup
+      CreateDataExchDef(DataExchDef);
+      CreateDataExchLineDef(DataExchLineDef,DataExchDef.Code,NamespaceTxt);
+      SetupSourceMoq(DataExchDef,TempBlobUTF8);
+
+      Assert.IsTrue(DataExch.ImportFileContent(DataExchDef),'Unexpected return value if user chooses a source file.');
+      DataExch."File Content".CREATEINSTREAM(ReadFileContentStream);
+      ReadFileContentStream.READTEXT(FileContentTxt);
+      TempBlobUTF8.Blob.CREATEINSTREAM(ReadTempBlobStream);
+      ReadTempBlobStream.READTEXT(TempBlobTxt);
+      Assert.AreEqual(FileContentTxt,TempBlobTxt,'Unexpected file content after user chooses a source file.');
+    END;
+
+    [Test]
+    PROCEDURE DefaultNamespaceIsIncorrect@22();
+    VAR
+      DataExch@1001 : Record 1220;
+      DataExchDef@1003 : Record 1222;
+      DataExchLineDef@1007 : Record 1227;
+      TempBlobOEM@1005 : Record 99008535;
+      TempBlobUTF8@1000 : Record 99008535;
+      OutStream@1006 : OutStream;
+      Encoding@1009 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.Encoding";
+    BEGIN
+      // Pre-Setup
+      TempBlobOEM.Blob.CREATEOUTSTREAM(OutStream);
+      WriteCAMTFile(OutStream,'UTF-8','');
+      ConvertEncoding(TempBlobOEM,TempBlobUTF8,Encoding.UTF8);
+
+      // Setup
+      CreateDataExchDef(DataExchDef);
+      // when an empty namespace is specified in the Data Exch Line Def, no namespace validation should be done
+      CreateDataExchLineDef(DataExchLineDef,DataExchDef.Code,'');
+      CreateDataExch(DataExch,DataExchDef.Code,DataExchLineDef.Code,TempBlobUTF8);
+
+      // Execute & Verify
+      // The validation is that no err is thrown
+      CODEUNIT.RUN(DataExchDef."Reading/Writing Codeunit",DataExch);
+    END;
+
+    [Test]
+    PROCEDURE DefaultNamespaceIsNotDefined@29();
+    VAR
+      DataExch@1001 : Record 1220;
+      DataExchDef@1003 : Record 1222;
+      DataExchLineDef@1007 : Record 1227;
+      TempBlobOEM@1005 : Record 99008535;
+      TempBlobUTF8@1000 : Record 99008535;
+      OutStream@1006 : OutStream;
+      Encoding@1009 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.Encoding";
+    BEGIN
+      // Pre-Setup
+      TempBlobOEM.Blob.CREATEOUTSTREAM(OutStream);
+      WriteCAMTFile(OutStream,'UTF-8',IncorrectNamespaceTxt);
+      ConvertEncoding(TempBlobOEM,TempBlobUTF8,Encoding.UTF8);
+
+      // Setup
+      CreateDataExchDef(DataExchDef);
+      CreateDataExchLineDef(DataExchLineDef,DataExchDef.Code,NamespaceTxt);
+      CreateDataExch(DataExch,DataExchDef.Code,DataExchLineDef.Code,TempBlobUTF8);
+
+      // Execute
+      ASSERTERROR CODEUNIT.RUN(DataExchDef."Reading/Writing Codeunit",DataExch);
+
+      // Verify
+      Assert.ExpectedError(STRSUBSTNO(IncorrectNamespaceErr,IncorrectNamespaceTxt,NamespaceTxt));
+    END;
+
+    [Test]
+    PROCEDURE InsertFieldRecWithLongXMLNodeValue@28();
+    VAR
+      DataExchField@1000 : Record 1221;
+      LongValue@1001 : Text;
+    BEGIN
+      // [FEATURE] [UT]
+      // [SCENARIO 124068] InsertRecXMLField with long XML Node Value
+
+      // [GIVEN] Long text with length more that max length of the DataExchField.Value
+      LongValue := PADSTR(LibraryUtility.GenerateGUID,MAXSTRLEN(DataExchField.Value),'0') + '0';
+
+      // [WHEN] Run InsertRecXMLField function
+      DataExchField.InsertRecXMLField(0,0,0,'',LongValue,'');
+      DataExchField.GET(0,0,0,'');
+
+      // [THEN] Extra symbols cut in DataExchField.Value
+      Assert.AreEqual(
+        COPYSTR(LongValue,1,MAXSTRLEN(DataExchField.Value)),
+        DataExchField.Value,
+        LongValueIncorrectlyProcessedErr);
+    END;
+
+    LOCAL PROCEDURE WriteCAMTFile@3(OutStream@1000 : OutStream;Encoding@1001 : Text;Namespace@1002 : Text);
+    BEGIN
+      WriteLine(OutStream,'<?xml version="1.0" encoding="' + Encoding + '"?>');
+      WriteLine(OutStream,
+        '<Document xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="' + Namespace + '">');
+      WriteLine(OutStream,'  <BkToCstmrStmt>');
+      WriteLine(OutStream,'    <GrpHdr>');
+      WriteLine(OutStream,'      <MsgId>AAAASESS-FP-STAT001</MsgId>');
+      WriteLine(OutStream,'    </GrpHdr>');
+      WriteLine(OutStream,'    <Stmt>');
+      WriteLine(OutStream,'      <Id>AAAASESS-FP-STAT001</Id>');
+      WriteLine(OutStream,'      <Ntry>');
+      WriteLine(OutStream,'        <Amt Ccy="SEK">105678.50</Amt>');
+      WriteLine(OutStream,'        <CdtDbtInd>CRDT</CdtDbtInd>');
+      WriteLine(OutStream,'        <Sts>BOOK</Sts>');
+      WriteLine(OutStream,'      </Ntry>');
+      WriteLine(OutStream,'    </Stmt>');
+      WriteLine(OutStream,'  </BkToCstmrStmt>');
+      WriteLine(OutStream,'</Document>');
+    END;
+
+    LOCAL PROCEDURE WriteCAMTFileWithReference@17(OutStream@1000 : OutStream;Encoding@1001 : Text;Reference@1002 : Text);
+    BEGIN
+      WriteLine(OutStream,'<?xml version="1.0" encoding="' + Encoding + '"?>');
+      WriteLine(OutStream,
+        '<Document xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="' + NamespaceTxt + '">');
+      WriteLine(OutStream,'  <BkToCstmrStmt>');
+      WriteLine(OutStream,'    <GrpHdr>');
+      WriteLine(OutStream,'      <MsgId>AAAASESS-FP-STAT001</MsgId>');
+      WriteLine(OutStream,'    </GrpHdr>');
+      WriteLine(OutStream,'    <Stmt>');
+      WriteLine(OutStream,'      <Id>AAAASESS-FP-STAT001</Id>');
+      WriteLine(OutStream,'      <Ntry>');
+      WriteLine(OutStream,'        <Amt Ccy="SEK">105678.50</Amt>');
+      WriteLine(OutStream,'        <CdtDbtInd>CRDT</CdtDbtInd>');
+      WriteLine(OutStream,'        <Sts>BOOK</Sts>');
+      WriteLine(OutStream,'        <NtryRef>' + Reference + '</NtryRef>');
+      WriteLine(OutStream,'      </Ntry>');
+      WriteLine(OutStream,'    </Stmt>');
+      WriteLine(OutStream,'  </BkToCstmrStmt>');
+      WriteLine(OutStream,'</Document>');
+    END;
+
+    LOCAL PROCEDURE WriteCAMTFileWithMultiLineBankStatement@66(OutStream@1000 : OutStream;Encoding@1001 : Text);
+    BEGIN
+      WriteLine(OutStream,'<?xml version="1.0" encoding="' + Encoding + '"?>');
+      WriteLine(OutStream,
+        '<Document xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="' + NamespaceTxt + '">');
+      WriteLine(OutStream,'  <BkToCstmrStmt>');
+      WriteLine(OutStream,'    <GrpHdr>');
+      WriteLine(OutStream,'      <MsgId>AAAASESS-FP-STAT001</MsgId>');
+      WriteLine(OutStream,'    </GrpHdr>');
+      WriteLine(OutStream,'    <Stmt>');
+      WriteLine(OutStream,'      <Id>AAAASESS-FP-STAT001</Id>');
+      WriteLine(OutStream,'      <Ntry>');
+      WriteLine(OutStream,'        <Amt Ccy="SEK">105678.50</Amt>');
+      WriteLine(OutStream,'        <CdtDbtInd>CRDT</CdtDbtInd>');
+      WriteLine(OutStream,'        <Sts>BOOK</Sts>');
+      WriteLine(OutStream,'      </Ntry>');
+      WriteLine(OutStream,'      <Ntry>');
+      WriteLine(OutStream,'        <Amt Ccy="DKK">216789.61</Amt>');
+      WriteLine(OutStream,'        <CdtDbtInd>CRDT</CdtDbtInd>');
+      WriteLine(OutStream,'        <Sts>PDNG</Sts>');
+      WriteLine(OutStream,'      </Ntry>');
+      WriteLine(OutStream,'    </Stmt>');
+      WriteLine(OutStream,'  </BkToCstmrStmt>');
+      WriteLine(OutStream,'</Document>');
+    END;
+
+    LOCAL PROCEDURE WriteCAMTFileWithRepeatedElement@13(OutStream@1000 : OutStream;Encoding@1001 : Text);
+    BEGIN
+      WriteLine(OutStream,'<?xml version="1.0" encoding="' + Encoding + '"?>');
+      WriteLine(OutStream,
+        '<Document xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="' + NamespaceTxt + '">');
+      WriteLine(OutStream,'  <BkToCstmrStmt>');
+      WriteLine(OutStream,'    <GrpHdr>');
+      WriteLine(OutStream,'      <MsgId>AAAASESS-FP-STAT001</MsgId>');
+      WriteLine(OutStream,'    </GrpHdr>');
+      WriteLine(OutStream,'    <Stmt>');
+      WriteLine(OutStream,'      <Id>AAAASESS-FP-STAT001</Id>');
+      WriteLine(OutStream,'      <Bal>');
+      WriteLine(OutStream,'        <Amt Ccy="SEK">500000</Amt>');
+      WriteLine(OutStream,'        <CdtDbtInd>CRDT</CdtDbtInd>');
+      WriteLine(OutStream,'      </Bal>');
+      WriteLine(OutStream,'      <Bal>');
+      WriteLine(OutStream,'        <Amt Ccy="SEK">435678.50</Amt>');
+      WriteLine(OutStream,'        <CdtDbtInd>CRDT</CdtDbtInd>');
+      WriteLine(OutStream,'      </Bal>');
+      WriteLine(OutStream,'      <Ntry>');
+      WriteLine(OutStream,'        <Amt Ccy="SEK">105678.50</Amt>');
+      WriteLine(OutStream,'        <CdtDbtInd>CRDT</CdtDbtInd>');
+      WriteLine(OutStream,'        <Sts>BOOK</Sts>');
+      WriteLine(OutStream,'      </Ntry>');
+      WriteLine(OutStream,'    </Stmt>');
+      WriteLine(OutStream,'  </BkToCstmrStmt>');
+      WriteLine(OutStream,'</Document>');
+    END;
+
+    LOCAL PROCEDURE WriteCAMTFileWithNamedNamespace@15(OutStream@1000 : OutStream;Encoding@1001 : Text);
+    BEGIN
+      WriteLine(OutStream,'<?xml version="1.0" encoding="' + Encoding + '"?>');
+      WriteLine(OutStream,
+        '<Document xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ns="' + NamespaceTxt + '">');
+      WriteLine(OutStream,'  <ns:BkToCstmrStmt>');
+      WriteLine(OutStream,'    <ns:GrpHdr>');
+      WriteLine(OutStream,'      <ns:MsgId>AAAASESS-FP-STAT001</ns:MsgId>');
+      WriteLine(OutStream,'    </ns:GrpHdr>');
+      WriteLine(OutStream,'    <ns:Stmt>');
+      WriteLine(OutStream,'      <ns:Id>AAAASESS-FP-STAT001</ns:Id>');
+      WriteLine(OutStream,'      <ns:Ntry>');
+      WriteLine(OutStream,'        <ns:Amt Ccy="SEK">105678.50</ns:Amt>');
+      WriteLine(OutStream,'        <ns:CdtDbtInd>CRDT</ns:CdtDbtInd>');
+      WriteLine(OutStream,'        <ns:Sts>BOOK</ns:Sts>');
+      WriteLine(OutStream,'      </ns:Ntry>');
+      WriteLine(OutStream,'    </ns:Stmt>');
+      WriteLine(OutStream,'  </ns:BkToCstmrStmt>');
+      WriteLine(OutStream,'</Document>');
+    END;
+
+    LOCAL PROCEDURE WriteCAMTFileWithNamespaceOverride@36(OutStream@1000 : OutStream;Encoding@1001 : Text);
+    BEGIN
+      WriteLine(OutStream,'<?xml version="1.0" encoding="' + Encoding + '"?>');
+      WriteLine(OutStream,
+        '<Document xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="' + IncorrectNamespaceTxt + '">');
+      WriteLine(OutStream,'  <BkToCstmrStmt xmlns:ns="' + NamespaceTxt + '">');
+      WriteLine(OutStream,'    <ns:GrpHdr>');
+      WriteLine(OutStream,'      <ns:MsgId>AAAASESS-FP-STAT001</ns:MsgId>');
+      WriteLine(OutStream,'    </ns:GrpHdr>');
+      WriteLine(OutStream,'    <ns:Stmt>');
+      WriteLine(OutStream,'      <ns:Id>AAAASESS-FP-STAT001</ns:Id>');
+      WriteLine(OutStream,'      <ns:Ntry>');
+      WriteLine(OutStream,'        <ns:Amt Ccy="SEK">105678.50</ns:Amt>');
+      WriteLine(OutStream,'        <ns:CdtDbtInd>CRDT</ns:CdtDbtInd>');
+      WriteLine(OutStream,'        <ns:Sts>BOOK</ns:Sts>');
+      WriteLine(OutStream,'      </ns:Ntry>');
+      WriteLine(OutStream,'    </ns:Stmt>');
+      WriteLine(OutStream,'  </BkToCstmrStmt>');
+      WriteLine(OutStream,'</Document>');
+    END;
+
+    LOCAL PROCEDURE WriteCAMTFileWithInnerNamedNamespace@38(OutStream@1000 : OutStream;Encoding@1001 : Text);
+    BEGIN
+      WriteLine(OutStream,'<?xml version="1.0" encoding="' + Encoding + '"?>');
+      WriteLine(OutStream,
+        '<Document xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">');
+      WriteLine(OutStream,'  <BkToCstmrStmt xmlns:ns="' + NamespaceTxt + '">');
+      WriteLine(OutStream,'    <ns:GrpHdr>');
+      WriteLine(OutStream,'      <ns:MsgId>AAAASESS-FP-STAT001</ns:MsgId>');
+      WriteLine(OutStream,'    </ns:GrpHdr>');
+      WriteLine(OutStream,'    <ns:Stmt>');
+      WriteLine(OutStream,'      <ns:Id>AAAASESS-FP-STAT001</ns:Id>');
+      WriteLine(OutStream,'      <ns:Ntry>');
+      WriteLine(OutStream,'        <ns:Amt Ccy="SEK">105678.50</ns:Amt>');
+      WriteLine(OutStream,'        <ns:CdtDbtInd>CRDT</ns:CdtDbtInd>');
+      WriteLine(OutStream,'        <ns:Sts>BOOK</ns:Sts>');
+      WriteLine(OutStream,'      </ns:Ntry>');
+      WriteLine(OutStream,'    </ns:Stmt>');
+      WriteLine(OutStream,'  </BkToCstmrStmt>');
+      WriteLine(OutStream,'</Document>');
+    END;
+
+    LOCAL PROCEDURE WriteCAMTFileWithInnerDefaultNamespace@20(OutStream@1000 : OutStream;Encoding@1001 : Text);
+    BEGIN
+      WriteLine(OutStream,'<?xml version="1.0" encoding="' + Encoding + '"?>');
+      WriteLine(OutStream,
+        '<Document xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">');
+      WriteLine(OutStream,'  <BkToCstmrStmt xmlns="' + NamespaceTxt + '">');
+      WriteLine(OutStream,'    <GrpHdr>');
+      WriteLine(OutStream,'      <MsgId>AAAASESS-FP-STAT001</MsgId>');
+      WriteLine(OutStream,'    </GrpHdr>');
+      WriteLine(OutStream,'    <Stmt>');
+      WriteLine(OutStream,'      <Id>AAAASESS-FP-STAT001</Id>');
+      WriteLine(OutStream,'      <Ntry>');
+      WriteLine(OutStream,'        <Amt Ccy="SEK">105678.50</Amt>');
+      WriteLine(OutStream,'        <CdtDbtInd>CRDT</CdtDbtInd>');
+      WriteLine(OutStream,'        <Sts>BOOK</Sts>');
+      WriteLine(OutStream,'      </Ntry>');
+      WriteLine(OutStream,'    </Stmt>');
+      WriteLine(OutStream,'  </BkToCstmrStmt>');
+      WriteLine(OutStream,'</Document>');
+    END;
+
+    LOCAL PROCEDURE WriteCAMTFileWithDataTypeMismatch@11(OutStream@1000 : OutStream;Encoding@1001 : Text);
+    BEGIN
+      WriteLine(OutStream,'<?xml version="1.0" encoding="' + Encoding + '"?>');
+      WriteLine(OutStream,
+        '<Document xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="' + NamespaceTxt + '">');
+      WriteLine(OutStream,'  <BkToCstmrStmt>');
+      WriteLine(OutStream,'    <GrpHdr>');
+      WriteLine(OutStream,'      <MsgId>AAAASESS-FP-STAT001</MsgId>');
+      WriteLine(OutStream,'    </GrpHdr>');
+      WriteLine(OutStream,'    <Stmt>');
+      WriteLine(OutStream,'      <Id>AAAASESS-FP-STAT001</Id>');
+      WriteLine(OutStream,'      <Ntry>');
+      WriteLine(OutStream,'        <Amt Ccy="SEK">Hello, World!</Amt>');
+      WriteLine(OutStream,'        <CdtDbtInd>CRDT</CdtDbtInd>');
+      WriteLine(OutStream,'        <Sts>BOOK</Sts>');
+      WriteLine(OutStream,'      </Ntry>');
+      WriteLine(OutStream,'    </Stmt>');
+      WriteLine(OutStream,'  </BkToCstmrStmt>');
+      WriteLine(OutStream,'</Document>');
+    END;
+
+    LOCAL PROCEDURE WriteCAMTFileWithPreHeaderComment@83(OutStream@1000 : OutStream;Encoding@1001 : Text);
+    BEGIN
+      WriteLine(OutStream,'<?xml version="1.0" encoding="' + Encoding + '"?>');
+      WriteLine(OutStream,'<?Hello World?>');
+      WriteLine(OutStream,
+        '<Document xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="' + NamespaceTxt + '">');
+      WriteLine(OutStream,'  <BkToCstmrStmt>');
+      WriteLine(OutStream,'    <GrpHdr>');
+      WriteLine(OutStream,'      <MsgId>AAAASESS-FP-STAT001</MsgId>');
+      WriteLine(OutStream,'    </GrpHdr>');
+      WriteLine(OutStream,'    <Stmt>');
+      WriteLine(OutStream,'      <Id>AAAASESS-FP-STAT001</Id>');
+      WriteLine(OutStream,'      <Ntry>');
+      WriteLine(OutStream,'        <Amt Ccy="SEK">105678.50</Amt>');
+      WriteLine(OutStream,'        <CdtDbtInd>CRDT</CdtDbtInd>');
+      WriteLine(OutStream,'        <Sts>BOOK</Sts>');
+      WriteLine(OutStream,'      </Ntry>');
+      WriteLine(OutStream,'    </Stmt>');
+      WriteLine(OutStream,'  </BkToCstmrStmt>');
+      WriteLine(OutStream,'</Document>');
+    END;
+
+    LOCAL PROCEDURE WriteCAMTFileWithTextValueInParentElement@81(OutStream@1000 : OutStream;Encoding@1001 : Text);
+    BEGIN
+      WriteLine(OutStream,'<?xml version="1.0" encoding="' + Encoding + '"?>');
+      WriteLine(OutStream,
+        '<Document xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="' + NamespaceTxt + '">');
+      WriteLine(OutStream,'  <BkToCstmrStmt>');
+      WriteLine(OutStream,'    <GrpHdr>');
+      WriteLine(OutStream,'      <MsgId>AAAASESS-FP-STAT001</MsgId>');
+      WriteLine(OutStream,'    </GrpHdr>');
+      WriteLine(OutStream,'    <Stmt> Hello, World! ');
+      WriteLine(OutStream,'      <Id>AAAASESS-FP-STAT001</Id>');
+      WriteLine(OutStream,'      <Ntry>');
+      WriteLine(OutStream,'        <Amt Ccy="SEK">105678.50</Amt>');
+      WriteLine(OutStream,'        <CdtDbtInd>CRDT</CdtDbtInd>');
+      WriteLine(OutStream,'        <Sts>BOOK</Sts>');
+      WriteLine(OutStream,'      </Ntry>');
+      WriteLine(OutStream,'    </Stmt>');
+      WriteLine(OutStream,'  </BkToCstmrStmt>');
+      WriteLine(OutStream,'</Document>');
+    END;
+
+    LOCAL PROCEDURE WriteLine@7(OutStream@1000 : OutStream;Text@1001 : Text);
+    BEGIN
+      OutStream.WRITETEXT(Text);
+      OutStream.WRITETEXT;
+    END;
+
+    LOCAL PROCEDURE ConvertEncoding@35(SourceTempBlob@1001 : Record 99008535;VAR DestinationTempBlob@1004 : Record 99008535;Encoding@1003 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.Encoding");
+    VAR
+      Writer@1000 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.IO.StreamWriter";
+      InStream@1002 : InStream;
+      OutStream@1005 : OutStream;
+      EncodedText@1006 : Text;
+    BEGIN
+      SourceTempBlob.Blob.CREATEINSTREAM(InStream);
+      DestinationTempBlob.Blob.CREATEOUTSTREAM(OutStream);
+
+      Writer := Writer.StreamWriter(OutStream,Encoding);
+
+      WHILE 0 <> InStream.READTEXT(EncodedText) DO
+        Writer.WriteLine(EncodedText);
+
+      Writer.Close;
+    END;
+
+    LOCAL PROCEDURE SetupSourceMoq@41(VAR DataExchDef@1001 : Record 1222;TempBlob@1000 : Record 99008535);
+    BEGIN
+      TempBlob."Primary Key" := BlobKey;
+      BlobKey += 1;
+      TempBlob.INSERT;
+
+      DataExchDef."Ext. Data Handling Codeunit" := CODEUNIT::"ERM PE Source test moq";
+      DataExchDef.MODIFY;
+    END;
+
+    LOCAL PROCEDURE SetupEmptySourceMoq@18(VAR DataExchDef@1001 : Record 1222);
+    BEGIN
+      DataExchDef."Ext. Data Handling Codeunit" := CODEUNIT::"ERM PE Empty Source test moq";
+      DataExchDef.MODIFY;
+    END;
+
+    LOCAL PROCEDURE CreateFormatDefinition@24(VAR DataExch@1000 : Record 1220;VAR DataExchDef@1004 : Record 1222;TempBlob@1006 : Record 99008535;Path@1005 : Text[250]);
+    VAR
+      DataExchColumnDef@1003 : Record 1223;
+      DataExchLineDef@1001 : Record 1227;
+    BEGIN
+      CreateDataExchDef(DataExchDef);
+      CreateDataExchLineDef(DataExchLineDef,DataExchDef.Code,NamespaceTxt);
+      CreateDataExch(DataExch,DataExchDef.Code,DataExchLineDef.Code,TempBlob);
+      DataExchColumnDef.InsertRecForImport(DataExchDef.Code,DataExchLineDef.Code,1,
+        LibraryUtility.GenerateGUID,'',FALSE,DataExchColumnDef."Data Type"::Text,'','');
+      DataExchColumnDef.Path := Path;
+      DataExchColumnDef.MODIFY(TRUE);
+    END;
+
+    LOCAL PROCEDURE CreateDataExchDef@46(VAR DataExchDef@1000 : Record 1222);
+    BEGIN
+      WITH DataExchDef DO BEGIN
+        INIT;
+        Code := LibraryUtility.GenerateRandomCode(FIELDNO(Code),DATABASE::"Data Exch. Def");
+        Type := Type::"Bank Statement Import";
+        "File Encoding" := "File Encoding"::"UTF-8";
+        "File Type" := "File Type"::Xml;
+        "Reading/Writing Codeunit" := CODEUNIT::"Import Bank Statement";
+        INSERT;
+      END;
+    END;
+
+    LOCAL PROCEDURE CreateDataExchLineDef@8(VAR DataExchLineDef@1000 : Record 1227;DataExchDefCode@1001 : Code[20];ExpectedNamespace@1002 : Text[250]);
+    BEGIN
+      DataExchLineDef.InsertRec(DataExchDefCode,LibraryUtility.GenerateGUID,'',0);
+      DataExchLineDef."Data Line Tag" := '/Document/BkToCstmrStmt/Stmt/Ntry';
+      DataExchLineDef.Namespace := ExpectedNamespace;
+      DataExchLineDef.MODIFY(TRUE);
+    END;
+
+    LOCAL PROCEDURE CreateDataExch@5(VAR DataExch@1000 : Record 1220;DataExchDefCode@1001 : Code[20];DataExchLineDefCode@1004 : Code[20];TempBlob@1002 : Record 99008535);
+    VAR
+      InStream@1003 : InStream;
+    BEGIN
+      TempBlob.Blob.CREATEINSTREAM(InStream);
+      DataExch.InsertRec('',InStream,DataExchDefCode);
+      DataExch."Data Exch. Line Def Code" := DataExchLineDefCode;
+      DataExch.MODIFY(TRUE);
+    END;
+
+    LOCAL PROCEDURE CreateDataExchMapping@16(VAR DataExchMapping@1000 : Record 1224;DataExchDef@1001 : Record 1222;TableId@1002 : Integer;FieldId@1005 : Integer;ColumnNo@1004 : Integer);
+    VAR
+      DataExchFieldMapping@1003 : Record 1225;
+      DataExchLineDef@1006 : Record 1227;
+    BEGIN
+      DataExchLineDef.SETRANGE("Data Exch. Def Code",DataExchDef.Code);
+      DataExchLineDef.FINDFIRST;
+      DataExchMapping.InsertRecForImport(DataExchDef.Code,DataExchLineDef.Code,
+        TableId,DataExchDef.Code,0,0);
+      DataExchFieldMapping.InsertRec(DataExchDef.Code,DataExchLineDef.Code,
+        TableId,ColumnNo,FieldId,FALSE,0);
+    END;
+
+    LOCAL PROCEDURE AssertDataInTable@6(VAR ExpectedDataExchField@1000 : Record 1221;VAR ActualDataExchField@1001 : Record 1221;Msg@1007 : Text);
+    VAR
+      LineNo@1008 : Integer;
+    BEGIN
+      ExpectedDataExchField.FINDFIRST;
+      ActualDataExchField.FINDFIRST;
+      REPEAT
+        LineNo += 1;
+        AreEqualRecords(ExpectedDataExchField,ActualDataExchField,STRSUBSTNO(TableErrorMsg,Msg,LineNo));
+      UNTIL (ExpectedDataExchField.NEXT = 0) OR (ActualDataExchField.NEXT = 0);
+      Assert.AreEqual(ExpectedDataExchField.COUNT,ActualDataExchField.COUNT,'Row count does not match');
+    END;
+
+    LOCAL PROCEDURE AreEqualRecords@30(ExpectedRecord@1000 : Variant;ActualRecord@1001 : Variant;Msg@1007 : Text);
+    VAR
+      ExpectedRecRef@1003 : RecordRef;
+      ActualRecRef@1002 : RecordRef;
+      i@1006 : Integer;
+    BEGIN
+      ExpectedRecRef.GETTABLE(ExpectedRecord);
+      ActualRecRef.GETTABLE(ActualRecord);
+
+      Assert.AreEqual(ExpectedRecRef.NUMBER,ActualRecRef.NUMBER,'Tables are not the same');
+
+      FOR i := 1 TO ExpectedRecRef.FIELDCOUNT DO
+        IF IsSupportedType(ExpectedRecRef.FIELDINDEX(i).VALUE) THEN
+          Assert.AreEqual(ExpectedRecRef.FIELDINDEX(i).VALUE,ActualRecRef.FIELDINDEX(i).VALUE,
+            STRSUBSTNO(AssertMsg,Msg,ExpectedRecRef.FIELDINDEX(i).NAME));
+    END;
+
+    LOCAL PROCEDURE IsSupportedType@31(Value@1000 : Variant) : Boolean;
+    BEGIN
+      EXIT(Value.ISBOOLEAN OR
+        Value.ISOPTION OR
+        Value.ISINTEGER OR
+        Value.ISDECIMAL OR
+        Value.ISTEXT OR
+        Value.ISCODE OR
+        Value.ISDATE OR
+        Value.ISTIME);
+    END;
+
+    BEGIN
+    END.
+  }
+}
+
