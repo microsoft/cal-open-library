@@ -8,5 +8,6 @@
     "testObjectsPath":  "Test",
     "dockerImage":  "bcinsider.azurecr.io/bcsandbox-master",
     "navVersion":  "12.0.0.0",
-    "branchId":  "82a7c30d-63ac-4847-9bf3-3df4b0da49f0"
+    "baseBranch": "master",
+    "branchId":  "a31afb76-d7ab-41f5-a233-1054291d8db0"
 }
