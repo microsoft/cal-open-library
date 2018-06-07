@@ -1,0 +1,70 @@
+OBJECT Codeunit 3016 DotNet_NavAppALInstaller
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      DotNetNavAppALInstaller@1000 : DotNet "'Microsoft.Dynamics.Nav.Ncl, Version=13.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.Microsoft.Dynamics.Nav.Runtime.Apps.NavAppALInstaller";
+
+    PROCEDURE NavAppALInstaller@5();
+    BEGIN
+      // do not make external
+      DotNetNavAppALInstaller := DotNetNavAppALInstaller.NavAppALInstaller
+    END;
+
+    PROCEDURE ALInstallNavApp@2(PackageID@1000 : GUID;Lcid@1001 : Integer);
+    BEGIN
+      // do not make external
+      DotNetNavAppALInstaller.ALInstallNavApp(PackageID,Lcid)
+    END;
+
+    PROCEDURE ALGetAppDependenciesToInstallString@3(PackageID@1000 : Text) : Text;
+    BEGIN
+      // do not make external
+      EXIT(DotNetNavAppALInstaller.ALGetAppDependenciesToInstallString(PackageID))
+    END;
+
+    PROCEDURE ALGetDependentAppsToUninstallString@4(PackageID@1000 : GUID) : Text;
+    BEGIN
+      // do not make external
+      EXIT(DotNetNavAppALInstaller.ALGetDependentAppsToUninstallString(PackageID))
+    END;
+
+    PROCEDURE ALUninstallNavApp@6(PackageID@1000 : GUID);
+    BEGIN
+      // do not make external
+      DotNetNavAppALInstaller.ALUninstallNavApp(PackageID)
+    END;
+
+    PROCEDURE ALUnpublishNavTenantApp@7(PackageID@1000 : GUID);
+    BEGIN
+      // do not make external
+      DotNetNavAppALInstaller.ALUnpublishNavTenantApp(PackageID)
+    END;
+
+    PROCEDURE GetNavAppALInstaller@8(VAR DotNetNavAppALInstaller2@1000 : DotNet "'Microsoft.Dynamics.Nav.Ncl, Version=13.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.Microsoft.Dynamics.Nav.Runtime.Apps.NavAppALInstaller");
+    BEGIN
+      DotNetNavAppALInstaller2 := DotNetNavAppALInstaller;
+    END;
+
+    PROCEDURE SetNavAppALInstaller@9(DotNetNavAppALInstaller2@1000 : DotNet "'Microsoft.Dynamics.Nav.Ncl, Version=13.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.Microsoft.Dynamics.Nav.Runtime.Apps.NavAppALInstaller");
+    BEGIN
+      DotNetNavAppALInstaller := DotNetNavAppALInstaller2
+    END;
+
+    BEGIN
+    END.
+  }
+}
+

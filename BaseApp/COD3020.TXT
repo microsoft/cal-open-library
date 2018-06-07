@@ -1,0 +1,46 @@
+OBJECT Codeunit 3020 DotNet_NavDesignerALFunctions
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      DotNetNavDesignerALFunctions@1000 : DotNet "'Microsoft.Dynamics.Nav.Ncl, Version=13.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.Microsoft.Dynamics.Nav.Runtime.Designer.NavDesignerALFunctions";
+
+    PROCEDURE GenerateDesignerPackageZipStreamByVersion@2(VAR OutStream@1000 : OutStream;ID@1001 : GUID;VersionString@1002 : Text);
+    BEGIN
+      // do not make external
+      DotNetNavDesignerALFunctions.GenerateDesignerPackageZipStreamByVersion(OutStream,ID,VersionString)
+    END;
+
+    PROCEDURE SanitizeDesignerFileName@3(Filename@1000 : Text;ReplacementCharacter@1001 : Char) : Text;
+    BEGIN
+      // do not make external
+      EXIT(DotNetNavDesignerALFunctions.SanitizeDesignerFileName(Filename,ReplacementCharacter))
+    END;
+
+    PROCEDURE GetNavDesignerALFunctions@1(VAR DotNetNavDesignerALFunctions2@1000 : DotNet "'Microsoft.Dynamics.Nav.Ncl, Version=13.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.Microsoft.Dynamics.Nav.Runtime.Designer.NavDesignerALFunctions");
+    BEGIN
+      DotNetNavDesignerALFunctions2 := DotNetNavDesignerALFunctions
+    END;
+
+    PROCEDURE SetNavDesignerALFunctions@4(DotNetNavDesignerALFunctions2@1000 : DotNet "'Microsoft.Dynamics.Nav.Ncl, Version=13.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.Microsoft.Dynamics.Nav.Runtime.Designer.NavDesignerALFunctions");
+    BEGIN
+      DotNetNavDesignerALFunctions := DotNetNavDesignerALFunctions2
+    END;
+
+    BEGIN
+    END.
+  }
+}
+

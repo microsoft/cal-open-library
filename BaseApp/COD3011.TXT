@@ -1,0 +1,49 @@
+OBJECT Codeunit 3011 DotNet_ImageFormatConverter
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      DotNetImageFormatConverter@1000 : DotNet "'System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a'.System.Drawing.ImageFormatConverter";
+
+    [External]
+    PROCEDURE InitImageFormatConverter@2();
+    BEGIN
+      DotNetImageFormatConverter := DotNetImageFormatConverter.ImageFormatConverter
+    END;
+
+    [External]
+    PROCEDURE ConvertToString@3(VAR DotNet_ImageFormat@1000 : Codeunit 3012) : Text;
+    VAR
+      DotNetImageFormat@1001 : DotNet "'System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a'.System.Drawing.Imaging.ImageFormat";
+    BEGIN
+      DotNet_ImageFormat.GetImageFormat(DotNetImageFormat);
+      EXIT(DotNetImageFormatConverter.ConvertToString(DotNetImageFormat))
+    END;
+
+    PROCEDURE GetImageFormatConverter@4(VAR DotNetImageFormatConverter2@1000 : DotNet "'System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a'.System.Drawing.ImageFormatConverter");
+    BEGIN
+      DotNetImageFormatConverter2 := DotNetImageFormatConverter
+    END;
+
+    PROCEDURE SetImageFormatConverter@5(DotNetImageFormatConverter2@1000 : DotNet "'System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a'.System.Drawing.ImageFormatConverter");
+    BEGIN
+      DotNetImageFormatConverter := DotNetImageFormatConverter2
+    END;
+
+    BEGIN
+    END.
+  }
+}
+

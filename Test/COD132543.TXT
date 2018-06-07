@@ -1,0 +1,655 @@
+OBJECT Codeunit 132543 Data Exch. Def UT
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=Test,Dev,ERM,All;
+  }
+  PROPERTIES
+  {
+    Subtype=Test;
+    TestPermissions=Disabled;
+    OnRun=BEGIN
+            // [FEATURE] [Data Exchange] [UT]
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      LibraryUtility@1002 : Codeunit 131000;
+      LibraryPaymentExport@1006 : Codeunit 130100;
+      Assert@1003 : Codeunit 130000;
+      LibraryXMLRead@1007 : Codeunit 131335;
+      DefaultTxt@1004 : TextConst '@@@=Please translate;ENU=DEFAULT';
+      ServerFileName@1005 : Text;
+      PositivePayFileTypeErr@1000 : TextConst 'ENU=The positive pay file that you are exporting must be of type Fixed Text or Variable Text.';
+      AssertIsNotFalseOnInsertFailedErr@1001 : TextConst 'ENU=The record should not be inserted.';
+      AssertIsNotTrueOnInsertFailedErr@1008 : TextConst 'ENU=The record should be inserted.';
+
+    [Test]
+    PROCEDURE InsertDataExchDef@1();
+    VAR
+      DataExchDef@1000 : Record 1222;
+      DataExchLineDef@1001 : Record 1227;
+      DataExchDefCard@1002 : TestPage 1210;
+      DataExchCode@1003 : Code[20];
+    BEGIN
+      // Setup
+      DataExchDefCard.OPENNEW;
+      DataExchCode := LibraryUtility.GenerateRandomCode(DataExchDef.FIELDNO(Code),DATABASE::"Data Exch. Def");
+
+      // Exercise
+      DataExchDefCard.Code.SETVALUE(DataExchCode);
+      DataExchDefCard.OK.INVOKE;
+
+      // Verify
+      DataExchDef.GET(DataExchCode);
+      DataExchDef.TESTFIELD(Name,DataExchDef.Code);
+      DataExchLineDef.GET(DataExchDef.Code,DefaultTxt);
+      DataExchLineDef.TESTFIELD(Code,DefaultTxt);
+      DataExchLineDef.TESTFIELD(Name,DefaultTxt);
+    END;
+
+    [Test]
+    PROCEDURE DeleteDataExchDef@4();
+    VAR
+      DataExchDef@1000 : Record 1222;
+      DataExchLineDef@1001 : Record 1227;
+      DataExchDefCard@1003 : TestPage 1210;
+      DataExchCode@1002 : Code[20];
+    BEGIN
+      // Setup
+      DataExchDefCard.OPENNEW;
+      DataExchCode := LibraryUtility.GenerateRandomCode(DataExchDef.FIELDNO(Code),DATABASE::"Data Exch. Def");
+
+      // Exercise
+      DataExchDefCard.Code.SETVALUE(DataExchCode);
+      DataExchDefCard.OK.INVOKE;
+      DataExchDef.GET(DataExchCode);
+
+      // Pre-Verify
+      Assert.IsTrue(DataExchLineDef.GET(DataExchDef.Code,DefaultTxt),'');
+
+      // Exercise
+      DataExchDef.DELETE(TRUE);
+
+      // Verify
+      Assert.IsFalse(DataExchLineDef.GET(DataExchDef.Code,DefaultTxt),'');
+    END;
+
+    [Test]
+    PROCEDURE CheckEnableDisableIsNonXMLFileType@8();
+    VAR
+      DataExchDef@1000 : Record 1222;
+    BEGIN
+      // Setup
+      DataExchDef.VALIDATE("File Type",DataExchDef."File Type"::"Variable Text");
+      // Verify
+      Assert.IsTrue(DataExchDef.CheckEnableDisableIsNonXMLFileType,'');
+    END;
+
+    [Test]
+    PROCEDURE CheckEnableDisableIsImportTypePaymentExport@9();
+    VAR
+      DataExchDef@1001 : Record 1222;
+    BEGIN
+      // Init
+      DataExchDef."File Type" := DataExchDef."File Type"::"Variable Text";
+
+      // Setup
+      DataExchDef.VALIDATE(Type,DataExchDef.Type::"Payment Export");
+
+      // Verify
+      Assert.IsFalse(DataExchDef.CheckEnableDisableIsImportType,'');
+    END;
+
+    [Test]
+    PROCEDURE CheckEnableDisableIsImportTypePayrollImport@19();
+    VAR
+      DataExchDef@1001 : Record 1222;
+    BEGIN
+      // Setup
+      DataExchDef.VALIDATE(Type,DataExchDef.Type::"Payroll Import");
+      DataExchDef.VALIDATE("File Type",DataExchDef."File Type"::Xml);
+
+      // Verify
+      Assert.IsFalse(DataExchDef.CheckEnableDisableIsImportType,'');
+    END;
+
+    [Test]
+    PROCEDURE CheckEnableDisableDelimitedFileType@10();
+    VAR
+      DataExchDef@1000 : Record 1222;
+    BEGIN
+      // Setup
+      DataExchDef.VALIDATE("File Type",DataExchDef."File Type"::"Variable Text");
+
+      // Verify
+      Assert.IsTrue(DataExchDef.CheckEnableDisableDelimitedFileType,'');
+    END;
+
+    [Test]
+    PROCEDURE MultipleLineDefititionsForImportAreAllowed@7();
+    VAR
+      DataExchDef@1000 : Record 1222;
+      DataExchLineDef1@1001 : Record 1227;
+      DataExchLineDef2@1002 : Record 1227;
+    BEGIN
+      // Pre-Setup
+      DataExchDef.INIT;
+      DataExchDef.Code := LibraryUtility.GenerateGUID;
+      DataExchDef.Type := DataExchDef.Type::"Bank Statement Import";
+      DataExchDef.INSERT(TRUE);
+
+      // Setup
+      DataExchLineDef1.INIT;
+      DataExchLineDef1."Data Exch. Def Code" := DataExchDef.Code;
+      DataExchLineDef1.Code := LibraryUtility.GenerateGUID;
+      DataExchLineDef1.INSERT(TRUE);
+
+      // Exercise
+      DataExchLineDef2.INIT;
+      DataExchLineDef2."Data Exch. Def Code" := DataExchDef.Code;
+      DataExchLineDef2.Code := LibraryUtility.GenerateGUID;
+      DataExchLineDef2.INSERT(TRUE);
+
+      // Verify: no error was raised.
+    END;
+
+    [Test]
+    [HandlerFunctions(MappingPageHandler)]
+    PROCEDURE SetCustomType@22();
+    VAR
+      DataExchDef@1000 : Record 1222;
+      DataExchMapping@1001 : Record 1224;
+      DataExchDefCard@1002 : TestPage 1210;
+      DataExchCode@1003 : Code[20];
+    BEGIN
+      // Setup
+      LibraryPaymentExport.CreateSimpleDataExchDefWithMapping(DataExchMapping,DATABASE::"Bank Acc. Reconciliation",1);
+      DataExchDefCard.OPENNEW;
+      DataExchCode := LibraryUtility.GenerateRandomCode(DataExchDef.FIELDNO(Code),DATABASE::"Data Exch. Def");
+
+      // Exercise
+      DataExchDefCard.Code.SETVALUE(DataExchCode);
+      DataExchDefCard.OK.INVOKE;
+
+      DataExchDef.GET(DataExchCode);
+      DataExchDef.Type := 1000;
+      DataExchDef.MODIFY;
+
+      // Verify - Check is done in handler
+      DataExchDefCard.OPENVIEW;
+      DataExchDefCard.GOTORECORD(DataExchDef);
+
+      DataExchDefCard."Data Exch Line Def Part"."Field Mapping".INVOKE;
+    END;
+
+    [PageHandler]
+    PROCEDURE MappingPageHandler@35(VAR MappingPage@1000 : TestPage 1214);
+    BEGIN
+      Assert.AreEqual(0,MappingPage."Table ID".ASINTEGER,'There must be no default mapping for custom Types');
+    END;
+
+    [Test]
+    PROCEDURE CheckLineTypesAreCreatedInTable@2();
+    VAR
+      DataExchLineType@1004 : 'Detail,Header,Footer';
+    BEGIN
+      // Scenario 1: New Data Exch. Line Type can be set on the page and is saved correctly.
+      ValidateUISavesLineType(DataExchLineType::Header);
+    END;
+
+    [Test]
+    PROCEDURE CheckLineTypesExport@5();
+    VAR
+      DataExchLineType@1000 : 'Detail,Header,Footer';
+    BEGIN
+      // Scenario 2: Export of Data Exchange Definition correctly captures the new Line Type field value
+      ValidateExportOfLineType(DataExchLineType::Header);
+      ValidateExportOfLineType(DataExchLineType::Detail);
+      ValidateExportOfLineType(DataExchLineType::Footer);
+    END;
+
+    [Test]
+    PROCEDURE CheckLineTypesImport@6();
+    VAR
+      DataExchDef@1010 : Record 1222;
+      DataExchLineDef1@1007 : Record 1227;
+      FileManagement@1002 : Codeunit 419;
+      ExportFile@1009 : File;
+      InputFile@1008 : File;
+      OutStream@1005 : OutStream;
+      InStream@1003 : InStream;
+      DataExchCode@1001 : Code[20];
+      DataExchLineType@1000 : 'Detail,Header,Footer';
+      LineTypeCount@1014 : Integer;
+    BEGIN
+      // Secnario 3: Import of Data Exchange Definition correctly recreates new Line Type field values
+      // Pre-Setup
+      DataExchDef.INIT;
+      DataExchDef.Code := LibraryUtility.GenerateGUID;
+      DataExchCode := DataExchDef.Code;
+      DataExchDef.Type := DataExchDef.Type::"Bank Statement Import";
+      DataExchDef.INSERT(TRUE);
+
+      InsertLineTypeRecords(DataExchCode,DataExchLineType::Header,'');
+      InsertLineTypeRecords(DataExchCode,DataExchLineType::Detail,'');
+      InsertLineTypeRecords(DataExchCode,DataExchLineType::Footer,'');
+
+      // Export Data Exch Def with 3 line records via XML1225 to file BLAH
+      DataExchDef.SETRANGE(Code,DataExchCode);
+      ServerFileName := FileManagement.ServerTempFileName('.xml');
+
+      ExportFile.WRITEMODE := TRUE;
+      ExportFile.TEXTMODE := TRUE;
+      ExportFile.CREATE(ServerFileName);
+      ExportFile.CREATEOUTSTREAM(OutStream);
+      XMLPORT.EXPORT(XMLPORT::"Imp / Exp Data Exch Def & Map",OutStream,DataExchDef);
+      ExportFile.CLOSE;
+
+      // Remove Header and Line Records just saved.
+      RemoveDataExch(DataExchCode);
+
+      // Import file via XML1225
+      InputFile.OPEN(ServerFileName);
+      InputFile.CREATEINSTREAM(InStream);
+      XMLPORT.IMPORT(XMLPORT::"Imp / Exp Data Exch Def & Map",InStream);
+
+      // Verify that there are 3 records in 1227 table with different Line Types.
+      LineTypeCount := 1;
+      DataExchLineDef1.SETRANGE("Data Exch. Def Code",DataExchCode);
+      IF DataExchLineDef1.FINDSET THEN BEGIN
+        REPEAT
+          CASE LineTypeCount OF
+            1:
+              DataExchLineDef1.TESTFIELD("Line Type",DataExchLineType::Header);
+            2:
+              DataExchLineDef1.TESTFIELD("Line Type",DataExchLineType::Detail);
+            3:
+              DataExchLineDef1.TESTFIELD("Line Type",DataExchLineType::Footer);
+          END;
+
+          LineTypeCount := LineTypeCount + 1;
+        UNTIL DataExchLineDef1.NEXT = 0;
+      END
+    END;
+
+    [Test]
+    PROCEDURE CheckLinesImportWhenDescendantGoesFirstAlphabetically@12();
+    VAR
+      DataExchDef@1010 : Record 1222;
+      DataExchLineDef@1011 : Record 1227;
+      FileManagement@1002 : Codeunit 419;
+      InputFile@1008 : File;
+      InStream@1003 : InStream;
+      DataExchLineType@1000 : 'Detail,Header,Footer';
+      ParentCode@1012 : Code[20];
+    BEGIN
+      // [SCENARIO 381089] When descendant Data Exch. Def. Line goes before parent alphabetically, then export and import of such Data Exch. Def. should not cause an error
+
+      // [GIVEN] Data Exch. Def.
+      DataExchDef.INIT;
+      DataExchDef.VALIDATE(Code,LibraryUtility.GenerateGUID);
+      DataExchDef.VALIDATE(Type,DataExchDef.Type::"Bank Statement Import");
+      DataExchDef.INSERT(TRUE);
+
+      // [GIVEN] Data Exch. Def. Line ZZZ, which surely be last alphabetically
+      InsertLineTypeRecords(DataExchDef.Code,DataExchLineType::Detail,'Z');
+      DataExchLineDef.SETRANGE("Data Exch. Def Code",DataExchDef.Code);
+      DataExchLineDef.FINDLAST;
+      ParentCode := DataExchLineDef.Code;
+
+      // [GIVEN] Data Exch. Def. Line AAA, which surely be 1st alphabetically and has ZZZ as "Parent Code"
+      InsertLineTypeRecords(DataExchDef.Code,DataExchLineType::Detail,'A');
+      DataExchLineDef.FINDFIRST;
+      DataExchLineDef.VALIDATE("Parent Code",ParentCode);
+      DataExchLineDef.MODIFY(TRUE);
+
+      // [GIVEN] Export Data Exch Def with 2 lines via XMLPort "Imp / Exp Data Exch Def & Map" to file
+      DataExchDef.SETRECFILTER;
+      ServerFileName := FileManagement.ServerTempFileName('.xml');
+
+      ExportViaXMLPort(DataExchDef);
+
+      // [GIVEN] Data Exch. Def. header and lines are deleted
+      RemoveDataExch(DataExchDef.Code);
+
+      // [WHEN] Import file via XMLPort "Imp / Exp Data Exch Def & Map"
+      InputFile.OPEN(ServerFileName);
+      InputFile.CREATEINSTREAM(InStream);
+      XMLPORT.IMPORT(XMLPORT::"Imp / Exp Data Exch Def & Map",InStream);
+
+      // [THEN] There are 2 records in "Data Exch. Line Def" table and no errors appeared
+      DataExchLineDef.SETRANGE("Data Exch. Def Code",DataExchDef.Code);
+      Assert.RecordCount(DataExchLineDef,2);
+    END;
+
+    [Test]
+    PROCEDURE OnModifyDefinitionCheckPositivePayExportFileTypeJSON@14();
+    VAR
+      DataExchDef@1000 : Record 1222;
+    BEGIN
+      // [FEATURE] [UT]
+      // [SCENARIO 381084] When the Data Exch. Def. "Type" has value of "Positive Pay Export", then the "File Type" can not be changed to "JSON"
+      // Updated Test Coverage from TFSID 122828 Test that the user can create a "Positive Pay Export" type Data Exchange Definition
+
+      // [GIVEN] Empty Data Exch. Definition inserted
+      // [GIVEN] Validating "Type" as "Positive Pay Export" and "File Type" as "JSON"
+      DataExchDef.INIT;
+      DataExchDef.VALIDATE(Code,LibraryUtility.GenerateGUID);
+      DataExchDef.INSERT(TRUE);
+      DataExchDef.VALIDATE("File Type",DataExchDef."File Type"::Json);
+      DataExchDef.VALIDATE(Type,DataExchDef.Type::"Positive Pay Export");
+
+      // [WHEN] Modify the record
+      ASSERTERROR DataExchDef.MODIFY(TRUE);
+
+      // [THEN] The record with "File Type" as "JSON" is not modified with error: Only Fixed Text or Variable Text are allowed
+      Assert.ExpectedError(PositivePayFileTypeErr);
+    END;
+
+    [Test]
+    PROCEDURE OnModifyDefinitionCheckPositivePayExportFileTypeXML@15();
+    VAR
+      DataExchDef@1000 : Record 1222;
+    BEGIN
+      // [FEATURE] [UT]
+      // [SCENARIO 381084] When the Data Exch. Def. "Type" has value of "Positive Pay Export", then the "File Type" can not be changed to "XML"
+      // Updated Test Coverage from TFSID 122828 Test that the user can create a "Positive Pay Export" type Data Exchange Definition
+
+      // [GIVEN] Empty Data Exch. Definition inserted
+      // [GIVEN] Validating "Type" as "Positive Pay Export" and "File Type" as "XML"
+      DataExchDef.INIT;
+      DataExchDef.VALIDATE(Code,LibraryUtility.GenerateGUID);
+      DataExchDef.INSERT(TRUE);
+      DataExchDef.VALIDATE("File Type",DataExchDef."File Type"::Xml);
+      DataExchDef.VALIDATE(Type,DataExchDef.Type::"Positive Pay Export");
+
+      // [WHEN] Modify the record
+      ASSERTERROR DataExchDef.MODIFY(TRUE);
+
+      // [THEN] The record with "File Type" as "XML" is not modified with error: Only Fixed Text or Variable Text are allowed
+      Assert.ExpectedError(PositivePayFileTypeErr);
+    END;
+
+    [Test]
+    PROCEDURE OnModifyDefinitionCheckPositivePayExportFileTypeFixedText@17();
+    VAR
+      DataExchDef@1000 : Record 1222;
+    BEGIN
+      // [FEATURE] [UT]
+      // [SCENARIO 381084] When the Data Exch. Def. "Type" has value of "Positive Pay Export", then the "File Type" can be changed to "Fixed Text"
+      // Updated Test Coverage from TFSID 122828 Test that the user can create a "Positive Pay Export" type Data Exchange Definition
+
+      // [GIVEN] Empty Data Exch. Definition inserted
+      // [GIVEN] Validating "Type" as "Positive Pay Export" and "File Type" as "Fixed Text"
+      DataExchDef.INIT;
+      DataExchDef.VALIDATE(Code,LibraryUtility.GenerateGUID);
+      DataExchDef.INSERT(TRUE);
+      DataExchDef.VALIDATE("File Type",DataExchDef."File Type"::"Fixed Text");
+      DataExchDef.VALIDATE(Type,DataExchDef.Type::"Positive Pay Export");
+
+      // [WHEN] Modify the record
+      DataExchDef.MODIFY(TRUE);
+
+      // [THEN] The record is modified and "File Type" as "Fixed Text" is saved
+      DataExchDef.FIND;
+      DataExchDef.TESTFIELD("File Type",DataExchDef."File Type"::"Fixed Text");
+    END;
+
+    [Test]
+    PROCEDURE OnModifyDefinitionCheckPositivePayExportFileTypeVariableText@18();
+    VAR
+      DataExchDef@1000 : Record 1222;
+    BEGIN
+      // [FEATURE] [UT]
+      // [SCENARIO 381084] When the Data Exch. Def. "Type" has value of "Positive Pay Export", then the "File Type" can be changed to "Variable Text"
+      // Updated Test Coverage from TFSID 122828 Test that the user can create a "Positive Pay Export" type Data Exchange Definition
+
+      // [GIVEN] Empty Data Exch. Definition inserted
+      // [GIVEN] Validating "Type" as "Positive Pay Export" and "File Type" as "Variable Text" and modify the record
+      DataExchDef.INIT;
+      DataExchDef.VALIDATE(Code,LibraryUtility.GenerateGUID);
+      DataExchDef.INSERT(TRUE);
+      DataExchDef.VALIDATE("File Type",DataExchDef."File Type"::"Variable Text");
+      DataExchDef.VALIDATE(Type,DataExchDef.Type::"Positive Pay Export");
+
+      // [WHEN] Modify the record
+      DataExchDef.MODIFY(TRUE);
+
+      // [THEN] The record is modified and "File Type" as "Variable Text" is saved
+      DataExchDef.FIND;
+      DataExchDef.TESTFIELD("File Type",DataExchDef."File Type"::"Variable Text");
+    END;
+
+    [Test]
+    PROCEDURE OnInsertDefinitionCheckPositivePayExportFileTypeJSON@25();
+    VAR
+      DataExchDef@1000 : Record 1222;
+    BEGIN
+      // [FEATURE] [UT]
+      // [SCENARIO 381084] A newly created Data Exch. Def. with "Type" of "Positive Pay Export" cannot have "File Type" as "JSON"
+      // Updated Test Coverage from TFSID 122828 Test that the user can create a "Positive Pay Export" type Data Exchange Definition
+
+      // [GIVEN] Empty Data Exch. Definition
+      // [GIVEN] Validate "Type" as "Positive Pay Export" and "File Type" as "JSON"
+      DataExchDef.INIT;
+      DataExchDef.VALIDATE(Code,LibraryUtility.GenerateGUID);
+      DataExchDef.VALIDATE(Type,DataExchDef.Type::"Positive Pay Export");
+      DataExchDef.VALIDATE("File Type",DataExchDef."File Type"::Json);
+
+      // [WHEN] Insert a record
+      ASSERTERROR DataExchDef.INSERT(TRUE);
+
+      // [THEN] The record with "File Type" as "JSON" is not inserted with error: Only Fixed Text or Variable Text are allowed
+      Assert.ExpectedError(PositivePayFileTypeErr);
+      Assert.IsFalse(DataExchDef.FIND,AssertIsNotFalseOnInsertFailedErr);
+    END;
+
+    [Test]
+    PROCEDURE OnInsertDefinitionCheckPositivePayExportFileTypeXML@24();
+    VAR
+      DataExchDef@1000 : Record 1222;
+    BEGIN
+      // [FEATURE] [UT]
+      // [SCENARIO 381084] A newly created Data Exch. Def. with "Type" of "Positive Pay Export" cannot have "File Type" as "XML"
+      // Updated Test Coverage from TFSID 122828 Test that the user can create a "Positive Pay Export" type Data Exchange Definition
+
+      // [GIVEN] Empty Data Exch. Definition
+      // [GIVEN] Validate "Type" as "Positive Pay Export" and "File Type" as "XML"
+      DataExchDef.INIT;
+      DataExchDef.VALIDATE(Code,LibraryUtility.GenerateGUID);
+      DataExchDef.VALIDATE(Type,DataExchDef.Type::"Positive Pay Export");
+      DataExchDef.VALIDATE("File Type",DataExchDef."File Type"::Xml);
+
+      // [WHEN] Insert a record
+      ASSERTERROR DataExchDef.INSERT(TRUE);
+
+      // [THEN] The record with "File Type" as "XML" is not inserted with error: Only Fixed Text or Variable Text are allowed
+      Assert.ExpectedError(PositivePayFileTypeErr);
+      Assert.IsFalse(DataExchDef.FIND,AssertIsNotFalseOnInsertFailedErr);
+    END;
+
+    [Test]
+    PROCEDURE OnInsertDefinitionCheckPositivePayExportFileTypeFixedText@21();
+    VAR
+      DataExchDef@1000 : Record 1222;
+    BEGIN
+      // [FEATURE] [UT]
+      // [SCENARIO 381084] A newly created Data Exch. Def. with "Type" of "Positive Pay Export" can have "File Type" as "Fixed Text"
+      // Updated Test Coverage from TFSID 122828 Test that the user can create a "Positive Pay Export" type Data Exchange Definition
+
+      // [GIVEN] Empty Data Exch. Definition
+      // [GIVEN] Validate "Type" as "Positive Pay Export" and "File Type" as "Fixed Text"
+      DataExchDef.INIT;
+      DataExchDef.VALIDATE(Code,LibraryUtility.GenerateGUID);
+      DataExchDef.VALIDATE(Type,DataExchDef.Type::"Positive Pay Export");
+      DataExchDef.VALIDATE("File Type",DataExchDef."File Type"::"Fixed Text");
+
+      // [WHEN] Insert a record
+      DataExchDef.INSERT(TRUE);
+
+      // [THEN] The record is inserted with "File Type" as "Fixed Text"
+      Assert.IsTrue(DataExchDef.FIND,AssertIsNotTrueOnInsertFailedErr);
+      DataExchDef.TESTFIELD("File Type",DataExchDef."File Type"::"Fixed Text");
+    END;
+
+    [Test]
+    PROCEDURE OnInsertDefinitionCheckPositivePayExportFileTypeVariableText@20();
+    VAR
+      DataExchDef@1000 : Record 1222;
+    BEGIN
+      // [FEATURE] [UT]
+      // [SCENARIO 381084] A newly created Data Exch. Def. with "Type" of "Positive Pay Export" can have "File Type" as "Variable Text"
+      // Updated Test Coverage from TFSID 122828 Test that the user can create a "Positive Pay Export" type Data Exchange Definition
+
+      // [GIVEN] Empty Data Exch. Definition
+      // [GIVEN] Validate "Type" as "Positive Pay Export" and "File Type" as "Variable Text"
+      DataExchDef.INIT;
+      DataExchDef.VALIDATE(Code,LibraryUtility.GenerateGUID);
+      DataExchDef.VALIDATE(Type,DataExchDef.Type::"Positive Pay Export");
+      DataExchDef.VALIDATE("File Type",DataExchDef."File Type"::"Variable Text");
+
+      // [WHEN] Insert a record
+      DataExchDef.INSERT(TRUE);
+
+      // [THEN] The record is inserted with "File Type" as "Variable Text"
+      Assert.IsTrue(DataExchDef.FIND,AssertIsNotTrueOnInsertFailedErr);
+      DataExchDef.TESTFIELD("File Type",DataExchDef."File Type"::"Variable Text");
+    END;
+
+    LOCAL PROCEDURE ExportViaXMLPort@16(VAR DataExchDef@1000 : Record 1222);
+    VAR
+      ExportFile@1001 : File;
+      OutStream@1002 : OutStream;
+    BEGIN
+      ExportFile.WRITEMODE := TRUE;
+      ExportFile.TEXTMODE := TRUE;
+      ExportFile.CREATE(ServerFileName);
+      ExportFile.CREATEOUTSTREAM(OutStream);
+      XMLPORT.EXPORT(XMLPORT::"Imp / Exp Data Exch Def & Map",OutStream,DataExchDef);
+      ExportFile.CLOSE;
+    END;
+
+    LOCAL PROCEDURE RemoveDataExch@23(DataExchDefCode@1000 : Code[20]);
+    VAR
+      DataExchDef@1001 : Record 1222;
+      DataExchMapping@1003 : Record 1224;
+    BEGIN
+      DataExchDef.SETRANGE(Code,DataExchDefCode);
+      DataExchDef.DELETEALL(TRUE);
+
+      DataExchMapping.SETRANGE("Data Exch. Def Code",DataExchDefCode);
+      DataExchMapping.DELETEALL(TRUE);
+    END;
+
+    LOCAL PROCEDURE ValidateExportOfLineType@11(LineType@1012 : 'Detail,Header,Footer');
+    VAR
+      DataExchDef@1003 : Record 1222;
+      DataExchLineDef@1000 : Record 1227;
+      FileManagement@1004 : Codeunit 419;
+      ExportFile@1002 : File;
+      OutStream@1001 : OutStream;
+      DataExchCode@1008 : Code[20];
+      OptionNumber@1005 : Integer;
+    BEGIN
+      // Setup for Line Type validation
+      DataExchDef.INIT;
+      DataExchDef.Code := LibraryUtility.GenerateGUID;
+      DataExchCode := DataExchDef.Code;
+      DataExchDef.Type := DataExchDef.Type::"Bank Statement Import";
+      DataExchDef.INSERT(TRUE);
+      OptionNumber := LineType;
+
+      DataExchLineDef.INIT;
+      DataExchLineDef.Code := LibraryUtility.GenerateGUID;
+      DataExchLineDef."Data Exch. Def Code" := DataExchCode;
+      DataExchLineDef."Line Type" := OptionNumber;
+      DataExchLineDef.INSERT(TRUE);
+
+      // Export Data Exch Def with Header Type line record via XML1225 to XML file
+      DataExchDef.SETRANGE(Code,DataExchCode);
+      ServerFileName := FileManagement.ServerTempFileName('.xml');
+
+      ExportFile.WRITEMODE := TRUE;
+      ExportFile.TEXTMODE := TRUE;
+      ExportFile.CREATE(ServerFileName);
+      ExportFile.CREATEOUTSTREAM(OutStream);
+      XMLPORT.EXPORT(XMLPORT::"Imp / Exp Data Exch Def & Map",OutStream,DataExchDef);
+      ExportFile.CLOSE;
+
+      // Verify that element in XML file with <LineType> tag of Header.
+      LibraryXMLRead.Initialize(ServerFileName);
+      LibraryXMLRead.VerifyAttributeValueInSubtree('DataExchDef','DataExchLineDef','LineType',FORMAT(OptionNumber));
+    END;
+
+    LOCAL PROCEDURE ValidateUISavesLineType@13(DataExchLineType@1000 : 'Detail,Header,Footer');
+    VAR
+      DataExchDef@1004 : Record 1222;
+      DataExchLineDef@1003 : Record 1227;
+      DataExchDefCard@1002 : TestPage 1210;
+      DataExchCode@1001 : Code[20];
+    BEGIN
+      // Setup for Detail Line Type
+      DataExchDefCard.OPENNEW;
+      DataExchCode := LibraryUtility.GenerateRandomCode(DataExchDef.FIELDNO(Code),DATABASE::"Data Exch. Def");
+
+      // Exercise
+      DataExchDefCard.Code.SETVALUE(DataExchCode);
+      DataExchDefCard."Data Exch Line Def Part"."Line Type".SETVALUE(DataExchLineType);
+      DataExchDefCard.OK.INVOKE;
+
+      // Verify record saved, Line Type should equal Line Type passed in.
+      DataExchDef.GET(DataExchCode);
+      DataExchDef.TESTFIELD(Name,DataExchDef.Code);
+      DataExchLineDef.GET(DataExchDef.Code,DefaultTxt);
+      DataExchLineDef.TESTFIELD(Code,DefaultTxt);
+      DataExchLineDef.TESTFIELD(Name,DefaultTxt);
+      DataExchLineDef.TESTFIELD("Line Type",DataExchLineType);
+    END;
+
+    LOCAL PROCEDURE InsertLineTypeRecords@3(DataExchCode@1000 : Code[20];DataExchLineType@1006 : 'Detail,Header,Footer';LineCodePrefix@1005 : Code[1]);
+    VAR
+      DataExchLineDef@1004 : Record 1227;
+      DataExchColDef@1003 : Record 1223;
+      DataExchMapping@1002 : Record 1224;
+      DataExchFieldMapping@1001 : Record 1225;
+    BEGIN
+      // Setup
+      DataExchLineDef.INIT;
+      DataExchLineDef.Code := LineCodePrefix + LibraryUtility.GenerateGUID;
+      DataExchLineDef."Data Exch. Def Code" := DataExchCode;
+      DataExchLineDef."Line Type" := DataExchLineType;
+      DataExchLineDef."Column Count" := 1;
+      DataExchLineDef.INSERT(TRUE);
+
+      DataExchColDef.INIT;
+      DataExchColDef."Data Exch. Def Code" := DataExchCode;
+      DataExchColDef."Data Exch. Line Def Code" := DataExchLineDef.Code;
+      DataExchColDef."Column No." := 1;
+      DataExchColDef.Name := 'Column1';
+      DataExchColDef.INSERT(TRUE);
+
+      DataExchMapping.INIT;
+      DataExchMapping."Data Exch. Def Code" := DataExchCode;
+      DataExchMapping."Data Exch. Line Def Code" := DataExchLineDef.Code;
+      DataExchMapping."Table ID" := 271;
+      DataExchMapping.INSERT(TRUE);
+
+      DataExchFieldMapping.INIT;
+      DataExchFieldMapping."Data Exch. Def Code" := DataExchCode;
+      DataExchFieldMapping."Data Exch. Line Def Code" := DataExchLineDef.Code;
+      DataExchFieldMapping."Table ID" := 271;
+      DataExchFieldMapping."Column No." := 1;
+      DataExchFieldMapping."Field ID" := 1;
+      DataExchFieldMapping.INSERT(TRUE);
+    END;
+
+    BEGIN
+    END.
+  }
+}
+

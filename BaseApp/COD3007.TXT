@@ -1,0 +1,46 @@
+OBJECT Codeunit 3007 DotNet_String
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      DotNetString@1000 : DotNet "'mscorlib'.System.String";
+
+    [External]
+    PROCEDURE Set@6(Text@1000 : Text);
+    BEGIN
+      DotNetString := Text
+    END;
+
+    [External]
+    PROCEDURE Replace@2(ToReplace@1001 : Text;ReplacementText@1002 : Text) : Text;
+    BEGIN
+      EXIT(DotNetString.Replace(ToReplace,ReplacementText))
+    END;
+
+    PROCEDURE GetString@3(VAR DotNetString2@1000 : DotNet "'mscorlib'.System.String");
+    BEGIN
+      DotNetString2 := DotNetString
+    END;
+
+    PROCEDURE SetString@4(DotNetString2@1000 : DotNet "'mscorlib'.System.String");
+    BEGIN
+      DotNetString := DotNetString2
+    END;
+
+    BEGIN
+    END.
+  }
+}
+
