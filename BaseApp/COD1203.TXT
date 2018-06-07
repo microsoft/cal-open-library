@@ -103,8 +103,8 @@ OBJECT Codeunit 1203 Import XML File to Data Exch.
             CurrentNodeID := IncreaseNodeID(NodeID,CurrentIndex);
             CurrentIndex += 1;
             InsertColumn(
-              DataExchColumnDef.Path,CurrentLineNo,CurrentNodeID,ParentNodeID,XmlNodeList.ItemOf(I - 1).Name,XmlNodeList.ItemOf(I - 1).InnerText,
-              CurrentDataExchLineDef,EntryNo);
+              DataExchColumnDef.Path,CurrentLineNo,CurrentNodeID,ParentNodeID,XmlNodeList.ItemOf(I - 1).Name,
+              XmlNodeList.ItemOf(I - 1).InnerText,CurrentDataExchLineDef,EntryNo);
           END;
         UNTIL DataExchColumnDef.NEXT = 0;
 
