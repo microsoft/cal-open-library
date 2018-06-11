@@ -107,14 +107,14 @@ OBJECT Codeunit 1239 XML Buffer Reader
 
     LOCAL PROCEDURE SaveProcessingInstructions@34(VAR TempParentElementXMLBuffer@1001 : TEMPORARY Record 1235;XMLCurrElement@1002 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlNode";XmlDocument@1003 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlDocument");
     VAR
-      TempPIXMLBuffer@1000 : TEMPORARY Record 1235;
+      TempXMLBuffer@1000 : TEMPORARY Record 1235;
       ProcessingInstruction@1005 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlProcessingInstruction";
     BEGIN
-      IF TempParentElementXMLBuffer.FindProcessingInstructions(TempPIXMLBuffer) THEN
+      IF TempParentElementXMLBuffer.FindProcessingInstructions(TempXMLBuffer) THEN
         REPEAT
-          ProcessingInstruction := XmlDocument.CreateProcessingInstruction(TempPIXMLBuffer.Name, TempPIXMLBuffer.GetValue);
+          ProcessingInstruction := XmlDocument.CreateProcessingInstruction(TempXMLBuffer.Name,TempXMLBuffer.GetValue);
           XMLCurrElement.AppendChild(ProcessingInstruction);
-        UNTIL TempPIXMLBuffer.NEXT = 0;
+        UNTIL TempXMLBuffer.NEXT = 0;
     END;
 
     BEGIN

@@ -247,7 +247,8 @@ OBJECT Codeunit 1235 XML Buffer Writer
             EXIT;
         END;
 
-        InsertProcessingInstruction(XMLBuffer,ParentXMLBuffer,ProcessingInstructionNumber,XmlReader.Depth + 1,XmlReader.Name,XmlReader.Value);
+        InsertProcessingInstruction(XMLBuffer,ParentXMLBuffer,ProcessingInstructionNumber,XmlReader.Depth + 1
+          ,XmlReader.Name,XmlReader.Value);
       END;
     END;
 
@@ -286,9 +287,9 @@ OBJECT Codeunit 1235 XML Buffer Writer
         "Parent Entry No." := ParentXMLBuffer."Entry No.";
         Path := COPYSTR(ParentXMLBuffer.Path + '/@' + AttributeName,1,MAXSTRLEN(Path));
         "Node Number" := NodeNumber;
-        Depth := NodeDepth;
         Name := AttributeName;
         Value := AttributeValue;
+        Depth := NodeDepth;
         "Data Type" := GetType(Value);
         Type := Type::Attribute;
         "Import ID" := ParentXMLBuffer."Import ID";

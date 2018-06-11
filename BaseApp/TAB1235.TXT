@@ -8,7 +8,6 @@ OBJECT Table 1235 XML Buffer
   }
   PROPERTIES
   {
-    CaptionML=ENU=XML Buffer;
   }
   FIELDS
   {
@@ -252,9 +251,9 @@ OBJECT Table 1235 XML Buffer
     END;
 
     [External]
-    PROCEDURE FindProcessingInstructions@10000001(VAR TempResultPIXMLBuffer@1000 : TEMPORARY Record 1235) : Boolean;
+    PROCEDURE FindProcessingInstructions@1901(VAR TempXMLBuffer@1000 : TEMPORARY Record 1235) : Boolean;
     BEGIN
-      EXIT(FindChildNodes(TempResultPIXMLBuffer,Type::"Processing Instruction",''));
+      EXIT(FindChildNodes(TempXMLBuffer,Type::"Processing Instruction",''));
     END;
 
     [External]
