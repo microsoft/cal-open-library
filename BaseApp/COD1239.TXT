@@ -52,7 +52,6 @@ OBJECT Codeunit 1239 XML Buffer Reader
       TempXMLBuffer.SETCURRENTKEY("Parent Entry No.",Type,"Node Number");
       Header := '<?xml version="1.0" encoding="' + Encoding + '"?>' +
         '<' + TempXMLBuffer.GetElementName + ' ';
-
       DefaultNamespace := TempXMLBuffer.GetAttributeValue('xmlns');
       IF TempXMLBuffer.FindAttributes(TempAttributeXMLBuffer) THEN
         REPEAT
@@ -87,6 +86,7 @@ OBJECT Codeunit 1239 XML Buffer Reader
           IF ElementValue <> '' THEN
             ChildElement.InnerText := ElementValue;
           XMLCurrElement.AppendChild(ChildElement);
+          SaveProcessingInstructions(TempElementXMLBuffer,ChildElement,XmlDocument);
           SaveAttributes(TempElementXMLBuffer,ChildElement,XmlDocument);
           SaveChildElements(TempElementXMLBuffer,ChildElement,XmlDocument);
         UNTIL TempElementXMLBuffer.NEXT = 0;
@@ -103,6 +103,18 @@ OBJECT Codeunit 1239 XML Buffer Reader
           Attribute.InnerText := TempAttributeXMLBuffer.Value;
           XMLCurrElement.Attributes.SetNamedItem(Attribute);
         UNTIL TempAttributeXMLBuffer.NEXT = 0;
+    END;
+
+    LOCAL PROCEDURE SaveProcessingInstructions@34(VAR TempParentElementXMLBuffer@1001 : TEMPORARY Record 1235;XMLCurrElement@1002 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlNode";XmlDocument@1003 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlDocument");
+    VAR
+      TempPIXMLBuffer@1000 : TEMPORARY Record 1235;
+      ProcessingInstruction@1005 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlProcessingInstruction";
+    BEGIN
+      IF TempParentElementXMLBuffer.FindProcessingInstructions(TempPIXMLBuffer) THEN
+        REPEAT
+          ProcessingInstruction := XmlDocument.CreateProcessingInstruction(TempPIXMLBuffer.Name, TempPIXMLBuffer.GetValue);
+          XMLCurrElement.AppendChild(ProcessingInstruction);
+        UNTIL TempPIXMLBuffer.NEXT = 0;
     END;
 
     BEGIN

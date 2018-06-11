@@ -21,6 +21,7 @@ OBJECT Codeunit 139200 XML Buffer Tests
       LibraryUtility@1000 : Codeunit 131000;
       Assert@1005 : Codeunit 130000;
       FileManagement@1006 : Codeunit 419;
+      LibraryRandom@10000000 : Codeunit 130440;
 
     [Test]
     PROCEDURE CreateTempRootNodeWithoutNamespace@9();
@@ -167,8 +168,8 @@ OBJECT Codeunit 139200 XML Buffer Tests
       // [GIVEN] An XML Buffer root element
       CreateRootNode(TempXMLBuffer,2,FALSE,RootNodeName,NamespacePrefix,NamespacePath);
       // [WHEN] Adding an XML element with special characters
-      ElementName := 'A-._ëõÜíùè';
-      ElementValue := 'ı!"#œ%&/()=?`Ô´@ú${[]}|+/*-,.-;:_<>\ëõÜíùè˘^''';
+      ElementName := 'A-._ÔøΩÔøΩÔøΩÔøΩÔøΩÔøΩ';
+      ElementValue := 'ÔøΩ!"#ÔøΩ%&/()=?`ÔøΩ@ÔøΩ${[]}|+/*-,.-;:_<>\ÔøΩÔøΩÔøΩÔøΩÔøΩÔøΩÔøΩ^''';
       TempXMLBuffer.AddElement(ElementName,ElementValue);
 
       // [THEN] The XML Buffer root node has one child with the same name and value
@@ -177,6 +178,39 @@ OBJECT Codeunit 139200 XML Buffer Tests
       Assert.IsTrue(TempXMLBuffer.FindChildElements(TempChildXMLBuffer),'root element should have children.');
       Assert.AreEqual(ElementName,TempChildXMLBuffer.Name,'Child name mismatch.');
       Assert.AreEqual(ElementValue,TempChildXMLBuffer.GetValue,'Child value mismatch.');
+    END;
+
+    [Test]
+    PROCEDURE TempElementProcessingInstructionsWithSpecialCharacters@10000000();
+    VAR
+      TempXMLBuffer@1001 : TEMPORARY Record 1235;
+      TempChildXMLBuffer@1004 : TEMPORARY Record 1235;
+      RootNodeName@1000 : Text[250];
+      ElementName@1005 : Text[250];
+      ElementValue@1006 : Text[250];
+      NamespacePrefix@1003 : ARRAY [2] OF Text[250];
+      NamespacePath@1002 : ARRAY [2] OF Text[250];
+      PIInstructionName@10000001 : Text;
+      PIInstructionValue@10000000 : Text;
+    BEGIN
+      // [GIVEN] An XML Buffer root element
+      CreateRootNode(TempXMLBuffer,2,FALSE,RootNodeName,NamespacePrefix,NamespacePath);
+
+      // [GIVEN] Adding an XML element with special characters
+      ElementName := 'A-._ÔøΩÔøΩÔøΩÔøΩÔøΩÔøΩ';
+      ElementValue := 'ÔøΩ!"#ÔøΩ%&/()=?`ÔøΩÔøΩ@ÔøΩ${[]}|+/*-,.-;:_<>\ÔøΩÔøΩÔøΩÔøΩÔøΩÔøΩÔøΩ^''';
+      TempXMLBuffer.AddElement(ElementName,ElementValue);
+
+      // [WHEN] Adding an XML Processing instructions with special characters
+      PIInstructionName := 'A-._ÔøΩÔøΩÔøΩÔøΩÔøΩÔøΩ';
+      PIInstructionValue := 'ÔøΩ!"#ÔøΩ%&/()=?`ÔøΩÔøΩ@ÔøΩ${[]}|+/*-,.-;:_<>\ÔøΩÔøΩÔøΩÔøΩÔøΩÔøΩÔøΩ^''';
+      TempXMLBuffer.AddProcessingInstruction(PIInstructionName, PIInstructionValue);
+
+      // [THEN] The XML Buffer root node has one processing instruction with the same name and value
+      Assert.AreEqual(1,TempXMLBuffer.CountProcessingInstructions,'Incorrect number of child processing instructions');
+      Assert.IsTrue(TempXMLBuffer.FindProcessingInstructions(TempChildXMLBuffer),'element should have processing instructions.');
+      Assert.AreEqual(PIInstructionName,TempChildXMLBuffer.Name,'Processing Instruction name mismatch.');
+      Assert.AreEqual(PIInstructionValue,TempChildXMLBuffer.GetValue,'Processing Instruction value mismatch.');
     END;
 
     [Test]
@@ -207,6 +241,40 @@ OBJECT Codeunit 139200 XML Buffer Tests
     END;
 
     [Test]
+    PROCEDURE CreateElementProcessingInstructionValueWithLengthOver250Characters@10000003();
+    VAR
+      TempXMLBuffer@1001 : TEMPORARY Record 1235;
+      TempChildXMLBuffer@1004 : TEMPORARY Record 1235;
+      LibraryRandom@1007 : Codeunit 130440;
+      RootNodeName@1000 : Text[250];
+      ElementName@1005 : Text[250];
+      ElementValue@1006 : Text;
+      NamespacePrefix@1003 : ARRAY [2] OF Text[250];
+      NamespacePath@1002 : ARRAY [2] OF Text[250];
+      PIInstructionName@10000000 : Text;
+      PIInstructionValue@10000001 : Text;
+    BEGIN
+      // [GIVEN] An XML Buffer root element
+      CreateRootNode(TempXMLBuffer,2,FALSE,RootNodeName,NamespacePrefix,NamespacePath);
+
+      // [WHEN] Adding an XML element
+      ElementName := COPYSTR(LibraryUtility.GenerateRandomAlphabeticText(10,0),1,250);
+      ElementValue := LibraryRandom.RandText(300);
+      TempXMLBuffer.AddElement(ElementName,ElementValue);
+
+      // [WHEN] Adding an XML element processing instruction longer than 250 characters
+      PIInstructionName := COPYSTR(LibraryUtility.GenerateRandomAlphabeticText(10,0),1,250);
+      PIInstructionValue := LibraryRandom.RandText(300);
+      TempXMLBuffer.AddProcessingInstruction(PIInstructionName,PIInstructionValue);
+
+      // [THEN] The XML Buffer root node has one processing instruction with the same name and value
+      Assert.AreEqual(1,TempXMLBuffer.CountProcessingInstructions,'Incorrect number of child processing instructions');
+      Assert.IsTrue(TempXMLBuffer.FindProcessingInstructions(TempChildXMLBuffer),'element should have processing instructions.');
+      Assert.AreEqual(PIInstructionName,TempChildXMLBuffer.Name,'Processing Instruction name mismatch.');
+      Assert.AreEqual(PIInstructionValue,TempChildXMLBuffer.GetValue,'Processing Instruction value mismatch.');
+    END;
+
+    [Test]
     PROCEDURE SaveAndLoadTempElementsWithSpecialCharacters@89();
     VAR
       TempXMLBuffer@1001 : TEMPORARY Record 1235;
@@ -217,8 +285,28 @@ OBJECT Codeunit 139200 XML Buffer Tests
       // [GIVEN] An XML Buffer root element
       // [GIVEN] A subelement containing special characters
       CreateRootNode(TempXMLBuffer,2,FALSE,RootNodeName,NamespacePrefix,NamespacePath);
-      TempXMLBuffer.AddAttribute('_','ı!#œ%/()=?`Ô@ú${[]}|+/*´-,.-;:_\˘^''');
-      TempXMLBuffer.AddElement('A-._','ı!"#œ%&/()=?`Ô´@ú${[]}|+/*-,.-;:_<>\˘^''');
+      TempXMLBuffer.AddAttribute('_','ÔøΩ!#ÔøΩ%/()=?`ÔøΩ@ÔøΩ${[]}|+/*ÔøΩ-,.-;:_\ÔøΩ^''');
+      TempXMLBuffer.AddElement('A-._','ÔøΩ!"#ÔøΩ%&/()=?`ÔøΩÔøΩ@ÔøΩ${[]}|+/*-,.-;:_<>\ÔøΩ^''');
+
+      // [WHEN] Saving and then loading the XML Buffer
+      // [THEN] The two XML Buffer lists are identical
+      SaveLoadAndVerifyTempXmlBuffer(TempXMLBuffer);
+    END;
+
+    [Test]
+    PROCEDURE SaveAndLoadTempElementsAndProcessingInstructionsWithSpecialCharacters@10000005();
+    VAR
+      TempXMLBuffer@1001 : TEMPORARY Record 1235;
+      RootNodeName@1000 : Text[250];
+      NamespacePrefix@1003 : ARRAY [2] OF Text[250];
+      NamespacePath@1002 : ARRAY [2] OF Text[250];
+    BEGIN
+      // [GIVEN] An XML Buffer root element
+      // [GIVEN] A subelement containing special characters
+      CreateRootNode(TempXMLBuffer,2,FALSE,RootNodeName,NamespacePrefix,NamespacePath);
+      TempXMLBuffer.AddAttribute('_','ÔøΩ!#ÔøΩ%/()=?`ÔøΩ@ÔøΩ${[]}|+/*ÔøΩ-,.-;:_\ÔøΩ^''');
+      TempXMLBuffer.AddElement('A-._','ÔøΩ!"#ÔøΩ%&/()=?`ÔøΩÔøΩ@ÔøΩ${[]}|+/*-,.-;:_<>\ÔøΩ^''');
+      TempXMLBuffer.AddProcessingInstruction('A-._ÔøΩÔøΩÔøΩÔøΩÔøΩÔøΩ','ÔøΩ!"#ÔøΩ%&/()=?`ÔøΩÔøΩ@ÔøΩ${[]}|+/*-,.-;:_<>\ÔøΩÔøΩÔøΩÔøΩÔøΩÔøΩÔøΩ^''');
 
       // [WHEN] Saving and then loading the XML Buffer
       // [THEN] The two XML Buffer lists are identical
@@ -540,10 +628,12 @@ OBJECT Codeunit 139200 XML Buffer Tests
       TempXMLBuffer@1000 : TEMPORARY Record 1235;
       TempChildElementsXMLBuffer@1001 : TEMPORARY Record 1235;
       Element2Position@1002 : Integer;
+      TempChildElementsPIXMLBuffer@10000000 : TEMPORARY Record 1235;
     BEGIN
       // [GIVEN] An XML Buffer with a root element and two child elements A and B
       TempXMLBuffer.CreateRootElement('RootNode');
       TempXMLBuffer.AddElement('Element1','value1');
+      TempXMLBuffer.AddProcessingInstruction('PIName1', 'PIValue1');
       Element2Position := TempXMLBuffer.AddElement('Element2','value2');
 
       // [GIVEN] The XML buffer is sorted after "Parent Entry No.","Node Number"
@@ -556,6 +646,8 @@ OBJECT Codeunit 139200 XML Buffer Tests
       // [THEN] In order, the child elements of the root node are A, C, B
       Assert.IsTrue(TempXMLBuffer.FindChildElements(TempChildElementsXMLBuffer),'No child elements were found.');
       Assert.AreEqual('Element1',TempChildElementsXMLBuffer.Name,'');
+      Assert.IsTrue(TempXMLBuffer.FindProcessingInstructions(TempChildElementsPIXMLBuffer),'No child elements processing instructions were found.');
+      Assert.AreEqual('PIName1',TempChildElementsPIXMLBuffer.Name,'');
       TempChildElementsXMLBuffer.NEXT;
       Assert.AreEqual('newGroupBetweenElement1and2',TempChildElementsXMLBuffer.Name,'');
       TempChildElementsXMLBuffer.NEXT;
@@ -570,6 +662,7 @@ OBJECT Codeunit 139200 XML Buffer Tests
       // [GIVEN] An XML Buffer with a root element and two child elements A and B
       TempXMLBuffer.CreateRootElement('RootNode');
       TempXMLBuffer.AddElement('Element1','value1');
+      TempXMLBuffer.AddProcessingInstruction('PIName1', 'PIValue1');
       TempXMLBuffer.AddElement('Element2','value2');
 
       // [GIVEN] A group node C is added between child element 1 and 2
@@ -635,6 +728,8 @@ OBJECT Codeunit 139200 XML Buffer Tests
     LOCAL PROCEDURE AddElements@72(VAR TempXMLBuffer@1000 : TEMPORARY Record 1235);
     VAR
       NamespacePrefix@1001 : Text;
+      PICount@10000000 : Integer;
+      i@10000001 : Integer;
     BEGIN
       NamespacePrefix := TempXMLBuffer.Namespace;
       IF NamespacePrefix <> '' THEN
@@ -646,6 +741,11 @@ OBJECT Codeunit 139200 XML Buffer Tests
       TempXMLBuffer.AddGroupElement(NamespacePrefix + 'Element2');
       TempXMLBuffer.AddAttribute('attribute1','attributeValue1');
       TempXMLBuffer.AddAttribute('EmptyAttribute','');
+
+      PICount := LibraryRandom.RandInt(3);
+      FOR i := 1 TO PICount DO
+        TempXMLBuffer.AddProcessingInstruction('PIName' + FORMAT(i), 'PIValue' + FORMAT(i));
+
       TempXMLBuffer.AddElement(NamespacePrefix + 'Element3','Value3');
       TempXMLBuffer.AddLastElement(NamespacePrefix + 'Element4','Value4');
       TempXMLBuffer.AddGroupElement('emptyGroupnodeWithoutNamespace');
@@ -735,6 +835,7 @@ OBJECT Codeunit 139200 XML Buffer Tests
       WriteLineToOutstream(OutStream,'  <SelfClosingElement attribute="attributeValue" />');
       WriteLineToOutstream(OutStream,'  <Element1>');
       WriteLineToOutstream(OutStream,'    <Element11 attribute="" Attribute2="test">');
+      WriteLineToOutstream(OutStream,'      <?PIName11 PIValue="PIValue11"?>');
       WriteLineToOutstream(OutStream,'      <Element111 attribute="" Attribute2="test" />');
       WriteLineToOutstream(OutStream,'      <Element112>Value</Element112>');
       WriteLineToOutstream(OutStream,'    </Element11>');
