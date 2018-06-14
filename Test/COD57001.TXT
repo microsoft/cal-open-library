@@ -1,0 +1,94 @@
+OBJECT Codeunit 57001 Test Add Text Line Encoding
+{
+  OBJECT-PROPERTIES
+  {
+    Date=18-06-14;
+    Time=18:56:14;
+    Modified=Yes;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    Subtype=Test;
+    TestPermissions=Disabled;
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      EncodeText@1000 : TextConst 'KOR=가나다라마바사아자차카타파하';
+      Assert@1001 : Codeunit 130000;
+      Encoding@1003 : DotNet "'mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.Encoding";
+      StreamWriter@1002 : DotNet "'mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.IO.StreamWriter";
+      StreamReader@1005 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.IO.StreamReader";
+      LStreamReader@1004 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.IO.StreamReader";
+
+    [Test]
+    PROCEDURE TestAddTextLineWithEncoding@3();
+    VAR
+      TempBlob@1000 : TEMPORARY Record 99008535;
+      LocalBlob@1005 : TEMPORARY Record 99008535;
+      OutStream@1001 : OutStream;
+      InStream@1002 : InStream;
+      LocalInStream@1007 : InStream;
+      TextMgmt@1004 : Codeunit 57000;
+      LocalOutStream@1003 : OutStream;
+    BEGIN
+
+      //SETUP
+      TempBlob.INIT;
+      TempBlob.INSERT;
+      TempBlob.Blob.CREATEOUTSTREAM(OutStream);
+      TextMgmt.AddTextLineWithEncoding(EncodeText,OutStream,949);
+      TempBlob.MODIFY;
+      TempBlob.CALCFIELDS(Blob);
+
+      LocalBlob.INIT;
+      LocalBlob.INSERT;
+      LocalBlob.Blob.CREATEOUTSTREAM(LocalOutStream);
+      AddTextLineWithoutEncoding(LocalOutStream,EncodeText);
+      LocalBlob.MODIFY;
+      LocalBlob.CALCFIELDS(Blob);
+
+      // Execute
+      TempBlob.Blob.CREATEINSTREAM(InStream);
+      LocalBlob.Blob.CREATEINSTREAM(LocalInStream);
+
+      // Verify the Encoding Text
+      Assert.AreNotEqual(ReadTextLineFromStream(InStream),ReadTextLineFromStream(LocalInStream),'Text should be not equal');
+    END;
+
+    [Normal]
+    LOCAL PROCEDURE AddTextLineWithoutEncoding@10(VAR _OutStream@1000 : OutStream;LineText@1001 : Text);
+    BEGIN
+
+      StreamWriter := StreamWriter.StreamWriter(_OutStream);
+      StreamWriter.WriteLine(LineText);
+      StreamWriter.Flush;
+      StreamWriter.Close;
+      StreamWriter.Dispose;
+    END;
+
+    [Normal]
+    LOCAL PROCEDURE ReadTextLineFromStream@34(VAR _InStream@1000 : InStream) retValue : Text;
+    VAR
+      result@1001 : Text;
+    BEGIN
+
+      StreamReader := StreamReader.StreamReader(_InStream);
+
+      result := StreamReader.ReadLine();
+      StreamReader.Close;
+      StreamReader.Dispose;
+
+
+      EXIT(result);
+    END;
+
+    BEGIN
+    END.
+  }
+}
+

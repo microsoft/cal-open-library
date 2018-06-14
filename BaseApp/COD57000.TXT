@@ -1,0 +1,40 @@
+OBJECT Codeunit 57000 DotNet Add Text Encoding
+{
+  OBJECT-PROPERTIES
+  {
+    Date=18-06-14;
+    Time=16:39:00;
+    Modified=Yes;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      Encoding@1000 : DotNet "'mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.Encoding";
+      StreamWriter@1001 : DotNet "'mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.IO.StreamWriter";
+
+    [External]
+    PROCEDURE AddTextLineWithEncoding@2(LineText@1000 : Text;VAR OutStream_@1001 : OutStream;CodePageNo@1002 : Integer);
+    BEGIN
+
+      StreamWriter := StreamWriter.StreamWriter(OutStream_,Encoding.GetEncoding(CodePageNo));
+      StreamWriter.WriteLine(LineText);
+      StreamWriter.Flush;
+      StreamWriter.Close;
+      StreamWriter.Dispose;
+    END;
+
+    BEGIN
+    {
+      System.IO.StreamWriter.'mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'
+      System.Text.Encoding.'mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'
+    }
+    END.
+  }
+}
