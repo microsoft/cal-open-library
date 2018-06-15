@@ -2,9 +2,8 @@ OBJECT Codeunit 57001 Test Add Text Line Encoding
 {
   OBJECT-PROPERTIES
   {
-    Date=18-06-14;
-    Time=18:56:14;
-    Modified=Yes;
+    Date=;
+    Time=;
     Version List=;
   }
   PROPERTIES
@@ -20,8 +19,6 @@ OBJECT Codeunit 57001 Test Add Text Line Encoding
     VAR
       EncodeText@1000 : TextConst 'KOR=가나다라마바사아자차카타파하';
       Assert@1001 : Codeunit 130000;
-      Encoding@1003 : DotNet "'mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.Encoding";
-      StreamWriter@1002 : DotNet "'mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.IO.StreamWriter";
       StreamReader@1005 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.IO.StreamReader";
       LStreamReader@1004 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.IO.StreamReader";
 
@@ -33,7 +30,7 @@ OBJECT Codeunit 57001 Test Add Text Line Encoding
       OutStream@1001 : OutStream;
       InStream@1002 : InStream;
       LocalInStream@1007 : InStream;
-      TextMgmt@1004 : Codeunit 57000;
+      StreamWriter@1004 : Codeunit 57000;
       LocalOutStream@1003 : OutStream;
     BEGIN
 
@@ -41,7 +38,7 @@ OBJECT Codeunit 57001 Test Add Text Line Encoding
       TempBlob.INIT;
       TempBlob.INSERT;
       TempBlob.Blob.CREATEOUTSTREAM(OutStream);
-      TextMgmt.AddTextLineWithEncoding(EncodeText,OutStream,949);
+      AddTextLineWithEncoding(OutStream,EncodeText,949);
       TempBlob.MODIFY;
       TempBlob.CALCFIELDS(Blob);
 
@@ -61,14 +58,15 @@ OBJECT Codeunit 57001 Test Add Text Line Encoding
     END;
 
     [Normal]
-    LOCAL PROCEDURE AddTextLineWithoutEncoding@10(VAR _OutStream@1000 : OutStream;LineText@1001 : Text);
+    LOCAL PROCEDURE AddTextLineWithoutEncoding@10(VAR OutStream@1000 : OutStream;LineText@1001 : Text);
+    VAR
+      DotNet_StreamWriter@1002 : DotNet "'mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.IO.StreamWriter";
     BEGIN
-
-      StreamWriter := StreamWriter.StreamWriter(_OutStream);
-      StreamWriter.WriteLine(LineText);
-      StreamWriter.Flush;
-      StreamWriter.Close;
-      StreamWriter.Dispose;
+      DotNet_StreamWriter := DotNet_StreamWriter.StreamWriter(OutStream);
+      DotNet_StreamWriter.WriteLine(LineText);
+      DotNet_StreamWriter.Flush;
+      DotNet_StreamWriter.Close;
+      DotNet_StreamWriter.Dispose;
     END;
 
     [Normal]
@@ -76,15 +74,23 @@ OBJECT Codeunit 57001 Test Add Text Line Encoding
     VAR
       result@1001 : Text;
     BEGIN
-
       StreamReader := StreamReader.StreamReader(_InStream);
-
       result := StreamReader.ReadLine();
       StreamReader.Close;
       StreamReader.Dispose;
-
-
       EXIT(result);
+    END;
+
+    [Normal]
+    LOCAL PROCEDURE AddTextLineWithEncoding@1(VAR OutStream@1000 : OutStream;LineText@1001 : Text;CodePage@1003 : Integer);
+    VAR
+      StreamWriter@1002 : Codeunit 57000;
+    BEGIN
+      StreamWriter.StreamWriter(OutStream,949);
+      StreamWriter.WriteLine(LineText);
+      StreamWriter.Flush;
+      StreamWriter.Close;
+      StreamWriter.Dispose;
     END;
 
     BEGIN

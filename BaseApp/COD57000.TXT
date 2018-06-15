@@ -1,10 +1,8 @@
-OBJECT Codeunit 57000 DotNet Add Text Encoding
-{
+OBJECT Codeunit 57000 DotNet_StreamWriter
   OBJECT-PROPERTIES
   {
-    Date=18-06-14;
-    Time=16:39:00;
-    Modified=Yes;
+    Date=;
+    Time=;
     Version List=;
   }
   PROPERTIES
@@ -16,25 +14,42 @@ OBJECT Codeunit 57000 DotNet Add Text Encoding
   CODE
   {
     VAR
-      Encoding@1000 : DotNet "'mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.Encoding";
-      StreamWriter@1001 : DotNet "'mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.IO.StreamWriter";
+      DotNet_StreamWriter@1001 : DotNet "'mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.IO.StreamWriter";
 
     [External]
-    PROCEDURE AddTextLineWithEncoding@2(LineText@1000 : Text;VAR OutStream_@1001 : OutStream;CodePageNo@1002 : Integer);
+    PROCEDURE WriteLine@2(LineText@1000 : Text);
     BEGIN
+      DotNet_StreamWriter.WriteLine(LineText);
+    END;
 
-      StreamWriter := StreamWriter.StreamWriter(OutStream_,Encoding.GetEncoding(CodePageNo));
-      StreamWriter.WriteLine(LineText);
-      StreamWriter.Flush;
-      StreamWriter.Close;
-      StreamWriter.Dispose;
+    [External]
+    PROCEDURE StreamWriter@1(VAR OutStream@1000 : OutStream;CodePageNo@1001 : Integer);
+    VAR
+      Encoding@1002 : DotNet "'mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.Encoding";
+    BEGIN
+      DotNet_StreamWriter := DotNet_StreamWriter.StreamWriter(OutStream,Encoding.GetEncoding(CodePageNo));
+    END;
+
+    [External]
+    PROCEDURE Flush@3();
+    BEGIN
+      DotNet_StreamWriter.Flush;
+    END;
+
+    [External]
+    PROCEDURE Close@4();
+    BEGIN
+      DotNet_StreamWriter.Close;
+    END;
+
+    [External]
+    PROCEDURE Dispose@5();
+    BEGIN
+      DotNet_StreamWriter.Dispose;
     END;
 
     BEGIN
-    {
-      System.IO.StreamWriter.'mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'
-      System.Text.Encoding.'mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'
-    }
     END.
+
   }
 }
