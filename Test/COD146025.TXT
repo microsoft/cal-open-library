@@ -17,43 +17,33 @@ OBJECT Codeunit 146025 Test Add Text Line Encoding
   CODE
   {
     VAR
-      EncodeText@1000 : TextConst 'KOR=가나다라마바사아자차카타파하';
+      EncodedText@1000 : TextConst 'KOR=가나다라마바사아자차카타파하';
       Assert@1001 : Codeunit 130000;
-      StreamReader@1005 : DotNet "'mscorlib'.System.IO.StreamReader";
-      LStreamReader@1004 : DotNet "'mscorlib'.System.IO.StreamReader";
+      StreamReader@1002 : DotNet "'mscorlib'.System.IO.StreamReader";
 
     [Test]
     PROCEDURE TestAddTextLineWithEncoding@3();
     VAR
       TempBlob@1000 : TEMPORARY Record 99008535;
-      LocalBlob@1005 : TEMPORARY Record 99008535;
+      TempBlobLocal@1005 : TEMPORARY Record 99008535;
       OutStream@1001 : OutStream;
       InStream@1002 : InStream;
       LocalInStream@1007 : InStream;
-      StreamWriter@1004 : Codeunit 3025;
       LocalOutStream@1003 : OutStream;
     BEGIN
       // [SCENARIO] Unit test of StreamWriter
 
       // [GIVEN] An encoded string in a blob.
-      TempBlob.INIT;
-      TempBlob.INSERT;
       TempBlob.Blob.CREATEOUTSTREAM(OutStream);
-      AddTextLineWithEncoding(OutStream,EncodeText,949);
-      TempBlob.MODIFY;
-      TempBlob.CALCFIELDS(Blob);
+      AddTextLineWithEncoding(OutStream,EncodedText,949);
 
       // [GIVEN] An non-encoded string in a blob.
-      LocalBlob.INIT;
-      LocalBlob.INSERT;
-      LocalBlob.Blob.CREATEOUTSTREAM(LocalOutStream);
-      AddTextLineWithoutEncoding(LocalOutStream,EncodeText);
-      LocalBlob.MODIFY;
-      LocalBlob.CALCFIELDS(Blob);
+      TempBlobLocal.Blob.CREATEOUTSTREAM(LocalOutStream);
+      AddTextLineWithoutEncoding(LocalOutStream,EncodedText);
 
       // [WHEN] Those strings are compared.
       TempBlob.Blob.CREATEINSTREAM(InStream);
-      LocalBlob.Blob.CREATEINSTREAM(LocalInStream);
+      TempBlobLocal.Blob.CREATEINSTREAM(LocalInStream);
 
       // [THEN] They are not equal.
       Assert.AreNotEqual(ReadTextLineFromStream(InStream),ReadTextLineFromStream(LocalInStream),'Text should be not equal');
@@ -86,15 +76,15 @@ OBJECT Codeunit 146025 Test Add Text Line Encoding
     END;
 
     [Normal]
-    LOCAL PROCEDURE ReadTextLineFromStream@34(VAR InStream@1000 : InStream) retValue : Text;
+    LOCAL PROCEDURE ReadTextLineFromStream@34(VAR InStream@1000 : InStream) : Text;
     VAR
-      result@1001 : Text;
+      Result@1001 : Text;
     BEGIN
       StreamReader := StreamReader.StreamReader(InStream);
-      result := StreamReader.ReadLine();
+      Result := StreamReader.ReadLine();
       StreamReader.Close;
       StreamReader.Dispose;
-      EXIT(result);
+      EXIT(Result);
     END;
 
     BEGIN

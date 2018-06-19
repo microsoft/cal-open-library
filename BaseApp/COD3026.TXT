@@ -15,24 +15,24 @@ OBJECT Codeunit 3026 DotNet_Encoding
   CODE
   {
     VAR
-      DotNet_Encoding@1000 : DotNet "'mscorlib'.System.Text.Encoding";
+      DotNetEncoding@1000 : DotNet "'mscorlib'.System.Text.Encoding";
 
     [External]
     PROCEDURE Encoding@4(codePage@1000 : Integer);
     BEGIN
-      DotNet_Encoding := DotNet_Encoding.GetEncoding(codePage);
+      DotNetEncoding := DotNetEncoding.GetEncoding(codePage);
     END;
 
     [External]
-    PROCEDURE GetEncoding@2(VAR Encoding2@1000 : DotNet "'mscorlib'.System.Text.Encoding");
+    PROCEDURE GetEncoding@2(VAR DotNetEncoding2@1000 : DotNet "'mscorlib'.System.Text.Encoding");
     BEGIN
-      Encoding2 := DotNet_Encoding;
+      DotNetEncoding2 := DotNetEncoding;
     END;
 
     [External]
-    PROCEDURE SetEncoding@1(Encoding2@1000 : DotNet "'mscorlib'.System.Text.Encoding");
+    PROCEDURE SetEncoding@1(DotNetEncoding2@1000 : DotNet "'mscorlib'.System.Text.Encoding");
     BEGIN
-      DotNet_Encoding := Encoding2;
+      DotNetEncoding := DotNetEncoding2;
     END;
 
     BEGIN
