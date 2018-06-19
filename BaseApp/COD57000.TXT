@@ -23,11 +23,12 @@ OBJECT Codeunit 57000 DotNet_StreamWriter
     END;
 
     [External]
-    PROCEDURE StreamWriter@1(VAR OutStream@1000 : OutStream;CodePageNo@1001 : Integer);
+    PROCEDURE StreamWriter@1(VAR OutStream@1000 : OutStream;DotNet_Encoding@1001 : Codeunit 57003);
     VAR
       Encoding@1002 : DotNet "'mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.Encoding";
     BEGIN
-      DotNet_StreamWriter := DotNet_StreamWriter.StreamWriter(OutStream,Encoding.GetEncoding(CodePageNo));
+      DotNet_Encoding.GetEncoding(Encoding);
+      DotNet_StreamWriter := DotNet_StreamWriter.StreamWriter(OutStream,Encoding);
     END;
 
     [External]

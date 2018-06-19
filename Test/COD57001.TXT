@@ -85,8 +85,10 @@ OBJECT Codeunit 57001 Test Add Text Line Encoding
     LOCAL PROCEDURE AddTextLineWithEncoding@1(VAR OutStream@1000 : OutStream;LineText@1001 : Text;CodePage@1003 : Integer);
     VAR
       StreamWriter@1002 : Codeunit 57000;
+      Encoding@1004 : Codeunit 57003;
     BEGIN
-      StreamWriter.StreamWriter(OutStream,949);
+      Encoding.Encoding(949);
+      StreamWriter.StreamWriter(OutStream,Encoding);
       StreamWriter.WriteLine(LineText);
       StreamWriter.Flush;
       StreamWriter.Close;
