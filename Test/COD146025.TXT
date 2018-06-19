@@ -17,7 +17,7 @@ OBJECT Codeunit 146025 Test Add Text Line Encoding
   CODE
   {
     VAR
-      EncodedText@1000 : TextConst 'KOR=가나다라마바사아자차카타파하';
+      EncodedStringTxt@1000 : TextConst 'KOR=가나다라마바사아자차카타파하';
       Assert@1001 : Codeunit 130000;
       StreamReader@1002 : DotNet "'mscorlib'.System.IO.StreamReader";
 
@@ -34,12 +34,14 @@ OBJECT Codeunit 146025 Test Add Text Line Encoding
       // [SCENARIO] Unit test of StreamWriter
 
       // [GIVEN] An encoded string in a blob.
+      TempBlob.INIT;
       TempBlob.Blob.CREATEOUTSTREAM(OutStream);
-      AddTextLineWithEncoding(OutStream,EncodedText,949);
+      AddTextLineWithEncoding(OutStream,EncodedStringTxt,949);
 
       // [GIVEN] An non-encoded string in a blob.
+      TempBlobLocal.INIT;
       TempBlobLocal.Blob.CREATEOUTSTREAM(LocalOutStream);
-      AddTextLineWithoutEncoding(LocalOutStream,EncodedText);
+      AddTextLineWithoutEncoding(LocalOutStream,EncodedStringTxt);
 
       // [WHEN] Those strings are compared.
       TempBlob.Blob.CREATEINSTREAM(InStream);
@@ -67,7 +69,7 @@ OBJECT Codeunit 146025 Test Add Text Line Encoding
       DotNet_StreamWriter@1002 : Codeunit 3025;
       DotNet_Encoding@1004 : Codeunit 3026;
     BEGIN
-      DotNet_Encoding.Encoding(949);
+      DotNet_Encoding.Encoding(CodePage);
       DotNet_StreamWriter.StreamWriter(OutStream,DotNet_Encoding);
       DotNet_StreamWriter.WriteLine(LineText);
       DotNet_StreamWriter.Flush;
