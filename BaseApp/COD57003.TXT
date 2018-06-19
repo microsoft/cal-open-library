@@ -1,0 +1,34 @@
+OBJECT Codeunit 57003 DotNet_Encoding
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+  }
+  CODE
+  {
+    VAR
+      DotNet_Encoding@1000 : DotNet "'mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.Encoding";
+
+    [External]
+    PROCEDURE GetEncoding@2(VAR Encoding2@1000 : DotNet "'mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.Encoding");
+    BEGIN
+      Encoding2 := DotNet_Encoding;
+    END;
+
+    [External]
+    PROCEDURE Encoding@4(codePage@1000 : Integer);
+    BEGIN
+      DotNet_Encoding := DotNet_Encoding.GetEncoding(codePage);
+    END;
+
+    BEGIN
+    END.
+  }
+}
