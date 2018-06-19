@@ -130,6 +130,7 @@ OBJECT Codeunit 6112 Customer Data Migration Facade
       GlobalGenJournalLine.MODIFY(TRUE);
     END;
 
+    [External]
     PROCEDURE SetGeneralJournalLineDocumentType@42(DocumentTypeToSet@1000 : ' ,Payment,Invoice,Credit Memo,Finance Charge Memo,Reminder,Refund');
     BEGIN
       IF NOT GenJournalLineIsSet THEN
@@ -139,6 +140,7 @@ OBJECT Codeunit 6112 Customer Data Migration Facade
       GlobalGenJournalLine.MODIFY(TRUE);
     END;
 
+    [External]
     PROCEDURE SetGeneralJournalLineSourceCode@57(SourceCodeToSet@1000 : Code[10]);
     BEGIN
       IF NOT GenJournalLineIsSet THEN
@@ -148,12 +150,33 @@ OBJECT Codeunit 6112 Customer Data Migration Facade
       GlobalGenJournalLine.MODIFY(TRUE);
     END;
 
+    [External]
     PROCEDURE SetGeneralJournalLineExternalDocumentNo@66(ExternalDocumentNoToSet@1000 : Code[35]);
     BEGIN
       IF NOT GenJournalLineIsSet THEN
         ERROR(InternalGenJournalLineNotSetErr);
 
       GlobalGenJournalLine.VALIDATE("External Document No.",ExternalDocumentNoToSet);
+      GlobalGenJournalLine.MODIFY(TRUE);
+    END;
+
+    [External]
+    PROCEDURE SetGeneralJournalLineSalesPersonCode@68(SalespersonCodeToSet@1000 : Code[20]);
+    BEGIN
+      IF NOT GenJournalLineIsSet THEN
+        ERROR(InternalGenJournalLineNotSetErr);
+
+      GlobalGenJournalLine.VALIDATE("Salespers./Purch. Code",SalespersonCodeToSet);
+      GlobalGenJournalLine.MODIFY(TRUE);
+    END;
+
+    [External]
+    PROCEDURE SetGeneralJournalLinePaymentTerms@69(PaymentTermsCodeToSet@1000 : Code[10]);
+    BEGIN
+      IF NOT GenJournalLineIsSet THEN
+        ERROR(InternalGenJournalLineNotSetErr);
+
+      GlobalGenJournalLine.VALIDATE("Payment Terms Code" ,PaymentTermsCodeToSet);
       GlobalGenJournalLine.MODIFY(TRUE);
     END;
 
@@ -411,6 +434,33 @@ OBJECT Codeunit 6112 Customer Data Migration Facade
     END;
 
     [External]
+    PROCEDURE SetName2@58(Name2@1000 : Text[50]);
+    BEGIN
+      IF NOT CustomerIsSet THEN
+        ERROR(InternalCustomerNotSetErr);
+
+      GlobalCustomer.VALIDATE("Name 2",Name2);
+    END;
+
+    [External]
+    PROCEDURE SetTerritoryCode@64(TerritoryCode@1000 : Code[10]);
+    BEGIN
+      IF NOT CustomerIsSet THEN
+        ERROR(InternalCustomerNotSetErr);
+
+      GlobalCustomer.VALIDATE("Territory Code",TerritoryCode);
+    END;
+
+    [External]
+    PROCEDURE SetPrintStatement@56(PrintStatement@1000 : Boolean);
+    BEGIN
+      IF NOT CustomerIsSet THEN
+        ERROR(InternalCustomerNotSetErr);
+
+      GlobalCustomer.VALIDATE("Print Statements",PrintStatement);
+    END;
+
+    [External]
     PROCEDURE CreateDefaultDimensionAndRequirementsIfNeeded@26(DimensionCode@1003 : Text[20];DimensionDescription@1004 : Text[50];DimensionValueCode@1005 : Code[20];DimensionValueName@1006 : Text[30]);
     VAR
       Dimension@1000 : Record 348;
@@ -469,6 +519,18 @@ OBJECT Codeunit 6112 Customer Data Migration Facade
     PROCEDURE CreatePaymentMethodIfNeeded@41(CodeToSet@1000 : Code[10];DescriptionToSet@1001 : Text[50]) : Code[10];
     BEGIN
       EXIT(DataMigrationFacadeHelper.CreatePaymentMethodIfNeeded(CodeToSet,DescriptionToSet));
+    END;
+
+    [External]
+    PROCEDURE CreateTerritoryCodeIfNeeded@67(TerritoryCodeToSet@1000 : Code[10];TerritoryNameToSet@1003 : Text[50]) : Code[10];
+    BEGIN
+      EXIT(DataMigrationFacadeHelper.CreateTerritoryIfNeeded(TerritoryCodeToSet,TerritoryNameToSet));
+    END;
+
+    [External]
+    PROCEDURE CreateTaxAreaIfNeeded@65(TaxAreaCodeToSet@1000 : Code[20];TaxDescriptionToSet@1003 : Text[50]) : Code[20];
+    BEGIN
+      EXIT(DataMigrationFacadeHelper.CreateTaxAreaIfNeeded(TaxAreaCodeToSet,TaxDescriptionToSet));
     END;
 
     [External]
@@ -710,7 +772,7 @@ OBJECT Codeunit 6112 Customer Data Migration Facade
     END;
 
     [External]
-    PROCEDURE SetCustomerAlternativeContact@56(NameToSet@1003 : Text[50];AddressToSet@1004 : Text[50];Address2ToSet@1005 : Text[50];PostCodeToSet@1006 : Code[20];CityToSet@1007 : Text[30];CountryToSet@1012 : Code[10];EmailToset@1008 : Text[80];PhoneNoToSet@1009 : Text[30];FaxToSet@1010 : Text[30];MobileNoToSet@1011 : Text[30]);
+    PROCEDURE SetCustomerAlternativeContact@63(NameToSet@1003 : Text[50];AddressToSet@1004 : Text[50];Address2ToSet@1005 : Text[50];PostCodeToSet@1006 : Code[20];CityToSet@1007 : Text[30];CountryToSet@1012 : Code[10];EmailToset@1008 : Text[80];PhoneNoToSet@1009 : Text[30];FaxToSet@1010 : Text[30];MobileNoToSet@1011 : Text[30]);
     BEGIN
       IF NOT CustomerIsSet THEN
         ERROR(InternalCustomerNotSetErr);

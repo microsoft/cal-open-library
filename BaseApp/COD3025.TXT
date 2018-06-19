@@ -1,4 +1,5 @@
-OBJECT Codeunit 57000 DotNet_StreamWriter
+OBJECT Codeunit 3025 DotNet_StreamWriter
+{
   OBJECT-PROPERTIES
   {
     Date=;
@@ -14,7 +15,7 @@ OBJECT Codeunit 57000 DotNet_StreamWriter
   CODE
   {
     VAR
-      DotNet_StreamWriter@1001 : DotNet "'mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.IO.StreamWriter";
+      DotNet_StreamWriter@1001 : DotNet "'mscorlib'.System.IO.StreamWriter";
 
     [External]
     PROCEDURE WriteLine@2(LineText@1000 : Text);
@@ -23,7 +24,7 @@ OBJECT Codeunit 57000 DotNet_StreamWriter
     END;
 
     [External]
-    PROCEDURE StreamWriter@1(VAR OutStream@1000 : OutStream;DotNet_Encoding@1001 : Codeunit 57003);
+    PROCEDURE StreamWriter@1(VAR OutStream@1000 : OutStream;DotNet_Encoding@1001 : Codeunit 3026);
     VAR
       Encoding@1002 : DotNet "'mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.Encoding";
     BEGIN
@@ -51,6 +52,6 @@ OBJECT Codeunit 57000 DotNet_StreamWriter
 
     BEGIN
     END.
-
   }
 }
+

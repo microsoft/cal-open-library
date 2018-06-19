@@ -1,0 +1,42 @@
+OBJECT Codeunit 3026 DotNet_Encoding
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      DotNet_Encoding@1000 : DotNet "'mscorlib'.System.Text.Encoding";
+
+    [External]
+    PROCEDURE Encoding@4(codePage@1000 : Integer);
+    BEGIN
+      DotNet_Encoding := DotNet_Encoding.GetEncoding(codePage);
+    END;
+
+    [External]
+    PROCEDURE GetEncoding@2(VAR Encoding2@1000 : DotNet "'mscorlib'.System.Text.Encoding");
+    BEGIN
+      Encoding2 := DotNet_Encoding;
+    END;
+
+    [External]
+    PROCEDURE SetEncoding@1(Encoding2@1000 : DotNet "'mscorlib'.System.Text.Encoding");
+    BEGIN
+      DotNet_Encoding := Encoding2;
+    END;
+
+    BEGIN
+    END.
+  }
+}
+
