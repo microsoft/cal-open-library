@@ -1,10 +1,10 @@
-OBJECT Codeunit 57001 Test Add Text Line Encoding
+OBJECT Codeunit 146025 Test Add Text Line Encoding
 {
   OBJECT-PROPERTIES
   {
     Date=;
     Time=;
-    Version List=;
+    Version List=Test,W1,All;
   }
   PROPERTIES
   {
@@ -19,8 +19,8 @@ OBJECT Codeunit 57001 Test Add Text Line Encoding
     VAR
       EncodeText@1000 : TextConst 'KOR=가나다라마바사아자차카타파하';
       Assert@1001 : Codeunit 130000;
-      StreamReader@1005 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.IO.StreamReader";
-      LStreamReader@1004 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.IO.StreamReader";
+      StreamReader@1005 : DotNet "'mscorlib'.System.IO.StreamReader";
+      LStreamReader@1004 : DotNet "'mscorlib'.System.IO.StreamReader";
 
     [Test]
     PROCEDURE TestAddTextLineWithEncoding@3();
@@ -30,11 +30,12 @@ OBJECT Codeunit 57001 Test Add Text Line Encoding
       OutStream@1001 : OutStream;
       InStream@1002 : InStream;
       LocalInStream@1007 : InStream;
-      StreamWriter@1004 : Codeunit 57000;
+      StreamWriter@1004 : Codeunit 3025;
       LocalOutStream@1003 : OutStream;
     BEGIN
+      // [SCENARIO] Unit test of StreamWriter
 
-      //SETUP
+      // [GIVEN] An encoded string in a blob.
       TempBlob.INIT;
       TempBlob.INSERT;
       TempBlob.Blob.CREATEOUTSTREAM(OutStream);
@@ -42,6 +43,7 @@ OBJECT Codeunit 57001 Test Add Text Line Encoding
       TempBlob.MODIFY;
       TempBlob.CALCFIELDS(Blob);
 
+      // [GIVEN] An non-encoded string in a blob.
       LocalBlob.INIT;
       LocalBlob.INSERT;
       LocalBlob.Blob.CREATEOUTSTREAM(LocalOutStream);
@@ -49,20 +51,34 @@ OBJECT Codeunit 57001 Test Add Text Line Encoding
       LocalBlob.MODIFY;
       LocalBlob.CALCFIELDS(Blob);
 
-      // Execute
+      // [WHEN] Those strings are compared.
       TempBlob.Blob.CREATEINSTREAM(InStream);
       LocalBlob.Blob.CREATEINSTREAM(LocalInStream);
 
-      // Verify the Encoding Text
+      // [THEN] They are not equal.
       Assert.AreNotEqual(ReadTextLineFromStream(InStream),ReadTextLineFromStream(LocalInStream),'Text should be not equal');
     END;
 
     [Normal]
     LOCAL PROCEDURE AddTextLineWithoutEncoding@10(VAR OutStream@1000 : OutStream;LineText@1001 : Text);
     VAR
-      DotNet_StreamWriter@1002 : DotNet "'mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.IO.StreamWriter";
+      DotNetStreamWriter@1002 : DotNet "'mscorlib'.System.IO.StreamWriter";
     BEGIN
-      DotNet_StreamWriter := DotNet_StreamWriter.StreamWriter(OutStream);
+      DotNetStreamWriter := DotNetStreamWriter.StreamWriter(OutStream);
+      DotNetStreamWriter.WriteLine(LineText);
+      DotNetStreamWriter.Flush;
+      DotNetStreamWriter.Close;
+      DotNetStreamWriter.Dispose;
+    END;
+
+    [Normal]
+    LOCAL PROCEDURE AddTextLineWithEncoding@1(VAR OutStream@1000 : OutStream;LineText@1001 : Text;CodePage@1003 : Integer);
+    VAR
+      DotNet_StreamWriter@1002 : Codeunit 3025;
+      DotNet_Encoding@1004 : Codeunit 3026;
+    BEGIN
+      DotNet_Encoding.Encoding(949);
+      DotNet_StreamWriter.StreamWriter(OutStream,DotNet_Encoding);
       DotNet_StreamWriter.WriteLine(LineText);
       DotNet_StreamWriter.Flush;
       DotNet_StreamWriter.Close;
@@ -70,29 +86,15 @@ OBJECT Codeunit 57001 Test Add Text Line Encoding
     END;
 
     [Normal]
-    LOCAL PROCEDURE ReadTextLineFromStream@34(VAR _InStream@1000 : InStream) retValue : Text;
+    LOCAL PROCEDURE ReadTextLineFromStream@34(VAR InStream@1000 : InStream) retValue : Text;
     VAR
       result@1001 : Text;
     BEGIN
-      StreamReader := StreamReader.StreamReader(_InStream);
+      StreamReader := StreamReader.StreamReader(InStream);
       result := StreamReader.ReadLine();
       StreamReader.Close;
       StreamReader.Dispose;
       EXIT(result);
-    END;
-
-    [Normal]
-    LOCAL PROCEDURE AddTextLineWithEncoding@1(VAR OutStream@1000 : OutStream;LineText@1001 : Text;CodePage@1003 : Integer);
-    VAR
-      StreamWriter@1002 : Codeunit 57000;
-      Encoding@1004 : Codeunit 57003;
-    BEGIN
-      Encoding.Encoding(949);
-      StreamWriter.StreamWriter(OutStream,Encoding);
-      StreamWriter.WriteLine(LineText);
-      StreamWriter.Flush;
-      StreamWriter.Close;
-      StreamWriter.Dispose;
     END;
 
     BEGIN
