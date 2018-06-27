@@ -1,0 +1,57 @@
+OBJECT Codeunit 3025 DotNet_StreamWriter
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      DotNetStreamWriter@1001 : DotNet "'mscorlib'.System.IO.StreamWriter";
+
+    [External]
+    PROCEDURE WriteLine@2(LineText@1000 : Text);
+    BEGIN
+      DotNetStreamWriter.WriteLine(LineText);
+    END;
+
+    [External]
+    PROCEDURE StreamWriter@1(VAR OutStream@1000 : OutStream;DotNet_Encoding@1001 : Codeunit 3026);
+    VAR
+      DotNetEncoding@1002 : DotNet "'mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.Encoding";
+    BEGIN
+      DotNet_Encoding.GetEncoding(DotNetEncoding);
+      DotNetStreamWriter := DotNetStreamWriter.StreamWriter(OutStream,DotNetEncoding);
+    END;
+
+    [External]
+    PROCEDURE Flush@3();
+    BEGIN
+      DotNetStreamWriter.Flush;
+    END;
+
+    [External]
+    PROCEDURE Close@4();
+    BEGIN
+      DotNetStreamWriter.Close;
+    END;
+
+    [External]
+    PROCEDURE Dispose@5();
+    BEGIN
+      DotNetStreamWriter.Dispose;
+    END;
+
+    BEGIN
+    END.
+  }
+}
+
