@@ -18,6 +18,8 @@ OBJECT Codeunit 132559 Signed XML Test
     VAR
       SignedXmlTextTestFailedErr@1000 : TextConst 'ENU=Xml Document Text signature test failed';
       SignedXmlStreamTestFailedErr@1001 : TextConst 'ENU=Xml Document Stream signature test failed';
+      SignedXmlTextPITestFailedErr@1000000001 : TextConst 'ENU=Xml Document with processing instructions text signature test failed';
+      SignedXmlStreamPITestFailedErr@1000000000 : TextConst 'ENU=Xml Document with processing instructions stream signature test failed';
       SignedXmlHardcodedTextTestFailedErr@1002 : TextConst 'ENU=Hardcoded Xml Document signature test failed';
       IncorrectSignedXmlTestFailedErr@1003 : TextConst 'ENU="Incorrect xml document signature test failed "';
       Assert@1004 : Codeunit 130000;
@@ -78,11 +80,76 @@ OBJECT Codeunit 132559 Signed XML Test
       // [WHEN] The document is signed
       SignedXmlText := SignedXMLMgt.SignXmlText(XmlText,PrivateKey);
 
-      TempBlob.WriteTextLine(SignedXmlText);
+      TempBlob.WriteAsText(SignedXmlText, TEXTENCODING::Windows);
       TempBlob.Blob.CREATEINSTREAM(InputStream);
 
       // [THEN] The signature is valid
       Assert.IsTrue(SignedXMLMgt.CheckXmlStreamSignature(InputStream,PublicKey),SignedXmlStreamTestFailedErr);
+    END;
+
+    [Test]
+    PROCEDURE TestSignedXmlTextWithProcIns@1000000001();
+    VAR
+      SignedXMLMgt@1001 : Codeunit 6227;
+      Convert@1002 : DotNet "'mscorlib'.System.Convert";
+      RSAKey@1000 : DotNet "'mscorlib'.System.Security.Cryptography.RSACryptoServiceProvider";
+      PrivateKey@1003 : Text;
+      PublicKey@1004 : Text;
+      XmlText@1005 : Text;
+      SignedXmlText@1006 : Text;
+    BEGIN
+      // [SCENARIO] Test of SignedXMLText function on XmlDocument with processing instruction
+
+      // [GIVEN] A private and public key
+      RSAKey := RSAKey.RSACryptoServiceProvider;
+
+      PrivateKey := Convert.ToBase64String(RSAKey.ExportCspBlob(TRUE));
+      PublicKey := Convert.ToBase64String(RSAKey.ExportCspBlob(FALSE));
+
+      // [GIVEN] A xml document in text representation
+      XmlText := '<?xml version="1.0" encoding="UTF-8" ?>' +
+        '<xml><data>something</data><data>another node</data></xml>';
+
+      // [WHEN] The document is signed
+      SignedXmlText := SignedXMLMgt.SignXmlText(XmlText,PrivateKey);
+
+      // [THEN] The signature is valid
+      Assert.IsTrue(SignedXMLMgt.CheckXmlTextSignature(SignedXmlText,PublicKey),SignedXmlTextPITestFailedErr);
+    END;
+
+    [Test]
+    PROCEDURE TestSignedXmlStreamWithProcIns@1000000000();
+    VAR
+      TempBlob@1007 : Record 99008535;
+      SignedXMLMgt@1001 : Codeunit 6227;
+      InputStream@1008 : InStream;
+      Convert@1002 : DotNet "'mscorlib'.System.Convert";
+      RSAKey@1000 : DotNet "'mscorlib'.System.Security.Cryptography.RSACryptoServiceProvider";
+      PrivateKey@1003 : Text;
+      PublicKey@1004 : Text;
+      XmlText@1005 : Text;
+      SignedXmlText@1006 : Text;
+    BEGIN
+      // [SCENARIO] Test of SignedXMLStream function on XmlDocument with processing instruction
+
+      // [GIVEN] A private and public key
+      RSAKey := RSAKey.RSACryptoServiceProvider;
+
+      PrivateKey := Convert.ToBase64String(RSAKey.ExportCspBlob(TRUE));
+      PublicKey := Convert.ToBase64String(RSAKey.ExportCspBlob(FALSE));
+
+      // [GIVEN] A xml document in text representation
+      XmlText := '<?xml version="1.0" encoding="UTF-8" ?>' +
+        '<xml><data>something</data><data>another node</data></xml>';
+
+      // [WHEN] The document is signed
+      SignedXmlText := SignedXMLMgt.SignXmlText(XmlText,PrivateKey);
+
+      TempBlob.WriteAsText(SignedXmlText, TEXTENCODING::Windows);
+      TempBlob.Blob.CREATEINSTREAM(InputStream);
+
+      // [THEN] The signature is valid
+      Assert.IsTrue(SignedXMLMgt.CheckXmlStreamSignature(InputStream,PublicKey),SignedXmlStreamPITestFailedErr);
     END;
 
     [Test]
@@ -95,7 +162,8 @@ OBJECT Codeunit 132559 Signed XML Test
       // [SCENARIO] Test valid hardcoded xml document and public key
 
       // [GIVEN] A signed xml document
-      SignedXmlText := '<xml><data>something</data><data>another node</data>' +
+      SignedXmlText := '<?xml version="1.0" encoding="UTF-8" ?>' +
+        '<xml><data>something</data><data>another node</data>' +
         '<Signature xmlns="http://www.w3.org/2000/09/xmldsig#">' +
         '<SignedInfo><CanonicalizationMethod Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315" />' +
         '<SignatureMethod Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha1" /><Reference URI="">' +
@@ -126,7 +194,8 @@ OBJECT Codeunit 132559 Signed XML Test
       // [SCENARIO] Test invalid hardcoded xml document and public key
 
       // [GIVEN] A signed xml document
-      SignedXmlText := '<xml><data>something different</data><data>another node</data>' +
+      SignedXmlText := '<?xml version="1.0" encoding="UTF-8" ?>' +
+        '<xml><data>something different</data><data>another node</data>' +
         '<Signature xmlns="http://www.w3.org/2000/09/xmldsig#">' +
         '<SignedInfo><CanonicalizationMethod Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315" />' +
         '<SignatureMethod Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha1" /><Reference URI="">' +
