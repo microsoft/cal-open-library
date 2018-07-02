@@ -1,0 +1,103 @@
+OBJECT Codeunit 3018 DotNet_ALAppOperationInvoker
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      DotNetALNavAppOperationInvoker@1000 : DotNet "'Microsoft.Dynamics.Nav.Ncl, Version=13.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.Microsoft.Dynamics.Nav.Runtime.Apps.ALNavAppOperationInvoker";
+
+    PROCEDURE ALNavAppOperationInvoker@5();
+    BEGIN
+      // do not make external
+      DotNetALNavAppOperationInvoker := DotNetALNavAppOperationInvoker.ALNavAppOperationInvoker
+    END;
+
+    PROCEDURE DeployTarget@2(AppId@1000 : GUID;Lcid@1001 : Text);
+    BEGIN
+      // do not make external
+      DotNetALNavAppOperationInvoker.DeployTarget(AppId,Lcid)
+    END;
+
+    PROCEDURE UploadPackage@3(PackageStream@1000 : InStream;DotNet_ALPacDeploymentSchedule@1001 : Codeunit 3019;Lcid@1002 : Text);
+    VAR
+      DotNetALPackageDeploymentSchedule@1003 : DotNet "'Microsoft.Dynamics.Nav.Ncl, Version=13.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.Microsoft.Dynamics.Nav.Runtime.Apps.ALPackageDeploymentSchedule";
+    BEGIN
+      // do not make external
+      DotNet_ALPacDeploymentSchedule.GetALPackageDeploymentSchedule(DotNetALPackageDeploymentSchedule);
+      DotNetALNavAppOperationInvoker.UploadPackage(PackageStream,DotNetALPackageDeploymentSchedule,Lcid)
+    END;
+
+    PROCEDURE RefreshOperationStatus@4(OperationID@1000 : GUID);
+    BEGIN
+      // do not make external
+      DotNetALNavAppOperationInvoker.RefreshOperationStatus(OperationID)
+    END;
+
+    PROCEDURE GetOperationDetailedStatusMessageAsStream@7(operationId@1000 : GUID;VAR OutStream@1001 : OutStream);
+    BEGIN
+      // do not make external
+      DotNetALNavAppOperationInvoker.GetOperationDetailedStatusMessageAsStream(operationId,OutStream)
+    END;
+
+    PROCEDURE GetOperationDetailedStatusMessage@8(operationId@1000 : GUID) : Text;
+    BEGIN
+      // do not make external
+      EXIT(DotNetALNavAppOperationInvoker.GetOperationDetailedStatusMessage(operationId))
+    END;
+
+    PROCEDURE GetDeployOperationAppName@12(OperationId@1000 : GUID) : Text;
+    BEGIN
+      // do not make external
+      EXIT(DotNetALNavAppOperationInvoker.GetDeployOperationAppName(OperationId));
+    END;
+
+    PROCEDURE GetDeployOperationAppPublisher@10(OperationId@1000 : GUID) : Text;
+    BEGIN
+      // do not make external
+      EXIT(DotNetALNavAppOperationInvoker.GetDeployOperationAppPublisher(OperationId));
+    END;
+
+    PROCEDURE GetDeployOperationAppVersion@9(OperationId@1000 : GUID) : Text;
+    BEGIN
+      // do not make external
+      EXIT(DotNetALNavAppOperationInvoker.GetDeployOperationAppVersion(OperationId));
+    END;
+
+    PROCEDURE GetDeployOperationSchedule@11(OperationId@1000 : GUID) : Text;
+    BEGIN
+      // do not make external
+      EXIT(DotNetALNavAppOperationInvoker.GetDeployOperationSchedule(OperationId));
+    END;
+
+    PROCEDURE GetDeployOperationJobId@13(OperationId@1000 : GUID) : Text;
+    BEGIN
+      // do not make external
+      EXIT(DotNetALNavAppOperationInvoker.GetDeployOperationJobId(OperationId));
+    END;
+
+    PROCEDURE GetALNavAppOperationInvoker@1(VAR DotNetALNavAppOperationInvoker2@1000 : DotNet "'Microsoft.Dynamics.Nav.Ncl, Version=13.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.Microsoft.Dynamics.Nav.Runtime.Apps.ALNavAppOperationInvoker");
+    BEGIN
+      DotNetALNavAppOperationInvoker2 := DotNetALNavAppOperationInvoker
+    END;
+
+    PROCEDURE SetALNavAppOperationInvoker@6(DotNetALNavAppOperationInvoker2@1000 : DotNet "'Microsoft.Dynamics.Nav.Ncl, Version=13.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.Microsoft.Dynamics.Nav.Runtime.Apps.ALNavAppOperationInvoker");
+    BEGIN
+      DotNetALNavAppOperationInvoker := DotNetALNavAppOperationInvoker2
+    END;
+
+    BEGIN
+    END.
+  }
+}
+

@@ -1,0 +1,231 @@
+OBJECT Codeunit 1203 Import XML File to Data Exch.
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    TableNo=1220;
+    Permissions=TableData 1221=rimd;
+    OnRun=BEGIN
+            StartTime := CURRENTDATETIME;
+            UpdateProgressWindow(0);
+
+            ParseParentChildDocument(Rec);
+
+            IF WindowOpen THEN
+              ProgressWindow.CLOSE;
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      ProgressMsg@1000 : TextConst 'ENU=Preparing line number #1#######';
+      ProgressWindow@1001 : Dialog;
+      WindowOpen@1002 : Boolean;
+      StartTime@1003 : DateTime;
+
+    LOCAL PROCEDURE ParseParentChildDocument@1(DataExch@1000 : Record 1220);
+    VAR
+      DataExchDef@1001 : Record 1222;
+      DataExchLineDef@1002 : Record 1227;
+      XMLDOMManagement@1011 : Codeunit 6224;
+      XmlDocument@1010 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlDocument";
+      XmlNodeList@1013 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlNodeList";
+      XmlNamespaceManager@1006 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlNamespaceManager";
+      XmlStream@1007 : InStream;
+      CurrentLineNo@1008 : Integer;
+      NodeID@1009 : Text[250];
+      I@1012 : Integer;
+      NodeCount@1003 : Integer;
+    BEGIN
+      DataExchDef.GET(DataExch."Data Exch. Def Code");
+      DataExchLineDef.SETRANGE("Data Exch. Def Code",DataExchDef.Code);
+      DataExchLineDef.SETRANGE("Parent Code",'');
+      IF NOT DataExchLineDef.FINDSET THEN
+        EXIT;
+
+      DataExch."File Content".CREATEINSTREAM(XmlStream);
+      XMLDOMManagement.LoadXMLDocumentFromInStream(XmlStream,XmlDocument);
+      DataExchLineDef.ValidateNamespace(XmlDocument.DocumentElement);
+      XMLDOMManagement.AddNamespaces(XmlNamespaceManager,XmlDocument);
+
+      REPEAT
+        XMLDOMManagement.FindNodesWithNamespaceManager(
+          XmlDocument,EscapeMissingNamespacePrefix(DataExchLineDef."Data Line Tag"),XmlNamespaceManager,XmlNodeList);
+        CurrentLineNo := 1;
+        NodeCount := XmlNodeList.Count;
+        FOR I := 1 TO NodeCount DO BEGIN
+          NodeID := IncreaseNodeID('',CurrentLineNo);
+          ParseParentChildLine(
+            XmlNodeList.ItemOf(I - 1),NodeID,'',CurrentLineNo,DataExchLineDef,DataExch."Entry No.",XmlNamespaceManager);
+          CurrentLineNo += 1;
+        END;
+      UNTIL DataExchLineDef.NEXT = 0;
+    END;
+
+    LOCAL PROCEDURE ParseParentChildLine@4(CurrentXmlNode@1000 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlNode";NodeID@1001 : Text[250];ParentNodeID@1002 : Text[250];CurrentLineNo@1003 : Integer;CurrentDataExchLineDef@1004 : Record 1227;EntryNo@1005 : Integer;XmlNamespaceManager@1006 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlNamespaceManager");
+    VAR
+      DataExchColumnDef@1007 : Record 1223;
+      DataExchLineDef@1008 : Record 1227;
+      DataExchField@1010 : Record 1221;
+      XMLDOMManagement@1012 : Codeunit 6224;
+      XmlNodeList@1013 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlNodeList";
+      CurrentIndex@1014 : Integer;
+      CurrentNodeID@1015 : Text[250];
+      LastLineNo@1017 : Integer;
+      I@1009 : Integer;
+      NodeCount@1011 : Integer;
+    BEGIN
+      DataExchField.InsertRecXMLFieldDefinition(EntryNo,CurrentLineNo,NodeID,ParentNodeID,'',CurrentDataExchLineDef.Code);
+
+      // Insert Attributes and values
+      DataExchColumnDef.SETRANGE("Data Exch. Def Code",CurrentDataExchLineDef."Data Exch. Def Code");
+      DataExchColumnDef.SETRANGE("Data Exch. Line Def Code",CurrentDataExchLineDef.Code);
+      DataExchColumnDef.SETFILTER(Path,'<>%1','');
+
+      CurrentIndex := 1;
+
+      IF DataExchColumnDef.FINDSET THEN
+        REPEAT
+          XMLDOMManagement.FindNodesWithNamespaceManager(
+            CurrentXmlNode,
+            GetRelativePath(DataExchColumnDef.Path,CurrentDataExchLineDef."Data Line Tag"),
+            XmlNamespaceManager,
+            XmlNodeList);
+
+          NodeCount := XmlNodeList.Count;
+          FOR I := 1 TO NodeCount DO BEGIN
+            CurrentNodeID := IncreaseNodeID(NodeID,CurrentIndex);
+            CurrentIndex += 1;
+            InsertColumn(
+              DataExchColumnDef.Path,CurrentLineNo,CurrentNodeID,ParentNodeID,XmlNodeList.ItemOf(I - 1).InnerText,
+              CurrentDataExchLineDef,EntryNo);
+          END;
+        UNTIL DataExchColumnDef.NEXT = 0;
+
+      // insert Constant values
+      DataExchColumnDef.SETFILTER(Path,'%1','');
+      DataExchColumnDef.SETFILTER(Constant,'<>%1','');
+      IF DataExchColumnDef.FINDSET THEN
+        REPEAT
+          CurrentNodeID := IncreaseNodeID(NodeID,CurrentIndex);
+          CurrentIndex += 1;
+          DataExchField.InsertRecXMLFieldWithParentNodeID(EntryNo,CurrentLineNo,DataExchColumnDef."Column No.",
+            CurrentNodeID,ParentNodeID,DataExchColumnDef.Constant,CurrentDataExchLineDef.Code);
+        UNTIL DataExchColumnDef.NEXT = 0;
+
+      // Insert Children
+      DataExchLineDef.SETRANGE("Data Exch. Def Code",CurrentDataExchLineDef."Data Exch. Def Code");
+      DataExchLineDef.SETRANGE("Parent Code",CurrentDataExchLineDef.Code);
+
+      IF DataExchLineDef.FINDSET THEN
+        REPEAT
+          XMLDOMManagement.FindNodesWithNamespaceManager(
+            CurrentXmlNode,
+            GetRelativePath(DataExchLineDef."Data Line Tag",CurrentDataExchLineDef."Data Line Tag"),
+            XmlNamespaceManager,
+            XmlNodeList);
+
+          DataExchField.SETRANGE("Data Exch. No.",EntryNo);
+          DataExchField.SETRANGE("Data Exch. Line Def Code",DataExchLineDef.Code);
+          LastLineNo := 1;
+          IF DataExchField.FINDLAST THEN
+            LastLineNo := DataExchField."Line No." + 1;
+
+          NodeCount := XmlNodeList.Count;
+          FOR I := 1 TO NodeCount DO BEGIN
+            CurrentNodeID := IncreaseNodeID(NodeID,CurrentIndex);
+            ParseParentChildLine(
+              XmlNodeList.ItemOf(I - 1),CurrentNodeID,NodeID,LastLineNo,DataExchLineDef,EntryNo,XmlNamespaceManager);
+            CurrentIndex += 1;
+            LastLineNo += 1;
+          END;
+        UNTIL DataExchLineDef.NEXT = 0;
+    END;
+
+    LOCAL PROCEDURE InsertColumn@2(Path@1000 : Text;LineNo@1001 : Integer;NodeId@1006 : Text[250];ParentNodeId@1008 : Text[250];Value@1002 : Text;VAR DataExchLineDef@1003 : Record 1227;EntryNo@1007 : Integer);
+    VAR
+      DataExchColumnDef@1004 : Record 1223;
+      DataExchField@1005 : Record 1221;
+    BEGIN
+      // Note: The Data Exch. variable is passed by reference only to improve performance.
+      DataExchColumnDef.SETRANGE("Data Exch. Def Code",DataExchLineDef."Data Exch. Def Code");
+      DataExchColumnDef.SETRANGE("Data Exch. Line Def Code",DataExchLineDef.Code);
+      DataExchColumnDef.SETRANGE(Path,Path);
+
+      IF DataExchColumnDef.FINDFIRST THEN BEGIN
+        UpdateProgressWindow(LineNo);
+        DataExchField.InsertRecXMLFieldWithParentNodeID(EntryNo,LineNo,DataExchColumnDef."Column No.",NodeId,ParentNodeId,Value,
+          DataExchLineDef.Code);
+      END;
+    END;
+
+    LOCAL PROCEDURE GetRelativePath@6(ChildPath@1000 : Text[250];ParentPath@1001 : Text[250]) : Text;
+    VAR
+      XMLDOMManagement@1002 : Codeunit 6224;
+    BEGIN
+      EXIT(EscapeMissingNamespacePrefix(XMLDOMManagement.GetRelativePath(ChildPath,ParentPath)));
+    END;
+
+    LOCAL PROCEDURE IncreaseNodeID@7(NodeID@1001 : Text[250];Seed@1000 : Integer) : Text[250];
+    BEGIN
+      EXIT(NodeID + FORMAT(Seed,0,'<Integer,4><Filler Char,0>'))
+    END;
+
+    [External]
+    PROCEDURE EscapeMissingNamespacePrefix@5(XPath@1000 : Text) : Text;
+    VAR
+      TypeHelper@1004 : Codeunit 10;
+      PositionOfFirstSlash@1002 : Integer;
+      FirstXPathElement@1001 : Text;
+      RestOfXPath@1003 : Text;
+    BEGIN
+      // we will let the user define XPaths without the required namespace prefix
+      // however, if he does that, we will only consider the XPath element as a local name
+      // for example, we will turn XPath /Invoice/cac:InvoiceLine into /*[local-name() = 'Invoice']/cac:InvoiceLine
+      PositionOfFirstSlash := STRPOS(XPath,'/');
+      CASE PositionOfFirstSlash OF
+        1:
+          EXIT('/' + EscapeMissingNamespacePrefix(COPYSTR(XPath,2)));
+        0:
+          BEGIN
+            IF (XPath = '') OR (NOT TypeHelper.IsAlphanumeric(XPath)) THEN
+              EXIT(XPath);
+            EXIT(STRSUBSTNO('*[local-name() = ''%1'']',XPath));
+          END;
+        ELSE BEGIN
+          FirstXPathElement := DELSTR(XPath,PositionOfFirstSlash);
+          RestOfXPath := COPYSTR(XPath,PositionOfFirstSlash);
+          EXIT(EscapeMissingNamespacePrefix(FirstXPathElement) + EscapeMissingNamespacePrefix(RestOfXPath));
+        END;
+      END;
+    END;
+
+    LOCAL PROCEDURE UpdateProgressWindow@3(LineNo@1001 : Integer);
+    VAR
+      PopupDelay@1000 : Integer;
+    BEGIN
+      PopupDelay := 1000;
+      IF CURRENTDATETIME - StartTime < PopupDelay THEN
+        EXIT;
+
+      StartTime := CURRENTDATETIME; // only update every PopupDelay ms
+
+      IF NOT WindowOpen THEN BEGIN
+        ProgressWindow.OPEN(ProgressMsg);
+        WindowOpen := TRUE;
+      END;
+
+      ProgressWindow.UPDATE(1,LineNo);
+    END;
+
+    BEGIN
+    END.
+  }
+}
+

@@ -1,0 +1,44 @@
+OBJECT Codeunit 146024 Test_DotNet_Uri
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=Test,W1,All;
+  }
+  PROPERTIES
+  {
+    Subtype=Test;
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      Assert@1000 : Codeunit 130000;
+      LibraryLowerPermissions@1002 : Codeunit 132217;
+      DotNet_Uri@1001 : Codeunit 3024;
+
+    [Test]
+    PROCEDURE EscapeAndUnescapeDataString@1();
+    VAR
+      Text@1000 : Text;
+      EscapedText@1001 : Text;
+    BEGIN
+      LibraryLowerPermissions.SetO365Basic;
+
+      // [GIVEN] A Url
+      Text := 'http://<some%url.com>';
+      // [WHEN] EscapeDataString is called on that url
+      // [THEN] The url is escaped
+      EscapedText := 'http%3A%2F%2F%3Csome%25url.com%3E';
+      Assert.AreEqual(EscapedText,DotNet_Uri.EscapeDataString(Text),'EscapeDataString fails');
+      Assert.AreEqual(Text,DotNet_Uri.UnescapeDataString(EscapedText),'UnescapeDataString fails');
+    END;
+
+    BEGIN
+    END.
+  }
+}
+

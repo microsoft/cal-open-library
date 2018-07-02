@@ -1,0 +1,526 @@
+OBJECT Codeunit 6110 GL Acc. Data Migration Facade
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    TableNo=1798;
+    OnRun=BEGIN
+            FINDSET;
+            REPEAT
+              OnMigrateGlAccount("Staging Table RecId To Process");
+              OnCreateOpeningBalanceTrx("Staging Table RecId To Process");
+              OnMigratePostingGroups("Staging Table RecId To Process");
+              GLAccountIsSet := FALSE;
+            UNTIL NEXT = 0;
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      GlobalGLAccount@1001 : Record 15;
+      GlobalGenJournalLine@1006 : Record 81;
+      DataMigrationFacadeHelper@1005 : Codeunit 1797;
+      GLAccountIsSet@1000 : Boolean;
+      InternalGLAccountNotSetErr@1002 : TextConst 'ENU=Internal G/L Account is not set. Create it first.';
+      InternalGeneralPostingSetupNotSetErr@1003 : TextConst 'ENU=Internal General Posting Setup is not set. Create it first.';
+
+    [Integration(TRUE)]
+    LOCAL PROCEDURE OnMigrateGlAccount@1(RecordIdToMigrate@1000 : RecordID);
+    BEGIN
+    END;
+
+    [Integration(TRUE)]
+    LOCAL PROCEDURE OnCreateOpeningBalanceTrx@7(RecordIdToMigrate@1000 : RecordID);
+    BEGIN
+    END;
+
+    [Integration(TRUE)]
+    LOCAL PROCEDURE OnMigratePostingGroups@9(RecordIdToMigrate@1000 : RecordID);
+    BEGIN
+    END;
+
+    [External]
+    PROCEDURE ModifyGLAccount@2(RunTrigger@1000 : Boolean);
+    BEGIN
+      IF NOT GLAccountIsSet THEN
+        ERROR(InternalGLAccountNotSetErr);
+
+      GlobalGLAccount.MODIFY(RunTrigger);
+    END;
+
+    [External]
+    PROCEDURE CreateGLAccountIfNeeded@13(AccountNoToSet@1000 : Code[20];AccountNameToSet@1003 : Text[50];AccountTypeToSet@1002 : 'Posting,Heading,Total,Begin-Total,End-Total') : Boolean;
+    VAR
+      GLAccount@1001 : Record 15;
+    BEGIN
+      IF GLAccount.GET(AccountNoToSet) THEN BEGIN
+        GlobalGLAccount := GLAccount;
+        GLAccountIsSet := TRUE;
+        EXIT;
+      END;
+
+      GLAccount.INIT;
+
+      GLAccount.VALIDATE("No.",AccountNoToSet);
+      GLAccount.VALIDATE(Name,AccountNameToSet);
+      GLAccount.VALIDATE("Account Type",AccountTypeToSet);
+
+      GLAccount.INSERT(TRUE);
+
+      GlobalGLAccount := GLAccount;
+      GLAccountIsSet := TRUE;
+      EXIT(TRUE);
+    END;
+
+    [External]
+    PROCEDURE CreateGeneralPostingSetupIfNeeded@4(GeneralPostingGroupCode@1001 : Code[10]);
+    VAR
+      GeneralPostingSetup@1000 : Record 252;
+    BEGIN
+      IF NOT GeneralPostingSetup.GET(GeneralPostingGroupCode,GeneralPostingGroupCode) THEN BEGIN
+        GeneralPostingSetup.INIT;
+        GeneralPostingSetup.VALIDATE("Gen. Bus. Posting Group",GeneralPostingGroupCode);
+        GeneralPostingSetup.VALIDATE("Gen. Prod. Posting Group",GeneralPostingGroupCode);
+        GeneralPostingSetup.INSERT(TRUE);
+      END;
+
+      GeneralPostingSetup.RESET;
+      IF NOT GeneralPostingSetup.GET('',GeneralPostingGroupCode) THEN BEGIN
+        GeneralPostingSetup.INIT;
+        GeneralPostingSetup.VALIDATE("Gen. Bus. Posting Group",'');
+        GeneralPostingSetup.VALIDATE("Gen. Prod. Posting Group",GeneralPostingGroupCode);
+        GeneralPostingSetup.INSERT(TRUE);
+      END;
+    END;
+
+    [External]
+    PROCEDURE CreateGenProductPostingGroupIfNeeded@5(PostingGroupCode@1000 : Code[20];PostingGroupDescription@1001 : Text[50]);
+    VAR
+      GenBusinessPostingGroup@1002 : Record 250;
+    BEGIN
+      IF GenBusinessPostingGroup.GET(PostingGroupCode) THEN
+        EXIT;
+
+      GenBusinessPostingGroup.INIT;
+      GenBusinessPostingGroup.VALIDATE(Code,PostingGroupCode);
+      GenBusinessPostingGroup.VALIDATE(Description,PostingGroupDescription);
+      GenBusinessPostingGroup.VALIDATE("Auto Insert Default",TRUE);
+      GenBusinessPostingGroup.INSERT(TRUE);
+    END;
+
+    [External]
+    PROCEDURE CreateGenBusinessPostingGroupIfNeeded@6(PostingGroupCode@1000 : Code[20];PostingGroupDescription@1001 : Text[50]);
+    VAR
+      GenProductPostingGroup@1002 : Record 251;
+    BEGIN
+      IF GenProductPostingGroup.GET(PostingGroupCode) THEN
+        EXIT;
+
+      GenProductPostingGroup.INIT;
+      GenProductPostingGroup.VALIDATE(Code,PostingGroupCode);
+      GenProductPostingGroup.VALIDATE(Description,PostingGroupDescription);
+      GenProductPostingGroup.VALIDATE("Auto Insert Default",TRUE);
+      GenProductPostingGroup.INSERT(TRUE);
+    END;
+
+    [External]
+    PROCEDURE CreateGeneralJournalLine@88(GeneralJournalBatchCode@1000 : Code[10];DocumentNo@1001 : Code[20];Description@1002 : Text[50];PostingDate@1003 : Date;DueDate@1005 : Date;Amount@1004 : Decimal;AmountLCY@1006 : Decimal;Currency@1007 : Code[10];BalancingAccount@1008 : Code[20]);
+    BEGIN
+      DataMigrationFacadeHelper.CreateGeneralJournalLine(
+        GlobalGenJournalLine,
+        GeneralJournalBatchCode,
+        DocumentNo,
+        Description,
+        GlobalGenJournalLine."Account Type"::"G/L Account",
+        GlobalGLAccount."No.",
+        PostingDate,
+        DueDate,
+        Amount,
+        AmountLCY,
+        Currency,
+        BalancingAccount);
+    END;
+
+    [External]
+    PROCEDURE CreateGeneralJournalBatchIfNeeded@89(GeneralJournalBatchCode@1000 : Code[10];NoSeriesCode@1002 : Code[20];PostingNoSeriesCode@1001 : Code[20]);
+    BEGIN
+      DataMigrationFacadeHelper.CreateGeneralJournalBatchIfNeeded(
+        GeneralJournalBatchCode,
+        NoSeriesCode,
+        PostingNoSeriesCode);
+    END;
+
+    [External]
+    PROCEDURE SetGlobalGLAccount@40(GLAccountNo@1000 : Code[20]) : Boolean;
+    BEGIN
+      GLAccountIsSet := GlobalGLAccount.GET(GLAccountNo);
+      EXIT(GLAccountIsSet);
+    END;
+
+    [External]
+    PROCEDURE SetIncomeBalanceType@16(IncomeBalanceTypeToSet@1000 : 'Income Statement,Balance Sheet');
+    BEGIN
+      IF NOT GLAccountIsSet THEN
+        ERROR(InternalGLAccountNotSetErr);
+
+      GlobalGLAccount.VALIDATE("Income/Balance",IncomeBalanceTypeToSet);
+    END;
+
+    [External]
+    PROCEDURE SetTotaling@18(TotalingToSet@1000 : Text[250]);
+    BEGIN
+      IF NOT GLAccountIsSet THEN
+        ERROR(InternalGLAccountNotSetErr);
+
+      GlobalGLAccount.VALIDATE(Totaling,TotalingToSet);
+    END;
+
+    [External]
+    PROCEDURE SetDebitCreditType@19(DebitCreditTypeToSet@1000 : 'Both,Debit,Credit');
+    BEGIN
+      IF NOT GLAccountIsSet THEN
+        ERROR(InternalGLAccountNotSetErr);
+
+      GlobalGLAccount.VALIDATE("Debit/Credit",DebitCreditTypeToSet);
+    END;
+
+    [External]
+    PROCEDURE SetExchangeRateAdjustmentType@22(ExchangeRateAdjustmentTypeToSet@1000 : 'No Adjustment,Adjust Amount,Adjust Additional-Currency Amount');
+    BEGIN
+      IF NOT GLAccountIsSet THEN
+        ERROR(InternalGLAccountNotSetErr);
+
+      GlobalGLAccount.VALIDATE("Exchange Rate Adjustment",ExchangeRateAdjustmentTypeToSet);
+    END;
+
+    [External]
+    PROCEDURE SetDirectPosting@25(DirectPostingToSet@1000 : Boolean);
+    BEGIN
+      IF NOT GLAccountIsSet THEN
+        ERROR(InternalGLAccountNotSetErr);
+
+      GlobalGLAccount.VALIDATE("Direct Posting",DirectPostingToSet);
+    END;
+
+    [External]
+    PROCEDURE SetBlocked@26(BlockedToSet@1000 : Boolean);
+    BEGIN
+      IF NOT GLAccountIsSet THEN
+        ERROR(InternalGLAccountNotSetErr);
+
+      GlobalGLAccount.VALIDATE(Blocked,BlockedToSet);
+    END;
+
+    [External]
+    PROCEDURE SetLastModifiedDateTime@27(LastModifiedDateTimeToSet@1000 : DateTime);
+    BEGIN
+      IF NOT GLAccountIsSet THEN
+        ERROR(InternalGLAccountNotSetErr);
+
+      GlobalGLAccount.VALIDATE("Last Modified Date Time",LastModifiedDateTimeToSet);
+    END;
+
+    [External]
+    PROCEDURE SetLastDateModified@28(LastDateModifiedToSet@1000 : Date);
+    BEGIN
+      IF NOT GLAccountIsSet THEN
+        ERROR(InternalGLAccountNotSetErr);
+
+      GlobalGLAccount.VALIDATE("Last Date Modified",LastDateModifiedToSet);
+    END;
+
+    [External]
+    PROCEDURE SetAccountCategory@3(AccountCategoryToSet@1000 : ' ,Assets,Liabilities,Equity,Income,Cost of Goods Sold,Expense');
+    BEGIN
+      IF NOT GLAccountIsSet THEN
+        ERROR(InternalGLAccountNotSetErr);
+
+      GlobalGLAccount.VALIDATE("Account Category",AccountCategoryToSet);
+    END;
+
+    [External]
+    PROCEDURE SetAccountSubCategory@30(AccountSubCategoryToSet@1000 : Integer);
+    BEGIN
+      IF NOT GLAccountIsSet THEN
+        ERROR(InternalGLAccountNotSetErr);
+
+      GlobalGLAccount.VALIDATE("Account Subcategory Entry No.",AccountSubCategoryToSet);
+    END;
+
+    [External]
+    PROCEDURE SetGeneralPostingSetupSalesAccount@8(GeneralPostingSetupCode@1000 : Code[20];SalesAccount@1001 : Code[20]);
+    VAR
+      GeneralPostingSetup@1002 : Record 252;
+    BEGIN
+      IF NOT GeneralPostingSetup.GET(GeneralPostingSetupCode,GeneralPostingSetupCode) THEN
+        ERROR(InternalGeneralPostingSetupNotSetErr);
+
+      GeneralPostingSetup.VALIDATE("Sales Account",SalesAccount);
+      GeneralPostingSetup.MODIFY(TRUE);
+
+      GeneralPostingSetup.RESET;
+      IF NOT GeneralPostingSetup.GET('',GeneralPostingSetupCode) THEN
+        ERROR(InternalGeneralPostingSetupNotSetErr);
+
+      GeneralPostingSetup.VALIDATE("Sales Account",SalesAccount);
+      GeneralPostingSetup.MODIFY(TRUE);
+    END;
+
+    [External]
+    PROCEDURE SetGeneralPostingSetupSalesLineDiscAccount@11(GeneralPostingSetupCode@1000 : Code[20];SalesLineDiscAccount@1001 : Code[20]);
+    VAR
+      GeneralPostingSetup@1002 : Record 252;
+    BEGIN
+      IF NOT GeneralPostingSetup.GET(GeneralPostingSetupCode,GeneralPostingSetupCode) THEN
+        ERROR(InternalGeneralPostingSetupNotSetErr);
+
+      GeneralPostingSetup.VALIDATE("Sales Line Disc. Account",SalesLineDiscAccount);
+      GeneralPostingSetup.MODIFY(TRUE);
+
+      GeneralPostingSetup.RESET;
+      IF NOT GeneralPostingSetup.GET('',GeneralPostingSetupCode) THEN
+        ERROR(InternalGeneralPostingSetupNotSetErr);
+
+      GeneralPostingSetup.VALIDATE("Sales Line Disc. Account",SalesLineDiscAccount);
+      GeneralPostingSetup.MODIFY(TRUE);
+    END;
+
+    [External]
+    PROCEDURE SetGeneralPostingSetupSalesInvDiscAccount@14(GeneralPostingSetupCode@1000 : Code[20];SalesInvDiscAccount@1001 : Code[20]);
+    VAR
+      GeneralPostingSetup@1002 : Record 252;
+    BEGIN
+      IF NOT GeneralPostingSetup.GET(GeneralPostingSetupCode,GeneralPostingSetupCode) THEN
+        ERROR(InternalGeneralPostingSetupNotSetErr);
+
+      GeneralPostingSetup.VALIDATE("Sales Inv. Disc. Account",SalesInvDiscAccount);
+      GeneralPostingSetup.MODIFY(TRUE);
+
+      GeneralPostingSetup.RESET;
+      IF NOT GeneralPostingSetup.GET('',GeneralPostingSetupCode) THEN
+        ERROR(InternalGeneralPostingSetupNotSetErr);
+
+      GeneralPostingSetup.VALIDATE("Sales Inv. Disc. Account",SalesInvDiscAccount);
+      GeneralPostingSetup.MODIFY(TRUE);
+    END;
+
+    [External]
+    PROCEDURE SetGeneralPostingSetupSalesPmtDiscDebitAccount@12(GeneralPostingSetupCode@1000 : Code[20];SalesPmtDiscDebitAccount@1001 : Code[20]);
+    VAR
+      GeneralPostingSetup@1002 : Record 252;
+    BEGIN
+      IF NOT GeneralPostingSetup.GET(GeneralPostingSetupCode,GeneralPostingSetupCode) THEN
+        ERROR(InternalGeneralPostingSetupNotSetErr);
+
+      GeneralPostingSetup.VALIDATE("Sales Pmt. Disc. Debit Acc.",SalesPmtDiscDebitAccount);
+      GeneralPostingSetup.MODIFY(TRUE);
+
+      GeneralPostingSetup.RESET;
+      IF NOT GeneralPostingSetup.GET('',GeneralPostingSetupCode) THEN
+        ERROR(InternalGeneralPostingSetupNotSetErr);
+
+      GeneralPostingSetup.VALIDATE("Sales Pmt. Disc. Debit Acc.",SalesPmtDiscDebitAccount);
+      GeneralPostingSetup.MODIFY(TRUE);
+    END;
+
+    [External]
+    PROCEDURE SetGeneralPostingSetupPurchAccount@15(GeneralPostingSetupCode@1000 : Code[20];PurchAccount@1001 : Code[20]);
+    VAR
+      GeneralPostingSetup@1002 : Record 252;
+    BEGIN
+      IF NOT GeneralPostingSetup.GET(GeneralPostingSetupCode,GeneralPostingSetupCode) THEN
+        ERROR(InternalGeneralPostingSetupNotSetErr);
+
+      GeneralPostingSetup.VALIDATE("Purch. Account",PurchAccount);
+      GeneralPostingSetup.MODIFY(TRUE);
+
+      GeneralPostingSetup.RESET;
+      IF NOT GeneralPostingSetup.GET('',GeneralPostingSetupCode) THEN
+        ERROR(InternalGeneralPostingSetupNotSetErr);
+
+      GeneralPostingSetup.VALIDATE("Purch. Account",PurchAccount);
+      GeneralPostingSetup.MODIFY(TRUE);
+    END;
+
+    [External]
+    PROCEDURE SetGeneralPostingSetupPurchLineDiscAccount@20(GeneralPostingSetupCode@1000 : Code[20];PurchLineDiscAccount@1001 : Code[20]);
+    VAR
+      GeneralPostingSetup@1002 : Record 252;
+    BEGIN
+      IF NOT GeneralPostingSetup.GET(GeneralPostingSetupCode,GeneralPostingSetupCode) THEN
+        ERROR(InternalGeneralPostingSetupNotSetErr);
+
+      GeneralPostingSetup.VALIDATE("Purch. Line Disc. Account",PurchLineDiscAccount);
+      GeneralPostingSetup.MODIFY(TRUE);
+
+      GeneralPostingSetup.RESET;
+      IF NOT GeneralPostingSetup.GET('',GeneralPostingSetupCode) THEN
+        ERROR(InternalGeneralPostingSetupNotSetErr);
+
+      GeneralPostingSetup.VALIDATE("Purch. Line Disc. Account",PurchLineDiscAccount);
+      GeneralPostingSetup.MODIFY(TRUE);
+    END;
+
+    [External]
+    PROCEDURE SetGeneralPostingSetupPurchInvDiscAccount@21(GeneralPostingSetupCode@1000 : Code[20];PurchInvDiscAccount@1001 : Code[20]);
+    VAR
+      GeneralPostingSetup@1002 : Record 252;
+    BEGIN
+      IF NOT GeneralPostingSetup.GET(GeneralPostingSetupCode,GeneralPostingSetupCode) THEN
+        ERROR(InternalGeneralPostingSetupNotSetErr);
+
+      GeneralPostingSetup.VALIDATE("Purch. Inv. Disc. Account",PurchInvDiscAccount);
+      GeneralPostingSetup.MODIFY(TRUE);
+
+      GeneralPostingSetup.RESET;
+      IF NOT GeneralPostingSetup.GET('',GeneralPostingSetupCode) THEN
+        ERROR(InternalGeneralPostingSetupNotSetErr);
+
+      GeneralPostingSetup.VALIDATE("Purch. Inv. Disc. Account",PurchInvDiscAccount);
+      GeneralPostingSetup.MODIFY(TRUE);
+    END;
+
+    [External]
+    PROCEDURE SetGeneralPostingSetupPurchCreditMemoAccount@17(GeneralPostingSetupCode@1000 : Code[20];PurchCreditMemoAccount@1001 : Code[20]);
+    VAR
+      GeneralPostingSetup@1002 : Record 252;
+    BEGIN
+      IF NOT GeneralPostingSetup.GET(GeneralPostingSetupCode,GeneralPostingSetupCode) THEN
+        ERROR(InternalGeneralPostingSetupNotSetErr);
+
+      GeneralPostingSetup.VALIDATE("Purch. Credit Memo Account",PurchCreditMemoAccount);
+      GeneralPostingSetup.MODIFY(TRUE);
+
+      GeneralPostingSetup.RESET;
+      IF NOT GeneralPostingSetup.GET('',GeneralPostingSetupCode) THEN
+        ERROR(InternalGeneralPostingSetupNotSetErr);
+
+      GeneralPostingSetup.VALIDATE("Purch. Credit Memo Account",PurchCreditMemoAccount);
+      GeneralPostingSetup.MODIFY(TRUE);
+    END;
+
+    [External]
+    PROCEDURE SetGeneralPostingSetupCOGSAccount@23(GeneralPostingSetupCode@1000 : Code[20];CogsAccount@1001 : Code[20]);
+    VAR
+      GeneralPostingSetup@1002 : Record 252;
+    BEGIN
+      IF NOT GeneralPostingSetup.GET(GeneralPostingSetupCode,GeneralPostingSetupCode) THEN
+        ERROR(InternalGeneralPostingSetupNotSetErr);
+
+      GeneralPostingSetup.VALIDATE("COGS Account",CogsAccount);
+      GeneralPostingSetup.MODIFY(TRUE);
+
+      GeneralPostingSetup.RESET;
+      IF NOT GeneralPostingSetup.GET('',GeneralPostingSetupCode) THEN
+        ERROR(InternalGeneralPostingSetupNotSetErr);
+
+      GeneralPostingSetup.VALIDATE("COGS Account",CogsAccount);
+      GeneralPostingSetup.MODIFY(TRUE);
+    END;
+
+    [External]
+    PROCEDURE SetGeneralPostingSetupInventoryAdjmtAccount@24(GeneralPostingSetupCode@1000 : Code[20];InventoryAdjmtAccount@1001 : Code[20]);
+    VAR
+      GeneralPostingSetup@1002 : Record 252;
+    BEGIN
+      IF NOT GeneralPostingSetup.GET(GeneralPostingSetupCode,GeneralPostingSetupCode) THEN
+        ERROR(InternalGeneralPostingSetupNotSetErr);
+
+      GeneralPostingSetup.VALIDATE("Inventory Adjmt. Account",InventoryAdjmtAccount);
+      GeneralPostingSetup.MODIFY(TRUE);
+
+      GeneralPostingSetup.RESET;
+      IF NOT GeneralPostingSetup.GET('',GeneralPostingSetupCode) THEN
+        ERROR(InternalGeneralPostingSetupNotSetErr);
+
+      GeneralPostingSetup.VALIDATE("Inventory Adjmt. Account",InventoryAdjmtAccount);
+      GeneralPostingSetup.MODIFY(TRUE);
+    END;
+
+    [External]
+    PROCEDURE SetGeneralPostingSetupSalesCreditMemoAccount@10(GeneralPostingSetupCode@1000 : Code[20];SalesCreditMemoAccount@1001 : Code[20]);
+    VAR
+      GeneralPostingSetup@1002 : Record 252;
+    BEGIN
+      IF NOT GeneralPostingSetup.GET(GeneralPostingSetupCode,GeneralPostingSetupCode) THEN
+        ERROR(InternalGeneralPostingSetupNotSetErr);
+
+      GeneralPostingSetup.VALIDATE("Sales Credit Memo Account",SalesCreditMemoAccount);
+      GeneralPostingSetup.MODIFY(TRUE);
+
+      GeneralPostingSetup.RESET;
+      IF NOT GeneralPostingSetup.GET('',GeneralPostingSetupCode) THEN
+        ERROR(InternalGeneralPostingSetupNotSetErr);
+
+      GeneralPostingSetup.VALIDATE("Sales Credit Memo Account",SalesCreditMemoAccount);
+      GeneralPostingSetup.MODIFY(TRUE);
+    END;
+
+    [External]
+    PROCEDURE SetGeneralPostingSetupPurchPmtDiscDebitAccount@29(GeneralPostingSetupCode@1002 : Code[20];PurchPmtDiscDebitAccount@1001 : Code[20]);
+    VAR
+      GeneralPostingSetup@1000 : Record 252;
+    BEGIN
+      IF NOT GeneralPostingSetup.GET(GeneralPostingSetupCode,GeneralPostingSetupCode) THEN
+        ERROR(InternalGeneralPostingSetupNotSetErr);
+
+      GeneralPostingSetup.VALIDATE("Purch. Pmt. Disc. Debit Acc.",PurchPmtDiscDebitAccount);
+      GeneralPostingSetup.MODIFY(TRUE);
+
+      GeneralPostingSetup.RESET;
+      IF NOT GeneralPostingSetup.GET('',GeneralPostingSetupCode) THEN
+        ERROR(InternalGeneralPostingSetupNotSetErr);
+
+      GeneralPostingSetup.VALIDATE("Purch. Pmt. Disc. Debit Acc.",PurchPmtDiscDebitAccount);
+      GeneralPostingSetup.MODIFY(TRUE);
+    END;
+
+    [External]
+    PROCEDURE SetGeneralPostingSetupPurchPrepaymentsAccount@31(GeneralPostingSetupCode@1002 : Code[20];PurchPrepaymentsAccount@1001 : Code[20]);
+    VAR
+      GeneralPostingSetup@1000 : Record 252;
+    BEGIN
+      IF NOT GeneralPostingSetup.GET(GeneralPostingSetupCode,GeneralPostingSetupCode) THEN
+        ERROR(InternalGeneralPostingSetupNotSetErr);
+
+      GeneralPostingSetup.VALIDATE("Purch. Prepayments Account",PurchPrepaymentsAccount);
+      GeneralPostingSetup.MODIFY(TRUE);
+
+      GeneralPostingSetup.RESET;
+      IF NOT GeneralPostingSetup.GET('',GeneralPostingSetupCode) THEN
+        ERROR(InternalGeneralPostingSetupNotSetErr);
+
+      GeneralPostingSetup.VALIDATE("Purch. Prepayments Account",PurchPrepaymentsAccount);
+      GeneralPostingSetup.MODIFY(TRUE);
+    END;
+
+    [External]
+    PROCEDURE SetGeneralPostingSetupPurchaseVarianceAccount@32(GeneralPostingSetupCode@1002 : Code[20];PurchaseVarianceAccount@1001 : Code[20]);
+    VAR
+      GeneralPostingSetup@1000 : Record 252;
+    BEGIN
+      IF NOT GeneralPostingSetup.GET(GeneralPostingSetupCode,GeneralPostingSetupCode) THEN
+        ERROR(InternalGeneralPostingSetupNotSetErr);
+
+      GeneralPostingSetup.VALIDATE("Purchase Variance Account",PurchaseVarianceAccount);
+      GeneralPostingSetup.MODIFY(TRUE);
+
+      GeneralPostingSetup.RESET;
+      IF NOT GeneralPostingSetup.GET('',GeneralPostingSetupCode) THEN
+        ERROR(InternalGeneralPostingSetupNotSetErr);
+
+      GeneralPostingSetup.VALIDATE("Purchase Variance Account",PurchaseVarianceAccount);
+      GeneralPostingSetup.MODIFY(TRUE);
+    END;
+
+    BEGIN
+    END.
+  }
+}
+

@@ -1,0 +1,215 @@
+OBJECT Codeunit 132545 Data Exch. Mapping UT
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=Test,Dev,ERM,All;
+  }
+  PROPERTIES
+  {
+    Subtype=Test;
+    TestPermissions=Disabled;
+    OnRun=BEGIN
+            // [FEATURE] [Data Exchange] [Mapping]
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      LibraryUtility@1003 : Codeunit 131000;
+      LibraryRandom@1002 : Codeunit 130440;
+      Assert@1001 : Codeunit 130000;
+      DataExchLineNoFieldNameTxt@1005 : TextConst 'ENU=Data Exch. Line No.';
+      DataExchEntryNoFieldNameTxt@1004 : TextConst 'ENU=Data Exch. Entry No.';
+      RecordNameFormatTok@1006 : TextConst 'ENU=%1 to %2';
+      RenameErr@1007 : TextConst 'ENU=You cannot rename the record if one or more field mapping lines exist.';
+
+    [Test]
+    PROCEDURE RenameRecord@10();
+    VAR
+      DataExchDef@1002 : Record 1222;
+      DataExchLineDef@1001 : Record 1227;
+      DataExchMapping@1000 : Record 1224;
+      DataExchFieldMapping@1003 : Record 1225;
+      DataExchColumnDef@1004 : Record 1223;
+    BEGIN
+      // Setup
+      CreateDataExchDef(DataExchDef,DataExchDef.Type::"Bank Statement Import",DataExchDef."File Type"::"Variable Text");
+      CreateDataExchLineDef(DataExchDef,DataExchLineDef);
+      CreateDataExchColumnDef(DataExchColumnDef,DataExchLineDef);
+      CreateDataExchMapping(DataExchMapping,DataExchLineDef,DATABASE::"Gen. Journal Line");
+      CreateDataExchFieldMapping(DataExchFieldMapping,DataExchMapping,DataExchColumnDef."Column No.");
+
+      // Exercise
+      ASSERTERROR DataExchMapping.RENAME(DataExchDef.Code,DataExchLineDef.Code,LibraryRandom.RandIntInRange(1,10));
+
+      // Verify
+      Assert.ExpectedError(RenameErr);
+    END;
+
+    [Test]
+    PROCEDURE TestCreateDataExchMapping@6();
+    VAR
+      DataExchDef@1002 : Record 1222;
+      DataExchLineDef@1001 : Record 1227;
+      DataExchMapping@1000 : Record 1224;
+    BEGIN
+      // Setup
+      CreateDataExchDef(DataExchDef,DataExchDef.Type::"Bank Statement Import",DataExchDef."File Type"::"Variable Text");
+      CreateDataExchLineDef(DataExchDef,DataExchLineDef);
+
+      // Exercise
+      DataExchMapping."Data Exch. Def Code" := DataExchLineDef."Data Exch. Def Code";
+      DataExchMapping."Data Exch. Line Def Code" := DataExchLineDef.Code;
+      DataExchMapping.CreateDataExchMapping(DATABASE::"Gen. Journal Line",0,
+        GetFieldID(DATABASE::"Gen. Journal Line",DataExchEntryNoFieldNameTxt),
+        GetFieldID(DATABASE::"Gen. Journal Line",DataExchLineNoFieldNameTxt));
+
+      DataExchMapping.GET(DataExchDef.Code,DataExchLineDef.Code,DATABASE::"Gen. Journal Line");
+
+      // Verify;
+      DataExchMapping.TESTFIELD(Name,CreateName(DATABASE::"Gen. Journal Line",DataExchDef.Code));
+    END;
+
+    [Test]
+    [TransactionModel(AutoRollback)]
+    PROCEDURE TestDeleteDataExchMapping@13();
+    VAR
+      DataExchDef@1002 : Record 1222;
+      DataExchLineDef@1001 : Record 1227;
+      DataExchMappingForDeleting@1000 : Record 1224;
+      DataExchMapping@1003 : Record 1224;
+    BEGIN
+      // [SCENARIO 371787] Removal of "Data Exch. Mapping" entry should not delete entries from "Data Exch. Field Mapping" with same "Data Exch. Def Code" and different "Table ID"
+      // [GIVEN] Data Exchange Definition - "DED" with two "Data Exch. Mapping" - "DEM1" and "DEM2"
+      // [GIVEN] "DEM1" with "Data Exch. Field Mapping" - "DEFM1" and "Data Exch. Def Code" = "DED"
+      // [GIVEN] "DEM2" with "Data Exch. Field Mapping" - "DEFM2" and "Data Exch. Def Code" = "DED"
+      CreateDataExchDef(DataExchDef,DataExchDef.Type::"Bank Statement Import",DataExchDef."File Type"::Xml);
+      CreateDataExchLineDef(DataExchDef,DataExchLineDef);
+      CreateDataExchColumnMappingField(DataExchMappingForDeleting,DataExchLineDef,DATABASE::Customer);
+      CreateDataExchColumnMappingField(DataExchMapping,DataExchLineDef,DATABASE::Vendor);
+
+      // [WHEN] Delete "DEM1"
+      DataExchMappingForDeleting.DELETE(TRUE);
+
+      // [THEN] "DEFM1" deleted
+      // [THEN] "DEFM2" is not deleted
+      VerifyNotExistingDataExchFieldMapping(DataExchMappingForDeleting);
+      VerifyExistingDataExchFieldMapping(DataExchMapping);
+    END;
+
+    LOCAL PROCEDURE CreateDataExchDef@4(VAR DataExchDef@1000 : Record 1222;ParamaterType@1001 : Option;FileType@1002 : Option);
+    BEGIN
+      DataExchDef.INIT;
+      DataExchDef.Code :=
+        LibraryUtility.GenerateRandomCode(DataExchDef.FIELDNO(Code),DATABASE::"Data Exch. Def");
+      DataExchDef."File Type" := FileType;
+      DataExchDef.VALIDATE(Type,ParamaterType);
+      DataExchDef.INSERT(TRUE);
+    END;
+
+    LOCAL PROCEDURE CreateDataExchLineDef@8(VAR DataExchDef@1000 : Record 1222;VAR DataExchLineDef@1001 : Record 1227);
+    BEGIN
+      DataExchLineDef.INIT;
+      DataExchLineDef."Data Exch. Def Code" := DataExchDef.Code;
+      DataExchLineDef.Code :=
+        LibraryUtility.GenerateRandomCode(DataExchLineDef.FIELDNO(Code),DATABASE::"Data Exch. Line Def");
+      DataExchLineDef.INSERT
+    END;
+
+    LOCAL PROCEDURE CreateDataExchColumnDef@17(VAR DataExchColumnDef@1000 : Record 1223;DataExchLineDef@1001 : Record 1227);
+    BEGIN
+      DataExchColumnDef.INIT;
+      DataExchColumnDef."Data Exch. Def Code" := DataExchLineDef."Data Exch. Def Code";
+      DataExchColumnDef."Data Exch. Line Def Code" := DataExchLineDef.Code;
+      DataExchColumnDef."Column No." := LibraryRandom.RandIntInRange(1,10);
+      DataExchColumnDef.INSERT;
+    END;
+
+    LOCAL PROCEDURE CreateDataExchMapping@11(VAR DataExchMapping@1000 : Record 1224;DataExchLineDef@1001 : Record 1227;TableID@1002 : Integer);
+    BEGIN
+      DataExchMapping.INIT;
+      DataExchMapping."Data Exch. Def Code" := DataExchLineDef."Data Exch. Def Code";
+      DataExchMapping."Data Exch. Line Def Code" := DataExchLineDef.Code;
+      DataExchMapping."Table ID" := TableID;
+      DataExchMapping.INSERT;
+    END;
+
+    LOCAL PROCEDURE CreateDataExchFieldMapping@12(VAR DataExchFieldMapping@1000 : Record 1225;DataExchMapping@1001 : Record 1224;ColumnNo@1003 : Integer);
+    VAR
+      RecRef@1004 : RecordRef;
+      FieldRef@1005 : FieldRef;
+    BEGIN
+      DataExchFieldMapping.INIT;
+      DataExchFieldMapping."Data Exch. Def Code" := DataExchMapping."Data Exch. Def Code";
+      DataExchFieldMapping."Data Exch. Line Def Code" := DataExchMapping."Data Exch. Line Def Code";
+      DataExchFieldMapping."Table ID" := DataExchMapping."Table ID";
+      DataExchFieldMapping."Column No." := ColumnNo;
+      RecRef.OPEN(DataExchFieldMapping."Table ID");
+      FieldRef := RecRef.FIELDINDEX(1);
+      DataExchFieldMapping."Field ID" := FieldRef.NUMBER;
+      DataExchFieldMapping.INSERT;
+    END;
+
+    LOCAL PROCEDURE CreateDataExchColumnMappingField@32(VAR DataExchMapping@1005 : Record 1224;DataExchLineDef@1001 : Record 1227;TableID@1004 : Integer);
+    VAR
+      DataExchColumnDef@1000 : Record 1223;
+      DataExchFieldMapping@1003 : Record 1225;
+    BEGIN
+      CreateDataExchColumnDef(DataExchColumnDef,DataExchLineDef);
+      CreateDataExchMapping(DataExchMapping,DataExchLineDef,TableID);
+      CreateDataExchFieldMapping(DataExchFieldMapping,DataExchMapping,DataExchColumnDef."Column No.");
+    END;
+
+    LOCAL PROCEDURE FilterDataExchFieldMapping@15(VAR DataExchFieldMapping@1003 : Record 1225;DataExchDefCode@1000 : Code[20];DataExchLineDefCode@1001 : Code[20];TableID@1002 : Integer);
+    BEGIN
+      DataExchFieldMapping.SETRANGE("Data Exch. Def Code",DataExchDefCode);
+      DataExchFieldMapping.SETRANGE("Data Exch. Line Def Code",DataExchLineDefCode);
+      DataExchFieldMapping.SETRANGE("Table ID",TableID);
+    END;
+
+    LOCAL PROCEDURE GetFieldID@9(TableID@1001 : Integer;FieldName@1002 : Text) : Integer;
+    VAR
+      Field@1000 : Record 2000000041;
+    BEGIN
+      Field.SETRANGE(TableNo,TableID);
+      Field.SETRANGE(FieldName,FieldName);
+      Field.FINDFIRST;
+      EXIT(Field."No.");
+    END;
+
+    LOCAL PROCEDURE CreateName@5(TableID@1000 : Integer;Code@1002 : Code[20]) : Text[50];
+    VAR
+      recRef@1001 : RecordRef;
+    BEGIN
+      recRef.OPEN(TableID);
+      EXIT(STRSUBSTNO(RecordNameFormatTok,Code,recRef.CAPTION));
+    END;
+
+    LOCAL PROCEDURE VerifyExistingDataExchFieldMapping@35(DataExchMapping@1000 : Record 1224);
+    VAR
+      DataExchFieldMapping@1001 : Record 1225;
+    BEGIN
+      FilterDataExchFieldMapping(
+        DataExchFieldMapping,DataExchMapping."Data Exch. Def Code",
+        DataExchMapping."Data Exch. Line Def Code",DataExchMapping."Table ID");
+      Assert.RecordIsNotEmpty(DataExchFieldMapping);
+    END;
+
+    LOCAL PROCEDURE VerifyNotExistingDataExchFieldMapping@19(DataExchMapping@1000 : Record 1224);
+    VAR
+      DataExchFieldMapping@1001 : Record 1225;
+    BEGIN
+      FilterDataExchFieldMapping(
+        DataExchFieldMapping,DataExchMapping."Data Exch. Def Code",
+        DataExchMapping."Data Exch. Line Def Code",DataExchMapping."Table ID");
+      Assert.RecordIsEmpty(DataExchFieldMapping);
+    END;
+
+    BEGIN
+    END.
+  }
+}
+

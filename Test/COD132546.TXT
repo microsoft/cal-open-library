@@ -1,0 +1,549 @@
+OBJECT Codeunit 132546 Data Exch. Field Mapping UT
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=Test,Dev,ERM,All;
+  }
+  PROPERTIES
+  {
+    Subtype=Test;
+    TestPermissions=Disabled;
+    OnRun=BEGIN
+            // [FEATURE] [Data Exch. Mapping] [UT]
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      LibraryUtility@1003 : Codeunit 131000;
+      LibraryPaymentExport@1005 : Codeunit 130100;
+      LibraryRandom@1002 : Codeunit 130440;
+      Assert@1001 : Codeunit 130000;
+      MissingFieldErr@1006 : TextConst 'ENU=%1 must have a value in %2';
+
+    [Test]
+    PROCEDURE DataExchFieldMappingMissingColumnNo@3();
+    VAR
+      DataExchFieldMapping@1000 : Record 1225;
+    BEGIN
+      // Setup
+      DataExchFieldMapping.INIT;
+      DataExchFieldMapping."Table ID" := LibraryRandom.RandInt(100);
+      DataExchFieldMapping."Field ID" := LibraryRandom.RandInt(100);
+
+      // Exercise
+      ASSERTERROR DataExchFieldMapping.INSERT(TRUE);
+
+      // Verify
+      Assert.ExpectedError(
+        STRSUBSTNO(MissingFieldErr,DataExchFieldMapping.FIELDCAPTION("Column No."),DataExchFieldMapping.TABLECAPTION));
+    END;
+
+    [Test]
+    PROCEDURE GetColumnCaption@7();
+    VAR
+      DataExchDef@1003 : Record 1222;
+      DataExchLineDef@1002 : Record 1227;
+      DataExchColumnDef@1001 : Record 1223;
+      DataExchFieldMapping@1000 : Record 1225;
+    BEGIN
+      // Setup
+      CreateDataExchDef(DataExchDef,DataExchDef.Type::"Payroll Import");
+      CreateDataExchLineDef(DataExchDef,DataExchLineDef);
+      CreateDataExchColumnDef(DataExchColumnDef,DataExchLineDef);
+
+      DataExchFieldMapping."Data Exch. Def Code" := DataExchDef.Code;
+      DataExchFieldMapping."Data Exch. Line Def Code" := DataExchLineDef.Code;
+      DataExchFieldMapping."Column No." := DataExchColumnDef."Column No.";
+
+      // Verify
+      Assert.AreEqual(DataExchFieldMapping.GetColumnCaption,DataExchColumnDef.Name,'');
+    END;
+
+    [Test]
+    PROCEDURE GetFieldCaption@10();
+    VAR
+      DataExchFieldMapping@1000 : Record 1225;
+      Customer@1001 : Record 18;
+    BEGIN
+      // Setup
+      DataExchFieldMapping."Table ID" := DATABASE::Customer;
+      DataExchFieldMapping."Field ID" := Customer.FIELDNO(Name);
+
+      // Verify
+      Assert.AreEqual(DataExchFieldMapping.GetFieldCaption,Customer.FIELDCAPTION(Name),'');
+    END;
+
+    [Test]
+    PROCEDURE FieldMappingAllowsExternalDataLineTags@11();
+    VAR
+      GenJournalLine@1004 : Record 81;
+      DataExchDef@1002 : Record 1222;
+      DataExchLineDef@1001 : Record 1227;
+      DataExchMapping@1000 : Record 1224;
+      DataExchFieldMapping@1003 : Record 1225;
+      DataExchColDef@1005 : Record 1223;
+    BEGIN
+      // Setup.
+      CreateDataExchDef(DataExchDef,DataExchDef.Type::"Bank Statement Import");
+      CreateDataExchLineDef(DataExchDef,DataExchLineDef);
+      DataExchLineDef.VALIDATE("Data Line Tag",LibraryUtility.GenerateGUID);
+      DataExchLineDef.MODIFY(TRUE);
+      DataExchColDef.InsertRecForImport(DataExchDef.Code,DataExchLineDef.Code,1,
+        LibraryUtility.GenerateRandomCode(DataExchColDef.FIELDNO(Name),
+          DATABASE::"Data Exch. Column Def"),'',TRUE,DataExchColDef."Data Type"::Decimal,'','');
+      DataExchMapping.InsertRecForImport(DataExchDef.Code,DataExchLineDef.Code,
+        DATABASE::"Gen. Journal Line",'',0,0);
+      DataExchFieldMapping.InsertRec(DataExchMapping."Data Exch. Def Code",DataExchMapping."Data Exch. Line Def Code",
+        DATABASE::"Gen. Journal Line",0,GenJournalLine.FIELDNO(Amount),FALSE,1);
+
+      // Exercise.
+      DataExchFieldMapping.VALIDATE("Column No.",DataExchColDef."Column No.");
+
+      // Verify: no validation errors
+    END;
+
+    [Test]
+    PROCEDURE FieldMappingAllowsInternalDataLineTags@20();
+    VAR
+      GenJournalLine@1004 : Record 81;
+      DataExchDef@1002 : Record 1222;
+      DataExchLineDef@1001 : Record 1227;
+      DataExchMapping@1000 : Record 1224;
+      DataExchFieldMapping@1003 : Record 1225;
+      DataExchColDef@1005 : Record 1223;
+    BEGIN
+      // Setup.
+      CreateDataExchDef(DataExchDef,DataExchDef.Type::"Bank Statement Import");
+      CreateDataExchLineDef(DataExchDef,DataExchLineDef);
+      DataExchLineDef.VALIDATE("Data Line Tag",LibraryUtility.GenerateGUID);
+      DataExchLineDef.MODIFY(TRUE);
+      DataExchColDef.InsertRecForImport(DataExchDef.Code,DataExchLineDef.Code,1,
+        LibraryUtility.GenerateRandomCode(DataExchColDef.FIELDNO(Name),
+          DATABASE::"Data Exch. Column Def"),'',TRUE,DataExchColDef."Data Type"::Decimal,'','');
+      DataExchColDef.VALIDATE(Path,
+        COPYSTR(DataExchLineDef."Data Line Tag" + '/' + DataExchColDef.Name,1,MAXSTRLEN(DataExchColDef.Path)));
+      DataExchColDef.MODIFY(TRUE);
+
+      DataExchMapping.InsertRecForImport(DataExchDef.Code,DataExchLineDef.Code,
+        DATABASE::"Gen. Journal Line",'',0,0);
+      DataExchFieldMapping.InsertRec(DataExchMapping."Data Exch. Def Code",DataExchMapping."Data Exch. Line Def Code",
+        DATABASE::"Gen. Journal Line",0,GenJournalLine.FIELDNO(Amount),FALSE,1);
+
+      // Exercise.
+      DataExchFieldMapping.VALIDATE("Column No.",DataExchColDef."Column No.");
+
+      // Verify: No validation errors.
+    END;
+
+    [Test]
+    PROCEDURE FieldMappingOverwriteValueOfFieldCodeType@9();
+    VAR
+      BankAccount@1002 : Record 270;
+      DataExchFieldMapping@1000 : Record 1225;
+      DataExchField@1009 : Record 1221;
+      Integer@1010 : Record 2000000026;
+      ProcessDataExch@1001 : Codeunit 1201;
+      RecRef@1008 : RecordRef;
+    BEGIN
+      // [FEATURE] [UT]
+      // [SCENARIO 215352] Function "Process Data Exch.".SetField should overwrite value of field with type "Code" if "Data Exch. Field Mapping"."Overwrite Value" = TRUE
+
+      // [GIVEN] Bank Account with "Search Name" = "Test Search Name"
+      LibraryPaymentExport.CreateBankAccount(BankAccount);
+      RecRef.GETTABLE(BankAccount);
+
+      // [GIVEN] "Data Exch. Field Mapping" with "Overwrite Value" = TRUE
+      // [GIVEN] "Data Exch. Field" for field "Search Name" and Value = "Updated Search Name"
+      CreateDataExchSetupAndFieldMappingWithOverwriteValue(
+        DataExchFieldMapping,DataExchField,BankAccount.FIELDNO("Search Name"),TRUE);
+
+      // [WHEN] Invoke "Process Data Exch.".SetField
+      ProcessDataExch.SetField(RecRef,DataExchFieldMapping,DataExchField,Integer);
+      RecRef.MODIFY(TRUE);
+
+      // [THEN] "Bank Account"."Search Name" = "Updated Search Name"
+      BankAccount.GET(BankAccount."No.");
+      BankAccount.TESTFIELD("Search Name",COPYSTR(DataExchField.Value,1,MAXSTRLEN(BankAccount."Search Name")));
+    END;
+
+    [Test]
+    PROCEDURE FieldMappingOverwriteValueOfFieldTextType@24();
+    VAR
+      BankAccount@1006 : Record 270;
+      DataExchFieldMapping@1005 : Record 1225;
+      DataExchField@1004 : Record 1221;
+      Integer@1003 : Record 2000000026;
+      ProcessDataExch@1000 : Codeunit 1201;
+      RecRef@1002 : RecordRef;
+    BEGIN
+      // [FEATURE] [UT]
+      // [SCENARIO 215352] Function "Process Data Exch.".SetField should overwrite value of field with type "Text" if "Data Exch. Field Mapping"."Overwrite Value" = TRUE
+
+      // [GIVEN] Bank Account with "Name" = "Test Name"
+      LibraryPaymentExport.CreateBankAccount(BankAccount);
+      RecRef.GETTABLE(BankAccount);
+
+      // [GIVEN] "Data Exch. Field Mapping" with "Overwrite Value" = TRUE
+      // [GIVEN] "Data Exch. Field" for field "Name" and Value = "Updated Name"
+      CreateDataExchSetupAndFieldMappingWithOverwriteValue(DataExchFieldMapping,DataExchField,BankAccount.FIELDNO(Name),TRUE);
+
+      // [WHEN] Invoke "Process Data Exch.".SetField
+      ProcessDataExch.SetField(RecRef,DataExchFieldMapping,DataExchField,Integer);
+      RecRef.MODIFY(TRUE);
+
+      // [THEN] "Bank Account"."Name" = "Updated Name"
+      BankAccount.GET(BankAccount."No.");
+      BankAccount.TESTFIELD(Name,COPYSTR(DataExchField.Value,1,MAXSTRLEN(BankAccount.Name)));
+    END;
+
+    [Test]
+    PROCEDURE FieldMappingAppendValueOfFieldCodeType@27();
+    VAR
+      BankAccount@1005 : Record 270;
+      DataExchFieldMapping@1004 : Record 1225;
+      DataExchField@1003 : Record 1221;
+      Integer@1002 : Record 2000000026;
+      ProcessDataExch@1000 : Codeunit 1201;
+      RecRef@1001 : RecordRef;
+      ExpectedString@1006 : Text;
+    BEGIN
+      // [FEATURE] [UT]
+      // [SCENARIO 215352] Function "Process Data Exch.".SetField should append value of field with type "Code" if "Data Exch. Field Mapping"."Overwrite Value" = FALSE
+
+      // [GIVEN] Bank Account with "Search Name" = "Test Search Name"
+      LibraryPaymentExport.CreateBankAccount(BankAccount);
+      RecRef.GETTABLE(BankAccount);
+
+      // [GIVEN] "Data Exch. Field Mapping" with "Overwrite Value" = TRUE
+      // [GIVEN] "Data Exch. Field" for field "Search Name" and Value = "Updated Search Name"
+      CreateDataExchSetupAndFieldMappingWithOverwriteValue(
+        DataExchFieldMapping,DataExchField,BankAccount.FIELDNO("Search Name"),FALSE);
+
+      // [WHEN] Invoke "Process Data Exch.".SetField
+      ProcessDataExch.SetField(RecRef,DataExchFieldMapping,DataExchField,Integer);
+      RecRef.MODIFY(TRUE);
+
+      // [THEN] "Bank Account"."Search Name" = "Test Search Name Updated Search Name"
+      ExpectedString := COPYSTR(BankAccount."Search Name" + ' ' + DataExchField.Value,1,MAXSTRLEN(BankAccount."Search Name"));
+      BankAccount.GET(BankAccount."No.");
+      BankAccount.TESTFIELD("Search Name",ExpectedString);
+    END;
+
+    [Test]
+    PROCEDURE FieldMappingAppendValueOfFieldTextType@26();
+    VAR
+      BankAccount@1005 : Record 270;
+      DataExchFieldMapping@1004 : Record 1225;
+      DataExchField@1003 : Record 1221;
+      Integer@1002 : Record 2000000026;
+      ProcessDataExch@1000 : Codeunit 1201;
+      RecRef@1001 : RecordRef;
+      ExpectedString@1006 : Text;
+    BEGIN
+      // [FEATURE] [UT]
+      // [SCENARIO 215352] Function "Process Data Exch.".SetField should append value of field with type "Text" if "Data Exch. Field Mapping"."Overwrite Value" = FALSE
+
+      // [GIVEN] Bank Account with "Name" = "Test Name"
+      LibraryPaymentExport.CreateBankAccount(BankAccount);
+      RecRef.GETTABLE(BankAccount);
+
+      // [GIVEN] "Data Exch. Field Mapping" with "Overwrite Value" = TRUE
+      // [GIVEN] "Data Exch. Field" for field "Name" and Value = "Updated Name"
+      CreateDataExchSetupAndFieldMappingWithOverwriteValue(DataExchFieldMapping,DataExchField,BankAccount.FIELDNO(Name),FALSE);
+
+      // [WHEN] Invoke "Process Data Exch.".SetField
+      ProcessDataExch.SetField(RecRef,DataExchFieldMapping,DataExchField,Integer);
+      RecRef.MODIFY(TRUE);
+
+      // [THEN] "Bank Account"."Name" = "Test Name Updated Name"
+      ExpectedString := COPYSTR(BankAccount.Name + ' ' + DataExchField.Value,1,MAXSTRLEN(BankAccount.Name));
+      BankAccount.GET(BankAccount."No.");
+      BankAccount.TESTFIELD(Name,ExpectedString);
+    END;
+
+    [Test]
+    PROCEDURE FieldMappingOverwriteValueOfMaxFilledFieldCodeType@23();
+    VAR
+      BankAccount@1002 : Record 270;
+      DataExchFieldMapping@1000 : Record 1225;
+      DataExchField@1009 : Record 1221;
+      Integer@1010 : Record 2000000026;
+      ProcessDataExch@1001 : Codeunit 1201;
+      RecRef@1008 : RecordRef;
+    BEGIN
+      // [FEATURE] [UT]
+      // [SCENARIO 215352] Function "Process Data Exch.".SetField should overwrite value of field with type "Code" if "Data Exch. Field Mapping"."Overwrite Value" = TRUE and the current value has a max lenght of field
+
+      // [GIVEN] Bank Account with maximum filled field "Search Name"
+      LibraryPaymentExport.CreateBankAccount(BankAccount);
+      LibraryUtility.FillFieldMaxText(BankAccount,BankAccount.FIELDNO("Search Name"));
+      BankAccount.GET(BankAccount."No.");
+      RecRef.GETTABLE(BankAccount);
+
+      // [GIVEN] "Data Exch. Field Mapping" with "Overwrite Value" = TRUE
+      // [GIVEN] "Data Exch. Field" for field "Search Name" and Value = "Updated Search Name"
+      CreateDataExchSetupAndFieldMappingWithOverwriteValue(
+        DataExchFieldMapping,DataExchField,BankAccount.FIELDNO("Search Name"),TRUE);
+
+      // [WHEN] Invoke "Process Data Exch.".SetField
+      ProcessDataExch.SetField(RecRef,DataExchFieldMapping,DataExchField,Integer);
+      RecRef.MODIFY(TRUE);
+
+      // [THEN] "Bank Account"."Search Name" = "Updated Search Name"
+      BankAccount.GET(BankAccount."No.");
+      BankAccount.TESTFIELD("Search Name",COPYSTR(DataExchField.Value,1,MAXSTRLEN(BankAccount."Search Name")));
+    END;
+
+    [Test]
+    PROCEDURE FieldMappingOverwriteValueOfMaxFilledFieldTextType@22();
+    VAR
+      BankAccount@1006 : Record 270;
+      DataExchFieldMapping@1005 : Record 1225;
+      DataExchField@1004 : Record 1221;
+      Integer@1003 : Record 2000000026;
+      ProcessDataExch@1000 : Codeunit 1201;
+      RecRef@1002 : RecordRef;
+    BEGIN
+      // [FEATURE] [UT]
+      // [SCENARIO 215352] Function "Process Data Exch.".SetField should overwrite value of field with type "Text" if "Data Exch. Field Mapping"."Overwrite Value" = TRUE and the current value has a max lenght of field
+
+      // [GIVEN] Bank Account with maximum filled field "Name"
+      LibraryPaymentExport.CreateBankAccount(BankAccount);
+      LibraryUtility.FillFieldMaxText(BankAccount,BankAccount.FIELDNO(Name));
+      BankAccount.GET(BankAccount."No.");
+      RecRef.GETTABLE(BankAccount);
+
+      // [GIVEN] "Data Exch. Field Mapping" with "Overwrite Value" = TRUE
+      // [GIVEN] "Data Exch. Field" for field "Name" and Value = "Updated Name"
+      CreateDataExchSetupAndFieldMappingWithOverwriteValue(DataExchFieldMapping,DataExchField,BankAccount.FIELDNO(Name),TRUE);
+
+      // [WHEN] Invoke "Process Data Exch.".SetField
+      ProcessDataExch.SetField(RecRef,DataExchFieldMapping,DataExchField,Integer);
+      RecRef.MODIFY(TRUE);
+
+      // [THEN] "Bank Account"."Name" = "Updated Name"
+      BankAccount.GET(BankAccount."No.");
+      BankAccount.TESTFIELD(Name,COPYSTR(DataExchField.Value,1,MAXSTRLEN(BankAccount.Name)));
+    END;
+
+    LOCAL PROCEDURE CreateDataExchDef@4(VAR DataExchDef@1000 : Record 1222;ParamaterType@1001 : Option);
+    BEGIN
+      DataExchDef.INIT;
+      DataExchDef.Code :=
+        LibraryUtility.GenerateRandomCode(DataExchDef.FIELDNO(Code),DATABASE::"Data Exch. Def");
+      DataExchDef.VALIDATE(Type,ParamaterType);
+      IF ParamaterType <> DataExchDef.Type::"Payment Export" THEN
+        DataExchDef."Ext. Data Handling Codeunit" := CODEUNIT::"Read Data Exch. from File";
+      DataExchDef.INSERT(TRUE);
+    END;
+
+    LOCAL PROCEDURE CreateDataExchLineDef@8(VAR DataExchDef@1000 : Record 1222;VAR DataExchLineDef@1001 : Record 1227);
+    BEGIN
+      DataExchLineDef.INIT;
+      DataExchLineDef."Data Exch. Def Code" := DataExchDef.Code;
+      DataExchLineDef.Code :=
+        LibraryUtility.GenerateRandomCode(DataExchLineDef.FIELDNO(Code),DATABASE::"Data Exch. Line Def");
+      DataExchLineDef.INSERT
+    END;
+
+    [Test]
+    [HandlerFunctions(FieldsModalPageHandler)]
+    PROCEDURE ChangeFieldID@13();
+    VAR
+      DataExchMapping@1001 : Record 1224;
+      DataExchMappingPage@1004 : TestPage 1214;
+    BEGIN
+      // Setup
+      LibraryPaymentExport.CreateSimpleDataExchDefWithMapping(DataExchMapping,DATABASE::"Bank Acc. Reconciliation",1);
+      DataExchMappingPage.OPENEDIT;
+      DataExchMappingPage.GOTORECORD(DataExchMapping);
+
+      // Exercise
+      DataExchMappingPage."Data Exch Field Mapping Part"."Field ID".LOOKUP;
+
+      // Verify
+      Assert.AreEqual(2,DataExchMappingPage."Data Exch Field Mapping Part"."Field ID".ASINTEGER,'Handler must set FieldID to 2');
+    END;
+
+    [Test]
+    PROCEDURE SetUseDefaultValueTrueWithImport@12();
+    VAR
+      DataExchDef@1000 : Record 1222;
+      DataExchMapping@1001 : Record 1224;
+      DataExchFieldMapping@1002 : Record 1225;
+    BEGIN
+      // Setup
+      LibraryPaymentExport.CreateSimpleDataExchDefWithMapping2(
+        DataExchDef,DataExchMapping,DataExchFieldMapping,DATABASE::"Bank Acc. Reconciliation",1);
+      DataExchDef.Type := DataExchDef.Type::"Bank Statement Import";
+      DataExchDef.MODIFY;
+      DataExchFieldMapping.SETRANGE("Data Exch. Def Code",DataExchMapping."Data Exch. Def Code");
+      DataExchFieldMapping.SETRANGE("Data Exch. Line Def Code",DataExchMapping."Data Exch. Line Def Code");
+      DataExchFieldMapping.SETRANGE("Table ID",DataExchMapping."Table ID");
+      DataExchFieldMapping.FINDFIRST;
+
+      // Execute
+      DataExchFieldMapping.VALIDATE("Use Default Value",TRUE);
+
+      // Verify
+      Assert.AreEqual(TRUE,DataExchFieldMapping."Use Default Value",'Use Default Value should be true');
+    END;
+
+    [Test]
+    PROCEDURE SetUseDefaultValueFalseWithExport@19();
+    VAR
+      DataExchDef@1000 : Record 1222;
+      DataExchMapping@1001 : Record 1224;
+      DataExchFieldMapping@1002 : Record 1225;
+    BEGIN
+      // Setup
+      LibraryPaymentExport.CreateSimpleDataExchDefWithMapping2(
+        DataExchDef,DataExchMapping,DataExchFieldMapping,DATABASE::"Bank Acc. Reconciliation",1);
+      DataExchDef.Type := DataExchDef.Type::"Payment Export";
+      DataExchDef.MODIFY;
+
+      DataExchFieldMapping.FINDFIRST;
+      DataExchFieldMapping."Default Value" := 'Default';
+      DataExchFieldMapping.VALIDATE("Use Default Value",FALSE);
+
+      // Verify
+      Assert.AreEqual('',DataExchFieldMapping."Default Value",'Payment Export types must reset Default Value property');
+    END;
+
+    [Test]
+    PROCEDURE MultiplierStays1OnModify@5();
+    VAR
+      DataExchDef@1000 : Record 1222;
+      DataExchMapping@1001 : Record 1224;
+      DataExchFieldMapping@1002 : Record 1225;
+    BEGIN
+      // Setup
+      LibraryPaymentExport.CreateSimpleDataExchDefWithMapping2(
+        DataExchDef,DataExchMapping,DataExchFieldMapping,DATABASE::"Bank Acc. Reconciliation",1);
+      DataExchDef.Type := DataExchDef.Type::"Bank Statement Import";
+      DataExchDef.MODIFY;
+
+      DataExchFieldMapping.FINDFIRST;
+      DataExchFieldMapping.TESTFIELD(Multiplier,1);
+
+      // Exercise
+      DataExchFieldMapping.VALIDATE(Optional,TRUE);
+      DataExchFieldMapping.MODIFY(TRUE);
+
+      // Verify
+      DataExchFieldMapping.FIND;
+      DataExchFieldMapping.TESTFIELD(Multiplier,1);
+    END;
+
+    [Test]
+    PROCEDURE OpenFieldMappingPageWithLongTableCaption@1();
+    VAR
+      DataExchMapping@1004 : Record 1224;
+      DataExchFieldMapping@1003 : Record 1225;
+      DataExchColumnDef@1002 : Record 1223;
+      DummyDataExchLineDef@1001 : Record 1227;
+      DataExchMappingCard@1000 : TestPage 1214;
+    BEGIN
+      // [SCENARIO] "Data Exch Mapping Card" Page must may be opened even if mapping is set for table with a 250 symbols (max possible) length
+      DataExchMappingCard.TRAP;
+
+      CreateDataExchColumnDef(DataExchColumnDef,DummyDataExchLineDef);
+      CreateDataExchMapping(DataExchMapping,DummyDataExchLineDef,DATABASE::"Payment Export Remittance Text");
+      CreateDataExchFieldMapping(DataExchFieldMapping,DataExchMapping,DataExchColumnDef."Column No.");
+      DataExchFieldMapping."Target Table Caption" := COPYSTR(LibraryUtility.GenerateRandomText(250),1,250);
+      DataExchFieldMapping.MODIFY;
+
+      PAGE.RUN(PAGE::"Data Exch Mapping Card",DataExchMapping);
+    END;
+
+    LOCAL PROCEDURE CreateDataExchMapping@6(VAR DataExchMapping@1000 : Record 1224;DataExchLineDef@1001 : Record 1227;TableID@1002 : Integer);
+    BEGIN
+      DataExchMapping.INIT;
+      DataExchMapping."Data Exch. Def Code" := DataExchLineDef."Data Exch. Def Code";
+      DataExchMapping."Data Exch. Line Def Code" := DataExchLineDef.Code;
+      DataExchMapping."Table ID" := TableID;
+      DataExchMapping.INSERT;
+    END;
+
+    LOCAL PROCEDURE CreateDataExchFieldMapping@2(VAR DataExchFieldMapping@1000 : Record 1225;DataExchMapping@1001 : Record 1224;ColumnNo@1003 : Integer);
+    VAR
+      RecRef@1004 : RecordRef;
+      FieldRef@1005 : FieldRef;
+    BEGIN
+      RecRef.OPEN(DataExchMapping."Table ID");
+      FieldRef := RecRef.FIELDINDEX(1);
+      CreateDataExchFieldMappingWithFieldID(DataExchFieldMapping,DataExchMapping,ColumnNo,FieldRef.NUMBER);
+    END;
+
+    LOCAL PROCEDURE CreateDataExchFieldMappingWithFieldID@51(VAR DataExchFieldMapping@1000 : Record 1225;DataExchMapping@1001 : Record 1224;ColumnNo@1003 : Integer;FieldID@1002 : Integer);
+    BEGIN
+      DataExchFieldMapping.INIT;
+      DataExchFieldMapping."Data Exch. Def Code" := DataExchMapping."Data Exch. Def Code";
+      DataExchFieldMapping."Data Exch. Line Def Code" := DataExchMapping."Data Exch. Line Def Code";
+      DataExchFieldMapping."Table ID" := DataExchMapping."Table ID";
+      DataExchFieldMapping."Column No." := ColumnNo;
+      DataExchFieldMapping."Field ID" := FieldID;
+      DataExchFieldMapping.INSERT;
+    END;
+
+    LOCAL PROCEDURE CreateDataExchSetupAndFieldMappingWithOverwriteValue@56(VAR DataExchFieldMapping@1005 : Record 1225;VAR DataExchField@1006 : Record 1221;FieldNo@1003 : Integer;OverwriteValue@1007 : Boolean);
+    VAR
+      DataExchDef@1000 : Record 1222;
+      DataExchLineDef@1001 : Record 1227;
+      DataExchColumnDef@1002 : Record 1223;
+      DataExchMapping@1004 : Record 1224;
+    BEGIN
+      CreateDataExchDef(DataExchDef,DataExchDef.Type::"Payroll Import");
+      CreateDataExchLineDef(DataExchDef,DataExchLineDef);
+      CreateDataExchColumnDefWithColumnNo(DataExchColumnDef,DataExchLineDef,FieldNo);
+      CreateDataExchMapping(DataExchMapping,DataExchLineDef,DATABASE::"Bank Account");
+      CreateDataExchFieldMappingWithFieldID(DataExchFieldMapping,DataExchMapping,FieldNo,FieldNo);
+      DataExchFieldMapping.VALIDATE("Overwrite Value",OverwriteValue);
+      DataExchFieldMapping.MODIFY(TRUE);
+      CreateDataExchField(DataExchField,DataExchLineDef,FieldNo);
+      LibraryUtility.FillFieldMaxText(DataExchField,DataExchField.FIELDNO(Value));
+      DataExchField.GET(DataExchField."Data Exch. No.",DataExchField."Line No.",DataExchField."Column No.",DataExchField."Node ID");
+    END;
+
+    LOCAL PROCEDURE CreateDataExchColumnDef@17(VAR DataExchColumnDef@1000 : Record 1223;DataExchLineDef@1001 : Record 1227);
+    BEGIN
+      CreateDataExchColumnDefWithColumnNo(DataExchColumnDef,DataExchLineDef,LibraryRandom.RandInt(10));
+    END;
+
+    LOCAL PROCEDURE CreateDataExchColumnDefWithColumnNo@47(VAR DataExchColumnDef@1000 : Record 1223;DataExchLineDef@1001 : Record 1227;ColumnNo@1002 : Integer);
+    BEGIN
+      DataExchColumnDef.INIT;
+      DataExchColumnDef."Data Exch. Def Code" := DataExchLineDef."Data Exch. Def Code";
+      DataExchColumnDef."Data Exch. Line Def Code" := DataExchLineDef.Code;
+      DataExchColumnDef."Column No." := ColumnNo;
+      DataExchColumnDef.INSERT;
+    END;
+
+    LOCAL PROCEDURE CreateDataExchField@41(VAR DataExchField@1000 : Record 1221;DataExchLineDef@1001 : Record 1227;ColumnNo@1002 : Integer);
+    BEGIN
+      DataExchField.INIT;
+      DataExchField."Data Exch. No." := LibraryRandom.RandIntInRange(1,10);
+      DataExchField."Line No." := LibraryRandom.RandIntInRange(1,10);
+      DataExchField."Data Exch. Line Def Code" := DataExchLineDef.Code;
+      DataExchField."Data Exch. Def Code" := DataExchLineDef."Data Exch. Def Code";
+      DataExchField."Node ID" := LibraryUtility.GenerateGUID;
+      DataExchField."Column No." := ColumnNo;
+      DataExchField.INSERT(TRUE);
+    END;
+
+    [ModalPageHandler]
+    PROCEDURE FieldsModalPageHandler@25(VAR FieldsLookup@1000 : TestPage 9806);
+    BEGIN
+      FieldsLookup.NEXT;
+      FieldsLookup.OK.INVOKE;
+    END;
+
+    BEGIN
+    END.
+  }
+}
+

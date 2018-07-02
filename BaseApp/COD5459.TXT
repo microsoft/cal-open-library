@@ -119,6 +119,7 @@ OBJECT Codeunit 5459 JSON Management
 
     PROCEDURE GetPropertyValueFromJObjectByPathSetToFieldRef@28(JObject@1002 : DotNet "'Newtonsoft.Json'.Newtonsoft.Json.Linq.JObject";propertyPath@1001 : Text;VAR FieldRef@1000 : FieldRef) : Boolean;
     VAR
+      TempBlob@1015 : Record 99008535;
       OutlookSynchTypeConv@1011 : Codeunit 5302;
       JProperty@1003 : DotNet "'Newtonsoft.Json'.Newtonsoft.Json.Linq.JProperty";
       Value@1005 : Variant;
@@ -135,7 +136,7 @@ OBJECT Codeunit 5459 JSON Management
       IF ISNULL(JProperty) THEN
         EXIT(FALSE);
 
-      Value := FORMAT(JProperty.Value);
+      Value := FORMAT(JProperty.Value,0,9);
 
       CASE FORMAT(FieldRef.TYPE) OF
         'Integer',
@@ -173,6 +174,11 @@ OBJECT Codeunit 5459 JSON Management
               FieldRef.VALUE := IntVar;
               Success := TRUE;
             END;
+          END;
+        'BLOB':
+          IF TryReadAsBase64(TempBlob,Value) THEN BEGIN
+            FieldRef.VALUE := TempBlob.Blob;
+            Success := TRUE;
           END;
       END;
 
@@ -336,14 +342,24 @@ OBJECT Codeunit 5459 JSON Management
       JProperty@1001 : DotNet "'Newtonsoft.Json'.Newtonsoft.Json.Linq.JProperty";
       ValueText@1004 : Text;
     BEGIN
-      IF value.ISINTEGER THEN
-        JProperty := JProperty.JProperty(propertyName,value)
-      ELSE BEGIN
-        ValueText := FORMAT(value,0,9);
-        JProperty := JProperty.JProperty(propertyName,ValueText);
+      CASE TRUE OF
+        value.ISINTEGER,
+        value.ISDECIMAL:
+          JProperty := JProperty.JProperty(propertyName,value);
+        ELSE BEGIN
+          ValueText := FORMAT(value,0,9);
+          JProperty := JProperty.JProperty(propertyName,ValueText);
+        END;
       END;
 
       JObject.Add(JProperty);
+    END;
+
+    PROCEDURE AddNullJPropertyToJObject@38(VAR JObject@1001 : DotNet "'Newtonsoft.Json'.Newtonsoft.Json.Linq.JObject";propertyName@1000 : Text);
+    VAR
+      JValue@1002 : DotNet "'Newtonsoft.Json'.Newtonsoft.Json.Linq.JValue";
+    BEGIN
+      JObject.Add(propertyName,JValue.CreateNull);
     END;
 
     PROCEDURE AddJValueToJObject@22(VAR JObject@1002 : DotNet "'Newtonsoft.Json'.Newtonsoft.Json.Linq.JObject";value@1003 : Variant);
@@ -408,6 +424,15 @@ OBJECT Codeunit 5459 JSON Management
       EXIT(JsonObject.ToString);
     END;
 
+    [External]
+    PROCEDURE FormatDecimalToJSONProperty@40(Value@1000 : Decimal;PropertyName@1001 : Text) : Text;
+    VAR
+      JProperty@1002 : DotNet "'Newtonsoft.Json'.Newtonsoft.Json.Linq.JProperty";
+    BEGIN
+      JProperty := JProperty.JProperty(PropertyName,Value);
+      EXIT(JProperty.ToString);
+    END;
+
     LOCAL PROCEDURE GetLastIndexOfPeriod@31(String@1000 : Text) LastIndex : Integer;
     VAR
       Index@1001 : Integer;
@@ -470,6 +495,19 @@ OBJECT Codeunit 5459 JSON Management
     BEGIN
       XmlDocument := JsonConvert.DeserializeXmlNode(Json,DocumentElementName);
       Xml := XmlDocument.OuterXml;
+    END;
+
+    [TryFunction]
+    [External]
+    PROCEDURE TryParseJObjectFromString@39(VAR JObject@1001 : DotNet "'Newtonsoft.Json'.Newtonsoft.Json.Linq.JObject";StringToParse@1000 : Variant);
+    BEGIN
+      JObject := JObject.Parse(FORMAT(StringToParse));
+    END;
+
+    [TryFunction]
+    LOCAL PROCEDURE TryReadAsBase64@48(VAR TempBlob@1000 : Record 99008535;Value@1001 : Text);
+    BEGIN
+      TempBlob.FromBase64String(Value);
     END;
 
     BEGIN

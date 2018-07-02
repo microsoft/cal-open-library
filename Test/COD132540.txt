@@ -1,0 +1,975 @@
+OBJECT Codeunit 132540 Test Data Exch.Import - CSV
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=Test,ERM,W1,All;
+  }
+  PROPERTIES
+  {
+    Subtype=Test;
+    TestPermissions=Disabled;
+    OnRun=BEGIN
+            // [FEATURE] [Data Exchange] [Import] [CSV]
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      LibraryUtility@1003 : Codeunit 131000;
+      Assert@1000 : Codeunit 130000;
+      ALongTxt@1001 : TextConst 'ENU=250 char long text and ..250 char long text and ..250 char long text and ..250 char long text and ..250 char long text and ..250 char long text and ..250 char long text and ..250 char long text and ..250 char long text and ..250 char long text and ..';
+      TableErrorMsg@1004 : TextConst 'ENU=%1 Line:%2';
+      AssertMsg@1018 : TextConst 'ENU=%1 Field:"%2" different from expected.';
+      LastLineIsHeaderErr@1019 : TextConst 'ENU=The imported file contains unexpected formatting. One or more lines may be missing in the file.';
+      WrongHeaderErr@1020 : TextConst 'ENU=The imported file contains unexpected formatting. One or more headers are incorrect.';
+
+    [Test]
+    PROCEDURE TestImportComma@1();
+    VAR
+      TempBlobOEM@1000 : Record 99008535;
+      TempBlobANSI@1008 : Record 99008535;
+      DataExch@1001 : Record 1220;
+      DataExchDef@1002 : Record 1222;
+      DataExchField@1003 : Record 1221;
+      TempExpectedDataExchField@1004 : TEMPORARY Record 1221;
+      OutStream@1006 : OutStream;
+      InStream@1007 : InStream;
+    BEGIN
+      // Setup
+      TempBlobOEM.Blob.CREATEOUTSTREAM(OutStream);
+      WriteLine(OutStream,'Field ABC, FieldABC ');
+      WriteLine(OutStream,'Field;)(%&/#!#%,Field`?=?`^:_>.');
+      WriteLine(OutStream,'"Field2",Field1');
+      WriteLine(OutStream,'"Field2",' + ALongTxt + ALongTxt);
+
+      ConvertOEMToANSI(TempBlobOEM,TempBlobANSI);
+
+      CreateDataExchDef(DataExchDef,XMLPORT::"Data Exch. Import - CSV",0,'','',DataExchDef."Column Separator"::Comma);
+      CreateDataExch(DataExch,DataExchDef.Code,TempBlobANSI);
+
+      // Execute
+      TempBlobANSI.Blob.CREATEINSTREAM(InStream);
+      XMLPORT.IMPORT(DataExchDef."Reading/Writing XMLport",InStream,DataExch);
+
+      // Verify Table Layout
+      TempExpectedDataExchField.InsertRec(DataExch."Entry No.",1,1,'Field ABC','');
+      TempExpectedDataExchField.InsertRec(DataExch."Entry No.",1,2,'FieldABC',''); // Leading and trailing speces will be removed
+      TempExpectedDataExchField.InsertRec(DataExch."Entry No.",2,1,'Field;)(%&/#!#%','');
+      TempExpectedDataExchField.InsertRec(DataExch."Entry No.",2,2,'Field`?=?`^:_>.','');
+      TempExpectedDataExchField.InsertRec(DataExch."Entry No.",3,1,'Field2','');
+      TempExpectedDataExchField.InsertRec(DataExch."Entry No.",3,2,'Field1','');
+      TempExpectedDataExchField.InsertRec(DataExch."Entry No.",4,1,'Field2','');
+      TempExpectedDataExchField.InsertRec(DataExch."Entry No.",4,2,ALongTxt,'');
+
+      DataExchField.SETRANGE("Data Exch. No.",DataExch."Entry No.");
+      AssertDataInTable(TempExpectedDataExchField,DataExchField,'');
+    END;
+
+    [Test]
+    PROCEDURE TestImportSemicolon@2();
+    VAR
+      TempBlobOEM@1008 : Record 99008535;
+      TempBlobANSI@1000 : Record 99008535;
+      DataExch@1001 : Record 1220;
+      DataExchDef@1002 : Record 1222;
+      DataExchField@1003 : Record 1221;
+      TempExpectedDataExchField@1004 : TEMPORARY Record 1221;
+      OutStream@1006 : OutStream;
+      InStream@1007 : InStream;
+    BEGIN
+      // Setup
+      TempBlobOEM.Blob.CREATEOUTSTREAM(OutStream);
+      WriteLine(OutStream,'Field,)(%&/#!#%;Field`?=?`^:_>.');
+
+      ConvertOEMToANSI(TempBlobOEM,TempBlobANSI);
+
+      CreateDataExchDef(DataExchDef,XMLPORT::"Data Exch. Import - CSV",0,'','',DataExchDef."Column Separator"::Semicolon);
+      CreateDataExch(DataExch,DataExchDef.Code,TempBlobANSI);
+
+      // Execute
+      TempBlobANSI.Blob.CREATEINSTREAM(InStream);
+      XMLPORT.IMPORT(DataExchDef."Reading/Writing XMLport",InStream,DataExch);
+
+      // Verify Table Layout
+      TempExpectedDataExchField.InsertRec(DataExch."Entry No.",1,1,'Field,)(%&/#!#%','');
+      TempExpectedDataExchField.InsertRec(DataExch."Entry No.",1,2,'Field`?=?`^:_>.','');
+
+      DataExchField.SETRANGE("Data Exch. No.",DataExch."Entry No.");
+      AssertDataInTable(TempExpectedDataExchField,DataExchField,'');
+    END;
+
+    [Test]
+    PROCEDURE TestImportTab@17();
+    VAR
+      TempBlobOEM@1008 : Record 99008535;
+      TempBlobANSI@1000 : Record 99008535;
+      DataExch@1001 : Record 1220;
+      DataExchDef@1002 : Record 1222;
+      DataExchField@1003 : Record 1221;
+      TempExpectedDataExchField@1004 : TEMPORARY Record 1221;
+      OutStream@1006 : OutStream;
+      InStream@1007 : InStream;
+      Tab@1005 : Text;
+    BEGIN
+      // Setup
+      TempBlobOEM.Blob.CREATEOUTSTREAM(OutStream);
+      Tab[1] := 9;
+      WriteLine(OutStream,CONVERTSTR('Field,)(%&/#!#%;Field`?=?`^:_>.',';',Tab));
+
+      ConvertOEMToANSI(TempBlobOEM,TempBlobANSI);
+
+      CreateDataExchDef(DataExchDef,XMLPORT::"Data Exch. Import - CSV",0,'','',DataExchDef."Column Separator"::Tab);
+      CreateDataExch(DataExch,DataExchDef.Code,TempBlobANSI);
+
+      // Execute
+      TempBlobANSI.Blob.CREATEINSTREAM(InStream);
+      XMLPORT.IMPORT(DataExchDef."Reading/Writing XMLport",InStream,DataExch);
+
+      // Verify Table Layout
+      TempExpectedDataExchField.InsertRec(DataExch."Entry No.",1,1,'Field,)(%&/#!#%','');
+      TempExpectedDataExchField.InsertRec(DataExch."Entry No.",1,2,'Field`?=?`^:_>.','');
+
+      DataExchField.SETRANGE("Data Exch. No.",DataExch."Entry No.");
+      AssertDataInTable(TempExpectedDataExchField,DataExchField,'');
+    END;
+
+    [Test]
+    PROCEDURE TestImportSpace@19();
+    VAR
+      TempBlobOEM@1008 : Record 99008535;
+      TempBlobANSI@1000 : Record 99008535;
+      DataExch@1001 : Record 1220;
+      DataExchDef@1002 : Record 1222;
+      DataExchField@1003 : Record 1221;
+      TempExpectedDataExchField@1004 : TEMPORARY Record 1221;
+      OutStream@1006 : OutStream;
+      InStream@1007 : InStream;
+    BEGIN
+      // Setup
+      TempBlobOEM.Blob.CREATEOUTSTREAM(OutStream);
+      WriteLine(OutStream,'Field,)(%&/#!#% "Field`?=?`^:_ >."');
+
+      ConvertOEMToANSI(TempBlobOEM,TempBlobANSI);
+
+      CreateDataExchDef(DataExchDef,XMLPORT::"Data Exch. Import - CSV",0,'','',DataExchDef."Column Separator"::Space);
+      CreateDataExch(DataExch,DataExchDef.Code,TempBlobANSI);
+
+      // Execute
+      TempBlobANSI.Blob.CREATEINSTREAM(InStream);
+      XMLPORT.IMPORT(DataExchDef."Reading/Writing XMLport",InStream,DataExch);
+
+      // Verify Table Layout
+      TempExpectedDataExchField.InsertRec(DataExch."Entry No.",1,1,'Field,)(%&/#!#%','');
+      TempExpectedDataExchField.InsertRec(DataExch."Entry No.",1,2,'Field`?=?`^:_ >.','');
+
+      DataExchField.SETRANGE("Data Exch. No.",DataExch."Entry No.");
+      AssertDataInTable(TempExpectedDataExchField,DataExchField,'');
+    END;
+
+    [Test]
+    PROCEDURE TestImportCustom@21();
+    VAR
+      TempBlobOEM@1008 : Record 99008535;
+      TempBlobANSI@1000 : Record 99008535;
+      DataExch@1001 : Record 1220;
+      DataExchDef@1002 : Record 1222;
+      DataExchField@1003 : Record 1221;
+      TempExpectedDataExchField@1004 : TEMPORARY Record 1221;
+      OutStream@1006 : OutStream;
+      InStream@1007 : InStream;
+    BEGIN
+      // Setup
+      TempBlobOEM.Blob.CREATEOUTSTREAM(OutStream);
+      WriteLine(OutStream,'Field,)(%&/#!#%+Field`?=?`^:_ >.');
+
+      ConvertOEMToANSI(TempBlobOEM,TempBlobANSI);
+
+      CreateDataExchDef(DataExchDef,XMLPORT::"Data Exch. Import - CSV",0,'','',DataExchDef."Column Separator"::Custom);
+      CreateDataExch(DataExch,DataExchDef.Code,TempBlobANSI);
+
+      // Execute
+      TempBlobANSI.Blob.CREATEINSTREAM(InStream);
+      XMLPORT.IMPORT(DataExchDef."Reading/Writing XMLport",InStream,DataExch);
+
+      // Verify Table Layout
+      TempExpectedDataExchField.InsertRec(DataExch."Entry No.",1,1,'Field,)(%&/#!#%','');
+      TempExpectedDataExchField.InsertRec(DataExch."Entry No.",1,2,'Field`?=?`^:_ >.','');
+
+      DataExchField.SETRANGE("Data Exch. No.",DataExch."Entry No.");
+      AssertDataInTable(TempExpectedDataExchField,DataExchField,'');
+    END;
+
+    [Test]
+    PROCEDURE TestImportOEM@20();
+    VAR
+      TempBlobOEM@1008 : Record 99008535;
+      DataExch@1001 : Record 1220;
+      DataExchDef@1002 : Record 1222;
+      DataExchField@1003 : Record 1221;
+      TempExpectedDataExchField@1004 : TEMPORARY Record 1221;
+      OutStream@1006 : OutStream;
+      InStream@1007 : InStream;
+    BEGIN
+      // Setup
+      TempBlobOEM.Blob.CREATEOUTSTREAM(OutStream);
+      WriteLine(OutStream,'Field ABC, FieldABC ');
+      WriteLine(OutStream,'Field;)(%&/#!#%,Field`?=?`^:_>.');
+      WriteLine(OutStream,'"Field2",Field1');
+      WriteLine(OutStream,'"Field2",' + ALongTxt + ALongTxt);
+
+      CreateDataExchDef(DataExchDef,XMLPORT::"Data Exch. Import - CSV",0,'','',DataExchDef."Column Separator"::Comma);
+      DataExchDef."File Encoding" := DataExchDef."File Encoding"::"MS-DOS";
+      DataExchDef.MODIFY;
+
+      CreateDataExch(DataExch,DataExchDef.Code,TempBlobOEM);
+
+      // Execute
+      TempBlobOEM.Blob.CREATEINSTREAM(InStream);
+      XMLPORT.IMPORT(DataExchDef."Reading/Writing XMLport",InStream,DataExch);
+
+      // Verify Table Layout
+      TempExpectedDataExchField.InsertRec(DataExch."Entry No.",1,1,'Field ABC','');
+      TempExpectedDataExchField.InsertRec(DataExch."Entry No.",1,2,'FieldABC',''); // Leading and trailing speces will be removed
+      TempExpectedDataExchField.InsertRec(DataExch."Entry No.",2,1,'Field;)(%&/#!#%','');
+      TempExpectedDataExchField.InsertRec(DataExch."Entry No.",2,2,'Field`?=?`^:_>.','');
+      TempExpectedDataExchField.InsertRec(DataExch."Entry No.",3,1,'Field2','');
+      TempExpectedDataExchField.InsertRec(DataExch."Entry No.",3,2,'Field1','');
+      TempExpectedDataExchField.InsertRec(DataExch."Entry No.",4,1,'Field2','');
+      TempExpectedDataExchField.InsertRec(DataExch."Entry No.",4,2,ALongTxt,'');
+
+      DataExchField.SETRANGE("Data Exch. No.",DataExch."Entry No.");
+      AssertDataInTable(TempExpectedDataExchField,DataExchField,'');
+    END;
+
+    [Test]
+    PROCEDURE TestImportWithHeaderLines@3();
+    VAR
+      TempBlobOEM@1008 : Record 99008535;
+      TempBlobANSI@1000 : Record 99008535;
+      DataExch@1001 : Record 1220;
+      DataExchDef@1002 : Record 1222;
+      DataExchField@1003 : Record 1221;
+      TempExpectedDataExchField@1004 : TEMPORARY Record 1221;
+      OutStream@1006 : OutStream;
+      InStream@1007 : InStream;
+    BEGIN
+      // Setup
+      TempBlobOEM.Blob.CREATEOUTSTREAM(OutStream);
+      WriteLine(OutStream,'Column1 Header;Column2 Header');
+      WriteLine(OutStream,'AnyData;AnyData');
+
+      ConvertOEMToANSI(TempBlobOEM,TempBlobANSI);
+
+      CreateDataExchDef(DataExchDef,XMLPORT::"Data Exch. Import - CSV",1,'','',DataExchDef."Column Separator"::Semicolon);
+      CreateDataExch(DataExch,DataExchDef.Code,TempBlobANSI);
+
+      // Execute
+      TempBlobANSI.Blob.CREATEINSTREAM(InStream);
+      XMLPORT.IMPORT(DataExchDef."Reading/Writing XMLport",InStream,DataExch);
+
+      // Verify Table Layout
+      TempExpectedDataExchField.InsertRec(DataExch."Entry No.",1,1,'AnyData','');
+      TempExpectedDataExchField.InsertRec(DataExch."Entry No.",1,2,'AnyData','');
+
+      DataExchField.SETRANGE("Data Exch. No.",DataExch."Entry No.");
+      AssertDataInTable(TempExpectedDataExchField,DataExchField,'');
+    END;
+
+    [Test]
+    PROCEDURE TestImportWithHeaderLinesAndHeaderTag@10();
+    VAR
+      TempBlob@1008 : Record 99008535;
+      DataExch@1001 : Record 1220;
+      DataExchDef@1002 : Record 1222;
+      DataExchField@1003 : Record 1221;
+      TempExpectedDataExchField@1004 : TEMPORARY Record 1221;
+      OutStream@1006 : OutStream;
+      InStream@1007 : InStream;
+    BEGIN
+      // Setup
+      TempBlob.Blob.CREATEOUTSTREAM(OutStream);
+      WriteLine(OutStream,'HeaderTag;Column2 Header');
+      WriteLine(OutStream,'AnyData;AnyData');
+
+      CreateDataExchDef(DataExchDef,XMLPORT::"Data Exch. Import - CSV",1,'HeaderTag','',DataExchDef."Column Separator"::Semicolon);
+      CreateDataExch(DataExch,DataExchDef.Code,TempBlob);
+
+      // Execute
+      TempBlob.Blob.CREATEINSTREAM(InStream);
+      XMLPORT.IMPORT(DataExchDef."Reading/Writing XMLport",InStream,DataExch);
+
+      // Verify Table Layout
+      TempExpectedDataExchField.InsertRec(DataExch."Entry No.",1,1,'AnyData','');
+      TempExpectedDataExchField.InsertRec(DataExch."Entry No.",1,2,'AnyData','');
+
+      DataExchField.SETRANGE("Data Exch. No.",DataExch."Entry No.");
+      AssertDataInTable(TempExpectedDataExchField,DataExchField,'');
+    END;
+
+    [Test]
+    PROCEDURE TestImportWithMultipleHeaderLinesAndHeaderTag@9();
+    VAR
+      TempBlob@1008 : Record 99008535;
+      DataExch@1001 : Record 1220;
+      DataExchDef@1002 : Record 1222;
+      DataExchField@1003 : Record 1221;
+      OutStream@1006 : OutStream;
+      InStream@1007 : InStream;
+    BEGIN
+      // Setup
+      TempBlob.Blob.CREATEOUTSTREAM(OutStream);
+      WriteLine(OutStream,'HeaderTag;Column2 Header1');
+      WriteLine(OutStream,'HeaderTag2;Column2 Header2');
+      WriteLine(OutStream,'AnyData;AnyData');
+
+      CreateDataExchDef(DataExchDef,XMLPORT::"Data Exch. Import - CSV",1,'HeaderTag2','',DataExchDef."Column Separator"::Semicolon);
+      CreateDataExch(DataExch,DataExchDef.Code,TempBlob);
+
+      // Execute
+      TempBlob.Blob.CREATEINSTREAM(InStream);
+      ASSERTERROR XMLPORT.IMPORT(DataExchDef."Reading/Writing XMLport",InStream,DataExch);
+
+      // Verify Table Layout
+      Assert.ExpectedError(WrongHeaderErr);
+      DataExchField.SETRANGE("Data Exch. No.",DataExch."Entry No.");
+      Assert.IsTrue(DataExchField.ISEMPTY,'Expect no data in the table.');
+    END;
+
+    [Test]
+    PROCEDURE TestImportWithHeaderTag@12();
+    VAR
+      TempBlob@1008 : Record 99008535;
+      DataExch@1001 : Record 1220;
+      DataExchDef@1002 : Record 1222;
+      DataExchField@1003 : Record 1221;
+      TempExpectedDataExchField@1004 : TEMPORARY Record 1221;
+      OutStream@1006 : OutStream;
+      InStream@1007 : InStream;
+    BEGIN
+      // Setup
+      TempBlob.Blob.CREATEOUTSTREAM(OutStream);
+      WriteLine(OutStream,'HeaderTag;Column2 Header');
+      WriteLine(OutStream,'AnyData;AnyData');
+
+      CreateDataExchDef(DataExchDef,XMLPORT::"Data Exch. Import - CSV",1,'HeaderTag','',DataExchDef."Column Separator"::Semicolon);
+      CreateDataExch(DataExch,DataExchDef.Code,TempBlob);
+
+      // Execute
+      TempBlob.Blob.CREATEINSTREAM(InStream);
+      XMLPORT.IMPORT(DataExchDef."Reading/Writing XMLport",InStream,DataExch);
+
+      // Verify Table Layout
+      TempExpectedDataExchField.InsertRec(DataExch."Entry No.",1,1,'AnyData','');
+      TempExpectedDataExchField.InsertRec(DataExch."Entry No.",1,2,'AnyData','');
+
+      DataExchField.SETRANGE("Data Exch. No.",DataExch."Entry No.");
+      AssertDataInTable(TempExpectedDataExchField,DataExchField,'');
+    END;
+
+    [Test]
+    PROCEDURE TestImportWithHeaderTagMismatch@14();
+    VAR
+      TempBlob@1008 : Record 99008535;
+      DataExch@1001 : Record 1220;
+      DataExchDef@1002 : Record 1222;
+      DataExchField@1003 : Record 1221;
+      TempExpectedDataExchField@1004 : TEMPORARY Record 1221;
+      OutStream@1006 : OutStream;
+      InStream@1007 : InStream;
+    BEGIN
+      // Setup
+      TempBlob.Blob.CREATEOUTSTREAM(OutStream);
+      WriteLine(OutStream,'HeaderTagMismatch;Column2 Header');
+      WriteLine(OutStream,'AnyData;AnyData');
+
+      CreateDataExchDef(DataExchDef,XMLPORT::"Data Exch. Import - CSV",0,'HeaderTag','',DataExchDef."Column Separator"::Semicolon);
+      CreateDataExch(DataExch,DataExchDef.Code,TempBlob);
+
+      // Execute
+      TempBlob.Blob.CREATEINSTREAM(InStream);
+      XMLPORT.IMPORT(DataExchDef."Reading/Writing XMLport",InStream,DataExch);
+
+      // Verify Table Layout
+      TempExpectedDataExchField.InsertRec(DataExch."Entry No.",1,1,'HeaderTagMismatch','');
+      TempExpectedDataExchField.InsertRec(DataExch."Entry No.",1,2,'Column2 Header','');
+      TempExpectedDataExchField.InsertRec(DataExch."Entry No.",2,1,'AnyData','');
+      TempExpectedDataExchField.InsertRec(DataExch."Entry No.",2,2,'AnyData','');
+
+      DataExchField.SETRANGE("Data Exch. No.",DataExch."Entry No.");
+
+      AssertDataInTable(TempExpectedDataExchField,DataExchField,'');
+    END;
+
+    [Test]
+    PROCEDURE TestImportWithHeaderTagAndFooterTag@16();
+    VAR
+      TempBlob@1008 : Record 99008535;
+      DataExch@1001 : Record 1220;
+      DataExchDef@1002 : Record 1222;
+      DataExchField@1003 : Record 1221;
+      TempExpectedDataExchField@1004 : TEMPORARY Record 1221;
+      OutStream@1006 : OutStream;
+      InStream@1007 : InStream;
+    BEGIN
+      // Setup
+      TempBlob.Blob.CREATEOUTSTREAM(OutStream);
+      WriteLine(OutStream,'HeaderTag;Column2 Header');
+      WriteLine(OutStream,'AnyData;AnyData');
+      WriteLine(OutStream,'FooterTag;Column2 Footer');
+
+      CreateDataExchDef(
+        DataExchDef,XMLPORT::"Data Exch. Import - CSV",0,'HeaderTag','FooterTag',DataExchDef."Column Separator"::Semicolon);
+      CreateDataExch(DataExch,DataExchDef.Code,TempBlob);
+
+      // Execute
+      TempBlob.Blob.CREATEINSTREAM(InStream);
+      XMLPORT.IMPORT(DataExchDef."Reading/Writing XMLport",InStream,DataExch);
+
+      // Verify Table Layout
+      TempExpectedDataExchField.InsertRec(DataExch."Entry No.",1,1,'AnyData','');
+      TempExpectedDataExchField.InsertRec(DataExch."Entry No.",1,2,'AnyData','');
+
+      DataExchField.SETRANGE("Data Exch. No.",DataExch."Entry No.");
+      AssertDataInTable(TempExpectedDataExchField,DataExchField,'');
+    END;
+
+    [Test]
+    PROCEDURE TestImportWithHeaderLinesAndFooterTag@18();
+    VAR
+      TempBlob@1008 : Record 99008535;
+      DataExch@1001 : Record 1220;
+      DataExchDef@1002 : Record 1222;
+      DataExchField@1003 : Record 1221;
+      TempExpectedDataExchField@1004 : TEMPORARY Record 1221;
+      OutStream@1006 : OutStream;
+      InStream@1007 : InStream;
+    BEGIN
+      // Setup
+      TempBlob.Blob.CREATEOUTSTREAM(OutStream);
+      WriteLine(OutStream,'Column1 Header;Column2 Header');
+      WriteLine(OutStream,'AnyData;AnyData');
+      WriteLine(OutStream,'FooterTag;Column2 Footer');
+
+      CreateDataExchDef(DataExchDef,XMLPORT::"Data Exch. Import - CSV",1,'','FooterTag',DataExchDef."Column Separator"::Semicolon);
+      CreateDataExch(DataExch,DataExchDef.Code,TempBlob);
+
+      // Execute
+      TempBlob.Blob.CREATEINSTREAM(InStream);
+      XMLPORT.IMPORT(DataExchDef."Reading/Writing XMLport",InStream,DataExch);
+
+      // Verify Table Layout
+      TempExpectedDataExchField.InsertRec(DataExch."Entry No.",1,1,'AnyData','');
+      TempExpectedDataExchField.InsertRec(DataExch."Entry No.",1,2,'AnyData','');
+
+      DataExchField.SETRANGE("Data Exch. No.",DataExch."Entry No.");
+      AssertDataInTable(TempExpectedDataExchField,DataExchField,'');
+    END;
+
+    [Test]
+    PROCEDURE TestImportWithFooterTag@11();
+    VAR
+      TempBlob@1008 : Record 99008535;
+      DataExch@1001 : Record 1220;
+      DataExchDef@1002 : Record 1222;
+      DataExchField@1003 : Record 1221;
+      TempExpectedDataExchField@1004 : TEMPORARY Record 1221;
+      OutStream@1006 : OutStream;
+      InStream@1007 : InStream;
+    BEGIN
+      // Setup
+      TempBlob.Blob.CREATEOUTSTREAM(OutStream);
+      WriteLine(OutStream,'AnyData;AnyData');
+      WriteLine(OutStream,'FooterTag;Column2 Footer');
+
+      CreateDataExchDef(DataExchDef,XMLPORT::"Data Exch. Import - CSV",0,'','FooterTag',DataExchDef."Column Separator"::Semicolon);
+      CreateDataExch(DataExch,DataExchDef.Code,TempBlob);
+
+      // Execute
+      TempBlob.Blob.CREATEINSTREAM(InStream);
+      XMLPORT.IMPORT(DataExchDef."Reading/Writing XMLport",InStream,DataExch);
+
+      // Verify Table Layout
+      TempExpectedDataExchField.InsertRec(DataExch."Entry No.",1,1,'AnyData','');
+      TempExpectedDataExchField.InsertRec(DataExch."Entry No.",1,2,'AnyData','');
+
+      DataExchField.SETRANGE("Data Exch. No.",DataExch."Entry No.");
+      AssertDataInTable(TempExpectedDataExchField,DataExchField,'');
+    END;
+
+    [Test]
+    PROCEDURE TestImportWithFooterTagMismatch@15();
+    VAR
+      TempBlob@1008 : Record 99008535;
+      DataExch@1001 : Record 1220;
+      DataExchDef@1002 : Record 1222;
+      DataExchField@1003 : Record 1221;
+      TempExpectedDataExchField@1004 : TEMPORARY Record 1221;
+      OutStream@1006 : OutStream;
+      InStream@1007 : InStream;
+    BEGIN
+      // Setup
+      TempBlob.Blob.CREATEOUTSTREAM(OutStream);
+      WriteLine(OutStream,'AnyData;AnyData');
+      WriteLine(OutStream,'FooterTagMismatch;Column2 Footer');
+
+      CreateDataExchDef(DataExchDef,XMLPORT::"Data Exch. Import - CSV",0,'','FooterTag',DataExchDef."Column Separator"::Semicolon);
+      CreateDataExch(DataExch,DataExchDef.Code,TempBlob);
+
+      // Execute
+      TempBlob.Blob.CREATEINSTREAM(InStream);
+      XMLPORT.IMPORT(DataExchDef."Reading/Writing XMLport",InStream,DataExch);
+
+      // Verify Table Layout
+      TempExpectedDataExchField.InsertRec(DataExch."Entry No.",1,1,'AnyData','');
+      TempExpectedDataExchField.InsertRec(DataExch."Entry No.",1,2,'AnyData','');
+      TempExpectedDataExchField.InsertRec(DataExch."Entry No.",2,1,'FooterTagMismatch','');
+      TempExpectedDataExchField.InsertRec(DataExch."Entry No.",2,2,'Column2 Footer','');
+
+      DataExchField.SETRANGE("Data Exch. No.",DataExch."Entry No.");
+
+      AssertDataInTable(TempExpectedDataExchField,DataExchField,'');
+    END;
+
+    [Test]
+    PROCEDURE TestImportEmptyDocument@4();
+    VAR
+      TempBlob@1000 : Record 99008535;
+      DataExch@1001 : Record 1220;
+      DataExchDef@1002 : Record 1222;
+      DataExchField@1003 : Record 1221;
+      InStream@1007 : InStream;
+    BEGIN
+      // Setup
+      CreateDataExchDef(DataExchDef,XMLPORT::"Data Exch. Import - CSV",0,'','',DataExchDef."Column Separator"::Comma);
+      CreateDataExch(DataExch,DataExchDef.Code,TempBlob);
+
+      // Execute
+      TempBlob.INIT;
+      TempBlob.Blob.CREATEINSTREAM(InStream);
+      ASSERTERROR XMLPORT.IMPORT(DataExchDef."Reading/Writing XMLport",InStream,DataExch);
+
+      // Verify
+      Assert.ExpectedErrorCode('XmlPortData');
+      DataExchField.SETRANGE("Data Exch. No.",DataExch."Entry No.");
+      Assert.IsTrue(DataExchField.ISEMPTY,'No line should be imported');
+    END;
+
+    [Test]
+    PROCEDURE TestImport94Columns@8();
+    VAR
+      TempBlob@1000 : Record 99008535;
+      DataExch@1001 : Record 1220;
+      DataExchDef@1002 : Record 1222;
+      DataExchField@1003 : Record 1221;
+      OutStream@1006 : OutStream;
+      InStream@1007 : InStream;
+      i@1008 : Integer;
+    BEGIN
+      // Setup
+      TempBlob.Blob.CREATEOUTSTREAM(OutStream);
+      FOR i := 1 TO 94 DO
+        OutStream.WRITETEXT(STRSUBSTNO('Value Column %1,',i));
+
+      CreateDataExchDef(DataExchDef,XMLPORT::"Data Exch. Import - CSV",0,'','',DataExchDef."Column Separator"::Comma);
+      CreateDataExch(DataExch,DataExchDef.Code,TempBlob);
+
+      // Execute
+      TempBlob.Blob.CREATEINSTREAM(InStream);
+      XMLPORT.IMPORT(DataExchDef."Reading/Writing XMLport",InStream,DataExch);
+
+      // Verify Table Layout
+      DataExchField.SETRANGE("Data Exch. No.",DataExch."Entry No.");
+      DataExchField.FINDSET;
+      i := 0;
+      REPEAT
+        i += 1;
+        Assert.AreEqual(1,DataExchField."Line No.",'Line no incorrect');
+        Assert.AreEqual(i,DataExchField."Column No.",'Column no incorrect');
+        Assert.AreEqual(STRSUBSTNO('Value Column %1',i),DataExchField.Value,'Value incorrect');
+      UNTIL DataExchField.NEXT = 0;
+      Assert.AreEqual(94,i,'Column count does not match');
+    END;
+
+    [Test]
+    PROCEDURE TestImportExtraHeadersInSequence@36();
+    VAR
+      TempBlob@1000 : Record 99008535;
+      DataExch@1001 : Record 1220;
+      DataExchDef@1002 : Record 1222;
+      DataExchField@1003 : Record 1221;
+      OutStream@1005 : OutStream;
+      InStream@1006 : InStream;
+    BEGIN
+      // Setup
+      TempBlob.Blob.CREATEOUTSTREAM(OutStream);
+      WriteLine(OutStream,'HeaderTag;Column2 Header');
+      WriteLine(OutStream,'HeaderTag;Column2 Header');
+      WriteLine(OutStream,'HeaderTag;Column2 Header');
+      WriteLine(OutStream,'AnyData11;AnyData12');
+      WriteLine(OutStream,'HeaderTag;Column2 Header');
+      WriteLine(OutStream,'HeaderTag;Column2 Header');
+      WriteLine(OutStream,'HeaderTag;Column2 Header');
+      WriteLine(OutStream,'HeaderTag;Column2 Header'); // The extra header
+      WriteLine(OutStream,'AnyData21;AnyData22');
+
+      CreateDataExchDef(
+        DataExchDef,XMLPORT::"Data Exch. Import - CSV",3,'HeaderTag','FooterTag',DataExchDef."Column Separator"::Semicolon);
+      CreateDataExch(DataExch,DataExchDef.Code,TempBlob);
+
+      // Execute
+      TempBlob.Blob.CREATEINSTREAM(InStream);
+      ASSERTERROR XMLPORT.IMPORT(DataExchDef."Reading/Writing XMLport",InStream,DataExch);
+
+      // Verify Table Layout
+      Assert.ExpectedError(LastLineIsHeaderErr);
+
+      DataExchField.SETRANGE("Data Exch. No.",DataExch."Entry No.");
+      Assert.IsTrue(DataExchField.ISEMPTY,'No line should be imported');
+    END;
+
+    [Test]
+    PROCEDURE TestImportLessHeadersInSequence@40();
+    VAR
+      TempBlob@1000 : Record 99008535;
+      DataExch@1001 : Record 1220;
+      DataExchDef@1002 : Record 1222;
+      DataExchField@1003 : Record 1221;
+      OutStream@1005 : OutStream;
+      InStream@1006 : InStream;
+    BEGIN
+      // Setup
+      TempBlob.Blob.CREATEOUTSTREAM(OutStream);
+      WriteLine(OutStream,'HeaderTag;Column2 Header');
+      WriteLine(OutStream,'HeaderTag;Column2 Header');
+      WriteLine(OutStream,'HeaderTag;Column2 Header');
+      WriteLine(OutStream,'AnyData11;AnyData12');
+      WriteLine(OutStream,'HeaderTag;Column2 Header');
+      WriteLine(OutStream,'HeaderTag;Column2 Header');
+      WriteLine(OutStream,'AnyData21;AnyData22');
+
+      CreateDataExchDef(DataExchDef,XMLPORT::"Data Exch. Import - CSV",3,'HeaderTag','',DataExchDef."Column Separator"::Semicolon);
+      CreateDataExch(DataExch,DataExchDef.Code,TempBlob);
+
+      // Execute
+      TempBlob.Blob.CREATEINSTREAM(InStream);
+      ASSERTERROR XMLPORT.IMPORT(DataExchDef."Reading/Writing XMLport",InStream,DataExch);
+
+      // Verify Table Layout
+      Assert.ExpectedError(LastLineIsHeaderErr);
+
+      DataExchField.SETRANGE("Data Exch. No.",DataExch."Entry No.");
+      Assert.IsTrue(DataExchField.ISEMPTY,'No line should be imported');
+    END;
+
+    [Test]
+    PROCEDURE TestImportHeaderAtEndWithoutLines@37();
+    VAR
+      TempBlob@1000 : Record 99008535;
+      DataExch@1001 : Record 1220;
+      DataExchDef@1002 : Record 1222;
+      DataExchField@1003 : Record 1221;
+      OutStream@1005 : OutStream;
+      InStream@1006 : InStream;
+    BEGIN
+      // Setup
+      TempBlob.Blob.CREATEOUTSTREAM(OutStream);
+      WriteLine(OutStream,'HeaderTag;Column2 Header');
+      WriteLine(OutStream,'AnyData1;AnyData2');
+      WriteLine(OutStream,'HeaderTag;Column2 Header');
+
+      CreateDataExchDef(DataExchDef,XMLPORT::"Data Exch. Import - CSV",0,'HeaderTag','',DataExchDef."Column Separator"::Semicolon);
+      CreateDataExch(DataExch,DataExchDef.Code,TempBlob);
+
+      // Execute
+      TempBlob.Blob.CREATEINSTREAM(InStream);
+      ASSERTERROR XMLPORT.IMPORT(DataExchDef."Reading/Writing XMLport",InStream,DataExch);
+
+      // Verify Table Layout
+      Assert.ExpectedError(LastLineIsHeaderErr);
+
+      DataExchField.SETRANGE("Data Exch. No.",DataExch."Entry No.");
+      Assert.IsTrue(DataExchField.ISEMPTY,'No line should be imported');
+    END;
+
+    [Test]
+    PROCEDURE TestImportOnlyHeaderWithoutLines@38();
+    VAR
+      TempBlob@1000 : Record 99008535;
+      DataExch@1001 : Record 1220;
+      DataExchDef@1002 : Record 1222;
+      DataExchField@1003 : Record 1221;
+      OutStream@1005 : OutStream;
+      InStream@1006 : InStream;
+    BEGIN
+      // Setup
+      TempBlob.Blob.CREATEOUTSTREAM(OutStream);
+      WriteLine(OutStream,'HeaderTag;Column2 Header');
+
+      CreateDataExchDef(DataExchDef,XMLPORT::"Data Exch. Import - CSV",0,'HeaderTag','',DataExchDef."Column Separator"::Semicolon);
+      CreateDataExch(DataExch,DataExchDef.Code,TempBlob);
+
+      // Execute
+      TempBlob.Blob.CREATEINSTREAM(InStream);
+      ASSERTERROR XMLPORT.IMPORT(DataExchDef."Reading/Writing XMLport",InStream,DataExch);
+
+      // Verify Table Layout
+      Assert.ExpectedError(LastLineIsHeaderErr);
+
+      DataExchField.SETRANGE("Data Exch. No.",DataExch."Entry No.");
+      Assert.IsTrue(DataExchField.ISEMPTY,'No line should be imported');
+    END;
+
+    [Test]
+    PROCEDURE TestImportNoHeaders@41();
+    VAR
+      TempBlob@1000 : Record 99008535;
+      DataExch@1001 : Record 1220;
+      DataExchDef@1002 : Record 1222;
+      DataExchField@1003 : Record 1221;
+      OutStream@1005 : OutStream;
+      InStream@1006 : InStream;
+    BEGIN
+      // Setup
+      TempBlob.Blob.CREATEOUTSTREAM(OutStream);
+      WriteLine(OutStream,'AnyData11;AnyData12');
+      WriteLine(OutStream,'AnyData21;AnyData22');
+
+      CreateDataExchDef(DataExchDef,XMLPORT::"Data Exch. Import - CSV",1,'HeaderTag','',DataExchDef."Column Separator"::Semicolon);
+      CreateDataExch(DataExch,DataExchDef.Code,TempBlob);
+
+      // Execute
+      TempBlob.Blob.CREATEINSTREAM(InStream);
+      ASSERTERROR XMLPORT.IMPORT(DataExchDef."Reading/Writing XMLport",InStream,DataExch);
+
+      // Verify Table Layout
+      Assert.ExpectedError(WrongHeaderErr);
+      DataExchField.SETRANGE("Data Exch. No.",DataExch."Entry No.");
+      Assert.IsTrue(DataExchField.ISEMPTY,'Expect no data in the table.');
+    END;
+
+    [Test]
+    PROCEDURE TestImportWrongHeader@42();
+    VAR
+      TempBlob@1000 : Record 99008535;
+      DataExch@1001 : Record 1220;
+      DataExchDef@1002 : Record 1222;
+      DataExchField@1003 : Record 1221;
+      OutStream@1005 : OutStream;
+      InStream@1006 : InStream;
+    BEGIN
+      // Setup
+      TempBlob.Blob.CREATEOUTSTREAM(OutStream);
+      WriteLine(OutStream,'HeaderTag;Column3 Header;Column2 Header;Column4 Header;Column5 Header');
+      WriteLine(OutStream,'AnyData1;AnyData2;AnyData3;AnyData4;AnyData5');
+
+      CreateDataExchDef(DataExchDef,XMLPORT::"Data Exch. Import - CSV",1,'HeaderTag;Column2 Header;Column3 Header;','',DataExchDef."Column Separator"::Semicolon);
+      CreateDataExch(DataExch,DataExchDef.Code,TempBlob);
+
+      // Execute
+      TempBlob.Blob.CREATEINSTREAM(InStream);
+      ASSERTERROR XMLPORT.IMPORT(DataExchDef."Reading/Writing XMLport",InStream,DataExch);
+
+      // Verify Table Layout
+      Assert.ExpectedError(WrongHeaderErr);
+      DataExchField.SETRANGE("Data Exch. No.",DataExch."Entry No.");
+      Assert.IsTrue(DataExchField.ISEMPTY,'Expect no data in the table.');
+    END;
+
+    [Test]
+    PROCEDURE TestImportLongHeaderTag@43();
+    VAR
+      TempBlob@1000 : Record 99008535;
+      DataExch@1001 : Record 1220;
+      DataExchDef@1002 : Record 1222;
+      DataExchField@1003 : Record 1221;
+      TempExpectedDataExchField@1004 : TEMPORARY Record 1221;
+      OutStream@1005 : OutStream;
+      InStream@1006 : InStream;
+    BEGIN
+      // Setup
+      TempBlob.Blob.CREATEOUTSTREAM(OutStream);
+      WriteLine(OutStream,'012345678901234567890123456789HeaderTag;Column2 Header;Column3 Header;Column4 Header;Column5 Header');
+      WriteLine(OutStream,'AnyData1;AnyData2;AnyData3;AnyData4;AnyData5');
+
+      CreateDataExchDef(DataExchDef,XMLPORT::"Data Exch. Import - CSV",1,
+        '012345678901234567890123456789HeaderTag;Column2 Header;Column3 Header;','',DataExchDef."Column Separator"::Semicolon);
+      CreateDataExch(DataExch,DataExchDef.Code,TempBlob);
+
+      // Execute
+      TempBlob.Blob.CREATEINSTREAM(InStream);
+      XMLPORT.IMPORT(DataExchDef."Reading/Writing XMLport",InStream,DataExch);
+
+      // Verify Table Layout
+      TempExpectedDataExchField.InsertRec(DataExch."Entry No.",1,1,'AnyData1','');
+      TempExpectedDataExchField.InsertRec(DataExch."Entry No.",1,2,'AnyData2','');
+      TempExpectedDataExchField.InsertRec(DataExch."Entry No.",1,3,'AnyData3','');
+      TempExpectedDataExchField.InsertRec(DataExch."Entry No.",1,4,'AnyData4','');
+      TempExpectedDataExchField.InsertRec(DataExch."Entry No.",1,5,'AnyData5','');
+
+      DataExchField.SETRANGE("Data Exch. No.",DataExch."Entry No.");
+      AssertDataInTable(TempExpectedDataExchField,DataExchField,'');
+    END;
+
+    [Test]
+    PROCEDURE TestImportLongFooterTag@44();
+    VAR
+      TempBlob@1000 : Record 99008535;
+      DataExch@1001 : Record 1220;
+      DataExchDef@1002 : Record 1222;
+      DataExchField@1003 : Record 1221;
+      TempExpectedDataExchField@1004 : TEMPORARY Record 1221;
+      OutStream@1005 : OutStream;
+      InStream@1006 : InStream;
+    BEGIN
+      // Setup
+      TempBlob.Blob.CREATEOUTSTREAM(OutStream);
+      WriteLine(OutStream,'AnyData1;AnyData2;AnyData3;AnyData4;AnyData5');
+      WriteLine(OutStream,'012345678901234567890123456789FooterTag;Column2 Footer;Column3 Footer;Column4 Footer;Column5 Footer');
+
+      CreateDataExchDef(DataExchDef,XMLPORT::"Data Exch. Import - CSV",0,
+        '','012345678901234567890123456789FooterTag;Column2 Footer;Column3 Footer;',DataExchDef."Column Separator"::Semicolon);
+      CreateDataExch(DataExch,DataExchDef.Code,TempBlob);
+
+      // Execute
+      TempBlob.Blob.CREATEINSTREAM(InStream);
+      XMLPORT.IMPORT(DataExchDef."Reading/Writing XMLport",InStream,DataExch);
+
+      // Verify Table Layout
+      TempExpectedDataExchField.InsertRec(DataExch."Entry No.",1,1,'AnyData1','');
+      TempExpectedDataExchField.InsertRec(DataExch."Entry No.",1,2,'AnyData2','');
+      TempExpectedDataExchField.InsertRec(DataExch."Entry No.",1,3,'AnyData3','');
+      TempExpectedDataExchField.InsertRec(DataExch."Entry No.",1,4,'AnyData4','');
+      TempExpectedDataExchField.InsertRec(DataExch."Entry No.",1,5,'AnyData5','');
+
+      DataExchField.SETRANGE("Data Exch. No.",DataExch."Entry No.");
+      AssertDataInTable(TempExpectedDataExchField,DataExchField,'');
+    END;
+
+    [Test]
+    PROCEDURE TestImportHeaderSharingTextWithData@13();
+    VAR
+      TempBlob@1006 : Record 99008535;
+      DataExch@1005 : Record 1220;
+      DataExchDef@1004 : Record 1222;
+      DataExchField@1003 : Record 1221;
+      TempExpectedDataExchField@1002 : TEMPORARY Record 1221;
+      OutStream@1001 : OutStream;
+      InStream@1000 : InStream;
+    BEGIN
+      // Setup
+      TempBlob.Blob.CREATEOUTSTREAM(OutStream);
+      WriteLine(OutStream,'HeaderTag;Column2;XYZ;Column4;Column5');
+      WriteLine(OutStream,'XYZ;AnyData2;AnyData3;AnyData4;AnyData5');
+
+      CreateDataExchDef(DataExchDef,XMLPORT::"Data Exch. Import - CSV",1,'HeaderTag;Column2;XYZ;','',DataExchDef."Column Separator"::Semicolon);
+      CreateDataExch(DataExch,DataExchDef.Code,TempBlob);
+
+      // Execute
+      TempBlob.Blob.CREATEINSTREAM(InStream);
+      XMLPORT.IMPORT(DataExchDef."Reading/Writing XMLport",InStream,DataExch);
+
+      // Verify Table Layout
+      TempExpectedDataExchField.InsertRec(DataExch."Entry No.",1,1,'XYZ','');
+      TempExpectedDataExchField.InsertRec(DataExch."Entry No.",1,2,'AnyData2','');
+      TempExpectedDataExchField.InsertRec(DataExch."Entry No.",1,3,'AnyData3','');
+      TempExpectedDataExchField.InsertRec(DataExch."Entry No.",1,4,'AnyData4','');
+      TempExpectedDataExchField.InsertRec(DataExch."Entry No.",1,5,'AnyData5','');
+
+      DataExchField.SETRANGE("Data Exch. No.",DataExch."Entry No.");
+      AssertDataInTable(TempExpectedDataExchField,DataExchField,'');
+    END;
+
+    LOCAL PROCEDURE CreateDataExch@5(VAR DataExch@1000 : Record 1220;DataExchDefCode@1001 : Code[20];TempBlob@1002 : Record 99008535);
+    VAR
+      InStream@1003 : InStream;
+    BEGIN
+      TempBlob.Blob.CREATEINSTREAM(InStream);
+      DataExch.InsertRec('',InStream,DataExchDefCode);
+      DataExch.SETRANGE("Entry No.",DataExch."Entry No.");
+    END;
+
+    LOCAL PROCEDURE CreateDataExchDef@46(VAR DataExchDef@1000 : Record 1222;XMLPortId@1001 : Integer;HeaderLines@1002 : Integer;HeaderTag@1003 : Text[250];FooterTag@1004 : Text[250];ColumnSeparator@1005 : Option);
+    BEGIN
+      DataExchDef.InsertRec(LibraryUtility.GenerateRandomCode(DataExchDef.FIELDNO(Code),DATABASE::"Data Exch. Def"),
+        LibraryUtility.GenerateGUID,DataExchDef.Type::"Bank Statement Import",XMLPortId,HeaderLines,HeaderTag,FooterTag);
+      DataExchDef."Column Separator" := ColumnSeparator;
+      IF DataExchDef."Column Separator" = DataExchDef."Column Separator"::Custom THEN
+        DataExchDef."Custom Column Separator" := '+';
+      DataExchDef.MODIFY;
+    END;
+
+    LOCAL PROCEDURE AssertDataInTable@6(VAR ExpectedDataExchField@1000 : Record 1221;VAR ActualDataExchField@1001 : Record 1221;Msg@1007 : Text);
+    VAR
+      LineNo@1008 : Integer;
+    BEGIN
+      ExpectedDataExchField.FINDFIRST;
+      ActualDataExchField.FINDFIRST;
+      REPEAT
+        LineNo += 1;
+        AreEqualRecords(ExpectedDataExchField,ActualDataExchField,STRSUBSTNO(TableErrorMsg,Msg,LineNo));
+      UNTIL (ExpectedDataExchField.NEXT = 0) OR (ActualDataExchField.NEXT = 0);
+      Assert.AreEqual(ExpectedDataExchField.COUNT,ActualDataExchField.COUNT,'Row count does not match');
+    END;
+
+    LOCAL PROCEDURE WriteLine@7(OutStream@1000 : OutStream;Text@1001 : Text);
+    BEGIN
+      OutStream.WRITETEXT(Text);
+      OutStream.WRITETEXT;
+    END;
+
+    LOCAL PROCEDURE AreEqualRecords@30(ExpectedRecord@1000 : Variant;ActualRecord@1001 : Variant;Msg@1007 : Text);
+    VAR
+      ExpectedRecRef@1003 : RecordRef;
+      ActualRecRef@1002 : RecordRef;
+      i@1006 : Integer;
+    BEGIN
+      ExpectedRecRef.GETTABLE(ExpectedRecord);
+      ActualRecRef.GETTABLE(ActualRecord);
+
+      Assert.AreEqual(ExpectedRecRef.NUMBER,ActualRecRef.NUMBER,'Tables are not the same');
+
+      FOR i := 1 TO ExpectedRecRef.FIELDCOUNT DO
+        IF IsSupportedType(ExpectedRecRef.FIELDINDEX(i).VALUE) THEN
+          Assert.AreEqual(ExpectedRecRef.FIELDINDEX(i).VALUE,ActualRecRef.FIELDINDEX(i).VALUE,
+            STRSUBSTNO(AssertMsg,Msg,ExpectedRecRef.FIELDINDEX(i).NAME));
+    END;
+
+    LOCAL PROCEDURE IsSupportedType@31(Value@1000 : Variant) : Boolean;
+    BEGIN
+      EXIT(Value.ISBOOLEAN OR
+        Value.ISOPTION OR
+        Value.ISINTEGER OR
+        Value.ISDECIMAL OR
+        Value.ISTEXT OR
+        Value.ISCODE OR
+        Value.ISDATE OR
+        Value.ISTIME);
+    END;
+
+    LOCAL PROCEDURE ConvertOEMToANSI@35(SourceTempBlob@1001 : Record 99008535;VAR DestinationTempBlob@1004 : Record 99008535);
+    VAR
+      Encoding@1003 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.Encoding";
+      Writer@1000 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.IO.StreamWriter";
+      InStream@1002 : InStream;
+      OutStream@1005 : OutStream;
+      EncodedText@1006 : Text;
+    BEGIN
+      SourceTempBlob.Blob.CREATEINSTREAM(InStream);
+      DestinationTempBlob.Blob.CREATEOUTSTREAM(OutStream);
+
+      Writer := Writer.StreamWriter(OutStream,Encoding.Default);
+
+      WHILE 0 <> InStream.READTEXT(EncodedText) DO
+        Writer.WriteLine(EncodedText);
+
+      Writer.Close;
+    END;
+
+    BEGIN
+    END.
+  }
+}
+

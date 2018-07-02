@@ -1,0 +1,110 @@
+OBJECT Codeunit 132594 Zip Stream Wrapper Test
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=Test,W1,All;
+  }
+  PROPERTIES
+  {
+    Subtype=Test;
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      TextFileTestFailedErr@1001 : TextConst 'ENU="Text zip file test failed "';
+      BinaryFileTestFailedErr@1000 : TextConst 'ENU=Binary zip file test failed';
+      Assert@1003 : Codeunit 130000;
+      LibraryLowerPermissions@1002 : Codeunit 132217;
+
+    [Test]
+    PROCEDURE TestZipStreams@1();
+    VAR
+      TempBlob@1000 : TEMPORARY Record 99008535;
+      TempNameValueBuffer@1010 : TEMPORARY Record 823;
+      OutZipStreamWrapper@1009 : Codeunit 706;
+      InZipStreamWrapper@1003 : Codeunit 706;
+      InputStream@1001 : InStream;
+      OutputStream@1002 : OutStream;
+      GuidToWrite@1007 : GUID;
+      GuidFromZip@1006 : GUID;
+      TextToWrite@1004 : Text;
+      TextFromZip@1005 : Text;
+      EntryName@1008 : Text;
+      BinaryEntryName@1011 : Text;
+    BEGIN
+      // [SCENARIO] E2E test of Zip Stream Wrapper
+      LibraryLowerPermissions.SetO365Basic;
+
+      // [GIVEN] Some data we want to compress
+      EntryName := 'TestEntry';
+      BinaryEntryName := 'BinaryEntry';
+      TextToWrite := 'Text to write';
+      GuidToWrite := CREATEGUID;
+
+      // [WHEN] Creating a new ZIP with entries
+      OutZipStreamWrapper.CreateNewZip;
+      AddEntryToZip(TextToWrite,EntryName,OutZipStreamWrapper);
+      AddEntryToZip(GuidToWrite,BinaryEntryName,OutZipStreamWrapper);
+
+      // [WHEN] The ZIP stream is saved to a blob
+      CLEAR(TempBlob);
+      TempBlob.Blob.CREATEOUTSTREAM(OutputStream);
+      OutZipStreamWrapper.SaveZipToStream(OutputStream);
+
+      // [WHEN] the ZIP is opened from the blob.
+      InZipStreamWrapper.OpenZipFromTempBlob(TempBlob,FALSE);
+      InZipStreamWrapper.GetEntries(TempNameValueBuffer);
+
+      // [THEN] the newly created entires exist in that stream
+      TempNameValueBuffer.SETRANGE(Name,EntryName);
+      Assert.RecordIsNotEmpty(TempNameValueBuffer);
+
+      TempNameValueBuffer.SETRANGE(Name,BinaryEntryName);
+      Assert.RecordIsNotEmpty(TempNameValueBuffer);
+
+      // [WHEN] The entires are read from the stream
+      ReadEntryFromZip(TempBlob,EntryName,InZipStreamWrapper);
+      TempBlob.Blob.CREATEINSTREAM(InputStream);
+      InputStream.READ(TextFromZip);
+
+      ReadEntryFromZip(TempBlob,BinaryEntryName,InZipStreamWrapper);
+      TempBlob.Blob.CREATEINSTREAM(InputStream);
+      InputStream.READ(GuidFromZip);
+
+      // [THEN] The extracted data is identical to the input data
+      Assert.AreEqual(TextToWrite,TextFromZip,TextFileTestFailedErr);
+      Assert.AreEqual(GuidToWrite,GuidFromZip,BinaryFileTestFailedErr);
+    END;
+
+    LOCAL PROCEDURE AddEntryToZip@5(Input@1002 : Variant;EntryName@1004 : Variant;OutZipStreamWrapper@1006 : Codeunit 706);
+    VAR
+      TempBlob@1000 : TEMPORARY Record 99008535;
+      OutputStream@1001 : OutStream;
+      InputStream@1003 : InStream;
+    BEGIN
+      CLEAR(TempBlob);
+      TempBlob.Blob.CREATEOUTSTREAM(OutputStream);
+      OutputStream.WRITE(Input);
+      TempBlob.Blob.CREATEINSTREAM(InputStream);
+      OutZipStreamWrapper.AddEntryFromStreamToZip(EntryName,InputStream);
+    END;
+
+    LOCAL PROCEDURE ReadEntryFromZip@12(VAR TempBlob@1000 : TEMPORARY Record 99008535;EntryName@1004 : Text;InZipStreamWrapper@1002 : Codeunit 706);
+    VAR
+      OutputStream@1001 : OutStream;
+    BEGIN
+      CLEAR(TempBlob);
+      TempBlob.Blob.CREATEOUTSTREAM(OutputStream);
+      InZipStreamWrapper.WriteEntryFromZipToOutStream(EntryName,OutputStream);
+    END;
+
+    BEGIN
+    END.
+  }
+}
+

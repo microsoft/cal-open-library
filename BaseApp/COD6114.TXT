@@ -1,0 +1,46 @@
+OBJECT Codeunit 6114 Ex. Rate Data Migration Facade
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+
+    [External]
+    PROCEDURE CreateSimpleExchangeRateIfNeeded@2(CurrencyCode@1000 : Code[10];StartingDate@1002 : Date;RelationalExchangeRateAmount@1004 : Decimal;ExchangeRateAmount@1003 : Decimal);
+    VAR
+      CurrencyExchangeRate@1001 : Record 330;
+      GeneralLedgerSetup@1006 : Record 98;
+    BEGIN
+      GeneralLedgerSetup.GET;
+      IF GeneralLedgerSetup."LCY Code" = CurrencyCode THEN
+        EXIT; // no exchange rate from local currency to local currency
+
+      IF NOT CurrencyExchangeRate.GET(CurrencyCode,StartingDate) THEN BEGIN
+        CurrencyExchangeRate.INIT;
+        CurrencyExchangeRate.VALIDATE("Currency Code",CurrencyCode);
+        CurrencyExchangeRate.VALIDATE("Starting Date",StartingDate);
+        CurrencyExchangeRate.VALIDATE("Exchange Rate Amount",ExchangeRateAmount);
+        CurrencyExchangeRate.VALIDATE("Adjustment Exch. Rate Amount",ExchangeRateAmount);
+        CurrencyExchangeRate.VALIDATE("Relational Currency Code",'');
+        CurrencyExchangeRate.VALIDATE("Relational Exch. Rate Amount",RelationalExchangeRateAmount);
+        CurrencyExchangeRate.VALIDATE("Relational Adjmt Exch Rate Amt",RelationalExchangeRateAmount);
+        CurrencyExchangeRate.VALIDATE("Fix Exchange Rate Amount",CurrencyExchangeRate."Fix Exchange Rate Amount"::Currency);
+        CurrencyExchangeRate.INSERT;
+      END;
+    END;
+
+    BEGIN
+    END.
+  }
+}
+

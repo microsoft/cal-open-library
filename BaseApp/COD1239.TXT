@@ -1,0 +1,124 @@
+OBJECT Codeunit 1239 XML Buffer Reader
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      DefaultNamespace@1000 : Text;
+
+    [TryFunction]
+    [Internal]
+    PROCEDURE SaveToFile@7(FilePath@1000 : Text;VAR XMLBuffer@1001 : Record 1235);
+    VAR
+      TempBlob@1003 : Record 99008535;
+      FileMgt@1002 : Codeunit 419;
+    BEGIN
+      SaveToTempBlobWithEncoding(TempBlob,XMLBuffer,'UTF-8');
+      FileMgt.BLOBExportToServerFile(TempBlob,FilePath);
+    END;
+
+    [TryFunction]
+    [External]
+    PROCEDURE SaveToTempBlob@1(VAR TempBlob@1000 : Record 99008535;VAR XMLBuffer@1001 : Record 1235);
+    BEGIN
+      SaveToTempBlobWithEncoding(TempBlob,XMLBuffer,'UTF-8');
+    END;
+
+    [TryFunction]
+    [External]
+    PROCEDURE SaveToTempBlobWithEncoding@2(VAR TempBlob@1000 : Record 99008535;VAR XMLBuffer@1001 : Record 1235;Encoding@1010 : Text);
+    VAR
+      TempXMLBuffer@1004 : TEMPORARY Record 1235;
+      TempAttributeXMLBuffer@1003 : TEMPORARY Record 1235;
+      XMLDOMManagement@1005 : Codeunit 6224;
+      XmlDocument@1007 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlDocument";
+      RootElement@1006 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlNode";
+      OutStr@1011 : OutStream;
+      Header@1002 : Text;
+    BEGIN
+      TempXMLBuffer.CopyImportFrom(XMLBuffer);
+      TempXMLBuffer := XMLBuffer;
+      TempXMLBuffer.SETCURRENTKEY("Parent Entry No.",Type,"Node Number");
+      Header := '<?xml version="1.0" encoding="' + Encoding + '"?>' +
+        '<' + TempXMLBuffer.GetElementName + ' ';
+      DefaultNamespace := TempXMLBuffer.GetAttributeValue('xmlns');
+      IF TempXMLBuffer.FindAttributes(TempAttributeXMLBuffer) THEN
+        REPEAT
+          Header += TempAttributeXMLBuffer.Name + '="' + TempAttributeXMLBuffer.Value + '" ';
+        UNTIL TempAttributeXMLBuffer.NEXT = 0;
+      Header += '/>';
+
+      XMLDOMManagement.LoadXMLDocumentFromText(Header,XmlDocument);
+      RootElement := XmlDocument.DocumentElement;
+
+      SaveChildElements(TempXMLBuffer,RootElement,XmlDocument);
+
+      TempBlob.Blob.CREATEOUTSTREAM(OutStr);
+      XmlDocument.Save(OutStr);
+    END;
+
+    LOCAL PROCEDURE SaveChildElements@33(VAR TempParentElementXMLBuffer@1000 : TEMPORARY Record 1235;XMLCurrElement@1002 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlNode";XmlDocument@1003 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlDocument");
+    VAR
+      TempElementXMLBuffer@1001 : TEMPORARY Record 1235;
+      ChildElement@1005 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlNode";
+      Namespace@1006 : Text;
+      ElementValue@1008 : Text;
+    BEGIN
+      IF TempParentElementXMLBuffer.FindChildElements(TempElementXMLBuffer) THEN
+        REPEAT
+          IF TempElementXMLBuffer.Namespace = '' THEN
+            Namespace := DefaultNamespace
+          ELSE
+            Namespace := TempElementXMLBuffer.Namespace;
+          ChildElement := XmlDocument.CreateNode('element',TempElementXMLBuffer.GetElementName,Namespace);
+          ElementValue := TempElementXMLBuffer.GetValue;
+          IF ElementValue <> '' THEN
+            ChildElement.InnerText := ElementValue;
+          XMLCurrElement.AppendChild(ChildElement);
+          SaveProcessingInstructions(TempElementXMLBuffer,ChildElement,XmlDocument);
+          SaveAttributes(TempElementXMLBuffer,ChildElement,XmlDocument);
+          SaveChildElements(TempElementXMLBuffer,ChildElement,XmlDocument);
+        UNTIL TempElementXMLBuffer.NEXT = 0;
+    END;
+
+    LOCAL PROCEDURE SaveAttributes@9(VAR TempParentElementXMLBuffer@1001 : TEMPORARY Record 1235;XMLCurrElement@1002 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlNode";XmlDocument@1003 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlDocument");
+    VAR
+      TempAttributeXMLBuffer@1000 : TEMPORARY Record 1235;
+      Attribute@1005 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlAttribute";
+    BEGIN
+      IF TempParentElementXMLBuffer.FindAttributes(TempAttributeXMLBuffer) THEN
+        REPEAT
+          Attribute := XmlDocument.CreateAttribute(TempAttributeXMLBuffer.Name);
+          Attribute.InnerText := TempAttributeXMLBuffer.Value;
+          XMLCurrElement.Attributes.SetNamedItem(Attribute);
+        UNTIL TempAttributeXMLBuffer.NEXT = 0;
+    END;
+
+    LOCAL PROCEDURE SaveProcessingInstructions@34(VAR TempParentElementXMLBuffer@1001 : TEMPORARY Record 1235;XMLCurrElement@1002 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlNode";XmlDocument@1003 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlDocument");
+    VAR
+      TempXMLBuffer@1000 : TEMPORARY Record 1235;
+      ProcessingInstruction@1005 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlProcessingInstruction";
+    BEGIN
+      IF TempParentElementXMLBuffer.FindProcessingInstructions(TempXMLBuffer) THEN
+        REPEAT
+          ProcessingInstruction := XmlDocument.CreateProcessingInstruction(TempXMLBuffer.Name,TempXMLBuffer.GetValue);
+          XMLCurrElement.AppendChild(ProcessingInstruction);
+        UNTIL TempXMLBuffer.NEXT = 0;
+    END;
+
+    BEGIN
+    END.
+  }
+}
+

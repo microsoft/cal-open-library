@@ -1,0 +1,109 @@
+OBJECT Codeunit 132596 RegEx Split Wrapper Unit Test
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=Test,W1,All;
+  }
+  PROPERTIES
+  {
+    Subtype=Test;
+    TestPermissions=Disabled;
+    OnRun=BEGIN
+            // [FEATURE] [RegEx Split Wrapper] [UT]
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      Assert@1003 : Codeunit 130000;
+      RegExSplitWrapper@1000 : Codeunit 707;
+      ArrayIsEmptyErr@1002 : TextConst 'ENU=No split string has been supplied.';
+      IndexOutOfBoundsErr@1001 : TextConst 'ENU=Index out of bounds.';
+
+    [Test]
+    PROCEDURE GetEmptyLength@1();
+    BEGIN
+      // [WHEN] GetLength is called on an empty array
+      // [THEN] An error is returned
+      ASSERTERROR RegExSplitWrapper.GetLength;
+      Assert.ExpectedError(ArrayIsEmptyErr);
+    END;
+
+    [Test]
+    PROCEDURE GetEmptyIndex@2();
+    BEGIN
+      // [WHEN] GetIndex is called on an empty array
+      // [THEN] An error is returned
+      ASSERTERROR RegExSplitWrapper.GetIndex(7);
+      Assert.ExpectedError(ArrayIsEmptyErr);
+    END;
+
+    [Test]
+    PROCEDURE GetLowerBoundaryError@4();
+    BEGIN
+      // [GIVEN] A string which is split
+      RegExSplitWrapper.Split('1;2;3;4;5;6',';');
+      // [WHEN] GetIndex is called outside of bounds
+      // [THEN] An error is returned
+      ASSERTERROR RegExSplitWrapper.GetIndex(-10);
+      Assert.ExpectedError(IndexOutOfBoundsErr);
+    END;
+
+    [Test]
+    PROCEDURE GetUpperBoundaryError@5();
+    BEGIN
+      // [GIVEN] A string which is split
+      RegExSplitWrapper.Split('1;2;3;4;5;6',';');
+      // [WHEN] GetIndex is called outside of bounds
+      // [THEN] An error is returned
+      ASSERTERROR RegExSplitWrapper.GetIndex(10);
+      Assert.ExpectedError(IndexOutOfBoundsErr);
+    END;
+
+    [Test]
+    PROCEDURE GetLength@6();
+    BEGIN
+      // [GIVEN] A string which is split
+      RegExSplitWrapper.Split('1;2;3;4;5;6',';');
+      // [WHEN] GetLength is called
+      // [THEN] The correct length of that sting is returend
+      Assert.AreEqual(6,RegExSplitWrapper.GetLength,'Wrong length of string');
+    END;
+
+    [Test]
+    PROCEDURE FillArrayAndTestValues@8();
+    BEGIN
+      // [GIVEN] A string which is split
+      RegExSplitWrapper.Split('1;2;3;4;5;6',';');
+      // [WHEN] GetIndex is called
+      // [THEN] The correct value is returned
+      Assert.AreEqual('1',RegExSplitWrapper.GetIndex(0),'Wrong value');
+      Assert.AreEqual('2',RegExSplitWrapper.GetIndex(1),'Wrong value');
+      Assert.AreEqual('3',RegExSplitWrapper.GetIndex(2),'Wrong value');
+      Assert.AreEqual('4',RegExSplitWrapper.GetIndex(3),'Wrong value');
+      Assert.AreEqual('5',RegExSplitWrapper.GetIndex(4),'Wrong value');
+      Assert.AreEqual('6',RegExSplitWrapper.GetIndex(5),'Wrong value');
+      // [WHEN] GetIndex is called on a non-existing index
+      // [THEN] A error is thrown
+      ASSERTERROR RegExSplitWrapper.GetIndex(6);
+      Assert.ExpectedError(IndexOutOfBoundsErr);
+    END;
+
+    [Test]
+    PROCEDURE TestEmptyParameters@9();
+    BEGIN
+      // [GIVEN] An empty string which is split
+      RegExSplitWrapper.Split('',';');
+      // [WHEN] GetLength is called
+      // [THEN] The array only contains one element
+      Assert.AreEqual(1,RegExSplitWrapper.GetLength,'Array should only contain 1 element.');
+    END;
+
+    BEGIN
+    END.
+  }
+}
+
