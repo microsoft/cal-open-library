@@ -46,7 +46,7 @@ OBJECT Codeunit 6227 Signed XML Mgt.
       XmlNamespaceManager := XmlNamespaceManager.XmlNamespaceManager(XmlDocument.NameTable);
       XmlNamespaceManager.AddNamespace('xmlsig','http://www.w3.org/2000/09/xmldsig#');
 
-      SignatureNode := XmlDocument.FirstChild.SelectSingleNode('xmlsig:Signature',XmlNamespaceManager);
+      SignatureNode := XmlDocument.SelectSingleNode('//xmlsig:Signature',XmlNamespaceManager);
       IF ISNULL(SignatureNode) THEN
         EXIT(FALSE);
 
