@@ -10,6 +10,7 @@ OBJECT Codeunit 132559 Signed XML Test
   {
     Subtype=Test;
     OnRun=BEGIN
+            // [FEATURE] [XML] [Signed]
           END;
 
   }
@@ -18,11 +19,12 @@ OBJECT Codeunit 132559 Signed XML Test
     VAR
       SignedXmlTextTestFailedErr@1000 : TextConst 'ENU=Xml Document Text signature test failed';
       SignedXmlStreamTestFailedErr@1001 : TextConst 'ENU=Xml Document Stream signature test failed';
-      SignedXmlTextPITestFailedErr@1000000001 : TextConst 'ENU=Xml Document with processing instructions text signature test failed';
-      SignedXmlStreamPITestFailedErr@1000000000 : TextConst 'ENU=Xml Document with processing instructions stream signature test failed';
+      SignedXmlTextPITestFailedErr@1006 : TextConst 'ENU=Xml Document with processing instructions text signature test failed';
+      SignedXmlStreamPITestFailedErr@1007 : TextConst 'ENU=Xml Document with processing instructions stream signature test failed';
       SignedXmlHardcodedTextTestFailedErr@1002 : TextConst 'ENU=Hardcoded Xml Document signature test failed';
       IncorrectSignedXmlTestFailedErr@1003 : TextConst 'ENU="Incorrect xml document signature test failed "';
       Assert@1004 : Codeunit 130000;
+      LibraryLowerPermissions@1005 : Codeunit 132217;
 
     [Test]
     PROCEDURE TestSignedXmlText@1();
@@ -36,6 +38,7 @@ OBJECT Codeunit 132559 Signed XML Test
       SignedXmlText@1006 : Text;
     BEGIN
       // [SCENARIO] Test of SignedXMLText function
+      LibraryLowerPermissions.SetO365Basic;
 
       // [GIVEN] A private and public key
       RSAKey := RSAKey.RSACryptoServiceProvider;
@@ -67,6 +70,7 @@ OBJECT Codeunit 132559 Signed XML Test
       SignedXmlText@1006 : Text;
     BEGIN
       // [SCENARIO] Test of SignedXMLStream function
+      LibraryLowerPermissions.SetO365Basic;
 
       // [GIVEN] A private and public key
       RSAKey := RSAKey.RSACryptoServiceProvider;
@@ -80,7 +84,7 @@ OBJECT Codeunit 132559 Signed XML Test
       // [WHEN] The document is signed
       SignedXmlText := SignedXMLMgt.SignXmlText(XmlText,PrivateKey);
 
-      TempBlob.WriteAsText(SignedXmlText, TEXTENCODING::Windows);
+      TempBlob.WriteAsText(SignedXmlText,TEXTENCODING::Windows);
       TempBlob.Blob.CREATEINSTREAM(InputStream);
 
       // [THEN] The signature is valid
@@ -88,7 +92,7 @@ OBJECT Codeunit 132559 Signed XML Test
     END;
 
     [Test]
-    PROCEDURE TestSignedXmlTextWithProcIns@1000000001();
+    PROCEDURE TestSignedXmlTextWithProcIns@5();
     VAR
       SignedXMLMgt@1001 : Codeunit 6227;
       Convert@1002 : DotNet "'mscorlib'.System.Convert";
@@ -99,6 +103,7 @@ OBJECT Codeunit 132559 Signed XML Test
       SignedXmlText@1006 : Text;
     BEGIN
       // [SCENARIO] Test of SignedXMLText function on XmlDocument with processing instruction
+      LibraryLowerPermissions.SetO365Basic;
 
       // [GIVEN] A private and public key
       RSAKey := RSAKey.RSACryptoServiceProvider;
@@ -118,7 +123,7 @@ OBJECT Codeunit 132559 Signed XML Test
     END;
 
     [Test]
-    PROCEDURE TestSignedXmlStreamWithProcIns@1000000000();
+    PROCEDURE TestSignedXmlStreamWithProcIns@6();
     VAR
       TempBlob@1007 : Record 99008535;
       SignedXMLMgt@1001 : Codeunit 6227;
@@ -131,6 +136,7 @@ OBJECT Codeunit 132559 Signed XML Test
       SignedXmlText@1006 : Text;
     BEGIN
       // [SCENARIO] Test of SignedXMLStream function on XmlDocument with processing instruction
+      LibraryLowerPermissions.SetO365Basic;
 
       // [GIVEN] A private and public key
       RSAKey := RSAKey.RSACryptoServiceProvider;
@@ -145,7 +151,7 @@ OBJECT Codeunit 132559 Signed XML Test
       // [WHEN] The document is signed
       SignedXmlText := SignedXMLMgt.SignXmlText(XmlText,PrivateKey);
 
-      TempBlob.WriteAsText(SignedXmlText, TEXTENCODING::Windows);
+      TempBlob.WriteAsText(SignedXmlText,TEXTENCODING::Windows);
       TempBlob.Blob.CREATEINSTREAM(InputStream);
 
       // [THEN] The signature is valid
@@ -160,6 +166,7 @@ OBJECT Codeunit 132559 Signed XML Test
       SignedXmlText@1006 : Text;
     BEGIN
       // [SCENARIO] Test valid hardcoded xml document and public key
+      LibraryLowerPermissions.SetO365Basic;
 
       // [GIVEN] A signed xml document
       SignedXmlText := '<?xml version="1.0" encoding="UTF-8" ?>' +
@@ -192,6 +199,7 @@ OBJECT Codeunit 132559 Signed XML Test
       SignedXmlText@1000 : Text;
     BEGIN
       // [SCENARIO] Test invalid hardcoded xml document and public key
+      LibraryLowerPermissions.SetO365Basic;
 
       // [GIVEN] A signed xml document
       SignedXmlText := '<?xml version="1.0" encoding="UTF-8" ?>' +
