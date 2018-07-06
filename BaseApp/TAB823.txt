@@ -12,10 +12,10 @@ OBJECT Table 823 Name/Value Buffer
   FIELDS
   {
     { 1   ;   ;ID                  ;Integer       ;AutoIncrement=Yes;
-                                                   DataClassification=SystemMetadata}
-    { 2   ;   ;Name                ;Text250       ;DataClassification=SystemMetadata}
-    { 3   ;   ;Value               ;Text250       ;DataClassification=SystemMetadata}
-    { 16  ;   ;Value BLOB          ;BLOB          ;DataClassification=SystemMetadata}
+                                                   DataClassification=SystemMetadata }
+    { 2   ;   ;Name                ;Text250       ;DataClassification=SystemMetadata }
+    { 3   ;   ;Value               ;Text250       ;DataClassification=SystemMetadata }
+    { 4   ;   ;Value BLOB          ;BLOB          ;DataClassification=SystemMetadata }
   }
   KEYS
   {

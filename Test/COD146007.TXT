@@ -1,0 +1,67 @@
+OBJECT Codeunit 146007 Test_DotNet_String
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=Test,W1,All;
+  }
+  PROPERTIES
+  {
+    Subtype=Test;
+    TestPermissions=Disabled;
+    OnRun=BEGIN
+            // [FEATURE] [.NET String] [UT]
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      Assert@1000 : Codeunit 130000;
+
+    [Test]
+    PROCEDURE TestDotNetStringSplit@1();
+    VAR
+      TempNameValueBuffer@1001 : TEMPORARY Record 823;
+      DotNet_String@1000 : Codeunit 3007;
+      SplitChar@1002 : Char;
+      TestValue@1003 : ARRAY [4] OF Text;
+    BEGIN
+      // [SCENARIO] Split a string
+      SplitChar := 9;
+
+      // [GIVEN] Some strings
+      TestValue[1] := 'This is the first value';
+      TestValue[2] := 'This is the second value';
+      TestValue[3] := PADSTR('This is a long value',1000,'A');
+      TestValue[3] := PADSTR('This is a longer value',5000,'B');
+
+      DotNet_String.Set(
+        TestValue[1] + FORMAT(SplitChar) +
+        TestValue[2] + FORMAT(SplitChar) +
+        TestValue[3] + FORMAT(SplitChar) +
+        TestValue[4] );
+
+      // [WHEN] The Split method is called
+      DotNet_String.Split(SplitChar,TempNameValueBuffer);
+
+      // [THEN] The String is split
+      TempNameValueBuffer.GET(1);
+      Assert.AreEqual(TestValue[1],TempNameValueBuffer.GetValue,'Incorrect result value from split');
+
+      TempNameValueBuffer.GET(2);
+      Assert.AreEqual(TestValue[2],TempNameValueBuffer.GetValue,'Incorrect result value from split');
+
+      TempNameValueBuffer.GET(3);
+      Assert.AreEqual(TestValue[3],TempNameValueBuffer.GetValue,'Incorrect result value from split');
+
+      TempNameValueBuffer.GET(4);
+      Assert.AreEqual(TestValue[4],TempNameValueBuffer.GetValue,'Incorrect result value from split');
+    END;
+
+    BEGIN
+    END.
+  }
+}
+

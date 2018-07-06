@@ -29,6 +29,19 @@ OBJECT Codeunit 3007 DotNet_String
       EXIT(DotNetString.Replace(ToReplace,ReplacementText))
     END;
 
+    [External]
+    PROCEDURE Split@5(Separator@1001 : Char;VAR TempNameValueBuffer@1000 : TEMPORARY Record 823);
+    VAR
+      SplitChar@1003 : DotNet "'mscorlib'.System.Char";
+      SplitCharArray@1002 : DotNet "'mscorlib'.System.Array";
+      String@1004 : DotNet "'mscorlib'.System.String";
+    BEGIN
+      SplitCharArray := SplitCharArray.CreateInstance(GETDOTNETTYPE(SplitChar),1);
+      SplitCharArray.SetValue(Separator,0);
+      FOREACH String IN DotNetString.Split(SplitCharArray) DO
+        TempNameValueBuffer.AddNewEntry('',String);
+    END;
+
     PROCEDURE GetString@3(VAR DotNetString2@1000 : DotNet "'mscorlib'.System.String");
     BEGIN
       DotNetString2 := DotNetString
@@ -37,19 +50,6 @@ OBJECT Codeunit 3007 DotNet_String
     PROCEDURE SetString@4(DotNetString2@1000 : DotNet "'mscorlib'.System.String");
     BEGIN
       DotNetString := DotNetString2
-    END;
-
-    [External]
-    PROCEDURE Split@10(Separator@1001 : Char;VAR NameValueBuffer@1000 : TEMPORARY Record 823);
-    VAR
-      SplitChar@1003 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Char";
-      SplitCharArray@1002 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Array";
-      String@1004 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.String";
-    BEGIN
-      SplitCharArray := SplitCharArray.CreateInstance(GETDOTNETTYPE(SplitChar),1);
-      SplitCharArray.SetValue(Separator,0);
-      FOREACH String IN DotNetString.Split(SplitCharArray) DO
-        NameValueBuffer.AddNewEntry('',String);
     END;
 
     BEGIN
