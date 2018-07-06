@@ -1,0 +1,58 @@
+OBJECT Table 823 Name/Value Buffer
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=;
+  }
+  PROPERTIES
+  {
+  }
+  FIELDS
+  {
+    { 1   ;   ;ID                  ;Integer       ;AutoIncrement=Yes;
+                                                   DataClassification=SystemMetadata}
+    { 2   ;   ;Name                ;Text250       ;DataClassification=SystemMetadata}
+    { 3   ;   ;Value               ;Text250       ;DataClassification=SystemMetadata}
+  }
+  KEYS
+  {
+    {    ;ID                                      ;Clustered=Yes }
+  }
+  FIELDGROUPS
+  {
+    { 1   ;DropDown            ;Name                                     }
+    { 2   ;Brick               ;Name,Value                               }
+  }
+  CODE
+  {
+    VAR
+      TemporaryErr@1000 : TextConst 'ENU=The record must be temporary.';
+
+    [External]
+    PROCEDURE AddNewEntry@1001(NewName@1000 : Text[250];NewValue@1001 : Text[250]);
+    VAR
+      NewID@1002 : Integer;
+    BEGIN
+      IF NOT ISTEMPORARY THEN
+        ERROR(TemporaryErr);
+
+      CLEAR(Rec);
+
+      NewID := 1;
+      IF FINDLAST THEN
+        NewID := ID + 1;
+
+      ID := NewID;
+      Name := NewName;
+      Value := NewValue;
+
+      INSERT(TRUE);
+    END;
+
+    BEGIN
+    END.
+  }
+}
+
