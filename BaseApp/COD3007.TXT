@@ -39,6 +39,19 @@ OBJECT Codeunit 3007 DotNet_String
       DotNetString := DotNetString2
     END;
 
+    [External]
+    PROCEDURE Split@10(Separator@1001 : Char;VAR NameValueBuffer@1000 : TEMPORARY Record 823);
+    VAR
+      SplitChar@1003 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Char";
+      SplitCharArray@1002 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Array";
+      String@1004 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.String";
+    BEGIN
+      SplitCharArray := SplitCharArray.CreateInstance(GETDOTNETTYPE(SplitChar),1);
+      SplitCharArray.SetValue(Separator,0);
+      FOREACH String IN DotNetString.Split(SplitCharArray) DO
+        NameValueBuffer.AddNewEntry('',String);
+    END;
+
     BEGIN
     END.
   }
