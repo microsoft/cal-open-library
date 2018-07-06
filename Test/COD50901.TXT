@@ -1,0 +1,74 @@
+OBJECT Codeunit 50901 Soap Proxy Client Mgt. Test
+{
+  OBJECT-PROPERTIES
+  {
+    Date=10.04.18;
+    Time=20:29:55;
+    Modified=Yes;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    Subtype=Test;
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      SendStatusErr@10018270 : TextConst 'ENU=Unable to send status to Hardware Hub.  Response: %1';
+      ReceiveStatusErr@10018271 : TextConst 'ENU=Incorrect response from Hardware Hub status: %1';
+
+    [Test]
+    PROCEDURE TestSoapProxy@10018270();
+    VAR
+      TempBlob@10018272 : Record 99008535;
+      Services@10018278 : TEMPORARY Record 823;
+      Types@10000230 : TEMPORARY Record 823;
+      SoapProxyClientMgt@10018270 : Codeunit 50900;
+      XMLDOMMgt@10018276 : Codeunit 6224;
+      XMLDoc@10018274 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlDocument";
+      ServiceName@10018279 : Text;
+      CommandId@10018271 : Text;
+      Status@10018277 : Text;
+    BEGIN
+      WITH SoapProxyClientMgt DO BEGIN
+        // [GIVEN] Test Status Command of Hardware Hub using the Soap Proxy
+        CreateSoapProxy('http://hub.dynamics.is/HardwareHub.asmx');
+        GetTypes(Types,Services);
+        ServiceName := Services.Name;
+        CommandId := DELCHR(DELCHR(CREATEGUID,'>','}'),'<','{');
+        Status := 'I Feel Good!';
+
+        // [WHEN] Send a text string as status
+        InitParameters(2);
+        SetParameterValue(CommandId,1);
+        SetParameterValue(Status,2);
+        InvokeMethod(ServiceName,'SendStatus',TempBlob);
+
+        // [THEN] result from sending a status should be 'true'
+        XMLDoc := XMLDoc.XmlDocument;
+        XMLDoc.LoadXml(TempBlob.ReadAsTextWithCRLFLineSeparator);
+        IF XMLDoc.DocumentElement.InnerText <> 'true' THEN
+          ERROR(SendStatusErr,XMLDoc.DocumentElement.InnerText);
+
+        // [WHEN] Receiving the status as a text string
+        InitParameters(1);
+        SetParameterValue(CommandId,1);
+        InvokeMethod(ServiceName,'ReceiveStatus',TempBlob);
+
+        // [THEN] Resulting status should match the sent one
+        XMLDoc := XMLDoc.XmlDocument;
+        XMLDoc.LoadXml(TempBlob.ReadAsTextWithCRLFLineSeparator);
+        IF XMLDoc.DocumentElement.InnerText <> Status THEN
+          ERROR(ReceiveStatusErr,XMLDoc.DocumentElement.InnerText);
+
+      END;
+    END;
+
+    BEGIN
+    END.
+  }
+}
+

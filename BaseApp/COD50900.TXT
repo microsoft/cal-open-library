@@ -1,0 +1,1037 @@
+OBJECT Codeunit 50900 Soap Proxy Client Mgt.
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      TempBlob@1030 : Record 99008535;
+      TempActivityLog@1070 : TEMPORARY Record 710;
+      ServiceDescription@1000 : DotNet "'System.Web.Services, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a'.System.Web.Services.Description.ServiceDescription";
+      Assembly@1001 : DotNet "'mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Reflection.Assembly";
+      Service@1006 : DotNet "'mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Object";
+      Parameters@1002 : DotNet "'mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Array";
+      TypeNotFoundErr@1005 : TextConst 'ENU=Type %1 not found';
+      CompileErr@1003 : TextConst 'ENU=There were errors during code compilation.';
+      Constructor@1035 : DotNet "'mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Array";
+      Properties@1007 : DotNet "'mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Collections.Generic.Dictionary`2";
+      StringBuilder@1004 : DotNet "'mscorlib'.System.Text.StringBuilder";
+      Credential@1008 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Net.NetworkCredential";
+      GlobalParameter@1031 : DotNet "'mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Object";
+      X509Certificate2@1012 : DotNet "'System, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Security.Cryptography.X509Certificates.X509Certificate2";
+      ClientX509CertificateValue@1036 : Text;
+      ServerX509CertificateValue@1037 : Text;
+      LoggingRecordId@1009 : RecordID;
+      LogActivity@1010 : Boolean;
+      RequestMsg@1020 : TextConst 'ENU=Request';
+      ResponseMsg@1021 : TextConst 'ENU=Response';
+      ServiceNotFoundErr@1022 : TextConst 'ENU=Service not found: %1';
+      MethodNotFoundErr@1023 : TextConst 'ENU=Method not found: %1';
+      PropertyNotFoundErr@1028 : TextConst 'ENU=Property not found: %1';
+      ServerX509CertErr@1032 : TextConst 'ENU=Server Certificate is not valid!';
+      ProxyNotConstructedErr@1011 : TextConst 'ENU=Proxy has not been constructed!';
+
+    [External]
+    PROCEDURE SetCredential@16(Username@1000 : Text;Password@1001 : Text);
+    VAR
+      Credential@1002 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Net.NetworkCredential";
+    BEGIN
+      CreateCredentials(Username,Password);
+    END;
+
+    [External]
+    PROCEDURE SetLogging@17(RecRelatedVariant@1000 : Variant);
+    VAR
+      DataTypeMgt@1001 : Codeunit 701;
+      RecRef@1002 : RecordRef;
+    BEGIN
+      IF DataTypeMgt.GetRecordRef(RecRelatedVariant,RecRef) THEN BEGIN
+        LoggingRecordId := RecRef.RECORDID;
+        LogActivity := TRUE;
+      END ELSE
+        LogActivity := FALSE;
+    END;
+
+    [External]
+    PROCEDURE CreateSoapProxy@2(Uri@1004 : Text);
+    VAR
+      HttpWebRequestMgt@1000 : Codeunit 1297;
+      HttpStatusCode@1002 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Net.HttpStatusCode";
+      ResponseHeaders@1001 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Collections.Specialized.NameValueCollection";
+      ResponseInStream@1003 : InStream;
+    BEGIN
+      WITH HttpWebRequestMgt DO BEGIN
+        Initialize(Uri + '?wsdl');
+        DisableUI;
+        IF NOT ISNULL(Credential) THEN
+          AddBasicAuthentication(Credential.UserName,Credential.Password);
+        TempBlob.INIT;
+        TempBlob.Blob.CREATEINSTREAM(ResponseInStream);
+        IF NOT GetResponse(ResponseInStream,HttpStatusCode,ResponseHeaders) THEN
+          ProcessFaultResponse(Uri);
+        ReadServiceDescription;
+
+        IF EndsWith(Uri,'SVC') THEN BEGIN
+          IF NOT CompileSVC(Uri + '?wsdl') THEN
+            ERROR(CompileErr);
+        END ELSE
+          IF NOT CompileASMX('SOAP12') THEN
+            IF NOT CompileASMX('SOAP') THEN
+              ERROR(CompileErr);
+      END;
+    END;
+
+    [External]
+    PROCEDURE CreateBasicBinding@23(Uri@1000 : Text;ClientCredentialType@1006 : Text);
+    VAR
+      Endpoint@1001 : DotNet "'System.ServiceModel, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.ServiceModel.EndpointAddress";
+      Binding@1002 : DotNet "'System.ServiceModel, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.ServiceModel.BasicHttpsBinding";
+      CredentialType@1003 : DotNet "'System.ServiceModel, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.ServiceModel.HttpClientCredentialType";
+      Object@1005 : DotNet "'mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Object";
+      Int@1004 : Record 2000000026;
+    BEGIN
+      Endpoint := Endpoint.EndpointAddress(Uri);
+      Binding := Binding.BasicHttpsBinding;
+      ParseEnum(CredentialType,GETDOTNETTYPE(CredentialType),ClientCredentialType);
+      Binding.Security.Transport.ClientCredentialType := CredentialType;
+
+      Int.FINDLAST;
+      Binding.MaxReceivedMessageSize := Int.Number;
+      Binding.MaxBufferPoolSize := Int.Number;
+      Binding.MaxBufferSize := Int.Number;
+      Binding.ReaderQuotas.MaxDepth := 32;
+      Binding.ReaderQuotas.MaxArrayLength := Int.Number;
+      Binding.ReaderQuotas.MaxStringContentLength := Int.Number;
+
+      Constructor := Constructor.CreateInstance(GETDOTNETTYPE(Object),2);
+      Constructor.SetValue(Binding,0);
+      Constructor.SetValue(Endpoint,1);
+    END;
+
+    [External]
+    PROCEDURE CreateCustomBinding@24(Uri@1000 : Text;SecurityNamespace@1001 : Text;SecurityBindingMethod@1002 : Text;SecurityVersion@1003 : Text;SetKeyDerivation@1004 : Boolean;IncludeTimestamp@1005 : Boolean;RequireClientCertificate@1006 : Boolean;UseDefaultWebProxy@1007 : Boolean;IncludeEndpointIdentity@1008 : Boolean;IncludeAuthentication@1009 : Boolean);
+    VAR
+      Endpoint@1011 : DotNet "'System.ServiceModel, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.ServiceModel.EndpointAddress";
+      CustomBinding@1012 : DotNet "'System.ServiceModel, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.ServiceModel.Channels.CustomBinding";
+      SecurityBindingElement@1013 : DotNet "'System.ServiceModel, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.ServiceModel.Channels.SecurityBindingElement";
+      MessageSecurityVersion@1014 : DotNet "'System.ServiceModel, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.ServiceModel.MessageSecurityVersion";
+      TextMessageEncodingBindingElement@1015 : DotNet "'System.ServiceModel, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.ServiceModel.Channels.TextMessageEncodingBindingElement";
+      MessageVersion@1016 : DotNet "'System.ServiceModel, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.ServiceModel.Channels.MessageVersion";
+      AddressHeaders@1017 : DotNet "'mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Array";
+      AddressHeader@1018 : DotNet "'System.ServiceModel, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.ServiceModel.Channels.AddressHeader";
+      Encoding@1019 : DotNet "'mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.Encoding";
+      HttpsTransportBindingElement@1020 : DotNet "'System.ServiceModel, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.ServiceModel.Channels.HttpsTransportBindingElement";
+      Convert@1021 : DotNet "'mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Convert";
+      X509Certificate2@1022 : DotNet "'System, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Security.Cryptography.X509Certificates.X509Certificate2";
+      X509NameType@1023 : DotNet "'System, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Security.Cryptography.X509Certificates.X509NameType";
+      EndPointIdentity@1024 : DotNet "'System.ServiceModel, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.ServiceModel.EndpointIdentity";
+      WebServiceUri@1025 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Uri";
+      Object@1026 : DotNet "'mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Object";
+      ObjectParameters@1027 : DotNet "'mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Array";
+      dnsIdentity@1028 : Text;
+      Int@1029 : Record 2000000026;
+    BEGIN
+      CustomBinding := CustomBinding.CustomBinding;
+
+      ExecuteStaticMethod(SecurityBindingElement,SecurityBindingMethod);
+      SecurityBindingElement.SetKeyDerivation := SetKeyDerivation;
+      SecurityBindingElement.IncludeTimestamp := IncludeTimestamp;
+      ExecuteStaticProperty(MessageSecurityVersion,SecurityVersion);
+      SecurityBindingElement.MessageSecurityVersion := MessageSecurityVersion;
+
+      SecurityBindingElement.LocalClientSettings.DetectReplays := TRUE;
+      SecurityBindingElement.LocalServiceSettings.DetectReplays := TRUE;
+
+      Int.FINDLAST;
+      TextMessageEncodingBindingElement := TextMessageEncodingBindingElement.TextMessageEncodingBindingElement(MessageVersion.Default,Encoding.UTF8);
+      TextMessageEncodingBindingElement.ReaderQuotas.MaxStringContentLength := Int.Number;
+      TextMessageEncodingBindingElement.ReaderQuotas.MaxArrayLength := Int.Number;
+      TextMessageEncodingBindingElement.ReaderQuotas.MaxBytesPerRead := Int.Number;
+      TextMessageEncodingBindingElement.ReaderQuotas.MaxDepth := Int.Number;
+      TextMessageEncodingBindingElement.ReaderQuotas.MaxNameTableCharCount := Int.Number;
+
+      HttpsTransportBindingElement := HttpsTransportBindingElement.HttpsTransportBindingElement;
+      HttpsTransportBindingElement.RequireClientCertificate := RequireClientCertificate;
+      HttpsTransportBindingElement.UseDefaultWebProxy := UseDefaultWebProxy;
+      HttpsTransportBindingElement.MaxReceivedMessageSize := Int.Number;
+      HttpsTransportBindingElement.MaxBufferPoolSize := Int.Number;
+
+      CustomBinding.Elements.Add(SecurityBindingElement);
+      CustomBinding.Elements.Add(TextMessageEncodingBindingElement);
+      CustomBinding.Elements.Add(HttpsTransportBindingElement);
+
+      IF IncludeEndpointIdentity THEN BEGIN
+        X509Certificate2 := X509Certificate2.X509Certificate2(Convert.FromBase64String(ServerX509CertificateValue));
+        dnsIdentity := X509Certificate2.GetNameInfo(X509NameType.SimpleName,FALSE);
+        EndPointIdentity := EndPointIdentity.CreateDnsIdentity(dnsIdentity);
+      END;
+
+      IF IncludeAuthentication THEN BEGIN
+        AddressHeaders := AddressHeaders.CreateInstance(GETDOTNETTYPE(AddressHeader),2);
+        AddressHeaders.SetValue(AddressHeader.CreateAddressHeader('UserName',SecurityNamespace,Credential.UserName),0);
+        AddressHeaders.SetValue(AddressHeader.CreateAddressHeader('Password',SecurityNamespace,Credential.Password),1);
+      END ELSE
+        AddressHeaders := AddressHeaders.CreateInstance(GETDOTNETTYPE(AddressHeader),0);
+
+      CASE TRUE OF
+        IncludeAuthentication AND IncludeEndpointIdentity:
+          Endpoint := Endpoint.EndpointAddress(WebServiceUri.Uri(Uri),EndPointIdentity,AddressHeaders);
+        IncludeAuthentication:
+          Endpoint := Endpoint.EndpointAddress(WebServiceUri.Uri(Uri),AddressHeaders);
+        IncludeEndpointIdentity:
+          Endpoint := Endpoint.EndpointAddress(WebServiceUri.Uri(Uri),EndPointIdentity,AddressHeaders);
+        ELSE
+          Endpoint := Endpoint.EndpointAddress(Uri);
+      END;
+
+      Constructor := Constructor.CreateInstance(GETDOTNETTYPE(Object),2);
+      Constructor.SetValue(CustomBinding,0);
+      Constructor.SetValue(Endpoint,1);
+    END;
+
+    [External]
+    PROCEDURE CreateAsymmetricBinding@37(Uri@1000 : Text;SecurityNamespace@1001 : Text;SecurityVersion@1003 : Text;Version@1034 : Text;ProtectionOrder@1033 : Text;InitiatorInclusionMode@1035 : Text;RecipientInclusionMode@1036 : Text;SetKeyDerivation@1004 : Boolean;IncludeTimestamp@1005 : Boolean;RequireClientCertificate@1006 : Boolean;UseDefaultWebProxy@1007 : Boolean;IncludeEndpointIdentity@1008 : Boolean;IncludeAuthentication@1009 : Boolean);
+    VAR
+      Endpoint@1011 : DotNet "'System.ServiceModel, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.ServiceModel.EndpointAddress";
+      CustomBinding@1012 : DotNet "'System.ServiceModel, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.ServiceModel.Channels.CustomBinding";
+      Initiator@1010 : DotNet "'System.ServiceModel, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.ServiceModel.Security.Tokens.X509SecurityTokenParameters";
+      Recipient@1030 : DotNet "'System.ServiceModel, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.ServiceModel.Security.Tokens.X509SecurityTokenParameters";
+      SecurityBindingElement@1013 : DotNet "'System.ServiceModel, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.ServiceModel.Channels.AsymmetricSecurityBindingElement";
+      MessageProtectionOrder@1002 : DotNet "'System.ServiceModel, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.ServiceModel.Security.MessageProtectionOrder";
+      MessageSecurityVersion@1014 : DotNet "'System.ServiceModel, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.ServiceModel.MessageSecurityVersion";
+      TextMessageEncodingBindingElement@1015 : DotNet "'System.ServiceModel, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.ServiceModel.Channels.TextMessageEncodingBindingElement";
+      MessageVersion@1016 : DotNet "'System.ServiceModel, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.ServiceModel.Channels.MessageVersion";
+      AddressHeaders@1017 : DotNet "'mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Array";
+      AddressHeader@1018 : DotNet "'System.ServiceModel, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.ServiceModel.Channels.AddressHeader";
+      Encoding@1019 : DotNet "'mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.Encoding";
+      HttpsTransportBindingElement@1020 : DotNet "'System.ServiceModel, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.ServiceModel.Channels.HttpsTransportBindingElement";
+      Convert@1021 : DotNet "'mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Convert";
+      X509Certificate2@1022 : DotNet "'System, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Security.Cryptography.X509Certificates.X509Certificate2";
+      X509NameType@1023 : DotNet "'System, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Security.Cryptography.X509Certificates.X509NameType";
+      X509KeyIdentifierClauseType@1031 : DotNet "'System.ServiceModel, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.ServiceModel.Security.Tokens.X509KeyIdentifierClauseType";
+      SecurityTokenInclusionMode@1032 : DotNet "'System.ServiceModel, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.ServiceModel.Security.Tokens.SecurityTokenInclusionMode";
+      EndPointIdentity@1024 : DotNet "'System.ServiceModel, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.ServiceModel.EndpointIdentity";
+      WebServiceUri@1025 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Uri";
+      Object@1026 : DotNet "'mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Object";
+      ObjectParameters@1027 : DotNet "'mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Array";
+      dnsIdentity@1028 : Text;
+      Int@1029 : Record 2000000026;
+    BEGIN
+      CustomBinding := CustomBinding.CustomBinding;
+
+      ParseEnum(SecurityTokenInclusionMode,GETDOTNETTYPE(SecurityTokenInclusionMode),InitiatorInclusionMode);
+      Initiator := Initiator.X509SecurityTokenParameters(X509KeyIdentifierClauseType.Thumbprint, SecurityTokenInclusionMode);
+      ParseEnum(SecurityTokenInclusionMode,GETDOTNETTYPE(SecurityTokenInclusionMode),RecipientInclusionMode);
+      Recipient := Initiator.X509SecurityTokenParameters(X509KeyIdentifierClauseType.Thumbprint, SecurityTokenInclusionMode);
+
+      SecurityBindingElement := SecurityBindingElement.AsymmetricSecurityBindingElement(Recipient,Initiator);
+      SecurityBindingElement.SetKeyDerivation := SetKeyDerivation;
+      SecurityBindingElement.IncludeTimestamp := IncludeTimestamp;
+      ExecuteStaticProperty(MessageSecurityVersion,SecurityVersion);
+      SecurityBindingElement.AllowSerializedSigningTokenOnReply := TRUE;
+      SecurityBindingElement.LocalClientSettings.DetectReplays := TRUE;
+      SecurityBindingElement.LocalServiceSettings.DetectReplays := TRUE;
+      ParseEnum(MessageProtectionOrder,GETDOTNETTYPE(MessageProtectionOrder),ProtectionOrder);
+      SecurityBindingElement.MessageProtectionOrder := MessageProtectionOrder;
+      SecurityBindingElement.MessageSecurityVersion := MessageSecurityVersion;
+
+      Int.FINDLAST;
+      ExecuteStaticProperty(MessageVersion,Version);
+      TextMessageEncodingBindingElement := TextMessageEncodingBindingElement.TextMessageEncodingBindingElement(MessageVersion,Encoding.UTF8);
+      TextMessageEncodingBindingElement.ReaderQuotas.MaxStringContentLength := Int.Number;
+      TextMessageEncodingBindingElement.ReaderQuotas.MaxArrayLength := Int.Number;
+      TextMessageEncodingBindingElement.ReaderQuotas.MaxBytesPerRead := Int.Number;
+      TextMessageEncodingBindingElement.ReaderQuotas.MaxDepth := Int.Number;
+      TextMessageEncodingBindingElement.ReaderQuotas.MaxNameTableCharCount := Int.Number;
+
+      HttpsTransportBindingElement := HttpsTransportBindingElement.HttpsTransportBindingElement;
+      HttpsTransportBindingElement.RequireClientCertificate := RequireClientCertificate;
+      HttpsTransportBindingElement.UseDefaultWebProxy := UseDefaultWebProxy;
+      HttpsTransportBindingElement.MaxReceivedMessageSize := Int.Number;
+      HttpsTransportBindingElement.MaxBufferPoolSize := Int.Number;
+
+      CustomBinding.Elements.Add(SecurityBindingElement);
+      CustomBinding.Elements.Add(TextMessageEncodingBindingElement);
+      CustomBinding.Elements.Add(HttpsTransportBindingElement);
+
+      IF IncludeEndpointIdentity THEN BEGIN
+        X509Certificate2 := X509Certificate2.X509Certificate2(Convert.FromBase64String(ServerX509CertificateValue));
+        dnsIdentity := X509Certificate2.GetNameInfo(X509NameType.SimpleName,FALSE);
+        EndPointIdentity := EndPointIdentity.CreateDnsIdentity(dnsIdentity);
+      END;
+
+      IF IncludeAuthentication THEN BEGIN
+        AddressHeaders := AddressHeaders.CreateInstance(GETDOTNETTYPE(AddressHeader),2);
+        AddressHeaders.SetValue(AddressHeader.CreateAddressHeader('UserName',SecurityNamespace,Credential.UserName),0);
+        AddressHeaders.SetValue(AddressHeader.CreateAddressHeader('Password',SecurityNamespace,Credential.Password),1);
+      END ELSE
+        AddressHeaders := AddressHeaders.CreateInstance(GETDOTNETTYPE(AddressHeader),0);
+
+      CASE TRUE OF
+        IncludeAuthentication AND IncludeEndpointIdentity:
+          Endpoint := Endpoint.EndpointAddress(WebServiceUri.Uri(Uri),EndPointIdentity,AddressHeaders);
+        IncludeAuthentication:
+          Endpoint := Endpoint.EndpointAddress(WebServiceUri.Uri(Uri),AddressHeaders);
+        IncludeEndpointIdentity:
+          Endpoint := Endpoint.EndpointAddress(WebServiceUri.Uri(Uri),EndPointIdentity,AddressHeaders);
+        ELSE
+          Endpoint := Endpoint.EndpointAddress(Uri);
+      END;
+
+      Constructor := Constructor.CreateInstance(GETDOTNETTYPE(Object),2);
+      Constructor.SetValue(CustomBinding,0);
+      Constructor.SetValue(Endpoint,1);
+    END;
+
+    [External]
+    PROCEDURE ConstructProxy@57(ServiceName@1000 : Text);
+    VAR
+      Activator@1002 : DotNet "'mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Activator";
+      ServiceType@1001 : DotNet "'mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Type";
+    BEGIN
+      ServiceType := Assembly.GetType(ServiceName);
+      IF ISNULL(ServiceType) THEN
+        ERROR(ServiceNotFoundErr,ServiceType);
+
+      IF ISNULL(Constructor) THEN
+        Service := Activator.CreateInstance(ServiceType)
+      ELSE
+        Service := Activator.CreateInstance(ServiceType,Constructor);
+    END;
+
+    [External]
+    PROCEDURE InitParameters@3(Length@1000 : Integer);
+    VAR
+      Object@1001 : DotNet "'mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Object";
+    BEGIN
+      Parameters := Parameters.CreateInstance(GETDOTNETTYPE(Object),Length);
+    END;
+
+    [External]
+    PROCEDURE SetParameterValue@4(ParameterValue@1000 : Variant;ParameterIndex@1001 : Integer);
+    BEGIN
+      Parameters.SetValue(ParameterValue,ParameterIndex - 1);
+    END;
+
+    [External]
+    PROCEDURE SetPropertyValue@15(PropertyValue@1000 : Variant;PropertyName@1001 : Text);
+    BEGIN
+      Properties.Add(PropertyName,PropertyValue);
+    END;
+
+    [External]
+    PROCEDURE SetSecurityProtocolType@38(SecurityProtocolTypeText@1000 : Text);
+    VAR
+      ServicePointManager@1001 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Net.ServicePointManager";
+      SecurityProtocolType@1002 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Net.SecurityProtocolType";
+    BEGIN
+      ParseEnum(SecurityProtocolType,GETDOTNETTYPE(SecurityProtocolType),SecurityProtocolTypeText);
+      ServicePointManager.SecurityProtocol := SecurityProtocolType;
+    END;
+
+    [External]
+    PROCEDURE SetGlobalParameterType@22(TypeName@1000 : Text);
+    VAR
+      Type@1001 : DotNet "'mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Type";
+      Activator@1002 : DotNet "'mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Activator";
+    BEGIN
+      FOREACH Type IN Assembly.ExportedTypes DO
+        IF Type.Name = TypeName THEN BEGIN
+          GlobalParameter := Activator.CreateInstance(Type);
+          EXIT;
+        END;
+      ERROR(TypeNotFoundErr,TypeName);
+    END;
+
+    [External]
+    PROCEDURE SetGlobalParameterAsParameterValue@12(ParameterIndex@1001 : Integer);
+    BEGIN
+      Parameters.SetValue(GlobalParameter,ParameterIndex - 1);
+    END;
+
+    [External]
+    PROCEDURE SetGlobalParameterPropertyValue@8(PropertyValue@1000 : Variant;PropertyName@1001 : Text);
+    VAR
+      PropertyInfo@1005 : DotNet "'mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Reflection.PropertyInfo";
+    BEGIN
+      FOREACH PropertyInfo IN GlobalParameter.GetType.GetProperties DO BEGIN
+        IF PropertyInfo.Name = PropertyName THEN BEGIN
+          PropertyInfo.SetValue(GlobalParameter,PropertyValue);
+          EXIT;
+        END;
+      END;
+      ERROR(PropertyNotFoundErr,PropertyName);
+    END;
+
+    [External]
+    PROCEDURE SetGlobalParameterValueFromXml@41(TempBlob@1000 : Record 99008535);
+    VAR
+      XmlSerializer@1001 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.Serialization.XmlSerializer";
+      XmlDoc@1002 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlDocument";
+      XmlNodeReader@1003 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlNodeReader";
+      InStr@1004 : InStream;
+    BEGIN
+      TempBlob.Blob.CREATEINSTREAM(InStr);
+      XmlDoc := XmlDoc.XmlDocument;
+      XmlDoc.Load(InStr);
+      XmlNodeReader := XmlNodeReader.XmlNodeReader(XmlDoc.DocumentElement);
+      XmlSerializer := XmlSerializer.XmlSerializer(GlobalParameter.GetType,GetTargetNamespace);
+      GlobalParameter := XmlSerializer.Deserialize(XmlNodeReader);
+    END;
+
+    [External]
+    PROCEDURE SetEnumValueAsParameterValue@32(EnumValue@1000 : Text;EnumName@1001 : Text;ParameterIndex@1002 : Integer);
+    VAR
+      EnumType@1003 : DotNet "'mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Type";
+      Enum@1004 : DotNet "'mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Object";
+    BEGIN
+      EnumType := Assembly.GetType(EnumName);
+      ParseEnum(Enum,EnumType,EnumValue);
+      Parameters.SetValue(Enum,ParameterIndex - 1);
+    END;
+
+    [External]
+    PROCEDURE SetClientCertificateValueAsBase64@26(CertificateValueAsBase64@1000 : Text);
+    BEGIN
+      ClientX509CertificateValue := CertificateValueAsBase64;
+    END;
+
+    [External]
+    PROCEDURE SetServerCertificateValueAsBase64@27(CertificateValueAsBase64@1000 : Text);
+    BEGIN
+      ServerX509CertificateValue := CertificateValueAsBase64;
+    END;
+
+    [External]
+    PROCEDURE SetServerCertificateValueFromWsdl@28();
+    BEGIN
+      ServerX509CertificateValue := ReadServerX509CertificateValue;
+      IF ServerX509CertificateValue = '' THEN
+        ERROR(ServerX509CertErr);
+    END;
+
+    [External]
+    PROCEDURE SetProxyCredentials@73();
+    VAR
+      PropertyInfo@1000 : DotNet "'mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Reflection.PropertyInfo";
+      Property@1001 : DotNet "'mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Object";
+      ClientCredentials@1005 : DotNet "'System.ServiceModel, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.ServiceModel.Description.ClientCredentials";
+    BEGIN
+      IF ISNULL(Service) THEN
+        ERROR(ProxyNotConstructedErr);
+
+      FOREACH PropertyInfo IN Service.GetType.GetProperties DO
+        IF Properties.TryGetValue(PropertyInfo.Name,Property) THEN
+          PropertyInfo.SetValue(Service,Property)
+        ELSE
+          CASE PropertyInfo.Name OF
+            'Credentials':
+              IF NOT ISNULL(Credential) THEN
+                PropertyInfo.SetValue(Service,Credential);
+            'ClientCredentials':
+              IF NOT ISNULL(Credential) THEN BEGIN
+                ClientCredentials := PropertyInfo.GetValue(Service);
+                ClientCredentials.UserName.UserName := Credential.UserName;
+                ClientCredentials.UserName.Password := Credential.Password;
+              END;
+          END;
+    END;
+
+    [External]
+    PROCEDURE SetProxyClientCertificate@76();
+    VAR
+      PropertyInfo@1000 : DotNet "'mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Reflection.PropertyInfo";
+      Property@1001 : DotNet "'mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Object";
+      Convert@1004 : DotNet "'mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Convert";
+      ClientCredentials@1005 : DotNet "'System.ServiceModel, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.ServiceModel.Description.ClientCredentials";
+      ClientCertificates@1003 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Security.Cryptography.X509Certificates.X509Certificate2Collection";
+      X509CertificateValidationMode@1002 : DotNet "'System.IdentityModel, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.ServiceModel.Security.X509CertificateValidationMode";
+    BEGIN
+      IF ISNULL(Service) THEN
+        ERROR(ProxyNotConstructedErr);
+
+      FOREACH PropertyInfo IN Service.GetType.GetProperties DO
+        CASE PropertyInfo.Name OF
+          'ClientCertificates':
+            BEGIN
+              ClientCertificates := PropertyInfo.GetValue(Service);
+              ClientCertificates.Add(X509Certificate2.X509Certificate2(Convert.FromBase64String(ClientX509CertificateValue)));
+            END;
+          'ClientCredentials':
+            BEGIN
+              ClientCredentials := PropertyInfo.GetValue(Service);
+              ClientCredentials.ClientCertificate.Certificate := X509Certificate2.X509Certificate2(Convert.FromBase64String(ClientX509CertificateValue));
+            END;
+        END;
+    END;
+
+    [External]
+    PROCEDURE SetProxyServerCertificate@77(CertificateValidationMode@1006 : Text);
+    VAR
+      PropertyInfo@1000 : DotNet "'mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Reflection.PropertyInfo";
+      Property@1001 : DotNet "'mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Object";
+      ClientCredentials@1005 : DotNet "'System.ServiceModel, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.ServiceModel.Description.ClientCredentials";
+      Convert@1004 : DotNet "'mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Convert";
+      X509CertificateValidationMode@1002 : DotNet "'System.IdentityModel, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.ServiceModel.Security.X509CertificateValidationMode";
+    BEGIN
+      IF ISNULL(Service) THEN
+        ERROR(ProxyNotConstructedErr);
+
+      FOREACH PropertyInfo IN Service.GetType.GetProperties DO
+        CASE PropertyInfo.Name OF
+          'ClientCertificates':
+            ;
+          'ClientCredentials':
+            BEGIN
+              ClientCredentials := PropertyInfo.GetValue(Service);
+              ParseEnum(X509CertificateValidationMode,GETDOTNETTYPE(X509CertificateValidationMode),CertificateValidationMode);
+              ClientCredentials.ServiceCertificate.Authentication.CertificateValidationMode := X509CertificateValidationMode;
+              ClientCredentials.ServiceCertificate.DefaultCertificate := X509Certificate2.X509Certificate2(Convert.FromBase64String(ServerX509CertificateValue));
+            END;
+        END;
+    END;
+
+    [External]
+    PROCEDURE SetProxyProtectionLevel@55(ProtectionLevelMode@1004 : Text);
+    VAR
+      PropertyInfo@1001 : DotNet "'mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Reflection.PropertyInfo";
+      Property@1000 : DotNet "'mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Object";
+      Endpoint@1002 : DotNet "'System.ServiceModel, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.ServiceModel.Description.ServiceEndpoint";
+      ProtectionLevel@1003 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Net.Security.ProtectionLevel";
+    BEGIN
+      IF ISNULL(Service) THEN
+        ERROR(ProxyNotConstructedErr);
+
+      PropertyInfo := Service.GetType.GetProperty('Endpoint');
+      Endpoint := PropertyInfo.GetValue(Service);
+      ParseEnum(ProtectionLevel,GETDOTNETTYPE(ProtectionLevel),ProtectionLevelMode);
+      Endpoint.Contract.ProtectionLevel := ProtectionLevel;
+    END;
+
+    [External]
+    PROCEDURE InvokeProxyMethod@83(MethodName@1000 : Text;VAR TempBlob@1001 : Record 99008535);
+    VAR
+      Response@1007 : DotNet "'mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Object";
+      MethodInfo@1004 : DotNet "'mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Reflection.MethodInfo";
+      XmlSerializer@1008 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.Serialization.XmlSerializer";
+      PropertyInfo@1003 : DotNet "'mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Reflection.PropertyInfo";
+      Property@1002 : DotNet "'mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Object";
+      OutStr@1009 : OutStream;
+    BEGIN
+      IF ISNULL(Service) THEN
+        ERROR(ProxyNotConstructedErr);
+
+      MethodInfo := Service.GetType.GetMethod(MethodName);
+      IF ISNULL(MethodInfo) THEN
+        ERROR(MethodNotFoundErr,MethodName);
+
+      FOREACH PropertyInfo IN Service.GetType.GetProperties DO
+        IF Properties.TryGetValue(PropertyInfo.Name,Property) THEN
+          PropertyInfo.SetValue(Service,Property);
+
+      Properties := Properties.Dictionary;
+      Response := MethodInfo.Invoke(Service,Parameters);
+
+      TempBlob.INIT;
+      TempBlob.Blob.CREATEOUTSTREAM(OutStr);
+      XmlSerializer := XmlSerializer.XmlSerializer(Response.GetType,GetTargetNamespace);
+      XmlSerializer.Serialize(OutStr,Response);
+
+      CreateActivityLog(TempBlob,ResponseMsg,Service.GetType.ToString,MethodName);
+    END;
+
+    [External]
+    PROCEDURE InvokeMethod@5(ServiceName@1003 : Text;MethodName@1000 : Text;VAR TempBlob@1001 : Record 99008535);
+    VAR
+      Activator@1006 : DotNet "'mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Activator";
+      Service@1005 : DotNet "'mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Object";
+      Response@1007 : DotNet "'mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Object";
+      ServiceType@1002 : DotNet "'mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Type";
+      MethodInfo@1004 : DotNet "'mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Reflection.MethodInfo";
+      PropertyInfo@1010 : DotNet "'mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Reflection.PropertyInfo";
+      XmlSerializer@1008 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.Serialization.XmlSerializer";
+      Property@1017 : DotNet "'mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Object";
+      ClientCredentials@1015 : DotNet "'System.ServiceModel, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.ServiceModel.Description.ClientCredentials";
+      ClientCertificates@1011 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Security.Cryptography.X509Certificates.X509Certificate2Collection";
+      Convert@1016 : DotNet "'mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Convert";
+      X509Certificate2@1018 : DotNet "'System, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Security.Cryptography.X509Certificates.X509Certificate2";
+      OutStr@1009 : OutStream;
+    BEGIN
+      ServiceType := Assembly.GetType(ServiceName);
+      IF ISNULL(ServiceType) THEN
+        ERROR(ServiceNotFoundErr,ServiceType);
+      MethodInfo := ServiceType.GetMethod(MethodName);
+      IF ISNULL(MethodInfo) THEN
+        ERROR(MethodNotFoundErr,MethodName);
+
+      IF ISNULL(Constructor) THEN
+        Service := Activator.CreateInstance(ServiceType)
+      ELSE
+        Service := Activator.CreateInstance(ServiceType,Constructor);
+
+      FOREACH PropertyInfo IN ServiceType.GetProperties DO
+        IF Properties.TryGetValue(PropertyInfo.Name,Property) THEN
+          PropertyInfo.SetValue(Service,Property)
+        ELSE
+          CASE PropertyInfo.Name OF
+            'Credentials':
+              IF NOT ISNULL(Credential) THEN
+                PropertyInfo.SetValue(Service,Credential);
+            'ClientCertificates':
+              IF ClientX509CertificateValue <> '' THEN BEGIN
+                ClientCertificates := PropertyInfo.GetValue(Service);
+                ClientCertificates.Add(X509Certificate2.X509Certificate2(Convert.FromBase64String(ClientX509CertificateValue)));
+              END;
+            'ClientCredentials':
+              IF NOT ISNULL(Credential) THEN BEGIN
+                ClientCredentials := PropertyInfo.GetValue(Service);
+                ClientCredentials.UserName.UserName := Credential.UserName;
+                ClientCredentials.UserName.Password := Credential.Password;
+                IF ClientX509CertificateValue <> '' THEN
+                  ClientCredentials.ClientCertificate.Certificate := X509Certificate2.X509Certificate2(Convert.FromBase64String(ClientX509CertificateValue));
+                IF ServerX509CertificateValue <> '' THEN
+                  ClientCredentials.ServiceCertificate.DefaultCertificate := X509Certificate2.X509Certificate2(Convert.FromBase64String(ServerX509CertificateValue));
+              END;
+          END;
+
+      Properties := Properties.Dictionary;
+      Response := MethodInfo.Invoke(Service,Parameters);
+
+      TempBlob.INIT;
+      TempBlob.Blob.CREATEOUTSTREAM(OutStr);
+      XmlSerializer := XmlSerializer.XmlSerializer(Response.GetType,GetTargetNamespace);
+      XmlSerializer.Serialize(OutStr,Response);
+
+      CreateActivityLog(TempBlob,ResponseMsg,ServiceName,MethodName);
+    END;
+
+    [External]
+    PROCEDURE GetTargetNamespace@7() : Text;
+    BEGIN
+      EXIT(ServiceDescription.TargetNamespace);
+    END;
+
+    [External]
+    PROCEDURE GetMethods@9(ServiceName@1000 : Text;VAR Methods@1001 : Record 823);
+    VAR
+      ServiceType@1002 : DotNet "'mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Type";
+      MethodInfo@1003 : DotNet "'mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Reflection.MethodInfo";
+    BEGIN
+      ServiceType := Assembly.GetType(ServiceName);
+      FOREACH MethodInfo IN ServiceType.GetMethods DO BEGIN
+        Methods.ID += 1;
+        Methods.Name := MethodInfo.Name;
+        Methods.INSERT;
+      END;
+    END;
+
+    [External]
+    PROCEDURE GetMethodParameters@47(ServiceName@1000 : Text;MethodName@1006 : Text;VAR Parameters@1001 : Record 823);
+    VAR
+      ServiceType@1002 : DotNet "'mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Type";
+      MethodInfo@1003 : DotNet "'mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Reflection.MethodInfo";
+      ParameterInfo@1005 : DotNet "'mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Reflection.ParameterInfo";
+    BEGIN
+      ServiceType := Assembly.GetType(ServiceName);
+      MethodInfo := ServiceType.GetMethod(MethodName);
+      FOREACH ParameterInfo IN MethodInfo.GetParameters DO BEGIN
+        Parameters.ID += 1;
+        Parameters.Name := ParameterInfo.Name;
+                Parameters.Value := ParameterInfo.ParameterType.ToString;
+        Parameters.INSERT;
+      END;
+    END;
+
+    [External]
+    PROCEDURE GetTypeProperties@13(TypeName@1000 : Text;VAR Properties@1001 : Record 823);
+    VAR
+      Type@1002 : DotNet "'mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Type";
+      TypeInfo@1004 : DotNet "'mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Reflection.TypeInfo";
+      PropertyInfo@1003 : DotNet "'mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Reflection.PropertyInfo";
+    BEGIN
+      FOREACH TypeInfo IN Assembly.GetTypes DO BEGIN
+        IF TypeInfo.Name = TypeName THEN
+          FOREACH PropertyInfo IN TypeInfo.GetProperties DO BEGIN
+            Properties.ID += 1;
+            Properties.Name := PropertyInfo.Name;
+            Properties.Value := PropertyInfo.PropertyType.ToString;
+            Properties.INSERT;
+          END;
+      END;
+    END;
+
+    [External]
+    PROCEDURE GetMethodParameterProperties@51(ServiceName@1000 : Text;MethodName@1006 : Text;ParameterName@1009 : Text;VAR Properties@1001 : Record 823);
+    VAR
+      ServiceType@1002 : DotNet "'mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Type";
+      MethodInfo@1003 : DotNet "'mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Reflection.MethodInfo";
+      ParameterInfo@1005 : DotNet "'mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Reflection.ParameterInfo";
+      Type@1007 : DotNet "'mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Type";
+      PropertyInfo@1008 : DotNet "'mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Reflection.PropertyInfo";
+    BEGIN
+      ServiceType := Assembly.GetType(ServiceName);
+      MethodInfo := ServiceType.GetMethod(MethodName);
+      FOREACH ParameterInfo IN MethodInfo.GetParameters DO
+        IF ParameterInfo.Name = ParameterName THEN BEGIN
+          Type := ParameterInfo.GetType;
+          FOREACH PropertyInfo IN Type.GetProperties DO BEGIN
+            Properties.ID += 1;
+            Properties.Name := PropertyInfo.Name;
+            Properties.Value := PropertyInfo.PropertyType.ToString;
+            Properties.INSERT;
+          END;
+        END;
+    END;
+
+    [External]
+    PROCEDURE GetTypes@10(VAR Types@1001 : Record 823;VAR Services@1000 : Record 823);
+    VAR
+      Type@1002 : DotNet "'mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Type";
+      BaseType@1003 : DotNet "'mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Type";
+      SoapHttpClientProtocol@1004 : DotNet "'System.Web.Services, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a'.System.Web.Services.Protocols.SoapHttpClientProtocol";
+    BEGIN
+      FOREACH Type IN Assembly.ExportedTypes DO BEGIN
+        BaseType := Type.BaseType;
+        Types.ID += 1;
+        Types.Name := Type.Name;
+        IF NOT ISNULL(BaseType) THEN BEGIN
+          Types.Value := BaseType.ToString;
+          IF BaseType.Equals(GETDOTNETTYPE(SoapHttpClientProtocol)) OR
+             (STRPOS(BaseType.ToString,'System.ServiceModel.ClientBase') > 0)
+          THEN BEGIN
+            Services.ID += 1;
+            Services.Name := Types.Name;
+            Services.Value := BaseType.ToString;
+            Services.INSERT;
+          END;
+        END;
+        Types.INSERT;
+      END;
+    END;
+
+    [External]
+    PROCEDURE GetParameterValue@42(VAR ParameterValue@1000 : Variant;ParameterIndex@1001 : Integer);
+    BEGIN
+      ParameterValue := Parameters.GetValue(ParameterIndex - 1);
+    END;
+
+    [External]
+    PROCEDURE GetParameterValueAsText@43(ParameterIndex@1001 : Integer) ParameterValue : Text;
+    VAR
+      ParameterValueVariant@1002 : Variant;
+    BEGIN
+      GetParameterValue(ParameterValueVariant,ParameterIndex);
+      ParameterValue := FORMAT(ParameterValueVariant,0,9);
+    END;
+
+    [External]
+    PROCEDURE GetParameterValueAsInt@44(ParameterIndex@1001 : Integer) ParameterValue : Integer;
+    VAR
+      ParameterValueVariant@1002 : Variant;
+    BEGIN
+      GetParameterValue(ParameterValueVariant,ParameterIndex);
+      IF ParameterValueVariant.ISINTEGER THEN
+        ParameterValue := ParameterValueVariant;
+    END;
+
+    [External]
+    PROCEDURE GetParameterValueAsDecimal@45(ParameterIndex@1001 : Integer) ParameterValue : Decimal;
+    VAR
+      ParameterValueVariant@1002 : Variant;
+    BEGIN
+      GetParameterValue(ParameterValueVariant,ParameterIndex);
+      IF ParameterValueVariant.ISDECIMAL THEN
+        ParameterValue := ParameterValueVariant;
+    END;
+
+    [External]
+    PROCEDURE GetParameterValueAsDateTime@46(ParameterIndex@1001 : Integer) ParameterValue : DateTime;
+    VAR
+      ParameterValueVariant@1002 : Variant;
+    BEGIN
+      GetParameterValue(ParameterValueVariant,ParameterIndex);
+      IF ParameterValueVariant.ISDATETIME THEN
+        ParameterValue := ParameterValueVariant;
+    END;
+
+    [External]
+    PROCEDURE GetGlobalParameterFromParameters@25(ParameterIndex@1000 : Integer);
+    BEGIN
+      GlobalParameter := Parameters.GetValue(ParameterIndex - 1);
+    END;
+
+    [External]
+    PROCEDURE GetGlobalParameterAsXml@39(VAR TempBlob@1000 : Record 99008535);
+    VAR
+      XmlSerializer@1001 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.Serialization.XmlSerializer";
+      OutStr@1002 : OutStream;
+    BEGIN
+      TempBlob.INIT;
+      TempBlob.Blob.CREATEOUTSTREAM(OutStr);
+      XmlSerializer := XmlSerializer.XmlSerializer(GlobalParameter.GetType,GetTargetNamespace);
+      XmlSerializer.Serialize(OutStr,GlobalParameter);
+    END;
+
+    [External]
+    PROCEDURE GetCSharpCode@11(VAR TempBlob@1000 : Record 99008535);
+    BEGIN
+      TempBlob.WriteAsText(StringBuilder.ToString,TEXTENCODING::UTF8);
+    END;
+
+    [External]
+    PROCEDURE CommitActivityLog@52();
+    VAR
+      ActivityLog@1000 : Record 710;
+    BEGIN
+      IF TempActivityLog.FINDSET THEN REPEAT
+        ActivityLog := TempActivityLog;
+        ActivityLog.ID := 0;
+        ActivityLog.INSERT;
+      UNTIL TempActivityLog.NEXT = 0;
+      TempActivityLog.DELETEALL;
+    END;
+
+    LOCAL PROCEDURE ReadServiceDescription@50();
+    VAR
+      String@1000 : DotNet "'mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.String";
+      InStr@1001 : InStream;
+    BEGIN
+      OnBeforeReadServiceDescription(TempBlob);
+      TempBlob.Blob.CREATEINSTREAM(InStr);
+      ServiceDescription := ServiceDescription.Read(InStr);
+    END;
+
+    LOCAL PROCEDURE ReadServerX509CertificateValue@10000235() : Text;
+    VAR
+      XmlDomMgt@1001 : Codeunit 6224;
+      XmlDocument@1002 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlDocument";
+      Identity@1003 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlNode";
+      KeyInfo@1004 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlNode";
+      X509Data@1005 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlNode";
+      X509Certificate@1006 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlNode";
+      InStr@1007 : InStream;
+      CertificateValue@1009 : Text;
+    BEGIN
+      TempBlob.Blob.CREATEINSTREAM(InStr);
+      XmlDomMgt.LoadXMLDocumentFromInStream(InStr,XmlDocument);
+      IF XmlDomMgt.FindNodeWithNamespace(XmlDocument.DocumentElement,'//urn:Identity','urn','http://schemas.xmlsoap.org/ws/2006/02/addressingidentity',Identity) THEN
+        IF XmlDomMgt.FindNodeWithNamespace(Identity,'//urn:KeyInfo','urn','http://www.w3.org/2000/09/xmldsig#',KeyInfo) THEN
+          IF XmlDomMgt.FindNodeWithNamespace(KeyInfo,'//urn:X509Data','urn','http://www.w3.org/2000/09/xmldsig#',X509Data) THEN
+            IF XmlDomMgt.FindNodeWithNamespace(X509Data,'//urn:X509Data','urn','http://www.w3.org/2000/09/xmldsig#',X509Certificate) THEN
+              CertificateValue := X509Certificate.InnerText;
+
+      OnAfterReadServerX509CertificateValue(TempBlob,CertificateValue);
+      EXIT(CertificateValue);
+    END;
+
+    [TryFunction]
+    LOCAL PROCEDURE CompileASMX@60(ProtocolName@1025 : Text);
+    VAR
+      ServiceDescriptionImporter@1017 : DotNet "'System.Web.Services, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a'.System.Web.Services.Description.ServiceDescriptionImporter";
+      ServiceDescriptionImporterStyle@1019 : DotNet "'System.Web.Services, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a'.System.Web.Services.Description.ServiceDescriptionImportStyle";
+      XmlCodeGenerationOptions@1001 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.Serialization.CodeGenerationOptions";
+      ServiceDescriptionImportWarnings@1016 : DotNet "'System.Web.Services, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a'.System.Web.Services.Description.ServiceDescriptionImportWarnings";
+      CodeNamespace@1015 : DotNet "'System, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.CodeDom.CodeNamespace";
+      CodeCompileUnit@1014 : DotNet "'System, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.CodeDom.CodeCompileUnit";
+    BEGIN
+      ServiceDescriptionImporter := ServiceDescriptionImporter.ServiceDescriptionImporter;
+      ServiceDescriptionImporter.AddServiceDescription(ServiceDescription,'','');
+      ServiceDescriptionImporter.ProtocolName := ProtocolName;
+      ServiceDescriptionImporter.Style := ServiceDescriptionImporterStyle.Client;
+      ServiceDescriptionImporter.CodeGenerationOptions := XmlCodeGenerationOptions.GenerateProperties;
+
+      CodeNamespace := CodeNamespace.CodeNamespace;
+      CodeCompileUnit := CodeCompileUnit.CodeCompileUnit;
+      CodeCompileUnit.Namespaces.Add(CodeNamespace);
+
+      ServiceDescriptionImportWarnings := ServiceDescriptionImporter.Import(CodeNamespace, CodeCompileUnit);
+      IF ServiceDescriptionImportWarnings = 0 THEN
+        CompileCodeCompileUnit(CodeNamespace,CodeCompileUnit)
+      ELSE
+        ERROR(ServiceDescriptionImportWarnings.ToString);
+      CLEAR(Constructor);
+    END;
+
+    [TryFunction]
+    LOCAL PROCEDURE CompileSVC@61(Uri@1020 : Text);
+    VAR
+      EndpointAddress@1090 : DotNet "'System.ServiceModel, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.ServiceModel.EndpointAddress";
+      HttpBinding@1091 : DotNet "'System.ServiceModel, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.ServiceModel.WSHttpBinding";
+      ServiceContractGenerator@1000 : DotNet "'System.ServiceModel, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.ServiceModel.Description.ServiceContractGenerator";
+      WsdlImporter@1001 : DotNet "'System.ServiceModel, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.ServiceModel.Description.WsdlImporter";
+      MetadataExchangeClient@1002 : DotNet "'System.ServiceModel, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.ServiceModel.Description.MetadataExchangeClient";
+      MetadataExchangeClientMode@1012 : DotNet "'System.ServiceModel, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.ServiceModel.Description.MetadataExchangeClientMode";
+      MetadataSet@1092 : DotNet "'System.ServiceModel, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.ServiceModel.Description.MetadataSet";
+      Contracts@1003 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Collections.ObjectModel.Collection`1";
+      ContractDescription@1004 : DotNet "'System.ServiceModel, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.ServiceModel.Description.ContractDescription";
+      CodeCompileUnit@1013 : DotNet "'System, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.CodeDom.CodeCompileUnit";
+      Credential@1011 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Net.NetworkCredential";
+      WebServiceUri@1032 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Uri";
+      CodeNamespace@1050 : DotNet "'System, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.CodeDom.CodeNamespace";
+    BEGIN
+      IF ISNULL(Credential) THEN
+        CreateBasicBinding(Uri,'None')
+      ELSE
+        CreateBasicBinding(Uri,'Basic');
+      HttpBinding := Constructor.GetValue(0);
+      EndpointAddress := Constructor.GetValue(1);
+
+      MetadataExchangeClient := MetadataExchangeClient.MetadataExchangeClient(HttpBinding);
+      MetadataExchangeClient.ResolveMetadataReferences := TRUE;
+      IF NOT ISNULL(Credential) THEN
+        MetadataExchangeClient.HttpCredentials(Credential);
+
+      MetadataSet := MetadataExchangeClient.GetMetadata(EndpointAddress.Uri,MetadataExchangeClientMode.HttpGet);
+      WsdlImporter := WsdlImporter.WsdlImporter(MetadataSet);
+
+      CodeNamespace := CodeNamespace.CodeNamespace;
+      CodeCompileUnit := CodeCompileUnit.CodeCompileUnit;
+      CodeCompileUnit.Namespaces.Add(CodeNamespace);
+
+      ServiceContractGenerator := ServiceContractGenerator.ServiceContractGenerator(CodeCompileUnit);
+
+      Contracts := WsdlImporter.ImportAllContracts;
+      FOREACH ContractDescription IN Contracts DO
+        ServiceContractGenerator.GenerateServiceContractType(ContractDescription);
+
+      IF ServiceContractGenerator.Errors.Count > 0 THEN
+        ERROR(CompileErr);
+
+      CompileCodeCompileUnit(CodeNamespace,CodeCompileUnit);
+    END;
+
+    LOCAL PROCEDURE CompileCodeCompileUnit@62(CodeNamespace@1000 : DotNet "'System, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.CodeDom.CodeNamespace";CodeCompileUnit@1001 : DotNet "'System, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.CodeDom.CodeCompileUnit");
+    VAR
+      CodeCompileUnitArray@1002 : DotNet "'mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Array";
+      CodeGenerationOptions@1003 : DotNet "'System, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.CodeDom.Compiler.CodeGeneratorOptions";
+      CompilerParameters@1004 : DotNet "'System, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.CodeDom.Compiler.CompilerParameters";
+      CompilerResults@1005 : DotNet "'System, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.CodeDom.Compiler.CompilerResults";
+      CompilerError@1012 : DotNet "'System, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.CodeDom.Compiler.CompilerError";
+      StringWriter@1006 : DotNet "'mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.IO.StringWriter";
+      CultureInfo@1007 : DotNet "'mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Globalization.CultureInfo";
+      CSharpCodeProvider@1008 : DotNet "'System, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.Microsoft.CSharp.CSharpCodeProvider";
+      AssemblyReferences@1009 : DotNet "'mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Array";
+      CSharpCode@1011 : DotNet "'mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Array";
+      String@1010 : DotNet "'mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.String";
+    BEGIN
+      StringBuilder := StringBuilder.StringBuilder;
+      StringWriter := StringWriter.StringWriter(StringBuilder,CultureInfo.CurrentCulture);
+      CSharpCodeProvider := CSharpCodeProvider.CSharpCodeProvider;
+      CSharpCodeProvider.GenerateCodeFromCompileUnit(CodeCompileUnit,StringWriter,CodeGenerationOptions.CodeGeneratorOptions);
+
+      AssemblyReferences := AssemblyReferences.CreateInstance(GETDOTNETTYPE(String),2);
+      AssemblyReferences.SetValue('System.Web.Services.dll',0);
+      AssemblyReferences.SetValue('System.Xml.dll',1);
+
+      CompilerParameters := CompilerParameters.CompilerParameters(AssemblyReferences);
+      CompilerParameters.GenerateExecutable := FALSE;
+      CompilerParameters.GenerateInMemory := TRUE;
+      CompilerParameters.TreatWarningsAsErrors := TRUE;
+      CompilerParameters.WarningLevel := 4;
+
+      CodeCompileUnitArray := CodeCompileUnitArray.CreateInstance(GETDOTNETTYPE(CodeCompileUnit),1);
+      CodeCompileUnitArray.SetValue(CodeCompileUnit,0);
+      CompilerResults := CSharpCodeProvider.CompileAssemblyFromDom(CompilerParameters,CodeCompileUnitArray);
+
+      FOREACH CompilerError IN CompilerResults.Errors DO
+        String := CompilerError.ErrorText;
+
+      IF CompilerResults.Errors.Count > 0 THEN
+        ERROR(String);
+
+      Assembly := CompilerResults.CompiledAssembly;
+      Properties := Properties.Dictionary;
+    END;
+
+    LOCAL PROCEDURE CreateCredentials@63(Username@1000 : Text;Password@1001 : Text);
+    BEGIN
+      Credential := Credential.NetworkCredential;
+      Credential.UserName := Username;
+      Credential.Password := Password;
+    END;
+
+    LOCAL PROCEDURE ExecuteStaticMethod@66(VAR Class@1000 : DotNet "'mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Object";MethodName@1001 : Text);
+    VAR
+      Object@1002 : DotNet "'mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Object";
+      ObjectParameters@1003 : DotNet "'mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Array";
+      MethodInfo@1004 : DotNet "'mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Reflection.MethodInfo";
+      Type@1005 : DotNet "'mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Type";
+    BEGIN
+      ObjectParameters := ObjectParameters.CreateInstance(GETDOTNETTYPE(Object),0);
+      Type := GETDOTNETTYPE(Class);
+      FOREACH MethodInfo IN Type.GetMethods DO
+        IF MethodInfo.Name = MethodName THEN BEGIN
+          Class := MethodInfo.Invoke(Object,ObjectParameters);
+          EXIT;
+        END;
+    END;
+
+    LOCAL PROCEDURE ExecuteStaticProperty@67(VAR Class@1000 : DotNet "'mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Object";PropertyName@1001 : Text);
+    VAR
+      PropertyInfo@1002 : DotNet "'mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Reflection.PropertyInfo";
+      Type@1003 : DotNet "'mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Type";
+    BEGIN
+      Type := GETDOTNETTYPE(Class);
+      FOREACH PropertyInfo IN Type.GetProperties DO
+        IF PropertyInfo.Name = PropertyName THEN BEGIN
+          Class := PropertyInfo.GetValue(Class);
+          EXIT;
+        END;
+    END;
+
+    LOCAL PROCEDURE ParseEnum@68(VAR Class@1000 : DotNet "'mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Object";EnumType@1003 : DotNet "'mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Type";EnumValue@1001 : Text);
+    VAR
+      Enum@1002 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Enum";
+    BEGIN
+      Class := Enum.Parse(EnumType,EnumValue);
+    END;
+
+    LOCAL PROCEDURE CreateActivityLog@64(TempBlob@1000 : Record 99008535;Context@1008 : Text;ServiceName@1001 : Text;MethodName@1002 : Text);
+    VAR
+      ActivityStatus@1006 : 'Success,Failed';
+      OutStr@1004 : OutStream;
+    BEGIN
+      IF NOT LogActivity THEN EXIT;
+
+      TempActivityLog.LogActivity(LoggingRecordId,ActivityStatus::Success,Context,STRSUBSTNO('%1:%2',ServiceName,MethodName),'');
+      TempActivityLog."Detailed Info" := TempBlob.Blob;
+      TempActivityLog.MODIFY;
+    END;
+
+    LOCAL PROCEDURE EndsWith@1(Uri@1000 : Text;Type@1001 : Text) : Boolean;
+    VAR
+      String@1002 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.String";
+    BEGIN
+      String := UPPERCASE(Uri);
+      EXIT(String.EndsWith(UPPERCASE(Type)));
+    END;
+
+    [Integration]
+    LOCAL PROCEDURE OnBeforeReadServiceDescription@70(VAR ServiceDescription@1000 : Record 99008535);
+    BEGIN
+    END;
+
+    [Integration]
+    LOCAL PROCEDURE OnAfterReadServerX509CertificateValue@71(VAR ServiceDescription@1000 : Record 99008535;VAR CertificateValue@1001 : Text);
+    BEGIN
+    END;
+
+    EVENT Assembly@1001::ModuleResolve@84(sender@1001 : Variant;e@1000 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.ResolveEventArgs");
+    BEGIN
+    END;
+
+    BEGIN
+    END.
+  }
+}
+
