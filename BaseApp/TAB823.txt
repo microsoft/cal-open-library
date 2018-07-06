@@ -15,6 +15,7 @@ OBJECT Table 823 Name/Value Buffer
                                                    DataClassification=SystemMetadata}
     { 2   ;   ;Name                ;Text250       ;DataClassification=SystemMetadata}
     { 3   ;   ;Value               ;Text250       ;DataClassification=SystemMetadata}
+    { 16  ;   ;Value BLOB          ;BLOB          ;DataClassification=SystemMetadata}
   }
   KEYS
   {
@@ -31,7 +32,7 @@ OBJECT Table 823 Name/Value Buffer
       TemporaryErr@1000 : TextConst 'ENU=The record must be temporary.';
 
     [External]
-    PROCEDURE AddNewEntry@1001(NewName@1000 : Text[250];NewValue@1001 : Text[250]);
+    PROCEDURE AddNewEntry@1001(NewName@1000 : Text[250];NewValue@1001 : Text);
     VAR
       NewID@1002 : Integer;
     BEGIN
@@ -46,9 +47,45 @@ OBJECT Table 823 Name/Value Buffer
 
       ID := NewID;
       Name := NewName;
-      Value := NewValue;
+      SetValueWithoutModifying(NewValue);
 
       INSERT(TRUE);
+    END;
+
+    [External]
+    PROCEDURE GetValue@22() : Text;
+    VAR
+      TempBlob@1001 : Record 99008535;
+      CR@1002 : Text[1];
+    BEGIN
+      IF NOT "Value BLOB".HASVALUE THEN
+        EXIT(Value);
+      CR[1] := 10;
+      CALCFIELDS("Value BLOB");
+      TempBlob.Blob := "Value BLOB";
+      EXIT(TempBlob.ReadAsText(CR,TEXTENCODING::Windows));
+    END;
+
+    [External]
+    PROCEDURE SetValue@24(NewValue@1000 : Text);
+    BEGIN
+      SetValueWithoutModifying(NewValue);
+      MODIFY;
+    END;
+
+    [External]
+    PROCEDURE SetValueWithoutModifying@25(NewValue@1000 : Text);
+    VAR
+      TempBlob@1001 : Record 99008535;
+    BEGIN
+      CLEAR("Value BLOB");
+      Value := COPYSTR(NewValue,1,MAXSTRLEN(Value));
+      IF STRLEN(NewValue) <= MAXSTRLEN(Value) THEN
+        EXIT; // No need to store anything in the blob
+      IF NewValue = '' THEN
+        EXIT;
+      TempBlob.WriteAsText(NewValue,TEXTENCODING::Windows);
+      "Value BLOB" := TempBlob.Blob;
     END;
 
     BEGIN
