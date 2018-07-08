@@ -1,0 +1,57 @@
+OBJECT Codeunit 3028 DotNet_CertificateCollection
+{
+  OBJECT-PROPERTIES
+  {
+    Date=08.07.18;
+    Time=21:50:38;
+    Modified=Yes;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      X509Certificate2Collection@1000 : DotNet "'System, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Security.Cryptography.X509Certificates.X509Certificate2Collection";
+
+    [LineStart(58)]
+    PROCEDURE Initialize@4();
+    BEGIN
+      GetStoreCollections;
+    END;
+
+    [LineStart(61)]
+    PROCEDURE GetCount@2() : Integer;
+    BEGIN
+      EXIT(X509Certificate2Collection.Count);
+    END;
+
+    [LineStart(64)]
+    PROCEDURE GetX509Certificate@3(Index@1000 : Integer;VAR DotNet_Certificate@1001 : Codeunit 3027);
+    BEGIN
+      DotNet_Certificate.SetCertificate(X509Certificate2Collection.Item(Index));
+    END;
+
+    [LineStart(67)]
+    LOCAL PROCEDURE GetStoreCollections@18();
+    VAR
+      X509Store@1002 : DotNet "'System, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Security.Cryptography.X509Certificates.X509Store";
+      X509StoreName@1003 : DotNet "'System, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Security.Cryptography.X509Certificates.StoreName";
+      X509StoreLocation@1004 : DotNet "'System, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Security.Cryptography.X509Certificates.StoreLocation";
+      X509StoreOpenFlags@1005 : DotNet "'System, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Security.Cryptography.X509Certificates.OpenFlags";
+    BEGIN
+      X509Store := X509Store.X509Store(X509StoreName.My,X509StoreLocation.LocalMachine);
+      X509Store.Open(X509StoreOpenFlags.ReadOnly);
+      X509Certificate2Collection := X509Store.Certificates;
+      X509Store.Close;
+    END;
+
+    BEGIN
+    END.
+  }
+}
+

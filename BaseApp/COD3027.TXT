@@ -1,0 +1,72 @@
+OBJECT Codeunit 3027 DotNet_Certificate
+{
+  OBJECT-PROPERTIES
+  {
+    Date=08.07.18;
+    Time=21:48:23;
+    Modified=Yes;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      X509Certificate2@1000 : DotNet "'System, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Security.Cryptography.X509Certificates.X509Certificate2";
+      LoadCertificateErr@1001 : TextConst 'ENU=Failed to load certificate!';
+
+    [External]
+    [LineStart(33)]
+    PROCEDURE LoadFromMemoryStream@3(DotNet_MemoryStream@1000 : Codeunit 3009;Password@1001 : Text);
+    VAR
+      DotNetMemoryStream2@1003 : DotNet "'mscorlib'.System.IO.MemoryStream";
+      X509KeyStorageFlags@1002 : DotNet "'mscorlib'.System.Security.Cryptography.X509Certificates.X509KeyStorageFlags";
+    BEGIN
+      DotNet_MemoryStream.GetMemoryStream(DotNetMemoryStream2);
+      X509Certificate2 := X509Certificate2.X509Certificate2(DotNetMemoryStream2.ToArray,Password,X509KeyStorageFlags.Exportable);
+      IF ISNULL(X509Certificate2) THEN
+        ERROR(LoadCertificateErr);
+    END;
+
+    [External]
+    [LineStart(39)]
+    PROCEDURE ExportToArray@13(VAR DotNet_Array@1001 : Codeunit 3000);
+    VAR
+      X509ContentType@1003 : DotNet "'mscorlib'.System.Security.Cryptography.X509Certificates.X509ContentType";
+    BEGIN
+      DotNet_Array.SetArray(X509Certificate2.Export(X509ContentType.Pkcs12));
+    END;
+
+    [External]
+    [LineStart(42)]
+    PROCEDURE GetCertificateDetails@2(VAR FriendlyName@1001 : Text;VAR Thumbprint@1002 : Text;VAR Issuer@1003 : Text;VAR Subject@1000 : Text;VAR Expiration@1004 : DateTime;VAR HasPrivateKey@1008 : Boolean);
+    BEGIN
+      FriendlyName := X509Certificate2.FriendlyName;
+      Thumbprint := X509Certificate2.Thumbprint;
+      Issuer := X509Certificate2.Issuer;
+      Subject := X509Certificate2.Subject;
+      EVALUATE(Expiration,X509Certificate2.GetExpirationDateString);
+      HasPrivateKey := X509Certificate2.HasPrivateKey;
+    END;
+
+    [LineStart(50)]
+    PROCEDURE GetCertificate@10(VAR DotNetX509Certificate2@1000 : DotNet "'System, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Security.Cryptography.X509Certificates.X509Certificate2");
+    BEGIN
+      DotNetX509Certificate2 := X509Certificate2;
+    END;
+
+    [LineStart(53)]
+    PROCEDURE SetCertificate@11(DotNetX509Certificate2@1000 : DotNet "'System, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Security.Cryptography.X509Certificates.X509Certificate2");
+    BEGIN
+      X509Certificate2 := DotNetX509Certificate2;
+    END;
+
+    BEGIN
+    END.
+  }
+}
+
