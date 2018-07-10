@@ -1,0 +1,126 @@
+OBJECT Codeunit 50008 DotNet_SmtpMessage
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Modified=Yes;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      DotNetSmtpMessage@17024400 : DotNet "'Microsoft.Dynamics.Nav.SMTP, Version=11.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.Microsoft.Dynamics.Nav.SMTP.SmtpMessage";
+
+    [External]
+    PROCEDURE CreateMessage@17024401();
+    BEGIN
+      DotNetSmtpMessage := DotNetSmtpMessage.SmtpMessage;
+    END;
+
+    [External]
+    PROCEDURE SetFromAddress@17024402(FromAddress@17024400 : Text);
+    BEGIN
+      DotNetSmtpMessage.FromAddress := FromAddress;
+    END;
+
+    [External]
+    PROCEDURE SetFromName@17024403(FromName@17024400 : Text);
+    BEGIN
+      DotNetSmtpMessage.FromAddress := FromName;
+    END;
+
+    [External]
+    PROCEDURE SetToAddress@17024405(ToAddress@17024400 : Text);
+    BEGIN
+      DotNetSmtpMessage."To" := ToAddress;
+    END;
+
+    [External]
+    PROCEDURE SetSubject@17024410(Subject@17024400 : Text);
+    BEGIN
+      DotNetSmtpMessage.Subject := Subject;
+    END;
+
+    [External]
+    PROCEDURE SetAsHtmlFormatted@17024408(HtmlFormatted@17024400 : Boolean);
+    BEGIN
+      DotNetSmtpMessage.HtmlFormatted := HtmlFormatted;
+    END;
+
+    [External]
+    PROCEDURE SetTimeout@17024424(Timeout@17024400 : Integer);
+    BEGIN
+      DotNetSmtpMessage.Timeout := Timeout;
+      DotNetSmtpMessage.ConvertBase64ImagesToContentId
+    END;
+
+    [External]
+    PROCEDURE ClearBody@17024412();
+    BEGIN
+      DotNetSmtpMessage.Body := '';
+    END;
+
+    [External]
+    PROCEDURE AppendToBody@17024413(Text@17024400 : Text);
+    BEGIN
+      DotNetSmtpMessage.AppendBody(Text);
+    END;
+
+    [External]
+    PROCEDURE AddRecipients@17024415(AddressToAdd@17024401 : Text);
+    BEGIN
+      DotNetSmtpMessage.AddRecipients(AddressToAdd);
+    END;
+
+    [External]
+    PROCEDURE AddCC@17024418(AddressToAdd@17024401 : Text);
+    BEGIN
+      DotNetSmtpMessage.AddCC(AddressToAdd);
+    END;
+
+    [External]
+    PROCEDURE AddBCC@17024419(AddressToAdd@17024401 : Text);
+    BEGIN
+      DotNetSmtpMessage.AddBCC(AddressToAdd);
+    END;
+
+    [External]
+    PROCEDURE AddAttachment@17024417(AttachmentStream@17024401 : InStream;AttachmentName@17024400 : Text);
+    BEGIN
+      DotNetSmtpMessage.AddAttachment(AttachmentStream, AttachmentName);
+    END;
+
+    [External]
+    PROCEDURE SendMail@17024421(ServerName@17024401 : Text;ServerPort@17024400 : Integer;UseAuthentication@17024402 : Boolean;Username@17024403 : Text;Password@17024404 : Text;UseSSL@17024405 : Boolean) : Text;
+    BEGIN
+      EXIT(DotNetSmtpMessage.Send(ServerName, ServerPort, UseAuthentication, Username, Password, UseSSL));
+    END;
+
+    [External]
+    PROCEDURE ConvertBase64ImagesToContentId@17024426(UseConvertBase64ImagesToContentId@17024400 : Boolean) : Boolean;
+    BEGIN
+      DotNetSmtpMessage.ConvertBase64ImagesToContentId();
+    END;
+
+    PROCEDURE GetSmtpMessage@4(VAR CurrentDotNetSmtpMessage@17024400 : DotNet "'Microsoft.Dynamics.Nav.SMTP, Version=11.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.Microsoft.Dynamics.Nav.SMTP.SmtpMessage");
+    BEGIN
+      CurrentDotNetSmtpMessage := DotNetSmtpMessage;
+    END;
+
+    PROCEDURE SetSmtpMessage@5(NewDotNetSmtpMessage@17024400 : DotNet "'Microsoft.Dynamics.Nav.SMTP, Version=11.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.Microsoft.Dynamics.Nav.SMTP.SmtpMessage");
+    BEGIN
+      DotNetSmtpMessage := NewDotNetSmtpMessage;
+    END;
+
+    BEGIN
+    END.
+  }
+}
+
