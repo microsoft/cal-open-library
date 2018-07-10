@@ -1,0 +1,133 @@
+OBJECT Codeunit 50921 Json Interface Test
+{
+  OBJECT-PROPERTIES
+  {
+    Date=02.05.18;
+    Time=12:23:38;
+    Modified=Yes;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    Subtype=Test;
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+
+    [Test]
+    PROCEDURE TestVariableStore@10901();
+    VAR
+      TempBlob@10901 : Record 99008535;
+      JsonInterfaceMgt@10900 : Codeunit 50920;
+      TextValue@10902 : Text;
+    BEGIN
+      WITH JsonInterfaceMgt DO BEGIN
+        Initialize;
+        AddVariable('TestVariable','TestVariableValue');
+        AddVariable('TestVariable2','TestVariableValue2');
+        GetAsTempBlob(TempBlob);
+
+        InitializeFromTempBlob(TempBlob);
+        IF NOT GetVariableTextValue(TextValue,'TestVariable') THEN
+          ERROR('Unable to retrieve text value from variable store!');
+        IF TextValue <> 'TestVariableValue' THEN
+          ERROR('Invalid value retrieved from variable store, %1 <> %2',TextValue,'TextVariableValue');
+        IF NOT GetVariableTextValue(TextValue,'TestVariable2') THEN
+          ERROR('Unable to retrieve text value from variable store!');
+        IF TextValue <> 'TestVariableValue2' THEN
+          ERROR('Invalid value retrieved from variable store, %1 <> %2',TextValue,'TextVariableValue');
+
+      END;
+    END;
+
+    [Test]
+    PROCEDURE TestCodeunitExecution@10902();
+    VAR
+      TempBlob@10901 : Record 99008535;
+      JsonInterfaceMgt@10900 : Codeunit 50920;
+    BEGIN
+      WITH JsonInterfaceMgt DO BEGIN
+        ExecuteInterfaceCodeunitIfExists('ApplicationManagement',TempBlob,'Codeunit ApplicationManagement not found!');
+
+
+      END
+    END;
+
+    [Test]
+    PROCEDURE TestDatabaseRecordIdStore@10905();
+    VAR
+      Customer@10901 : Record 18;
+      TempBlob@10902 : Record 99008535;
+      JsonInterfaceMgt@10900 : Codeunit 50920;
+      RecRef@10903 : RecordRef;
+    BEGIN
+      WITH JsonInterfaceMgt DO BEGIN
+        Customer.INIT;
+        Customer."No." := 'TESTCUSTOMER';
+        Customer.INSERT;
+
+        Initialize;
+        AddVariable('TestVariable','TestVariableValue');
+        AddRecordID(Customer);
+        GetAsTempBlob(TempBlob);
+
+        InitializeFromTempBlob(TempBlob);
+        RecRef.OPEN(DATABASE::Customer);
+        GetRecord(RecRef);
+        RecRef.SETTABLE(Customer);
+        IF Customer."No." <> 'TESTCUSTOMER' THEN
+          ERROR('Unable to retrieve stored record!');
+        Customer.DELETE;
+      END;
+    END;
+
+    [Test]
+    PROCEDURE TestTempRecordStore@10909();
+    VAR
+      TempCustomer@10902 : TEMPORARY Record 18;
+      TempBlob@10901 : Record 99008535;
+      JsonInterfaceMgt@10900 : Codeunit 50920;
+      RecRef@10904 : RecordRef;
+      i@10903 : Integer;
+    BEGIN
+      WITH JsonInterfaceMgt DO BEGIN
+        FOR i := 0 TO 9 DO BEGIN
+          TempCustomer.INIT;
+          TempCustomer."No." := STRSUBSTNO('TESTCUSTOMER%1',i);
+          TempCustomer.INSERT;
+        END;
+
+        TempCustomer.SETRANGE("No.",'TESTCUSTOMER1');
+        Initialize;
+        AddVariable('TestVariable','TestVariableValue');
+        AddTempTable('TempCustomer',TempCustomer);
+        GetAsTempBlob(TempBlob);
+
+        TempCustomer.RESET;
+        TempCustomer.DELETEALL;
+
+        InitializeFromTempBlob(TempBlob);
+        RecRef.GETTABLE(TempCustomer);
+        GetTempTable('TempCustomer',RecRef);
+        RecRef.SETTABLE(TempCustomer);
+
+        IF TempCustomer.COUNT <> 1 THEN
+          ERROR('Temporary Table View not passed correctly.  %1 <> 1',TempCustomer.COUNT);
+
+        TempCustomer.RESET;
+        IF TempCustomer.COUNT <> 10 THEN
+          ERROR('Temporary Table not passed correctly!');
+
+        IF NOT TempCustomer.GET('TESTCUSTOMER1') THEN
+          ERROR('Temporary Table not passed correctly!');
+      END;
+    END;
+
+    BEGIN
+    END.
+  }
+}
+
