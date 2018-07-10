@@ -1,0 +1,126 @@
+OBJECT Codeunit 50006 DotNet_GzipStream
+{
+  OBJECT-PROPERTIES
+  {
+    Date=18-07-10;
+    Time=21:23:58;
+    Modified=Yes;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      DotNetGZipStream@17024400 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.IO.Compression.GZipStream";
+      TextErrorReadNotSupported@17024401 : TextConst 'ENU=Stream cannot be read from';
+      TextErrorWriteNotSupported@17024402 : TextConst 'ENU=Stream cannot be written to';
+
+    [External]
+    PROCEDURE InitGzipStreamFromTempBlob@17024400(VAR TempBlob@1000 : Record 99008535;CompressMode@17024401 : Boolean);
+    VAR
+      BaseInStream@17024400 : InStream;
+      BaseOutStream@17024402 : OutStream;
+    BEGIN
+      IF CompressMode THEN
+        BEGIN
+          CLEAR(TempBlob.Blob);
+          TempBlob.Blob.CREATEOUTSTREAM(BaseOutStream);
+          InitGzipStreamFromOutStream(BaseOutStream);
+        END
+      ELSE
+        BEGIN
+          TempBlob.Blob.CREATEINSTREAM(BaseInStream);
+          InitGzipStreamFromInStream(BaseInStream);
+        END;
+    END;
+
+    [External]
+    PROCEDURE InitGzipStreamFromInStream@7(VAR BaseStream@1000 : InStream);
+    VAR
+      DotNetCompressionMode@17024400 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.IO.Compression.CompressionMode";
+    BEGIN
+      DotNetGZipStream := DotNetGZipStream.GZipStream(BaseStream, DotNetCompressionMode.Decompress);
+    END;
+
+    [External]
+    PROCEDURE InitGzipStreamFromOutStream@17024402(VAR BaseStream@1000 : OutStream);
+    VAR
+      DotNetCompressionMode@17024400 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.IO.Compression.CompressionMode";
+    BEGIN
+      DotNetGZipStream := DotNetGZipStream.GZipStream(BaseStream, DotNetCompressionMode.Compress);
+    END;
+
+    [External]
+    PROCEDURE WriteToStream@8(VAR OutStream@1000 : OutStream);
+    BEGIN
+      IF NOT CanRead THEN
+        ERROR(TextErrorReadNotSupported);
+      DotNetGZipStream.CopyTo(OutStream);
+    END;
+
+    [External]
+    PROCEDURE WriteToTempBlob@17024401(VAR TempBlob@1000 : Record 99008535);
+    VAR
+      ResultStream@17024400 : OutStream;
+    BEGIN
+      CLEAR(TempBlob.Blob);
+      TempBlob.Blob.CREATEOUTSTREAM(ResultStream);
+      WriteToStream(ResultStream);
+    END;
+
+    [External]
+    PROCEDURE ReadFromStream@17024408(VAR InStream@1000 : InStream);
+    BEGIN
+      IF NOT CanWrite THEN
+        ERROR(TextErrorWriteNotSupported);
+
+      COPYSTREAM(DotNetGZipStream, InStream);
+    END;
+
+    [External]
+    PROCEDURE ReadFromTempBlob@17024410(VAR TempBlob@1000 : Record 99008535);
+    VAR
+      DataStream@17024400 : InStream;
+    BEGIN
+      TempBlob.Blob.CREATEINSTREAM(DataStream);
+      ReadFromStream(DataStream);
+    END;
+
+    [External]
+    PROCEDURE Close@3();
+    BEGIN
+      DotNetGZipStream.Close;
+    END;
+
+    [External]
+    PROCEDURE CanRead@17024403() : Boolean;
+    BEGIN
+      EXIT(DotNetGZipStream.CanRead);
+    END;
+
+    [External]
+    PROCEDURE CanWrite@17024404() : Boolean;
+    BEGIN
+      EXIT(DotNetGZipStream.CanWrite);
+    END;
+
+    PROCEDURE GetGZipStream@4(VAR CurrentDotNetGZipStream@17024400 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.IO.Compression.GZipStream");
+    BEGIN
+      CurrentDotNetGZipStream := DotNetGZipStream;
+    END;
+
+    PROCEDURE SetGZipStream@5(NewDotNetGZipStream@17024400 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.IO.Compression.GZipStream");
+    BEGIN
+      DotNetGZipStream := NewDotNetGZipStream;
+    END;
+
+    BEGIN
+    END.
+  }
+}
+
