@@ -1,0 +1,91 @@
+OBJECT Codeunit 50003 DotNet_XslTransform
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Modified=Yes;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      DotNetXslTransform@17024400 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.Xsl.XslCompiledTransform";
+
+    [External]
+    PROCEDURE CreateFromBlob@17024400(VAR TempBlob@17024400 : Record 99008535);
+    VAR
+      TransformStream@17024401 : InStream;
+    BEGIN
+      TempBlob.Blob.CREATEINSTREAM(TransformStream);
+      CreateFromStream(TransformStream);
+    END;
+
+    [External]
+    PROCEDURE CreateFromStream@17024424(XslTransformationStream@17024400 : InStream);
+    VAR
+      XmlReader@17024401 : Codeunit 50004;
+    BEGIN
+      XmlReader.CreateFromStream(XslTransformationStream);
+      CreateFromXmlReader(XmlReader);
+    END;
+
+    [External]
+    PROCEDURE CreateFromXmlReader@17024401(VAR XmlReader@17024400 : Codeunit 50004);
+    VAR
+      DotNetXmlReader@17024401 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlReader";
+    BEGIN
+      XmlReader.GetXmlReader(DotNetXmlReader);
+      DotNetXslTransform := DotNetXslTransform.XslCompiledTransform;
+      DotNetXslTransform.Load(DotNetXmlReader);
+    END;
+
+    [External]
+    PROCEDURE TransformBlob@17024408(VAR TempBlob@17024405 : Record 99008535;VAR DestinationStream@17024404 : OutStream);
+    VAR
+      SourceStream@17024400 : InStream;
+    BEGIN
+      TempBlob.Blob.CREATEINSTREAM(SourceStream);
+      TransformStream(SourceStream, DestinationStream);
+    END;
+
+    [External]
+    PROCEDURE TransformStream@17024428(VAR SourceXmlStream@17024405 : InStream;VAR DestinationStream@17024404 : OutStream);
+    VAR
+      XmlDocument@17024406 : Codeunit 3013;
+    BEGIN
+      XmlDocument.Load(SourceXmlStream);
+      TransformXmlDocument(XmlDocument, DestinationStream);
+    END;
+
+    [External]
+    PROCEDURE TransformXmlDocument@17024407(VAR XmlDocument@17024405 : Codeunit 3013;VAR DestinationStream@17024404 : OutStream);
+    VAR
+      DotNetXPathNavigatable@17024401 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XPath.IXPathNavigable";
+      DotNetXsltArgumentList@17024400 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.Xsl.XsltArgumentList";
+    BEGIN
+      XmlDocument.GetXmlDocument(DotNetXPathNavigatable);
+      DotNetXslTransform.Transform(DotNetXPathNavigatable, DotNetXsltArgumentList, DestinationStream);
+    END;
+
+    PROCEDURE GetXslTransform@17024402(VAR CurrentDotNetXslTransform@17024400 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.Xsl.XslCompiledTransform");
+    BEGIN
+      CurrentDotNetXslTransform := DotNetXslTransform;
+    END;
+
+    PROCEDURE SetXslTransform@17024404(NewDotNetXslTransform@17024400 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.Xsl.XslCompiledTransform");
+    BEGIN
+      DotNetXslTransform := NewDotNetXslTransform;
+    END;
+
+    BEGIN
+    END.
+  }
+}
+
