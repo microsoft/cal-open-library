@@ -1,0 +1,710 @@
+OBJECT Codeunit 50000 AES Encryption Management
+{
+  OBJECT-PROPERTIES
+  {
+    Date=07/08/18;
+    Time=[ 4:10:55 PM];
+    Modified=Yes;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+
+            // Public Interface ======================================================================================
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      OptionKeySize@1000000001 : '256,192,128';
+      OptionCipherMode@1000000002 : 'CBC,CFB,CTS,OFB,ECB';
+      OptionPaddingMode@1000000005 : 'PKCS7,ANSIX923,ISO10126,Zeros,None';
+      CipherMode@1000000003 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Security.Cryptography.CipherMode";
+      PaddingMode@1000000006 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Security.Cryptography.PaddingMode";
+      Key@1000000008 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Array";
+      IV@1000000007 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Array";
+      HaveKey@1000000009 : Boolean;
+      HaveIV@1000000010 : Boolean;
+      SystemType@1000000004 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Type";
+
+    [External]
+    PROCEDURE SetKeySize@1000000022(Size@1000000000 : '256,192,128');
+    BEGIN
+
+      OptionKeySize := Size;
+    END;
+
+    [External]
+    PROCEDURE SetCipherMode@1000000024(Mode@1000000000 : 'CBC,CFB,CTS,OFB,ECB');
+    BEGIN
+
+      OptionCipherMode := Mode;
+    END;
+
+    [External]
+    PROCEDURE SetPaddingMode@1000000000(Mode@1000000000 : 'PKCS7,ANSIX923,ISO10126,Zeros,None');
+    BEGIN
+
+      OptionPaddingMode := Mode;
+    END;
+
+    [External]
+    PROCEDURE SetKey@1000000008(VAR TempBlob@1000000000 : Record 99008535);
+    BEGIN
+
+      IF NOT TrySetKey(TempBlob) THEN ;
+    END;
+
+    [External]
+    PROCEDURE SetIV@1000000009(VAR TempBlob@1000000000 : Record 99008535);
+    BEGIN
+
+      IF TrySetKey(TempBlob) THEN ;
+    END;
+
+    [External]
+    PROCEDURE SetPassword@1000000015(VAR TempBlob@1000000000 : Record 99008535);
+    BEGIN
+
+      IF TrySetPassword(TempBlob) THEN ;
+    END;
+
+    [External]
+    PROCEDURE EncryptString@1000000001(Password@1000000001 : Text;String@1000000000 : Text;VAR EncryptedString@1000000003 : Text) : Boolean;
+    VAR
+      Result@1000000002 : Boolean;
+    BEGIN
+
+      IF STRLEN(String) > 0 THEN
+        Result := TryEncryptString(Password, String, EncryptedString);
+      CLEARLASTERROR;
+      EXIT(Result);
+    END;
+
+    [External]
+    PROCEDURE DecryptString@1000000002(Password@1000000001 : Text;EncryptedString@1000000000 : Text;VAR DecryptedString@1000000003 : Text) : Boolean;
+    VAR
+      Result@1000000002 : Boolean;
+    BEGIN
+
+      IF STRLEN(EncryptedString) > 0 THEN
+        Result := TryDecryptString(Password, EncryptedString, DecryptedString);
+      CLEARLASTERROR;
+      EXIT(Result);
+    END;
+
+    [External]
+    PROCEDURE EncryptTempBlob@1000000006(Password@1000000001 : Text;VAR TempBlobUnencrypted@1000000000 : Record 99008535;VAR TempBlobEncrypted@1000000003 : Record 99008535) : Boolean;
+    VAR
+      Result@1000000002 : Boolean;
+    BEGIN
+
+      Result := TryEncryptTempBlob(Password, TempBlobUnencrypted, TempBlobEncrypted);
+      CLEARLASTERROR;
+      EXIT(Result);
+    END;
+
+    [External]
+    PROCEDURE DecryptTempBlob@1000000005(Password@1000000001 : Text;VAR EncryptedTempBlob@1000000000 : Record 99008535;VAR DecryptedTempBlob@1000000003 : Record 99008535) : Boolean;
+    VAR
+      Result@1000000002 : Boolean;
+    BEGIN
+
+      Result := TryDecryptTempBlob(Password, EncryptedTempBlob, DecryptedTempBlob);
+      CLEARLASTERROR;
+      EXIT(Result);
+    END;
+
+    [External]
+    PROCEDURE EncryptStream@1000000003(Password@1000000001 : Text;VAR UnEncryptedStream@1000000002 : InStream;VAR EncryptedStream@1000000000 : OutStream) : Boolean;
+    VAR
+      Result@1000000003 : Boolean;
+    BEGIN
+
+      Result := TryEncryptStream(Password, UnEncryptedStream, EncryptedStream);
+      CLEARLASTERROR;
+      EXIT(Result);
+    END;
+
+    [External]
+    PROCEDURE DecryptStream@1000000004(Password@1000000002 : Text;VAR EncryptedStream@1000000001 : InStream;VAR UnEncryptedStream@1000000000 : OutStream) : Boolean;
+    VAR
+      Result@1000000003 : Boolean;
+    BEGIN
+
+      Result := TryDecryptStream(Password, EncryptedStream, UnEncryptedStream);
+      CLEARLASTERROR;
+      EXIT(Result);
+    END;
+
+    [External]
+    PROCEDURE ComputeAesCodeunitCheckSum@1000000026(VAR CheckSum@1000000009 : Text);
+    VAR
+      Object@1000000000 : Record 2000000001;
+      IStream@1000000001 : InStream;
+      MD5@1000000004 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Security.Cryptography.MD5";
+      BitConverter@1000000006 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.BitConverter";
+    BEGIN
+
+      // retrieve this object
+      Object.GET(Object.Type::Codeunit,'',CODEUNIT::"AES Encryption Management");
+
+      // open an instream to read the compiled code
+      Object.CALCFIELDS("BLOB Reference");
+      Object."BLOB Reference".CREATEINSTREAM(IStream);
+
+      // calculate a MD5 hash from the compiled code
+      MD5 := MD5.Create();
+      CheckSum := BitConverter.ToString(MD5.ComputeHash(IStream));
+      MD5.Dispose();
+
+      // Private Interface =====================================================================================
+    END;
+
+    LOCAL PROCEDURE KeySize@1000000017() : Integer;
+    VAR
+      Size@1000000000 : Integer;
+    BEGIN
+
+      // Key size (default 256, 32 bytes)
+      CASE OptionKeySize OF
+        OptionKeySize::"128": Size := 16;
+        OptionKeySize::"192": Size := 24;
+        ELSE Size := 32;
+      END;
+
+      EXIT(Size);
+    END;
+
+    [TryFunction]
+    LOCAL PROCEDURE TryEncryptString@1000000040(VAR Password@1000000013 : Text;VAR String@1000000012 : Text;VAR EncryptedString@1000000014 : Text);
+    VAR
+      OutStream@1000000002 : OutStream;
+      TempBlobUnEncrypted@1000000001 : Record 99008535;
+      TempBlobEncrypted@1000000000 : Record 99008535;
+    BEGIN
+
+      // Push unencrypted text into tempblob
+      TempBlobEncrypted.INIT();
+      TempBlobUnEncrypted.Blob.CREATEOUTSTREAM(OutStream);
+      OutStream.WRITETEXT(String);
+
+      // Encrypt
+      IF TryEncryptTempBlob(Password, TempBlobUnEncrypted, TempBlobEncrypted) THEN
+      BEGIN
+        // Read the encrypted text from the encrypted tempblob
+        EncryptedString := TempBlobEncrypted.ToBase64String();
+      END ELSE BEGIN
+        CLEARLASTERROR;
+        ERROR('Encrypt failed');
+      END;
+    END;
+
+    [TryFunction]
+    LOCAL PROCEDURE TryDecryptString@1000000039(VAR Password@1000000002 : Text;VAR EncryptedString@1000000001 : Text;VAR DecryptedString@1000000000 : Text);
+    VAR
+      InStream@1000000008 : InStream;
+      TempBlobDecrypted@1000000006 : Record 99008535;
+      TempBlobEncrypted@1000000005 : Record 99008535;
+    BEGIN
+
+      // Create a stream to read the transformed base64 string
+      TempBlobEncrypted.FromBase64String(EncryptedString);
+
+      // Decrypt
+      IF TryDecryptTempBlob(Password, TempBlobEncrypted, TempBlobDecrypted) THEN
+      BEGIN
+        // Read the decrypted text from the decrypted tempblob
+        TempBlobDecrypted.Blob.CREATEINSTREAM(InStream);
+        InStream.READTEXT(DecryptedString);
+      END ELSE BEGIN
+        CLEARLASTERROR;
+        ERROR('Decrypt failed');
+      END;
+    END;
+
+    [TryFunction]
+    LOCAL PROCEDURE TryEncryptTempBlob@1000000012(VAR Password@1000000013 : Text;VAR UnEncryptedTempBlob@1000000006 : Record 99008535;VAR EncryptedTempBlob@1000000002 : Record 99008535);
+    VAR
+      InStream@1000000010 : InStream;
+      OutStream@1000000004 : OutStream;
+    BEGIN
+
+      // Create a stream to read from unencrypted tempblob
+      UnEncryptedTempBlob.Blob.CREATEINSTREAM(InStream);
+
+      // Create a stream to write to encrypted tempblob
+      EncryptedTempBlob.INIT();
+      EncryptedTempBlob.Blob.CREATEOUTSTREAM(OutStream);
+
+      // Encrypt
+      IF NOT TryEncryptStream(Password, InStream, OutStream) THEN
+      BEGIN
+        CLEARLASTERROR;
+        ERROR('Encrypt failed');
+      END;
+    END;
+
+    [TryFunction]
+    LOCAL PROCEDURE TryDecryptTempBlob@1000000007(VAR Password@1000000002 : Text;VAR EncryptedTempBlob@1000000001 : Record 99008535;VAR DecryptedTempBlob@1000000000 : Record 99008535);
+    VAR
+      InStream@1000000008 : InStream;
+      OutStream@1000000007 : OutStream;
+    BEGIN
+
+      // Create a stream to read from encrypted tempblob
+      EncryptedTempBlob.Blob.CREATEINSTREAM(InStream);
+
+      // Create a stream to write to decrypted tempblob
+      DecryptedTempBlob.INIT();
+      DecryptedTempBlob.Blob.CREATEOUTSTREAM(OutStream);
+
+      // Decrypt
+      IF NOT TryDecryptStream(Password, InStream, OutStream) THEN
+      BEGIN
+        CLEARLASTERROR;
+        ERROR('Decrypt failed');
+      END;
+    END;
+
+    [TryFunction]
+    LOCAL PROCEDURE TryEncryptStream@1000000035(VAR Password@1000000002 : Text;VAR UnEncryptedStream@1000000001 : InStream;VAR EncryptedStream@1000000000 : OutStream);
+    VAR
+      SymmetricAlgorithm@1000000013 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Security.Cryptography.SymmetricAlgorithm";
+      ICryptoTransform@1000000012 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Security.Cryptography.ICryptoTransform";
+      CryptoStream@1000000011 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Security.Cryptography.CryptoStream";
+      CryptoStreamMode@1000000010 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Security.Cryptography.CryptoStreamMode";
+      ByteBuffer@1000000003 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Array";
+      StreamReader@1000000004 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.IO.StreamReader";
+      StreamWriter@1000000006 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.IO.StreamWriter";
+      BytesRead@1000000005 : Integer;
+    BEGIN
+
+      IF TryCreateSymmetricAlgorithm(Password, SymmetricAlgorithm) THEN
+      BEGIN
+        // a reasonably sized buffer for stream reading
+        ByteBuffer := ByteBuffer.CreateInstance(SystemType.GetType('System.Byte',FALSE), 4096);
+
+        // setup the encryption pipeline
+        ICryptoTransform := SymmetricAlgorithm.CreateEncryptor();
+        CryptoStream := CryptoStream.CryptoStream(EncryptedStream, ICryptoTransform, CryptoStreamMode.Write);
+        StreamReader := StreamReader.StreamReader(UnEncryptedStream);
+        StreamWriter := StreamWriter.StreamWriter(CryptoStream);
+
+        // encrypt
+        REPEAT
+          BytesRead := StreamReader.BaseStream.Read(ByteBuffer, 0, ByteBuffer.Length);
+          IF BytesRead > 0 THEN
+            StreamWriter.BaseStream.Write(ByteBuffer, 0, BytesRead);
+        UNTIL BytesRead < 1;
+        StreamWriter.Flush();
+
+        // dispose
+        StreamReader.Dispose();
+        StreamWriter.Dispose();
+        CryptoStream.Dispose();
+        ICryptoTransform.Dispose();
+        SymmetricAlgorithm.Dispose();
+      END ELSE BEGIN
+        CLEARLASTERROR;
+        ERROR('CreateSymmetricAlgorithm failed');
+      END;
+    END;
+
+    [TryFunction]
+    LOCAL PROCEDURE TryDecryptStream@1000000036(VAR Password@1000000002 : Text;VAR EncryptedStream@1000000001 : InStream;VAR DecryptedStream@1000000000 : OutStream);
+    VAR
+      SymmetricAlgorithm@1000000010 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Security.Cryptography.SymmetricAlgorithm";
+      ICryptoTransform@1000000009 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Security.Cryptography.ICryptoTransform";
+      CryptoStream@1000000008 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Security.Cryptography.CryptoStream";
+      CryptoStreamMode@1000000007 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Security.Cryptography.CryptoStreamMode";
+      ByteBuffer@1000000006 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Array";
+      StreamReader@1000000005 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.IO.StreamReader";
+      StreamWriter@1000000004 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.IO.StreamWriter";
+      BytesRead@1000000003 : Integer;
+    BEGIN
+
+      IF TryCreateSymmetricAlgorithm(Password, SymmetricAlgorithm) THEN
+      BEGIN
+        // a reasonably sized buffer for stream reading
+        ByteBuffer := ByteBuffer.CreateInstance(SystemType.GetType('System.Byte',FALSE), 4096);
+
+        // setup the encryption pipeline
+        ICryptoTransform := SymmetricAlgorithm.CreateDecryptor();
+        CryptoStream := CryptoStream.CryptoStream(EncryptedStream, ICryptoTransform, CryptoStreamMode.Read);
+        StreamReader := StreamReader.StreamReader(CryptoStream);
+        StreamWriter := StreamWriter.StreamWriter(DecryptedStream);
+
+        // decrypt
+        REPEAT
+          BytesRead := StreamReader.BaseStream.Read(ByteBuffer, 0, ByteBuffer.Length);
+          IF BytesRead > 0 THEN
+            StreamWriter.BaseStream.Write(ByteBuffer, 0, BytesRead);
+        UNTIL BytesRead < 1;
+        StreamWriter.Flush();
+
+        // dispose
+        StreamReader.Dispose();
+        StreamWriter.Dispose();
+        CryptoStream.Dispose();
+        ICryptoTransform.Dispose();
+        SymmetricAlgorithm.Dispose();
+      END ELSE BEGIN
+        CLEARLASTERROR;
+        ERROR('CreateSymmetricAlgorithm failed');
+      END;
+    END;
+
+    [TryFunction]
+    LOCAL PROCEDURE TryCreateSymmetricAlgorithm@1000000025(Password@1000000006 : Text;VAR SymmetricAlgorithm@1000000005 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Security.Cryptography.SymmetricAlgorithm");
+    VAR
+      PaddingMode@1000000000 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Security.Cryptography.PaddingMode";
+      SHA384Managed@1000000010 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Security.Cryptography.SHA384Managed";
+      UTF8Encoding@1000000009 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.UTF8Encoding";
+      HashBytes@1000000008 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Array";
+      PasswordBytes@1000000001 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Array";
+      AesCryptoServiceProvider@1000000003 : DotNet "'System.Core, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Security.Cryptography.AesCryptoServiceProvider";
+    BEGIN
+
+      // Cipher mode
+      CASE OptionCipherMode OF
+        OptionCipherMode::CFB: CipherMode := CipherMode.CFB;
+        OptionCipherMode::ECB: CipherMode := CipherMode.ECB;
+        ELSE CipherMode := CipherMode.CBC;
+      END;
+
+      // Padding mode
+      CASE OptionPaddingMode OF
+        OptionPaddingMode::None: PaddingMode := PaddingMode.None;
+        OptionPaddingMode::ANSIX923: PaddingMode := PaddingMode.ANSIX923;
+        OptionPaddingMode::ISO10126: PaddingMode := PaddingMode.ISO10126;
+        OptionPaddingMode::Zeros: PaddingMode := PaddingMode.Zeros;
+        ELSE PaddingMode := PaddingMode.PKCS7;
+      END;
+
+      // Create Key & IV (if not already supplied)
+      IF NOT HaveKey OR NOT HaveIV THEN
+      BEGIN
+        // read the password from the stream into a byte array
+        UTF8Encoding := UTF8Encoding.UTF8Encoding();
+        PasswordBytes := UTF8Encoding.GetBytes(Password);
+
+        // create hash from password
+        SHA384Managed := SHA384Managed.SHA384Managed();
+        HashBytes := SHA384Managed.ComputeHash(PasswordBytes);
+
+        // use first KeySize bytes for Key
+        IF NOT HaveKey THEN
+        BEGIN
+          Key := Key.CreateInstance(SystemType.GetType('System.Byte',FALSE), KeySize);
+          Key.ConstrainedCopy(HashBytes, 0, Key, 0, KeySize);
+        END;
+        // use following 16 bytes for IV
+        IF NOT HaveIV THEN
+        BEGIN
+          IV := IV.CreateInstance(SystemType.GetType('System.Byte',FALSE), 16);
+          CASE OptionCipherMode OF
+            OptionCipherMode::CBC: IV.ConstrainedCopy(HashBytes, KeySize, IV, 0, 16);
+            OptionCipherMode::ECB: IV.Clear(IV, 0, 16); // zero array just to be sure
+          END;
+        END;
+      END;
+
+      // create an AES algorithm
+      SymmetricAlgorithm := AesCryptoServiceProvider.AesCryptoServiceProvider();
+      SymmetricAlgorithm.Mode := CipherMode;
+      SymmetricAlgorithm.BlockSize := 128;  // Always 128 for AES
+      SymmetricAlgorithm.Padding := PaddingMode;
+      SymmetricAlgorithm.Key := Key;
+      SymmetricAlgorithm.IV := IV;
+    END;
+
+    [TryFunction]
+    LOCAL PROCEDURE TrySetKey@1000000010(VAR TempBlob@1000000000 : Record 99008535);
+    VAR
+      IStream@1000000001 : InStream;
+      MemoryStream@1000000002 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.IO.MemoryStream";
+    BEGIN
+
+      MemoryStream := MemoryStream.MemoryStream();
+      TempBlob.Blob.CREATEINSTREAM(IStream);
+      COPYSTREAM(MemoryStream, IStream);
+      Key := Key.CreateInstance(SystemType.GetType('System.Byte',FALSE), KeySize);
+      MemoryStream.Write(Key, 0, KeySize);
+      MemoryStream.Dispose();
+      HaveKey := TRUE;
+    END;
+
+    [TryFunction]
+    LOCAL PROCEDURE TrySetIV@1000000011(VAR TempBlob@1000000000 : Record 99008535);
+    VAR
+      IStream@1000000002 : InStream;
+      MemoryStream@1000000001 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.IO.MemoryStream";
+    BEGIN
+
+      MemoryStream := MemoryStream.MemoryStream();
+      TempBlob.Blob.CREATEINSTREAM(IStream);
+      COPYSTREAM(MemoryStream, IStream);
+      IV := Key.CreateInstance(SystemType.GetType('System.Byte',FALSE), 16);
+      MemoryStream.Write(IV, 0, 16);
+      MemoryStream.Dispose();
+      HaveIV := TRUE;
+    END;
+
+    [TryFunction]
+    LOCAL PROCEDURE TrySetPassword@1000000016(VAR TempBlob@1000000000 : Record 99008535);
+    VAR
+      IStream@1000000001 : InStream;
+      SHA384Managed@1000000007 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Security.Cryptography.SHA384Managed";
+      HashBytes@1000000005 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Array";
+    BEGIN
+
+      // Set Key, IV from clear text password stored in tempblob
+
+      // create hash from password
+      TempBlob.Blob.CREATEINSTREAM(IStream);
+      SHA384Managed := SHA384Managed.SHA384Managed();
+      HashBytes := SHA384Managed.ComputeHash(IStream);
+
+      // use first KeySize bytes for Key
+      Key := Key.CreateInstance(SystemType.GetType('System.Byte',FALSE), KeySize);
+      Key.ConstrainedCopy(HashBytes, 0, Key, 0, KeySize);
+
+      // use following 16 bytes for IV
+      IV := IV.CreateInstance(SystemType.GetType('System.Byte',FALSE), 16);
+      CASE OptionCipherMode OF
+        OptionCipherMode::ECB: IV.Clear(IV, 0, 16); // zero array just to be sure
+        ELSE IV.ConstrainedCopy(HashBytes, KeySize, IV, 0, 16);
+      END;
+
+      HaveKey := TRUE;
+      HaveIV := TRUE;
+    END;
+
+    LOCAL PROCEDURE CSharpSimpleWrapper@1000000050();
+    BEGIN
+
+      // A simple C# wrapper for comparison (purposely not production quality)
+
+      {
+      using System;
+      using System.IO;
+      using System.Core;
+      using System.Text;
+      using System.Security.Cryptography;
+
+      namespace AES
+      {
+          class Cryptography
+          {
+              public static int KeySize { get; set; } = 32;
+              public const int BlockSize = 16;
+              public static CipherMode CipherMode { get; set; } = CipherMode.CBC;
+              public static PaddingMode PaddingMode { get; set; } = PaddingMode.PKCS7;
+
+              public static string EncryptString(string password, string data)
+              {
+                  return AES.EncryptString(password, data);
+              }
+
+              public static string DecryptString(string password, string data)
+              {
+                 return AES.DecryptString(password, data);
+              }
+
+              public static bool EncryptStream(string password, Stream instream, Stream outstream)
+              {
+                  return AES.EncryptStream(password, instream, outstream);
+              }
+
+              public static bool DecryptStream(string password, Stream instream, Stream outstream)
+              {
+                  return AES.DecryptStream(password, instream, outstream);
+              }
+          }
+
+          internal class AES
+          {
+              private static SymmetricAlgorithm CreateSymAlgorithm(string password)
+              {
+                  byte[] key = new byte[AES.Cryptography.KeySize];
+                  byte[] iv = new byte[AES.Cryptography.BlockSize];
+                  GenerateKey(password, ref key, ref iv);
+
+                  AesCryptoServiceProvider crypto =
+                      new AesCryptoServiceProvider()
+                      {
+                          Mode = AES.Cryptography.CipherMode,
+                          BlockSize = AES.Cryptography.BlockSize,
+                          Padding = AES.Cryptography.PaddingMode,
+                          Key = key,
+                          IV = iv
+                      };
+
+                  return crypto;
+              }
+
+              private static void GenerateKey(string password, ref byte[] key, ref byte[] iv)
+              {
+                  SHA384Managed sha = new SHA384Managed();
+                  byte[] b = sha.ComputeHash(new UTF8Encoding().GetBytes(password));
+
+                  key = new byte[AES.Cryptography.KeySize];
+                  iv = new byte[AES.Cryptography.BlockSize];
+
+                  Array.Copy(b, 0, key, 0, AES.Cryptography.KeySize);
+                  Array.Copy(b, AES.Cryptography.KeySize, iv, 0, AES.Cryptography.BlockSize);
+              }
+
+              public static string EncryptString(string password, string clearText)
+              {
+                  if (string.IsNullOrEmpty(clearText))
+                      return string.Empty;
+
+                  string result = null;
+
+                  try
+                  {
+                      using (SymmetricAlgorithm crypto = CreateSymAlgorithm(password))
+                      using (ICryptoTransform encryptor = crypto.CreateEncryptor())
+                      using (MemoryStream memoryStream = new MemoryStream())
+                      using (CryptoStream crptoStream = new CryptoStream(memoryStream, encryptor, CryptoStreamMode.Write))
+                      {
+                          byte[] data = (new UTF8Encoding()(.GetBytes(clearText);
+                          crptoStream.Write(data, 0, data.Length);
+                          crptoStream.FlushFinalBlock();
+                          result = Convert.ToBase64String(memoryStream.ToArray());
+                      }
+                  }
+                  catch { }
+
+                  return result;
+              }
+
+              public static string DecryptString(string password, string cipherText)
+              {
+                  if (string.IsNullOrEmpty(cipherText))
+                      return string.Empty;
+
+                  string result = null;
+
+                  try
+                  {
+                      byte[] cipher = Convert.FromBase64String(cipherText);
+
+                      using (SymmetricAlgorithm crypto = CreateSymAlgorithm(password))
+                      using (ICryptoTransform decryptor = crypto.CreateDecryptor())
+                      using (MemoryStream memoryStream = new MemoryStream(cipher))
+                      using (CryptoStream crptoStream = new CryptoStream(memoryStream, decryptor, CryptoStreamMode.Read))
+                      {
+                          byte[] data = new byte[cipher.Length];
+                          int dataLength = crptoStream.Read(data, 0, data.Length);
+                          result = (new UTF8Encoding()).GetString(data, 0, dataLength);
+                      }
+                  }
+                  catch { }
+
+                  return result;
+              }
+
+              public static bool EncryptStream(string password, Stream instream, Stream outstream)
+              {
+                  bool result = false;
+
+                  try
+                  {
+                      using (SymmetricAlgorithm crypto = CreateSymAlgorithm(password))
+                      using (ICryptoTransform encryptor = crypto.CreateEncryptor())
+                      using (CryptoStream cstream = new CryptoStream(outstream, encryptor, CryptoStreamMode.Write))
+                      using (BinaryWriter bWriter = new BinaryWriter(cstream))
+                      using (BinaryReader bReader = new BinaryReader(instream))
+                      {
+                          int count;
+                          byte[] buffer = new byte[4096];
+
+                          while ((count = bReader.Read(buffer, 0, buffer.Length)) > 0)
+                              bWriter.Write(buffer, 0, count);
+
+                          bWriter.Flush();
+                          result = true;
+                      }
+                  }
+                  catch { }
+
+                  return result;
+              }
+
+              public static bool DecryptStream(string password, Stream instream, Stream outstream)
+              {
+                  bool result = false;
+
+                  try
+                  {
+                      using (SymmetricAlgorithm crypto = CreateSymAlgorithm(password))
+                      using (ICryptoTransform decryptor = crypto.CreateDecryptor())
+                      using (CryptoStream cstream = new CryptoStream(instream, decryptor, CryptoStreamMode.Read))
+                      using (BinaryReader bReader = new BinaryReader(cstream))
+                      {
+                          int count;
+                          byte[] buffer = new byte[4096];
+
+                          while ((count = bReader.Read(buffer, 0, buffer.Length)) > 0)
+                              outstream.Write(buffer, 0, count);
+
+                          outstream.Flush();
+                          result = true;
+                      }
+                  }
+                  catch { }
+
+                  return result;
+              }
+          }
+      }
+
+      }
+    END;
+
+    BEGIN
+    {
+
+        As implemented this is AES encryption with variable key size, cipher mode and padding
+        Key size: 256 (default), 192, 128
+        Cipher mode: CBC (default), CFB, CTS, OFB, ECB
+        Padding mode: PKCS7 (default), ANSIX923, ISO10126, Zeros, None
+        Block size: 128 always (per AES spec)
+
+        This implementation uses (by default) a hash of the password to create the secret Key & IV.
+        You can override this default implementation using the SetKey & SetIV interfaces.
+
+        The Encrypt/Decrypt String interfaces convert the string arguments using a base64 transform.
+        If you need a different transform use the *Stream() interface and roll your own.
+
+        SECURITY NOTE --
+        There are (at least) two fundamental problems with an encryption interface implemented in a codeunit:
+        1. Visibility of private data in the debugger
+        2. Man-in-the-Middle (MITM) vulnerability; i.e., changes to the code that intercept the private data
+
+        To guard against these vulnerabilities you can do as follows --
+        Data Visibility:
+        - DO NOT pass private data as clear text -- i.e., DO NOT USE the EncryptString, DecryptString interfaces
+        - Set the Password or the Key & IV using the Set*() interfaces
+        - Encrypt/decrypt using the *TempBlob() or *Stream() interfaces with a blank password
+        Man-in-the-Middle:
+        - Make your own copy of the ComputeAesCodeunitCheckSum() function (to avoid MITM)
+        - Use that checksum function to calculate a checksum on a baseline version of this codeunit
+        - Save that checksum
+        - Use that checksum function to calculate a checksum on the runtime version of this codeunit
+        - Compare the two checksums, if they differ then take appropriate action
+
+        ADDITIONAL NOTES --
+        - Ideally this functionality would be rolled into a native API - similiar to ENCRYPT/DECRYPT
+        - This codeunit is essentially a C/AL wrapper around the .NET AesCryptoServiceProvider class
+        - All exposed functions use only C/AL data types so they are callable from AL
+        - All errors are cleared before returning to avoid disclosing any private data details
+    }
+    END.
+  }
+}
