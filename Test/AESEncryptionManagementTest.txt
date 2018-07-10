@@ -1,0 +1,478 @@
+OBJECT Codeunit 50001 AES Encryption Manager Test
+{
+  OBJECT-PROPERTIES
+  {
+    Date=07/08/18;
+    Time=[ 4:23:57 PM];
+    Modified=Yes;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    Subtype=Test;
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      OptionKeySize@1000000004 : '256,192,128';
+      OptionCipherMode@1000000003 : 'CBC,CFB,CTS,OFB,ECB';
+      OptionPaddingMode@1000000002 : 'PKCS7,ANSIX923,ISO10126,Zeros,None';
+      Assert@1000000006 : Codeunit 130000;
+      LibraryUtility@1000000007 : Codeunit 131000;
+      LibraryRandom@1000000000 : Codeunit 130440;
+
+    LOCAL PROCEDURE EncryptDecryptString@1000000007(VAR AESEncryptionManager@1000000003 : Codeunit 50000;TextPassword@1000000005 : Text;VAR TextClear@1000000006 : Text;VAR TextEncrypted@1000000007 : Text;VAR TextDecrypted@1000000008 : Text);
+    BEGIN
+      Assert.IsTrue(AESEncryptionManager.EncryptString(TextPassword, TextClear, TextEncrypted), 'EncryptString failed');
+      Assert.IsTrue(AESEncryptionManager.DecryptString(TextPassword, TextEncrypted, TextDecrypted), 'DecryptString failed');
+    END;
+
+    LOCAL PROCEDURE EncryptDecryptTempBlob@1000000004(VAR AESEncryptionManager@1000000003 : Codeunit 50000;TextPassword@1000000005 : Text;VAR TempBlobClear@1000000006 : Record 99008535;VAR TempBlobEncrypted@1000000007 : Record 99008535;VAR TempBlobDecrypted@1000000008 : Record 99008535);
+    BEGIN
+      Assert.IsTrue(AESEncryptionManager.EncryptTempBlob(TextPassword, TempBlobClear, TempBlobEncrypted), 'EncryptString failed');
+      Assert.IsTrue(AESEncryptionManager.DecryptTempBlob(TextPassword, TempBlobEncrypted, TempBlobDecrypted), 'DecryptString failed');
+    END;
+
+    LOCAL PROCEDURE EncryptDecryptStream@1000000006(VAR AESEncryptionManager@1000000015 : Codeunit 50000;TextPassword@1000000014 : Text;VAR TextClear@1000000013 : Text;VAR TextEncrypted@1000000012 : Text;VAR TextDecrypted@1000000010 : Text);
+    VAR
+      InStream@1000000001 : InStream;
+      OutStream@1000000000 : OutStream;
+      TempBlobClear@1000000004 : Record 99008535;
+      TempBlobEncrypted@1000000003 : Record 99008535;
+      TempBlobDecrypted@1000000005 : Record 99008535;
+      BigTextClear@1000000002 : BigText;
+      BigTextDecrypted@1000000007 : BigText;
+      Convert@1000000009 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Convert";
+      MemoryStream@1000000008 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.IO.MemoryStream";
+    BEGIN
+      // Push clear text into tempblob
+      TempBlobClear.Blob.CREATEOUTSTREAM(OutStream);
+      BigTextClear.ADDTEXT(TextClear);
+      BigTextClear.WRITE(OutStream);
+
+      // Create a stream to read from tempblob
+      TempBlobClear.Blob.CREATEINSTREAM(InStream);
+
+      // Create a stream to write to encrypted tempblob
+      TempBlobEncrypted.Blob.CREATEOUTSTREAM(OutStream);
+
+      // Encrypt
+      Assert.IsTrue(AESEncryptionManager.EncryptStream(TextPassword, InStream, OutStream), 'EncryptStream failed');
+
+      // Create streams to read from encrypted and write to decrypted tempblob
+      TempBlobEncrypted.Blob.CREATEINSTREAM(InStream);
+      TempBlobDecrypted.Blob.CREATEOUTSTREAM(OutStream);
+
+      // Decrypt
+      Assert.IsTrue(AESEncryptionManager.DecryptStream(TextPassword, InStream, OutStream), 'DecryptStream failed');
+
+      // Read the encrypted text from the tempblob & convert to base64
+      TempBlobEncrypted.Blob.CREATEINSTREAM(InStream);
+      MemoryStream := MemoryStream.MemoryStream();
+      COPYSTREAM(MemoryStream, InStream);
+      TextEncrypted := Convert.ToBase64String(MemoryStream.ToArray());
+      MemoryStream.Dispose();
+
+      // Read the decrypted text from the tempblob
+      TempBlobDecrypted.Blob.CREATEINSTREAM(InStream);
+      BigTextDecrypted.READ(InStream);
+      BigTextDecrypted.GETSUBTEXT(TextDecrypted, 1);
+    END;
+
+    [Test]
+    PROCEDURE AES_ComputeAesCodeunitChecksum@1000000009();
+    VAR
+      AESEncryptionManager@1000000000 : Codeunit 50000;
+      TextChecksum@1000000001 : Text;
+    BEGIN
+      AESEncryptionManager.ComputeAesCodeunitCheckSum(TextChecksum);
+      Assert.AreNotEqual(63,STRLEN(TextChecksum),'TryComputeChecksum returned an invalid result');
+      // Hash is 32 bytes, result string is hex representaion dash separated
+    END;
+
+    [Test]
+    PROCEDURE AES_256_CBC_PKCS7_EncryptDecryptString@1000000000();
+    VAR
+      AESEncryptionManager@1000000003 : Codeunit 50000;
+      TextPassword@1000000004 : Text;
+      TextToEncrypt@1000000002 : Text;
+      TextEncrypted@1000000001 : Text;
+      TextDecrypted@1000000000 : Text;
+    BEGIN
+      TextPassword := LibraryUtility.GenerateRandomText(LibraryRandom.RandIntInRange(1,64));
+      TextToEncrypt := LibraryUtility.GenerateRandomText(LibraryRandom.RandIntInRange(1,1024));
+
+      // Encrypt/decrypt string
+      EncryptDecryptString(AESEncryptionManager, TextPassword, TextToEncrypt, TextEncrypted, TextDecrypted);
+
+      // Compare clear & decrypted text
+      Assert.AreEqual(TextToEncrypt, TextDecrypted, 'Encrypt/Decrypt failed');
+    END;
+
+    [Test]
+    PROCEDURE AES_256_CBC_PKCS7_EncryptDecryptTempBlob@1000000003();
+    VAR
+      AESEncryptionManager@1000000003 : Codeunit 50000;
+      TextPassword@1000000004 : Text;
+      TextToEncrypt@1000000002 : Text;
+      TextDecrypted@1000000008 : Text;
+      TempBlobClear@1000000005 : Record 99008535;
+      TempBlobEncrypted@1000000001 : Record 99008535;
+      TempBlobDecrypted@1000000000 : Record 99008535;
+      InStream@1000000006 : InStream;
+      OutStream@1000000007 : OutStream;
+    BEGIN
+      TextPassword := LibraryUtility.GenerateRandomText(LibraryRandom.RandIntInRange(1,64));
+      TextToEncrypt := LibraryUtility.GenerateRandomText(LibraryRandom.RandIntInRange(1,1024));
+
+      // Push clear text into tempblob
+      TempBlobClear.Blob.CREATEOUTSTREAM(OutStream);
+      OutStream.WRITETEXT(TextToEncrypt);
+
+      // Encrypt/decrypt string
+      EncryptDecryptTempBlob(AESEncryptionManager, TextPassword, TempBlobClear, TempBlobEncrypted, TempBlobDecrypted);
+
+      // Retrieve decrypted text tempblob
+      TempBlobDecrypted.Blob.CREATEINSTREAM(InStream);
+      InStream.READTEXT(TextDecrypted);
+
+      // Compare clear & decrypted text
+      Assert.AreEqual(TextToEncrypt, TextDecrypted, 'Encrypt/Decrypt failed');
+    END;
+
+    [Test]
+    PROCEDURE AES_256_CBC_PKCS7_EncryptDecryptStream@1000000001();
+    VAR
+      AESEncryptionManager@1000000007 : Codeunit 50000;
+      TextToEncrypt@1000000008 : Text;
+      TextEncrypted@1000000000 : Text;
+      TextDecrypted@1000000009 : Text;
+      TextPassword@1000000011 : Text;
+    BEGIN
+      TextPassword := LibraryUtility.GenerateRandomText(LibraryRandom.RandIntInRange(1,64));
+      TextToEncrypt := LibraryUtility.GenerateRandomText(100000); // to stress the read buffer
+
+      // Encrypt/decrypt stream
+      EncryptDecryptStream(AESEncryptionManager, TextPassword, TextToEncrypt, TextEncrypted, TextDecrypted);
+
+      // Compare clear & decrypted text
+      Assert.AreEqual(TextToEncrypt, TextDecrypted, 'Encrypt/Decrypt failed');
+    END;
+
+    [Test]
+    PROCEDURE AES_256_CBC_PKCS7_SetPassword_EncryptDecrypt@1000000002();
+    VAR
+      AESEncryptionManager@1000000007 : Codeunit 50000;
+      TextToEncrypt@1000000008 : Text;
+      TextDecrypted@1000000009 : Text;
+      TextEncrypted@1000000014 : Text;
+      TextPassword@1000000011 : Text;
+      BigTextPassword@1000000012 : BigText;
+      TempBlobPassword@1000000000 : Record 99008535;
+      OutStream@1000000001 : OutStream;
+    BEGIN
+      TextPassword := LibraryUtility.GenerateRandomText(LibraryRandom.RandIntInRange(1,64));
+      TextToEncrypt := LibraryUtility.GenerateRandomText(LibraryRandom.RandIntInRange(1,1024));
+
+      // Push password into tempblob
+      TempBlobPassword.Blob.CREATEOUTSTREAM(OutStream);
+      BigTextPassword.ADDTEXT(TextPassword);
+      BigTextPassword.WRITE(OutStream);
+      AESEncryptionManager.SetPassword(TempBlobPassword);
+
+      // Encrypt/decrypt
+      EncryptDecryptString(AESEncryptionManager, '', TextToEncrypt, TextEncrypted, TextDecrypted);
+
+      // Compare clear & decrypted text
+      Assert.AreEqual(TextToEncrypt, TextDecrypted, 'Encrypt/Decrypt failed');
+    END;
+
+    [Test]
+    PROCEDURE AES_256_CBC_PKCS7_SetKey_IV_EncryptDecrypt@1000000018();
+    VAR
+      AESEncryptionManager@1000000007 : Codeunit 50000;
+      TextToEncrypt@1000000008 : Text;
+      TextDecrypted@1000000009 : Text;
+      TextEncrypted@1000000014 : Text;
+      TextKey@1000000011 : Text;
+      TextIV@1000000003 : Text;
+      TempBlobKey@1000000000 : Record 99008535;
+      TempBlobIV@1000000004 : Record 99008535;
+      OutStream@1000000001 : OutStream;
+      MemoryStream@1000000006 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.IO.MemoryStream";
+      Convert@1000000002 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Convert";
+    BEGIN
+      TextToEncrypt := LibraryUtility.GenerateRandomText(LibraryRandom.RandIntInRange(1,1024));
+
+      // Base64 representations of Key & IV generated when TrySetPassword is called with a password of 'password'
+      TextKey := 'qLZLq9CsqRpZvbt3YbQh1PK7OCgNOnW6DyHyvrxFWD0=';
+      TextIV  := 'RGxZhmDJTOaAxH0ZwweDpw==';
+
+      // Hex representations - in case you want to test against an online crypto interface
+      // TestKey := 'A8B64BABD0ACA91A59BDBB7761B421D4F2BB38280D3A75BA0F21F2BEBC45583D'
+      // TestIV  := '446C598660C94CE680C47D19C30783A7'
+
+      // Convert TestKey to byte[] & push into tempblob
+      TempBlobKey.Blob.CREATEOUTSTREAM(OutStream);
+      MemoryStream := MemoryStream.MemoryStream(Convert.FromBase64String(TextKey));
+      COPYSTREAM(OutStream, MemoryStream);
+      MemoryStream.Dispose();
+
+      // Convert TestIV to byte[] & push into tempblob
+      TempBlobIV.Blob.CREATEOUTSTREAM(OutStream);
+      MemoryStream := MemoryStream.MemoryStream(Convert.FromBase64String(TextIV));
+      COPYSTREAM(OutStream, MemoryStream);
+      MemoryStream.Dispose();
+
+      // Encrypt/decrypt
+      AESEncryptionManager.SetKey(TempBlobKey);
+      AESEncryptionManager.SetIV(TempBlobIV);
+      EncryptDecryptString(AESEncryptionManager, '', TextToEncrypt, TextEncrypted, TextDecrypted);
+
+      // Compare clear & decrypted text
+      Assert.AreEqual(TextToEncrypt, TextDecrypted, 'Encrypt/Decrypt failed');
+    END;
+
+    [Test]
+    PROCEDURE AES_192_CBC_PKCS7_EncryptDecrypt@1000000027();
+    VAR
+      AESEncryptionManager@1000000003 : Codeunit 50000;
+      TextPassword@1000000004 : Text;
+      TextToEncrypt@1000000002 : Text;
+      TextEncrypted@1000000001 : Text;
+      TextDecrypted@1000000000 : Text;
+    BEGIN
+      TextPassword := LibraryUtility.GenerateRandomText(LibraryRandom.RandIntInRange(1,64));
+      TextToEncrypt := LibraryUtility.GenerateRandomText(LibraryRandom.RandIntInRange(1,1024));
+
+      AESEncryptionManager.SetKeySize(OptionKeySize::"192");
+
+      // Encrypt/decrypt string
+      EncryptDecryptString(AESEncryptionManager, TextPassword, TextToEncrypt, TextEncrypted, TextDecrypted);
+
+      // Compare clear & decrypted text
+      Assert.AreEqual(TextToEncrypt, TextDecrypted, 'Encrypt/Decrypt failed');
+    END;
+
+    [Test]
+    PROCEDURE AES_128_CBC_PKCS7_EncryptDecrypt@1000000005();
+    VAR
+      AESEncryptionManager@1000000003 : Codeunit 50000;
+      TextPassword@1000000004 : Text;
+      TextToEncrypt@1000000002 : Text;
+      TextEncrypted@1000000001 : Text;
+      TextDecrypted@1000000000 : Text;
+    BEGIN
+      TextPassword := LibraryUtility.GenerateRandomText(8);
+      TextToEncrypt := LibraryUtility.GenerateRandomText(LibraryRandom.RandIntInRange(1,1024));
+
+      AESEncryptionManager.SetKeySize(OptionKeySize::"128");
+
+      // Encrypt/decrypt string
+      EncryptDecryptString(AESEncryptionManager, TextPassword, TextToEncrypt, TextEncrypted, TextDecrypted);
+
+      // Compare clear & decrypted text
+      Assert.AreEqual(TextToEncrypt, TextDecrypted, 'Encrypt/Decrypt failed');
+    END;
+
+    [Test]
+    PROCEDURE AES_256_CFB_PKCS7_EncryptDecrypt@1000000010();
+    VAR
+      AESEncryptionManager@1000000003 : Codeunit 50000;
+      TextPassword@1000000004 : Text;
+      TextToEncrypt@1000000002 : Text;
+      TextEncrypted@1000000001 : Text;
+      TextDecrypted@1000000000 : Text;
+    BEGIN
+      TextPassword := LibraryUtility.GenerateRandomText(LibraryRandom.RandIntInRange(1,64));
+      TextToEncrypt := LibraryUtility.GenerateRandomText(1);
+
+      AESEncryptionManager.SetCipherMode(OptionCipherMode::CFB);
+
+      // Encrypt/decrypt string
+      EncryptDecryptString(AESEncryptionManager, TextPassword, TextToEncrypt, TextEncrypted, TextDecrypted);
+
+      // Compare clear & decrypted text
+      Assert.AreEqual(TextToEncrypt, TextDecrypted, 'Encrypt/Decrypt failed');
+    END;
+
+    [Test]
+    PROCEDURE AES_256_CTS_PKCS7_EncryptDecrypt@1000000014();
+    VAR
+      AESEncryptionManager@1000000003 : Codeunit 50000;
+      TextPassword@1000000004 : Text;
+      TextToEncrypt@1000000002 : Text;
+      TextEncrypted@1000000001 : Text;
+      TextDecrypted@1000000000 : Text;
+    BEGIN
+      TextPassword := LibraryUtility.GenerateRandomText(LibraryRandom.RandIntInRange(1,64));
+      TextToEncrypt := LibraryUtility.GenerateRandomText(LibraryRandom.RandIntInRange(1,1024));
+
+      AESEncryptionManager.SetCipherMode(OptionCipherMode::CTS);
+
+      // Encrypt/decrypt string
+      EncryptDecryptString(AESEncryptionManager, TextPassword, TextToEncrypt, TextEncrypted, TextDecrypted);
+
+      // Compare clear & decrypted text
+      Assert.AreEqual(TextToEncrypt, TextDecrypted, 'Encrypt/Decrypt failed');
+    END;
+
+    [Test]
+    PROCEDURE AES_256_ECB_PKCS7_EncryptDecrypt@1000000012();
+    VAR
+      AESEncryptionManager@1000000003 : Codeunit 50000;
+      TextPassword@1000000004 : Text;
+      TextToEncrypt@1000000002 : Text;
+      TextEncrypted@1000000001 : Text;
+      TextDecrypted@1000000000 : Text;
+    BEGIN
+      TextPassword := LibraryUtility.GenerateRandomText(LibraryRandom.RandIntInRange(1,64));
+      TextToEncrypt := LibraryUtility.GenerateRandomText(LibraryRandom.RandIntInRange(1,1024));
+
+      AESEncryptionManager.SetCipherMode(OptionCipherMode::ECB);
+
+      // Encrypt/decrypt string
+      EncryptDecryptString(AESEncryptionManager, TextPassword, TextToEncrypt, TextEncrypted, TextDecrypted);
+
+      // Compare clear & decrypted text
+      Assert.AreEqual(TextToEncrypt, TextDecrypted, 'Encrypt/Decrypt failed');
+    END;
+
+    [Test]
+    PROCEDURE AES_256_OFB_PKCS7_EncryptDecrypt@1000000015();
+    VAR
+      AESEncryptionManager@1000000003 : Codeunit 50000;
+      TextPassword@1000000004 : Text;
+      TextToEncrypt@1000000002 : Text;
+      TextEncrypted@1000000001 : Text;
+      TextDecrypted@1000000000 : Text;
+    BEGIN
+      TextPassword := LibraryUtility.GenerateRandomText(LibraryRandom.RandIntInRange(1,64));
+      TextToEncrypt := LibraryUtility.GenerateRandomText(LibraryRandom.RandIntInRange(1,1024));
+
+      AESEncryptionManager.SetCipherMode(OptionCipherMode::OFB);
+
+      // Encrypt/decrypt string
+      EncryptDecryptString(AESEncryptionManager, TextPassword, TextToEncrypt, TextEncrypted, TextDecrypted);
+
+      // Compare clear & decrypted text
+      Assert.AreEqual(TextToEncrypt, TextDecrypted, 'Encrypt/Decrypt failed');
+    END;
+
+    [Test]
+    PROCEDURE AES_256_CBC_ANSIX923_EncryptDecrypt@1000000008();
+    VAR
+      AESEncryptionManager@1000000007 : Codeunit 50000;
+      TextToEncrypt@1000000008 : Text;
+      TextEncrypted@1000000000 : Text;
+      TextDecrypted@1000000009 : Text;
+      TextPassword@1000000011 : Text;
+    BEGIN
+      TextPassword := LibraryUtility.GenerateRandomText(LibraryRandom.RandIntInRange(1,64));
+      TextToEncrypt := LibraryUtility.GenerateRandomText(LibraryRandom.RandIntInRange(1,1024));
+
+      AESEncryptionManager.SetPaddingMode(OptionPaddingMode::ANSIX923);
+
+      // Encrypt/decrypt stream
+      EncryptDecryptStream(AESEncryptionManager, TextPassword, TextToEncrypt, TextEncrypted, TextDecrypted);
+
+      // Compare clear & decrypted text
+      Assert.AreEqual(TextToEncrypt, TextDecrypted, 'Encrypt/Decrypt failed');
+    END;
+
+    [Test]
+    PROCEDURE AES_256_CBC_ISO10126_EncryptDecrypt@1000000011();
+    VAR
+      AESEncryptionManager@1000000007 : Codeunit 50000;
+      TextToEncrypt@1000000008 : Text;
+      TextEncrypted@1000000000 : Text;
+      TextDecrypted@1000000009 : Text;
+      TextPassword@1000000011 : Text;
+    BEGIN
+      TextPassword := LibraryUtility.GenerateRandomText(LibraryRandom.RandIntInRange(1,64));
+      TextToEncrypt := LibraryUtility.GenerateRandomText(LibraryRandom.RandIntInRange(1,1024));
+
+      AESEncryptionManager.SetPaddingMode(OptionPaddingMode::ISO10126);
+
+      // Encrypt/decrypt stream
+      EncryptDecryptStream(AESEncryptionManager, TextPassword, TextToEncrypt, TextEncrypted, TextDecrypted);
+
+      // Compare clear & decrypted text
+      Assert.AreEqual(TextToEncrypt, TextDecrypted, 'Encrypt/Decrypt failed');
+    END;
+
+    [Test]
+    PROCEDURE AES_256_CBC_Zeros_EncryptDecrypt@1000000013();
+    VAR
+      AESEncryptionManager@1000000007 : Codeunit 50000;
+      TextToEncrypt@1000000008 : Text;
+      TextEncrypted@1000000000 : Text;
+      TextDecrypted@1000000009 : Text;
+      TextPassword@1000000011 : Text;
+    BEGIN
+      TextPassword := LibraryUtility.GenerateRandomText(LibraryRandom.RandIntInRange(1,64));
+      TextToEncrypt := LibraryUtility.GenerateRandomText(LibraryRandom.RandIntInRange(1,1024));
+
+      AESEncryptionManager.SetPaddingMode(OptionPaddingMode::Zeros);
+
+      // Encrypt/decrypt stream
+      EncryptDecryptStream(AESEncryptionManager, TextPassword, TextToEncrypt, TextEncrypted, TextDecrypted);
+
+      // Compare clear & decrypted text
+      Assert.AreEqual(TextToEncrypt, TextDecrypted, 'Encrypt/Decrypt failed');
+    END;
+
+    [Test]
+    PROCEDURE AES_256_CBC_PKCS7_EncryptStringFail@1000000016();
+    VAR
+      AESEncryptionManager@1000000003 : Codeunit 50000;
+      TextPassword@1000000004 : Text;
+      TextToEncrypt@1000000002 : Text;
+      TextEncrypted@1000000001 : Text;
+      TextDecrypted@1000000000 : Text;
+    BEGIN
+      TextPassword := '';
+      TextToEncrypt := '';
+
+      // Encrypt string
+      Assert.IsFalse(AESEncryptionManager.EncryptString(TextPassword, TextToEncrypt, TextEncrypted), 'Expected encryption failure');
+    END;
+
+    [Test]
+    PROCEDURE AES_256_CBC_PKCS7_DecryptStringFail@1000000017();
+    VAR
+      AESEncryptionManager@1000000003 : Codeunit 50000;
+      TextPassword@1000000004 : Text;
+      TextToEncrypt@1000000001 : Text;
+      TextToDecrypt@1000000002 : Text;
+      TextDecrypted@1000000000 : Text;
+      TextEncrypted@1000000005 : Text;
+    BEGIN
+      TextPassword := LibraryUtility.GenerateRandomText(LibraryRandom.RandIntInRange(1,64));
+      TextToEncrypt := LibraryUtility.GenerateRandomText(LibraryRandom.RandIntInRange(10,100));
+
+      // Encrypt string
+      Assert.IsTrue(AESEncryptionManager.EncryptString(TextPassword, TextToEncrypt, TextEncrypted), 'Encryption failed');
+
+      // Mangle encrypted string
+      TextEncrypted[STRLEN(TextEncrypted)-2] := '_';
+      TextEncrypted[STRLEN(TextEncrypted)-1] := '_';
+
+      Assert.IsFalse(AESEncryptionManager.DecryptString(TextPassword, TextEncrypted, TextDecrypted), 'Expected decryption failure');
+    END;
+
+    BEGIN
+    {
+
+      A good online tool for verifying encryption results is: http://www.txtwizard.net/crypto
+      (though it only supports 128 bit encryption)
+
+      NOTE: Exercising the EncryptString/DecryptString functions also exercises the EncryptStream/DecryptStream functions.
+    }
+    END.
+  }
+}
+
