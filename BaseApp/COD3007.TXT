@@ -30,15 +30,18 @@ OBJECT Codeunit 3007 DotNet_String
     END;
 
     [External]
-    PROCEDURE Split@5(Separator@1001 : Char;VAR DotNet_Array@1000 : Codeunit 3000);
+    PROCEDURE Split@5(DotNet_ArraySplit@1001 : Codeunit 3000;VAR DotNet_ArrayReturn@1000 : Codeunit 3000);
     VAR
-      SplitChar@1003 : DotNet "'mscorlib'.System.Char";
-      SplitCharArray@1002 : DotNet "'mscorlib'.System.Array";
-      String@1004 : DotNet "'mscorlib'.System.String";
+      DotNetArraySplit@1002 : DotNet "'mscorlib'.System.Array";
     BEGIN
-      SplitCharArray := SplitCharArray.CreateInstance(GETDOTNETTYPE(SplitChar),1);
-      SplitCharArray.SetValue(Separator,0);
-      DotNet_Array.SetArray(DotNetString.Split(SplitCharArray));
+      DotNet_ArraySplit.GetArray(DotNetArraySplit);
+      DotNet_ArrayReturn.SetArray(DotNetString.Split(DotNetArraySplit));
+    END;
+
+    [External]
+    PROCEDURE ToCharArray@1(StartIndex@1001 : Integer;Length@1002 : Integer;VAR DotNet_Array@1000 : Codeunit 3000);
+    BEGIN
+      DotNet_Array.SetArray(DotNetString.ToCharArray(StartIndex,Length));
     END;
 
     PROCEDURE GetString@3(VAR DotNetString2@1000 : DotNet "'mscorlib'.System.String");
