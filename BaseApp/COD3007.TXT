@@ -30,7 +30,7 @@ OBJECT Codeunit 3007 DotNet_String
     END;
 
     [External]
-    PROCEDURE Split@5(Separator@1001 : Char;VAR TempNameValueBuffer@1000 : TEMPORARY Record 823);
+    PROCEDURE Split@5(Separator@1001 : Char;VAR DotNet_Array@1000 : Codeunit 3000);
     VAR
       SplitChar@1003 : DotNet "'mscorlib'.System.Char";
       SplitCharArray@1002 : DotNet "'mscorlib'.System.Array";
@@ -38,8 +38,7 @@ OBJECT Codeunit 3007 DotNet_String
     BEGIN
       SplitCharArray := SplitCharArray.CreateInstance(GETDOTNETTYPE(SplitChar),1);
       SplitCharArray.SetValue(Separator,0);
-      FOREACH String IN DotNetString.Split(SplitCharArray) DO
-        TempNameValueBuffer.AddNewEntry('',String);
+      DotNet_Array.SetArray(DotNetString.Split(SplitCharArray));
     END;
 
     PROCEDURE GetString@3(VAR DotNetString2@1000 : DotNet "'mscorlib'.System.String");

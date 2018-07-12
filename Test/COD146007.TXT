@@ -23,7 +23,7 @@ OBJECT Codeunit 146007 Test_DotNet_String
     [Test]
     PROCEDURE TestDotNetStringSplit@1();
     VAR
-      TempNameValueBuffer@1001 : TEMPORARY Record 823;
+      DotNet_Array@1001 : Codeunit 3000;
       DotNet_String@1000 : Codeunit 3007;
       SplitChar@1002 : Char;
       TestValue@1003 : ARRAY [4] OF Text;
@@ -44,20 +44,13 @@ OBJECT Codeunit 146007 Test_DotNet_String
         TestValue[4] );
 
       // [WHEN] The Split method is called
-      DotNet_String.Split(SplitChar,TempNameValueBuffer);
+      DotNet_String.Split(SplitChar,DotNet_Array);
 
       // [THEN] The String is split
-      TempNameValueBuffer.GET(1);
-      Assert.AreEqual(TestValue[1],TempNameValueBuffer.GetValue,'Incorrect result value from split');
-
-      TempNameValueBuffer.GET(2);
-      Assert.AreEqual(TestValue[2],TempNameValueBuffer.GetValue,'Incorrect result value from split');
-
-      TempNameValueBuffer.GET(3);
-      Assert.AreEqual(TestValue[3],TempNameValueBuffer.GetValue,'Incorrect result value from split');
-
-      TempNameValueBuffer.GET(4);
-      Assert.AreEqual(TestValue[4],TempNameValueBuffer.GetValue,'Incorrect result value from split');
+      Assert.AreEqual(TestValue[1],DotNet_Array.GetValueAsText(0),'Incorrect result value from split');
+      Assert.AreEqual(TestValue[2],DotNet_Array.GetValueAsText(1),'Incorrect result value from split');
+      Assert.AreEqual(TestValue[3],DotNet_Array.GetValueAsText(2),'Incorrect result value from split');
+      Assert.AreEqual(TestValue[4],DotNet_Array.GetValueAsText(3),'Incorrect result value from split');
     END;
 
     BEGIN
