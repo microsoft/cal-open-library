@@ -1,0 +1,76 @@
+OBJECT Codeunit 50014 Test_DotNet_ObjectAndType
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Modified=Yes;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    Subtype=Test;
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      Assert@17024400 : Codeunit 130000;
+      LibraryLowerPermissions@17024401 : Codeunit 132217;
+      DotNet_Object@17024405 : Codeunit 50010;
+      DotNet_Type@17024402 : Codeunit 50011;
+      DotNet_Array@17024403 : Codeunit 3000;
+      DotNetObject@17024404 : DotNet "'mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Object" SUPPRESSDISPOSE;
+      DotNetString@17024406 : DotNet "'mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.String" SUPPRESSDISPOSE;
+
+    [Test]
+    PROCEDURE ObjectMethodsTest@17024401();
+    BEGIN
+      LibraryLowerPermissions.SetO365Basic;
+      //[GIVEN] string with value 'TestString' is actual object
+      DotNetString := 'TestString';
+      //[WHEN] casting it to "object" .NET Type
+      DotNet_Object.SetObject(DotNetString);
+      //[THEN] ToString result should be equal to 'TestString'
+      Assert.AreEqual('TestString', DotNet_Object.ToText, 'Casting to object fails');
+      //[THEN] object values is not "null"
+      Assert.AreEqual(FALSE, DotNet_Object.IsEmpty, 'Checking if object is null fails');
+      DotNet_Object.GetTypeInfo(DotNet_Type);
+      //[THEN] type name of object is 'String'
+      Assert.AreEqual('String', DotNet_Type.GetName, 'Checking type fails');
+    END;
+
+    [Test]
+    PROCEDURE ArrayCreationAndModificationTest@17024404();
+    BEGIN
+      LibraryLowerPermissions.SetO365Basic;
+      DotNetString := 'TestString';
+      //[GIVEN] System.String datatype is used as type base
+      DotNet_Type.SetType(DotNetString.GetType);
+      //[WHEN] Array of 3 elements is created
+      DotNet_Array.Create(DotNet_Type, 3);
+      //[WHEN] and first element is set to 'TestString' using object wrapper
+      DotNet_Object.SetObject(DotNetString);
+      DotNet_Array.SetValueAsObject(0, DotNet_Object);
+      //[WHEN] and second element is set to 'TestString2' directly
+      DotNet_Array.SetValueAsText(1, 'TestString2');
+      //[THEN] array length should be 3
+      Assert.AreEqual(3, DotNet_Array.Length, 'Length check fails');
+      //[THEN] first element should be 'TestString'
+      Assert.AreEqual('TestString', DotNet_Array.GetValueAsText(0), 'First element check fails');
+      //[THEN] second element should be 'TestString2'
+      DotNet_Array.GetValueAsObject(1, DotNet_Object);
+      DotNet_Object.GetObject(DotNetString);
+      Assert.AreEqual('TestString2', DotNetString.ToString, 'Second element check fails');
+      //[THEN] third element should be null
+      DotNet_Array.GetValueAsObject(2, DotNet_Object);
+      Assert.AreEqual(TRUE, DotNet_Object.IsEmpty, 'Third element check fails');
+    END;
+
+    BEGIN
+    END.
+  }
+}
+

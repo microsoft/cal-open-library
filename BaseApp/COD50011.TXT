@@ -1,0 +1,56 @@
+OBJECT Codeunit 50011 DotNet_Type
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Modified=Yes;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      DotNetType@17024400 : DotNet "'mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Type";
+
+    PROCEDURE SetType@17024409(NewType@17024400 : DotNet "'mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Type");
+    BEGIN
+      DotNetType := NewType;
+    END;
+
+    PROCEDURE GetType@17024410(VAR CurrentObject@17024400 : DotNet "'mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Type");
+    BEGIN
+      CurrentObject := DotNetType;
+    END;
+
+    [External]
+    PROCEDURE GetAssemblyQualifiedName@17024401() : Text;
+    BEGIN
+      EXIT(DotNetType.AssemblyQualifiedName);
+    END;
+
+    [External]
+    PROCEDURE GetName@17024403() : Text;
+    BEGIN
+      EXIT(DotNetType.Name);
+    END;
+
+    [External]
+    PROCEDURE IsAssignableFrom@17024405(OtherType@17024400 : Codeunit 50011) : Boolean;
+    VAR
+      OtherDotNetType@17024401 : DotNet "'mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Type";
+    BEGIN
+      OtherType.GetType(OtherDotNetType);
+      EXIT(DotNetType.IsAssignableFrom(DotNetType));
+    END;
+
+    BEGIN
+    END.
+  }
+}
+
