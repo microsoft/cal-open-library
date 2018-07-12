@@ -1,0 +1,41 @@
+OBJECT Codeunit 50013 DotNet_IEnumerable
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Modified=Yes;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      DotNetEnumerable@17024400 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Collections.IEnumerable";
+
+    PROCEDURE SetEnumerable@17024415(NewEnumerable@17024400 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Collections.IEnumerable");
+    BEGIN
+      DotNetEnumerable := NewEnumerable;
+    END;
+
+    PROCEDURE GetEnumerable@17024414(VAR CurrentEnumerable@17024400 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Collections.IEnumerable");
+    BEGIN
+      CurrentEnumerable := DotNetEnumerable;
+    END;
+
+    [External]
+    PROCEDURE GetEnumerator@17024403(VAR Enumerator@17024400 : Codeunit 50012);
+    BEGIN
+      Enumerator.SetEnumerator(DotNetEnumerable.GetEnumerator);
+    END;
+
+    BEGIN
+    END.
+  }
+}
+

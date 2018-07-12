@@ -4,6 +4,7 @@ OBJECT Codeunit 3000 DotNet_Array
   {
     Date=;
     Time=;
+    Modified=Yes;
     Version List=;
   }
   PROPERTIES
@@ -18,15 +19,48 @@ OBJECT Codeunit 3000 DotNet_Array
       DotNetArray@1000 : DotNet "'mscorlib'.System.Array";
 
     [External]
+    PROCEDURE Create@17024402(VAR ElementType@17024401 : Codeunit 50011;Length@17024400 : Integer) : Integer;
+    VAR
+      DotNetType@17024402 : DotNet "'mscorlib'.System.Type";
+    BEGIN
+      ElementType.GetType(DotNetType);
+      DotNetArray := DotNetArray.CreateInstance(DotNetType, Length);
+    END;
+
+    [External]
     PROCEDURE Length@4() : Integer;
     BEGIN
       EXIT(DotNetArray.Length)
     END;
 
     [External]
+    PROCEDURE SetValueAsObject@17024407(Index@1000 : Integer;VAR NewValue@17024400 : Codeunit 50010);
+    VAR
+      DotNetObject@17024401 : DotNet "'mscorlib'.System.Object";
+    BEGIN
+      NewValue.GetObject(DotNetObject);
+      DotNetArray.SetValue(DotNetObject, Index);
+    END;
+
+    [External]
+    PROCEDURE SetValueAsText@17024409(Index@1000 : Integer;NewValue@17024400 : Text);
+    VAR
+      DotNetString@17024401 : DotNet "'mscorlib'.System.String";
+    BEGIN
+      DotNetString := NewValue;
+      DotNetArray.SetValue(DotNetString, Index);
+    END;
+
+    [External]
     PROCEDURE GetValueAsText@5(Index@1000 : Integer) : Text;
     BEGIN
       EXIT(DotNetArray.GetValue(Index))
+    END;
+
+    [External]
+    PROCEDURE GetValueAsObject@17024405(Index@1000 : Integer;VAR CurrentValue@17024400 : Codeunit 50010);
+    BEGIN
+      CurrentValue.SetObject(DotNetArray.GetValue(Index));
     END;
 
     PROCEDURE GetArray@2(VAR DotNetArray2@1000 : DotNet "'mscorlib'.System.Array");
@@ -37,6 +71,12 @@ OBJECT Codeunit 3000 DotNet_Array
     PROCEDURE SetArray@3(DotNetArray2@1000 : DotNet "'mscorlib'.System.Array");
     BEGIN
       DotNetArray := DotNetArray2
+    END;
+
+    [External]
+    PROCEDURE AsEnumerable@17024400(VAR Enumerable@17024400 : Codeunit 50013);
+    BEGIN
+      Enumerable.SetEnumerable(DotNetArray);
     END;
 
     BEGIN

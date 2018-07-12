@@ -1,0 +1,83 @@
+OBJECT Codeunit 50015 Test_DotNet_Enumerator
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Modified=Yes;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    Subtype=Test;
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      Assert@17024400 : Codeunit 130000;
+      LibraryLowerPermissions@17024401 : Codeunit 132217;
+      DotNet_Object@17024405 : Codeunit 50010;
+      DotNet_Type@17024402 : Codeunit 50011;
+      DotNet_Array@17024403 : Codeunit 3000;
+      DotNetString@17024406 : DotNet "'mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.String" SUPPRESSDISPOSE;
+      DotNet_IEnumerator@17024407 : Codeunit 50012;
+      DotNet_IEnumerable@17024408 : Codeunit 50013;
+
+    [Test]
+    PROCEDURE StringEnumeratorTest@17024401();
+    VAR
+      Count@17024400 : Integer;
+    BEGIN
+      LibraryLowerPermissions.SetO365Basic;
+      //[GIVEN] 'TestString' as stored as .NET string
+      DotNetString := 'TestString';
+      //[WHEN] type is casted to IEnumerable and iteration is performed
+      DotNet_IEnumerable.SetEnumerable(DotNetString);
+      DotNet_IEnumerable.GetEnumerator(DotNet_IEnumerator);
+      Count := 0;
+      WHILE DotNet_IEnumerator.MoveNext DO
+        Count += 1;
+      //[THEN] iterations count should be equal to string length
+      Assert.AreEqual(DotNetString.Length, Count, 'Enumerator elements count fails');
+    END;
+
+    [Test]
+    PROCEDURE ArrayEnumeratorTest@17024412();
+    VAR
+      Count@17024400 : Integer;
+      Concatenation@17024401 : Text;
+    BEGIN
+      LibraryLowerPermissions.SetO365Basic;
+      //[GIVEN] a string array of 3 elements ('Value1', 'Value2', 'Value3')
+      DotNetString := '';
+      DotNet_Type.SetType(DotNetString.GetType);
+      DotNet_Array.Create(DotNet_Type, 3);
+      DotNet_Array.SetValueAsText(0, 'Value1');
+      DotNet_Array.SetValueAsText(1, 'Value2');
+      DotNet_Array.SetValueAsText(2, 'Value3');
+      //[WHEN] Array is casted to IEnumerable and iteration is performed
+      DotNet_Array.AsEnumerable(DotNet_IEnumerable);
+      DotNet_IEnumerable.GetEnumerator(DotNet_IEnumerator);
+      Count := 0;
+      Concatenation := '';
+      WHILE DotNet_IEnumerator.MoveNext DO
+        BEGIN
+          Count += 1;
+          DotNet_IEnumerator.GetCurrent(DotNet_Object);
+          DotNet_Object.GetObject(DotNetString);
+          Concatenation += DotNetString.ToString;
+        END;
+      //[THEN] iterations count should be equal to array length
+      Assert.AreEqual(DotNet_Array.Length, Count, 'Enumerator elements count fails');
+      //[THEN] and concatenation of all iterated values should be equal to 'Value1Value2Value3'
+      Assert.AreEqual('Value1Value2Value3', Concatenation, 'Enumerator elements count fails');
+    END;
+
+    BEGIN
+    END.
+  }
+}
+
