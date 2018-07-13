@@ -1,0 +1,63 @@
+OBJECT Codeunit 50017 GZipStream Helper
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      TextErrorReadNotSupported@17024401 : TextConst 'ENU=Stream cannot be read from';
+      TextErrorWriteNotSupported@17024402 : TextConst 'ENU=Stream cannot be written to';
+
+    [External]
+    PROCEDURE InitGzipStreamFromTempBlob@17024400(VAR TempBlob@1000 : Record 99008535;CompressMode@17024401 : Boolean;VAR GzipStream@17024403 : Codeunit 50006);
+    VAR
+      BaseInStream@17024400 : InStream;
+      BaseOutStream@17024402 : OutStream;
+    BEGIN
+      IF CompressMode THEN
+        BEGIN
+          CLEAR(TempBlob.Blob);
+          TempBlob.Blob.CREATEOUTSTREAM(BaseOutStream);
+          GzipStream.InitGzipStreamFromOutStream(BaseOutStream);
+        END
+      ELSE
+        BEGIN
+          TempBlob.Blob.CREATEINSTREAM(BaseInStream);
+          GzipStream.InitGzipStreamFromInStream(BaseInStream);
+        END;
+    END;
+
+    [External]
+    PROCEDURE WriteToTempBlob@17024401(VAR GzipStream@17024401 : Codeunit 50006;VAR TempBlob@1000 : Record 99008535);
+    VAR
+      ResultStream@17024400 : OutStream;
+    BEGIN
+      CLEAR(TempBlob.Blob);
+      TempBlob.Blob.CREATEOUTSTREAM(ResultStream);
+      GzipStream.WriteToStream(ResultStream);
+    END;
+
+    [External]
+    PROCEDURE ReadFromTempBlob@17024410(VAR GzipStream@17024401 : Codeunit 50006;VAR TempBlob@1000 : Record 99008535);
+    VAR
+      DataStream@17024400 : InStream;
+    BEGIN
+      TempBlob.Blob.CREATEINSTREAM(DataStream);
+      GzipStream.ReadFromStream(DataStream);
+    END;
+
+    BEGIN
+    END.
+  }
+}
+

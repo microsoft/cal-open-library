@@ -2,9 +2,8 @@ OBJECT Codeunit 50007 Test_DotNet_GzipStream
 {
   OBJECT-PROPERTIES
   {
-    Date=18-07-10;
-    Time=21:29:18;
-    Modified=Yes;
+    Date=;
+    Time=;
     Version List=;
   }
   PROPERTIES
@@ -20,6 +19,7 @@ OBJECT Codeunit 50007 Test_DotNet_GzipStream
       Assert@17024400 : Codeunit 130000;
       LibraryLowerPermissions@17024401 : Codeunit 132217;
       DotNet_GzipStream@17024405 : Codeunit 50006;
+      GZipStreamHelper@17024402 : Codeunit 50017;
 
     [Test]
     PROCEDURE SampleDataCompression@17024402();
@@ -32,8 +32,8 @@ OBJECT Codeunit 50007 Test_DotNet_GzipStream
       // [Given] Uncompressed data is 'TestData'
       SourceTempBlob.WriteAsText('TestData', TEXTENCODING::UTF8);
       // [WHEN] Gzip Compression completes
-      DotNet_GzipStream.InitGzipStreamFromTempBlob(DestTempBlob, TRUE);
-      DotNet_GzipStream.ReadFromTempBlob(SourceTempBlob);
+      GZipStreamHelper.InitGzipStreamFromTempBlob(DestTempBlob, TRUE, DotNet_GzipStream);
+      GZipStreamHelper.ReadFromTempBlob(DotNet_GzipStream, SourceTempBlob);
       DotNet_GzipStream.Close;
       // [THEN] Compressed data as Base64 should be 'H4sIAAAAAAAEAAtJLS5xSSxJBAA2+6HACAAAAA=='
       Assert.AreEqual('H4sIAAAAAAAEAAtJLS5xSSxJBAA2+6HACAAAAA==', DestTempBlob.ToBase64String, 'Compression fails');
@@ -50,8 +50,8 @@ OBJECT Codeunit 50007 Test_DotNet_GzipStream
       // [Given] Compressed data (as Base64) is 'H4sIAAAAAAAEAAtJLS5xSSxJBAA2+6HACAAAAA=='
       SourceTempBlob.FromBase64String('H4sIAAAAAAAEAAtJLS5xSSxJBAA2+6HACAAAAA==');
       // [WHEN] Gzip Decompression completes
-      DotNet_GzipStream.InitGzipStreamFromTempBlob(SourceTempBlob, FALSE);
-      DotNet_GzipStream.WriteToTempBlob(DestTempBlob);
+      GZipStreamHelper.InitGzipStreamFromTempBlob(SourceTempBlob, FALSE, DotNet_GzipStream);
+      GZipStreamHelper.WriteToTempBlob(DotNet_GzipStream, DestTempBlob);
       DotNet_GzipStream.Close;
       // [THEN] Decompressed data should be 'TestData'
       Assert.AreEqual('TestData', DestTempBlob.ReadAsTextWithCRLFLineSeparator, 'Decompression fails');
@@ -69,13 +69,13 @@ OBJECT Codeunit 50007 Test_DotNet_GzipStream
       // [Given] Uncompressed data is 'TestData'
       SourceTempBlob.WriteAsText('TestData', TEXTENCODING::UTF8);
       // [WHEN] Gzip Compression completes
-      DotNet_GzipStream.InitGzipStreamFromTempBlob(IntermTempBlob, TRUE);
-      DotNet_GzipStream.ReadFromTempBlob(SourceTempBlob);
+      GZipStreamHelper.InitGzipStreamFromTempBlob(IntermTempBlob, TRUE, DotNet_GzipStream);
+      GZipStreamHelper.ReadFromTempBlob(DotNet_GzipStream, SourceTempBlob);
       // [WHEN] And Gzip Decompression from the same stream completes
       CLEAR(DotNet_GzipStream);
-      DotNet_GzipStream.InitGzipStreamFromTempBlob(IntermTempBlob, FALSE);
+      GZipStreamHelper.InitGzipStreamFromTempBlob(IntermTempBlob, FALSE, DotNet_GzipStream);
       CLEAR(DestTempBlob.Blob);
-      DotNet_GzipStream.WriteToTempBlob(DestTempBlob);
+      GZipStreamHelper.WriteToTempBlob(DotNet_GzipStream, DestTempBlob);
       // [THEN] Result must be the same string
       Assert.AreEqual('TestData', DestTempBlob.ReadAsTextWithCRLFLineSeparator, 'Compression/Decompression fails');
     END;

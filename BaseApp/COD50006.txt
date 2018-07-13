@@ -2,9 +2,8 @@ OBJECT Codeunit 50006 DotNet_GzipStream
 {
   OBJECT-PROPERTIES
   {
-    Date=18-07-10;
-    Time=21:23:58;
-    Modified=Yes;
+    Date=;
+    Time=;
     Version List=;
   }
   PROPERTIES
@@ -21,22 +20,14 @@ OBJECT Codeunit 50006 DotNet_GzipStream
       TextErrorWriteNotSupported@17024402 : TextConst 'ENU=Stream cannot be written to';
 
     [External]
-    PROCEDURE InitGzipStreamFromTempBlob@17024400(VAR TempBlob@1000 : Record 99008535;CompressMode@17024401 : Boolean);
+    PROCEDURE Create@17024401(VAR BaseStream@1000 : InStream;Compress@17024401 : Boolean);
     VAR
-      BaseInStream@17024400 : InStream;
-      BaseOutStream@17024402 : OutStream;
+      DotNetCompressionMode@17024400 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.IO.Compression.CompressionMode";
     BEGIN
-      IF CompressMode THEN
-        BEGIN
-          CLEAR(TempBlob.Blob);
-          TempBlob.Blob.CREATEOUTSTREAM(BaseOutStream);
-          InitGzipStreamFromOutStream(BaseOutStream);
-        END
+      IF Compress THEN
+        DotNetGZipStream := DotNetGZipStream.GZipStream(BaseStream, DotNetCompressionMode.Compress)
       ELSE
-        BEGIN
-          TempBlob.Blob.CREATEINSTREAM(BaseInStream);
-          InitGzipStreamFromInStream(BaseInStream);
-        END;
+        DotNetGZipStream := DotNetGZipStream.GZipStream(BaseStream, DotNetCompressionMode.Decompress);
     END;
 
     [External]
@@ -64,31 +55,12 @@ OBJECT Codeunit 50006 DotNet_GzipStream
     END;
 
     [External]
-    PROCEDURE WriteToTempBlob@17024401(VAR TempBlob@1000 : Record 99008535);
-    VAR
-      ResultStream@17024400 : OutStream;
-    BEGIN
-      CLEAR(TempBlob.Blob);
-      TempBlob.Blob.CREATEOUTSTREAM(ResultStream);
-      WriteToStream(ResultStream);
-    END;
-
-    [External]
     PROCEDURE ReadFromStream@17024408(VAR InStream@1000 : InStream);
     BEGIN
       IF NOT CanWrite THEN
         ERROR(TextErrorWriteNotSupported);
 
       COPYSTREAM(DotNetGZipStream, InStream);
-    END;
-
-    [External]
-    PROCEDURE ReadFromTempBlob@17024410(VAR TempBlob@1000 : Record 99008535);
-    VAR
-      DataStream@17024400 : InStream;
-    BEGIN
-      TempBlob.Blob.CREATEINSTREAM(DataStream);
-      ReadFromStream(DataStream);
     END;
 
     [External]
