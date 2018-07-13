@@ -4,7 +4,6 @@ OBJECT Codeunit 50005 Test_DotNet_XslTransform
   {
     Date=;
     Time=;
-    Modified=Yes;
     Version List=;
   }
   PROPERTIES
@@ -20,8 +19,8 @@ OBJECT Codeunit 50005 Test_DotNet_XslTransform
       Assert@17024400 : Codeunit 130000;
       LibraryLowerPermissions@17024401 : Codeunit 132217;
       DotNet_XslTransform@17024402 : Codeunit 50003;
-      DotNet_XmlReader@17024403 : Codeunit 50004;
       DotNet_XmlDocument@17024404 : Codeunit 3013;
+      XslTransformHelpers@17024403 : Codeunit 50016;
 
     PROCEDURE TransformXmlHelper@17024401(XsltTransformationText@17024400 : Text;XmlData@17024401 : Text) : Text;
     VAR
@@ -30,14 +29,12 @@ OBJECT Codeunit 50005 Test_DotNet_XslTransform
       InputStream@17024403 : InStream;
     BEGIN
       TempBlob.WriteAsText(XsltTransformationText, TEXTENCODING::UTF8);
-      CLEAR(DotNet_XmlReader);
-      DotNet_XmlReader.CreateFromBlob(TempBlob);
       CLEAR(DotNet_XslTransform);
-      DotNet_XslTransform.CreateFromXmlReader(DotNet_XmlReader);
+      XslTransformHelpers.CreateXslTransformFromBlob(TempBlob, DotNet_XslTransform);
       LoadXmlDocumentHelper(XmlData);
       CLEAR(TempBlob);
       TempBlob.Blob.CREATEOUTSTREAM(ResultStream);
-      DotNet_XslTransform.TransformXmlDocument(DotNet_XmlDocument, ResultStream);
+      DotNet_XslTransform.Transform(DotNet_XmlDocument, ResultStream);
       EXIT(TempBlob.ReadAsTextWithCRLFLineSeparator);
     END;
 
@@ -61,6 +58,7 @@ OBJECT Codeunit 50005 Test_DotNet_XslTransform
       ExpectedResult@17024402 : Text;
       Result@17024403 : Text;
     BEGIN
+      LibraryLowerPermissions.SetO365Basic;
       // [Given] Xslt tranformation:
       Xslt :=
           '<?xml version="1.0" encoding="UTF-8"?>'
@@ -93,6 +91,7 @@ OBJECT Codeunit 50005 Test_DotNet_XslTransform
       ExpectedResult@17024402 : Text;
       Result@17024403 : Text;
     BEGIN
+      LibraryLowerPermissions.SetO365Basic;
       // [Given] Xslt tranformation:
       Xslt :=
           '<?xml version="1.0" encoding="UTF-8"?>'

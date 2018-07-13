@@ -1,0 +1,49 @@
+OBJECT Codeunit 50016 XslTransform Helpers
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+
+    [External]
+    PROCEDURE CreateXslTransformFromBlob@17024400(VAR TempBlob@17024400 : Record 99008535;VAR XslTransform@17024402 : Codeunit 50003);
+    VAR
+      TransformStream@17024401 : InStream;
+    BEGIN
+      TempBlob.Blob.CREATEINSTREAM(TransformStream);
+      XslTransform.Create(TransformStream);
+    END;
+
+    [External]
+    PROCEDURE TransformBlob@17024408(VAR XslTransform@17024401 : Codeunit 50003;VAR TempBlob@17024405 : Record 99008535;VAR DestinationStream@17024404 : OutStream);
+    VAR
+      SourceStream@17024400 : InStream;
+    BEGIN
+      TempBlob.Blob.CREATEINSTREAM(SourceStream);
+      TransformStream(XslTransform, SourceStream, DestinationStream);
+    END;
+
+    [External]
+    PROCEDURE TransformStream@17024428(VAR XslTransform@17024400 : Codeunit 50003;VAR SourceXmlStream@17024405 : InStream;VAR DestinationStream@17024404 : OutStream);
+    VAR
+      XmlDocument@17024406 : Codeunit 3013;
+    BEGIN
+      XmlDocument.Load(SourceXmlStream);
+      XslTransform.Transform(XmlDocument, DestinationStream);
+    END;
+
+    BEGIN
+    END.
+  }
+}
+
