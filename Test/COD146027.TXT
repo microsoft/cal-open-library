@@ -2,8 +2,8 @@ OBJECT Codeunit 146027 DotNet_Certificate Test
 {
   OBJECT-PROPERTIES
   {
-    Date=08.07.18;
-    Time=21:49:13;
+    Date=16.07.18;
+    Time=20:09:19;
     Modified=Yes;
     Version List=;
   }
@@ -20,7 +20,7 @@ OBJECT Codeunit 146027 DotNet_Certificate Test
       Assert@1000 : Codeunit 130000;
 
     [Test]
-    [LineStart(75)]
+    [LineStart(81)]
     PROCEDURE TestCertificateCollection@2();
     VAR
       DotNet_Certificate@1000 : Codeunit 3027;
@@ -28,7 +28,7 @@ OBJECT Codeunit 146027 DotNet_Certificate Test
       Index@1002 : Integer;
     BEGIN
       // Read Certificate from Local Machine
-      DotNet_CertificateCollection.Initialize;
+      DotNet_CertificateCollection.Init;
 
       FOR Index := 1 TO DotNet_CertificateCollection.GetCount DO BEGIN
         DotNet_CertificateCollection.GetX509Certificate(Index - 1,DotNet_Certificate);
@@ -37,7 +37,7 @@ OBJECT Codeunit 146027 DotNet_Certificate Test
     END;
 
     [Test]
-    [LineStart(84)]
+    [LineStart(90)]
     PROCEDURE TestDemoCertificateFromBase64String@5();
     VAR
       TempBlob@1002 : Record 99008535;
@@ -47,12 +47,13 @@ OBJECT Codeunit 146027 DotNet_Certificate Test
     BEGIN
       TempBlob.FromBase64String(DemoCertificate);
       TempBlob.Blob.CREATEINSTREAM(InStr);
-      DotNet_MemoryStream.InitMemoryStreamFromInStream(InStr);
+      DotNet_MemoryStream.InitMemoryStream;
+      DotNet_MemoryStream.CopyFromInStream(InStr);
       DotNet_Certificate.LoadFromMemoryStream(DotNet_MemoryStream,''); // Password not needed
       TestCertificate(DotNet_Certificate);
     END;
 
-    [LineStart(91)]
+    [LineStart(98)]
     LOCAL PROCEDURE TestCertificate@1(DotNet_Certificate@1000 : Codeunit 3027);
     VAR
       TempBlob@1012 : Record 99008535;
@@ -62,20 +63,19 @@ OBJECT Codeunit 146027 DotNet_Certificate Test
       InStr@1013 : InStream;
       OutStr@1014 : OutStream;
       FriendlyName@1008 : Text;
-      FriendlyName2@1015 : Text;
       Thumbprint@1007 : Text;
-      Thumbprint2@1016 : Text;
       Issuer@1006 : Text;
-      Issuer2@1017 : Text;
       Subject@1005 : Text;
-      Subject2@1018 : Text;
       Expiration@1004 : DateTime;
-      Expiration2@1019 : DateTime;
       HasPrivateKey@1003 : Boolean;
-      HasPrivateKey2@1020 : Boolean;
     BEGIN
       // Get Details to compare with
-      DotNet_Certificate.GetCertificateDetails(FriendlyName,Thumbprint,Issuer,Subject,Expiration,HasPrivateKey);
+      FriendlyName := DotNet_Certificate.GetFriendlyName;
+      Thumbprint := DotNet_Certificate.GetThumbprint;
+      Issuer := DotNet_Certificate.GetIssuer;
+      Subject := DotNet_Certificate.GetSubject;
+      Expiration := DotNet_Certificate.GetExpiration;
+      HasPrivateKey := DotNet_Certificate.GetHasPrivateKey;
 
       // Export Certificate to TempBlob as Byte Array
       DotNet_Certificate.ExportToArray(DotNet_Array);
@@ -85,20 +85,20 @@ OBJECT Codeunit 146027 DotNet_Certificate Test
 
       // Import Certificate from TempBlob as Byte Array
       TempBlob.Blob.CREATEINSTREAM(InStr);
-      DotNet_MemoryStream.InitMemoryStreamFromInStream(InStr);
+      DotNet_MemoryStream.InitMemoryStream;
+      DotNet_MemoryStream.CopyFromInStream(InStr);
       DotNet_Certificate.LoadFromMemoryStream(DotNet_MemoryStream,''); // Password not needed
 
       // Verify Certificate Details
-      DotNet_Certificate.GetCertificateDetails(FriendlyName2,Thumbprint2,Issuer2,Subject2,Expiration2,HasPrivateKey2);
-      Assert.AreEqual(FriendlyName,FriendlyName2,'Certificate Details incorrect!');
-      Assert.AreEqual(Thumbprint,Thumbprint2,'Certificate Details incorrect!');
-      Assert.AreEqual(Issuer,Issuer2,'Certificate Details incorrect!');
-      Assert.AreEqual(Subject,Subject2,'Certificate Details incorrect!');
-      Assert.AreEqual(Expiration,Expiration2,'Certificate Details incorrect!');
-      Assert.AreEqual(HasPrivateKey,HasPrivateKey2,'Certificate Details incorrect!');
+      Assert.AreEqual(FriendlyName,DotNet_Certificate.GetFriendlyName,'Certificate Details incorrect!');
+      Assert.AreEqual(Thumbprint,DotNet_Certificate.GetThumbprint,'Certificate Details incorrect!');
+      Assert.AreEqual(Issuer,DotNet_Certificate.GetIssuer,'Certificate Details incorrect!');
+      Assert.AreEqual(Subject,DotNet_Certificate.GetSubject,'Certificate Details incorrect!');
+      Assert.AreEqual(Expiration,DotNet_Certificate.GetExpiration,'Certificate Details incorrect!');
+      Assert.AreEqual(HasPrivateKey,DotNet_Certificate.GetHasPrivateKey,'Certificate Details incorrect!');
     END;
 
-    [LineStart(115)]
+    [LineStart(127)]
     PROCEDURE DemoCertificate@6() : Text;
     BEGIN
       EXIT(
