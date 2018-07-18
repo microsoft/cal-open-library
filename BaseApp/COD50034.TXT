@@ -1,0 +1,40 @@
+OBJECT Codeunit 50034 DotNet_Word.HyperlinkRelations
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      DotNetHyperlinkRelationship@17024400 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Packaging.HyperlinkRelationship";
+
+    [External]
+    PROCEDURE GetId@17024401() : Text;
+    BEGIN
+      EXIT(DotNetHyperlinkRelationship.Id);
+    END;
+
+    PROCEDURE SetHyperlinkRelationship@17024411(NewDotNetHyperlinkRelationship@17024400 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Packaging.HyperlinkRelationship");
+    BEGIN
+      DotNetHyperlinkRelationship := NewDotNetHyperlinkRelationship;
+    END;
+
+    PROCEDURE GetHyperlinkRelationship@17024400(VAR CurrentDotNetHyperlinkRelationship@17024400 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Packaging.HyperlinkRelationship");
+    BEGIN
+      CurrentDotNetHyperlinkRelationship := DotNetHyperlinkRelationship;
+    END;
+
+    BEGIN
+    END.
+  }
+}
+

@@ -1,0 +1,63 @@
+OBJECT Codeunit 50033 DotNet_Word.ProofError
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      DotNetProofError@17024400 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.ProofError";
+
+    [External]
+    PROCEDURE Create@17024403();
+    BEGIN
+      DotNetProofError := DotNetProofError.ProofError;
+    END;
+
+    [External]
+    PROCEDURE GetOuterXml@17024402() : Text;
+    BEGIN
+      EXIT(DotNetProofError.OuterXml);
+    END;
+
+    [External]
+    PROCEDURE GetInnerText@17024410() : Text;
+    BEGIN
+      EXIT(DotNetProofError.InnerText);
+    END;
+
+    [External]
+    PROCEDURE SetType@17024401(NewProofingErrorType@17024400 : 'SpellStart,SpellEnd,GrammarStart,GrammarEnd');
+    VAR
+      DotNetProofingErrorValues@17024402 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.ProofingErrorValues";
+      DotNetEnumValue@17024403 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.EnumValue`1";
+      OpenXmlDotNetHelper@17024401 : Codeunit 50067;
+    BEGIN
+      OpenXmlDotNetHelper.CreateEnumValueGeneric(GETDOTNETTYPE(DotNetProofingErrorValues), NewProofingErrorType, DotNetEnumValue);
+      DotNetProofError.Type := DotNetEnumValue;
+    END;
+
+    PROCEDURE SetProofError@17024411(NewDotNetProofError@17024400 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.ProofError");
+    BEGIN
+      DotNetProofError := NewDotNetProofError;
+    END;
+
+    PROCEDURE GetProofError@17024400(VAR CurrentDotNetProofError@17024400 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.ProofError");
+    BEGIN
+      CurrentDotNetProofError := DotNetProofError;
+    END;
+
+    BEGIN
+    END.
+  }
+}
+

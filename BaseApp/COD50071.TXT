@@ -1,0 +1,101 @@
+OBJECT Codeunit 50071 DotNet_Word.Numbering
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      DotNetNumbering@17024400 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.Numbering";
+
+    [External]
+    PROCEDURE Create@17024403();
+    BEGIN
+      DotNetNumbering := DotNetNumbering.Numbering;
+    END;
+
+    [External]
+    PROCEDURE CreateFromOuterXml@17024408(OuterXml@17024400 : Text);
+    BEGIN
+      DotNetNumbering := DotNetNumbering.Numbering(OuterXml);
+    END;
+
+    [External]
+    PROCEDURE GetOuterXml@17024404() : Text;
+    BEGIN
+      EXIT(DotNetNumbering.OuterXml);
+    END;
+
+    [External]
+    PROCEDURE GetInnerText@17024410() : Text;
+    BEGIN
+      EXIT(DotNetNumbering.InnerText);
+    END;
+
+    [External]
+    PROCEDURE AppendAbstractNum@17024405(VAR WordAbstractNum@17024401 : Codeunit 50072);
+    VAR
+      DotNetAbstractNum@17024400 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.AbstractNum";
+      OpenXmlDotNetHelper@17024402 : Codeunit 50067;
+    BEGIN
+      WordAbstractNum.GetAbstractNum(DotNetAbstractNum);
+      //We need this to deal with .NET Generics:
+      OpenXmlDotNetHelper.AppendGeneric(DotNetNumbering, DotNetAbstractNum);
+    END;
+
+    [External]
+    PROCEDURE AppendNumberingInstance@17024402(VAR WordNumberingInstance@17024401 : Codeunit 50074);
+    VAR
+      DotNetNumberingInstance@17024400 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.NumberingInstance";
+      OpenXmlDotNetHelper@17024402 : Codeunit 50067;
+    BEGIN
+      WordNumberingInstance.GetNumberingInstance(DotNetNumberingInstance);
+      //We need this to deal with .NET Generics:
+      OpenXmlDotNetHelper.AppendGeneric(DotNetNumbering, DotNetNumberingInstance);
+    END;
+
+    [External]
+    PROCEDURE Save@17024401(VAR WordNumberingDefinitionPart@17024401 : Codeunit 50070);
+    VAR
+      DotNetNumberingDefinitionsPart@17024402 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Packaging.NumberingDefinitionsPart";
+    BEGIN
+      WordNumberingDefinitionPart.GetNumberingDefinitionsPart(DotNetNumberingDefinitionsPart);
+      DotNetNumbering.Save(DotNetNumberingDefinitionsPart);
+    END;
+
+    [External]
+    PROCEDURE GetAbstractNumEnumerator@17024413(VAR WordAbstractNumEnumerator@17024400 : Codeunit 50075);
+    VAR
+      DotNetAbstractNum@17024402 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.AbstractNum";
+      DotNetEnumerator@17024403 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Collections.IEnumerator";
+      OpenXmlDotNetHelper@17024401 : Codeunit 50067;
+    BEGIN
+      //We need this to deal with .NET Generics:
+      OpenXmlDotNetHelper.GetEnumeratorOfTypeGeneric(DotNetNumbering.Elements, GETDOTNETTYPE(DotNetAbstractNum), DotNetEnumerator);
+      WordAbstractNumEnumerator.SetEnumerator(DotNetEnumerator);
+    END;
+
+    PROCEDURE SetNumbering@17024411(NewDotNetNumbering@17024400 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.Numbering");
+    BEGIN
+      DotNetNumbering := NewDotNetNumbering;
+    END;
+
+    PROCEDURE GetNumbering@17024400(VAR CurrentDotNetNumbering@17024400 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.Numbering");
+    BEGIN
+      CurrentDotNetNumbering := DotNetNumbering;
+    END;
+
+    BEGIN
+    END.
+  }
+}
+

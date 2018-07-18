@@ -1,0 +1,75 @@
+OBJECT Codeunit 50020 DotNet_Word.Document
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      DotNetDocument@17024400 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.Document";
+
+    [External]
+    PROCEDURE Create@17024402();
+    BEGIN
+      DotNetDocument := DotNetDocument.Document;
+    END;
+
+    [External]
+    PROCEDURE CreateFromOuterXml@17024409(OuterXml@17024400 : Text);
+    BEGIN
+      DotNetDocument := DotNetDocument.Document(OuterXml);
+    END;
+
+    [External]
+    PROCEDURE GetOuterXml@17024404() : Text;
+    BEGIN
+      EXIT(DotNetDocument.OuterXml);
+    END;
+
+    [External]
+    PROCEDURE GetInnerText@17024406() : Text;
+    BEGIN
+      EXIT(DotNetDocument.InnerText);
+    END;
+
+    [External]
+    PROCEDURE SetBody@17024401(VAR WordBody@17024400 : Codeunit 50021);
+    VAR
+      DotNetBody@17024401 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.Body";
+    BEGIN
+      WordBody.GetBody(DotNetBody);
+      DotNetDocument.Body := DotNetBody;
+    END;
+
+    [External]
+    PROCEDURE GetBody@17024403(VAR WordBody@17024400 : Codeunit 50021);
+    VAR
+      DotNetBody@17024401 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.Body";
+    BEGIN
+      WordBody.SetBody(DotNetDocument.Body);
+    END;
+
+    PROCEDURE SetDocument@17024411(NewDocument@17024400 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.Document");
+    BEGIN
+      DotNetDocument := NewDocument;
+    END;
+
+    PROCEDURE GetDocument@17024400(VAR CurrentDocument@17024400 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.Document");
+    BEGIN
+      CurrentDocument := DotNetDocument;
+    END;
+
+    BEGIN
+    END.
+  }
+}
+

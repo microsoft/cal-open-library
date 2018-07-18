@@ -1,0 +1,80 @@
+OBJECT Codeunit 50061 DotNet_Word.PresetGeometry
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      DotNetPresetGeometry@17024400 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Drawing.PresetGeometry";
+      OpenXmlDotNetHelper@17024401 : Codeunit 50067;
+
+    [External]
+    PROCEDURE Create@17024403();
+    BEGIN
+      DotNetPresetGeometry := DotNetPresetGeometry.PresetGeometry;
+    END;
+
+    [External]
+    PROCEDURE CreateFromOuterXml@17024408(OuterXml@17024400 : Text);
+    BEGIN
+      DotNetPresetGeometry := DotNetPresetGeometry.PresetGeometry(OuterXml);
+    END;
+
+    [External]
+    PROCEDURE GetOuterXml@17024402() : Text;
+    BEGIN
+      EXIT(DotNetPresetGeometry.OuterXml);
+    END;
+
+    [External]
+    PROCEDURE GetInnerText@17024410() : Text;
+    BEGIN
+      EXIT(DotNetPresetGeometry.InnerText);
+    END;
+
+    [External]
+    PROCEDURE SetPreset@17024416(NewPresetType@17024401 : Integer);
+    VAR
+      DotNetShapeTypeValues@17024400 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Drawing.ShapeTypeValues";
+      DotNetEnumValue@17024403 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.EnumValue`1";
+    BEGIN
+      //We need this to deal with .NET Generics:
+      OpenXmlDotNetHelper.CreateEnumValueGeneric(GETDOTNETTYPE(DotNetShapeTypeValues), NewPresetType, DotNetEnumValue);
+      DotNetPresetGeometry.Preset := DotNetEnumValue;
+    END;
+
+    [External]
+    PROCEDURE AppendAdjustValueList@17024404();
+    VAR
+      DotNetAdjustValueList@17024400 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Drawing.AdjustValueList";
+    BEGIN
+      DotNetAdjustValueList := DotNetAdjustValueList.AdjustValueList;
+      //We need this to deal with .NET Generics:
+      OpenXmlDotNetHelper.AppendGeneric(DotNetPresetGeometry, DotNetAdjustValueList);
+    END;
+
+    PROCEDURE SetPresetGeometry@17024411(NewDotNetPresetGeometry@17024400 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Drawing.PresetGeometry");
+    BEGIN
+      DotNetPresetGeometry := NewDotNetPresetGeometry;
+    END;
+
+    PROCEDURE GetPresetGeometry@17024400(VAR CurrentDotNetPresetGeometry@17024400 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Drawing.PresetGeometry");
+    BEGIN
+      CurrentDotNetPresetGeometry := DotNetPresetGeometry;
+    END;
+
+    BEGIN
+    END.
+  }
+}
+

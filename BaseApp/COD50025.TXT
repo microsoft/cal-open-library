@@ -1,0 +1,127 @@
+OBJECT Codeunit 50025 DotNet_Word.RunProperties
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      DotNetRunProperties@17024400 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.RunProperties";
+
+    [External]
+    PROCEDURE Create@17024403();
+    BEGIN
+      DotNetRunProperties := DotNetRunProperties.RunProperties;
+    END;
+
+    [External]
+    PROCEDURE CreateFromOuterXml@17024408(OuterXml@17024400 : Text);
+    BEGIN
+      DotNetRunProperties := DotNetRunProperties.RunProperties(OuterXml);
+    END;
+
+    [External]
+    PROCEDURE GetOuterXml@17024407() : Text;
+    BEGIN
+      EXIT(DotNetRunProperties.OuterXml);
+    END;
+
+    [External]
+    PROCEDURE GetInnerText@17024410() : Text;
+    BEGIN
+      EXIT(DotNetRunProperties.InnerText);
+    END;
+
+    [External]
+    PROCEDURE SetBold@17024405(Bold@17024401 : Boolean);
+    VAR
+      DotNetBold@17024400 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.Bold";
+      DotNetBoldNull@17024402 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.Bold";
+    BEGIN
+      DotNetBold := DotNetBold.Bold;
+      IF Bold THEN
+        DotNetRunProperties.Bold := DotNetBold
+      ELSE
+        DotNetRunProperties.Bold := DotNetBoldNull;
+    END;
+
+    [External]
+    PROCEDURE SetItalic@17024409(Italic@17024401 : Boolean);
+    VAR
+      DotNetItalic@17024400 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.Italic";
+      DotNetItalicNull@17024402 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.Italic";
+    BEGIN
+      DotNetItalic := DotNetItalic.Italic;
+      IF Italic THEN
+        DotNetRunProperties.Italic := DotNetItalic
+      ELSE
+        DotNetRunProperties.Italic := DotNetItalicNull;
+    END;
+
+    [External]
+    PROCEDURE SetUnderline@17024401(Underline@17024401 : Boolean);
+    VAR
+      DotNetUnderline@17024400 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.Underline";
+      DotNetUnderlineNull@17024402 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.Underline";
+    BEGIN
+      DotNetUnderline := DotNetUnderline.Underline;
+      IF Underline THEN
+        DotNetRunProperties.Underline := DotNetUnderline
+      ELSE
+        DotNetRunProperties.Underline := DotNetUnderlineNull;
+    END;
+
+    [External]
+    PROCEDURE SetFontSize@17024406(NewFontSize@17024401 : Text);
+    VAR
+      DotNetFontSize@17024400 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.FontSize";
+      DotNetStringValue@17024402 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.StringValue";
+    BEGIN
+      DotNetFontSize := DotNetFontSize.FontSize;
+      DotNetFontSize.Val := DotNetStringValue.StringValue(NewFontSize);
+    END;
+
+    [External]
+    PROCEDURE SetColor@17024404(VAR WordColor@17024401 : Codeunit 50036);
+    VAR
+      DotNetColor@17024400 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.Color";
+    BEGIN
+      WordColor.GetColor(DotNetColor);
+      DotNetRunProperties.Color := DotNetColor;
+    END;
+
+    [External]
+    PROCEDURE SetRunStyle@17024402(StyleName@17024401 : Text);
+    VAR
+      DotNetRunStyle@17024402 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.RunStyle";
+      DotNetStringValue@17024400 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.StringValue";
+    BEGIN
+      DotNetRunStyle := DotNetRunStyle.RunStyle;
+      DotNetRunStyle.Val := DotNetStringValue.StringValue(StyleName);
+      DotNetRunProperties.RunStyle := DotNetRunStyle;
+    END;
+
+    PROCEDURE SetRunProperties@17024411(NewDotNetRunProperties@17024400 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.RunProperties");
+    BEGIN
+      DotNetRunProperties := NewDotNetRunProperties;
+    END;
+
+    PROCEDURE GetRunProperties@17024400(VAR CurrentDotNetRunProperties@17024400 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.RunProperties");
+    BEGIN
+      CurrentDotNetRunProperties := DotNetRunProperties;
+    END;
+
+    BEGIN
+    END.
+  }
+}
+

@@ -1,0 +1,66 @@
+OBJECT Codeunit 50056 DotNet_Word.NonVisualPictureDr
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      DotNetNonVisualPictureDrawingProperties@17024400 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Drawing.Pictures.NonVisualPictureDrawingProperties";
+
+    [External]
+    PROCEDURE Create@17024403();
+    BEGIN
+      DotNetNonVisualPictureDrawingProperties := DotNetNonVisualPictureDrawingProperties.NonVisualPictureDrawingProperties;
+    END;
+
+    [External]
+    PROCEDURE CreateFromOuterXml@17024408(OuterXml@17024400 : Text);
+    BEGIN
+      DotNetNonVisualPictureDrawingProperties := DotNetNonVisualPictureDrawingProperties.NonVisualPictureDrawingProperties(OuterXml);
+    END;
+
+    [External]
+    PROCEDURE GetOuterXml@17024402() : Text;
+    BEGIN
+      EXIT(DotNetNonVisualPictureDrawingProperties.OuterXml);
+    END;
+
+    [External]
+    PROCEDURE GetInnerText@17024410() : Text;
+    BEGIN
+      EXIT(DotNetNonVisualPictureDrawingProperties.InnerText);
+    END;
+
+    [External]
+    PROCEDURE SetPreferRelativeResize@17024416(NewPreferRelativeResize@17024401 : Boolean);
+    VAR
+      DotNetBooleanValue@17024400 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.BooleanValue";
+    BEGIN
+      DotNetNonVisualPictureDrawingProperties.PreferRelativeResize := DotNetBooleanValue.FromBoolean(NewPreferRelativeResize);
+    END;
+
+    PROCEDURE SetNonVisualPictureDrawingProperties@17024411(NewDotNetNonVisualPictureDrawingProperties@17024400 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Drawing.Pictures.NonVisualPictureDrawingProperties");
+    BEGIN
+      DotNetNonVisualPictureDrawingProperties := NewDotNetNonVisualPictureDrawingProperties;
+    END;
+
+    PROCEDURE GetNonVisualPictureDrawingProperties@17024400(VAR CurrentDotNetNonVisualPictureDrawingProperties@17024400 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Drawing.Pictures.NonVisualPictureDrawingProperties");
+    BEGIN
+      CurrentDotNetNonVisualPictureDrawingProperties := DotNetNonVisualPictureDrawingProperties;
+    END;
+
+    BEGIN
+    END.
+  }
+}
+

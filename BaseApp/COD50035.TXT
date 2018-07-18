@@ -1,0 +1,97 @@
+OBJECT Codeunit 50035 DotNet_Word.Hyperlink
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      DotNetHyperlink@17024400 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.Hyperlink";
+      OpenXmlDotNetHelper@17024401 : Codeunit 50067;
+
+    [External]
+    PROCEDURE Create@17024403();
+    BEGIN
+      DotNetHyperlink := DotNetHyperlink.Hyperlink;
+    END;
+
+    [External]
+    PROCEDURE CreateFromOuterXml@17024408(OuterXml@17024401 : Text);
+    VAR
+      DotNetXmlElem@17024400 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.Underline";
+    BEGIN
+      DotNetHyperlink := DotNetHyperlink.Hyperlink(OuterXml);
+    END;
+
+    [External]
+    PROCEDURE GetOuterXml@17024404() : Text;
+    BEGIN
+      EXIT(DotNetHyperlink.OuterXml);
+    END;
+
+    [External]
+    PROCEDURE GetInnerText@17024410() : Text;
+    BEGIN
+      EXIT(DotNetHyperlink.InnerText);
+    END;
+
+    [External]
+    PROCEDURE AppendRun@17024401(VAR WordRun@17024400 : Codeunit 50023);
+    VAR
+      DotNetRun@17024401 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.Run";
+    BEGIN
+      WordRun.GetRun(DotNetRun);
+      //We need this to deal with .NET Generics:
+      OpenXmlDotNetHelper.AppendGeneric(DotNetHyperlink, DotNetRun);
+    END;
+
+    [External]
+    PROCEDURE AppendProofError@17024402(VAR WordProofError@17024400 : Codeunit 50033);
+    VAR
+      DotNetProofError@17024401 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.ProofError";
+    BEGIN
+      WordProofError.GetProofError(DotNetProofError);
+      //We need this to deal with .NET Generics:
+      OpenXmlDotNetHelper.AppendGeneric(DotNetHyperlink, DotNetProofError);
+    END;
+
+    [External]
+    PROCEDURE SetId@17024406(NewId@17024400 : Text);
+    VAR
+      DotNetStringValue@17024401 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.StringValue";
+    BEGIN
+      DotNetHyperlink.Id := DotNetStringValue.StringValue(NewId);
+    END;
+
+    [External]
+    PROCEDURE SetHistory@17024405(NewHistory@17024400 : Boolean);
+    VAR
+      DotNetOnOffValue@17024401 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.OnOffValue";
+    BEGIN
+      DotNetHyperlink.History := DotNetOnOffValue.FromBoolean(NewHistory);
+    END;
+
+    PROCEDURE SetHyperlink@17024411(NewDotNetHyperlink@17024400 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.Hyperlink");
+    BEGIN
+      DotNetHyperlink := NewDotNetHyperlink;
+    END;
+
+    PROCEDURE GetHyperlink@17024400(VAR CurrentDotNetHyperlink@17024400 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.Hyperlink");
+    BEGIN
+      CurrentDotNetHyperlink := DotNetHyperlink;
+    END;
+
+    BEGIN
+    END.
+  }
+}
+

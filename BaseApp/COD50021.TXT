@@ -1,0 +1,104 @@
+OBJECT Codeunit 50021 DotNet_Word.Body
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      DotNetBody@17024400 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.Body";
+      OpenXmlDotNetHelper@17024401 : Codeunit 50067;
+
+    [External]
+    PROCEDURE Create@17024401();
+    BEGIN
+      DotNetBody := DotNetBody.Body;
+    END;
+
+    [External]
+    PROCEDURE CreateFromOuterXml@17024409(OuterXml@17024400 : Text);
+    BEGIN
+      DotNetBody := DotNetBody.Body(OuterXml);
+    END;
+
+    [External]
+    PROCEDURE GetOuterXml@17024405() : Text;
+    BEGIN
+      EXIT(DotNetBody.OuterXml);
+    END;
+
+    [External]
+    PROCEDURE GetInnerText@17024406() : Text;
+    BEGIN
+      EXIT(DotNetBody.InnerText);
+    END;
+
+    [External]
+    PROCEDURE AppendParagraph@17024403(VAR WordParagraph@17024400 : Codeunit 50022);
+    VAR
+      DotNetParagraph@17024401 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.Paragraph";
+    BEGIN
+      WordParagraph.GetParagraph(DotNetParagraph);
+      //We need this to deal with .NET Generics:
+      OpenXmlDotNetHelper.AppendGeneric(DotNetBody, DotNetParagraph);
+    END;
+
+    [External]
+    PROCEDURE AppendTable@17024402(VAR WordTable@17024400 : Codeunit 50027);
+    VAR
+      DotNetTable@17024401 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.Table";
+      DotNetArray@17024402 : DotNet "'mscorlib'.System.Array";
+    BEGIN
+      WordTable.GetTable(DotNetTable);
+      //We need this to deal with .NET Generics:
+      OpenXmlDotNetHelper.AppendGeneric(DotNetBody, DotNetTable);
+    END;
+
+    [External]
+    PROCEDURE GetTableEnumerator@17024404(VAR WordTableEnumerator@17024400 : Codeunit 50064);
+    VAR
+      EnumeratorHelper@17024401 : Codeunit 50067;
+      DotNetTable@17024402 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.Table";
+      DotNetEnumerator@17024403 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Collections.IEnumerator";
+    BEGIN
+      //We need this to deal with .NET Generics:
+      EnumeratorHelper.GetEnumeratorOfTypeGeneric(DotNetBody.Elements, GETDOTNETTYPE(DotNetTable), DotNetEnumerator);
+      WordTableEnumerator.SetEnumerator(DotNetEnumerator);
+    END;
+
+    [External]
+    PROCEDURE GetParagraphEnumerator@17024408(VAR WordParagraphEnumerator@17024400 : Codeunit 50062);
+    VAR
+      EnumeratorHelper@17024401 : Codeunit 50067;
+      DotNetParagraph@17024402 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.Paragraph";
+      DotNetEnumerator@17024403 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Collections.IEnumerator";
+    BEGIN
+      //We need this to deal with .NET Generics:
+      EnumeratorHelper.GetEnumeratorOfTypeGeneric(DotNetBody.Elements, GETDOTNETTYPE(DotNetParagraph), DotNetEnumerator);
+      WordParagraphEnumerator.SetEnumerator(DotNetEnumerator);
+    END;
+
+    PROCEDURE SetBody@17024411(NewDotNetBody@17024400 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.Body");
+    BEGIN
+      DotNetBody := NewDotNetBody;
+    END;
+
+    PROCEDURE GetBody@17024400(VAR CurrentDotNetBody@17024400 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.Body");
+    BEGIN
+      CurrentDotNetBody := DotNetBody;
+    END;
+
+    BEGIN
+    END.
+  }
+}
+

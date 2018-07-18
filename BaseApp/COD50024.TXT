@@ -1,0 +1,91 @@
+OBJECT Codeunit 50024 DotNet_Word.Text
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      DotNetText@17024400 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.Text";
+
+    [External]
+    PROCEDURE Create@17024403();
+    VAR
+      DotNetType@17024401 : DotNet "'mscorlib'.System.Type";
+      DotNetObject@17024404 : DotNet "'mscorlib'.System.Object";
+      DotNetTypeArray@17024402 : DotNet "'mscorlib'.System.Array";
+      DotNetParamsArray@17024403 : DotNet "'mscorlib'.System.Array";
+    BEGIN
+      //So normally it should be a simple call like that:
+      //DotNetText := DotNetText.Text();
+      //but constructor name equals to property name (both "Text") and in NAV we have no way to handle it
+      //so I need to use some tricks here
+      //basically I get constructor using reflection and then call it
+      DotNetType := GETDOTNETTYPE(DotNetText);
+      DotNetTypeArray := DotNetTypeArray.CreateInstance(GETDOTNETTYPE(DotNetType), 0);
+      DotNetParamsArray := DotNetParamsArray.CreateInstance(GETDOTNETTYPE(DotNetObject), 0);
+      DotNetText := DotNetType.GetConstructor(DotNetTypeArray).Invoke(DotNetParamsArray);
+    END;
+
+    [External]
+    PROCEDURE GetOuterXml@17024404() : Text;
+    BEGIN
+      EXIT(DotNetText.OuterXml);
+    END;
+
+    [External]
+    PROCEDURE GetInnerText@17024401() : Text;
+    BEGIN
+      EXIT(DotNetText.InnerText);
+    END;
+
+    [External]
+    PROCEDURE SetText@17024405(NewText@17024400 : Text);
+    BEGIN
+      DotNetText.Text := NewText;
+    END;
+
+    [External]
+    PROCEDURE GetText@17024406() : Text;
+    BEGIN
+      EXIT(DotNetText.Text);
+    END;
+
+    [External]
+    PROCEDURE SetSpacePreserveOption@17024402(PreserveSpace@17024400 : Boolean);
+    VAR
+      DotNetSpaceProcessingModeValues@17024401 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.SpaceProcessingModeValues";
+      OpenXmlDotNetHelper@17024402 : Codeunit 50067;
+      DotNetEnumValue@17024403 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.EnumValue`1";
+    BEGIN
+      IF PreserveSpace THEN
+        OpenXmlDotNetHelper.CreateEnumValueGeneric(GETDOTNETTYPE(DotNetSpaceProcessingModeValues), 1, DotNetEnumValue)
+      ELSE
+        OpenXmlDotNetHelper.CreateEnumValueGeneric(GETDOTNETTYPE(DotNetSpaceProcessingModeValues), 0, DotNetEnumValue);
+      DotNetText.Space := DotNetEnumValue;
+    END;
+
+    PROCEDURE SetTextObject@17024411(NewDotNetText@17024400 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.Text");
+    BEGIN
+      DotNetText := NewDotNetText;
+    END;
+
+    PROCEDURE GetTextObject@17024400(VAR CurrentDotNetText@17024400 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.Text");
+    BEGIN
+      CurrentDotNetText := DotNetText;
+    END;
+
+    BEGIN
+    END.
+  }
+}
+

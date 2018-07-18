@@ -1,0 +1,78 @@
+OBJECT Codeunit 50053 DotNet_Word.ShapeProperties
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      DotNetShapeProperties@17024400 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Drawing.Pictures.ShapeProperties";
+
+    [External]
+    PROCEDURE Create@17024403();
+    BEGIN
+      DotNetShapeProperties := DotNetShapeProperties.ShapeProperties;
+    END;
+
+    [External]
+    PROCEDURE CreateFromOuterXml@17024408(OuterXml@17024400 : Text);
+    BEGIN
+      DotNetShapeProperties := DotNetShapeProperties.ShapeProperties(OuterXml);
+    END;
+
+    [External]
+    PROCEDURE GetOuterXml@17024402() : Text;
+    BEGIN
+      EXIT(DotNetShapeProperties.OuterXml);
+    END;
+
+    [External]
+    PROCEDURE GetInnerText@17024410() : Text;
+    BEGIN
+      EXIT(DotNetShapeProperties.InnerText);
+    END;
+
+    [External]
+    PROCEDURE SetTransform2D@17024416(VAR WordTransform2D@17024401 : Codeunit 50060);
+    VAR
+      DotNetTransform2D@17024402 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Drawing.Transform2D";
+    BEGIN
+      WordTransform2D.GetTransform2D(DotNetTransform2D);
+      DotNetShapeProperties.Transform2D := DotNetTransform2D;
+    END;
+
+    [External]
+    PROCEDURE AppendPresetGeometry@17024404(VAR WordPresetGeometry@17024401 : Codeunit 50061);
+    VAR
+      DotNetPresetGeometry@17024402 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Drawing.PresetGeometry";
+      OpenXmlDotNetHelper@17024400 : Codeunit 50067;
+    BEGIN
+      WordPresetGeometry.GetPresetGeometry(DotNetPresetGeometry);
+      //We need this to deal with .NET Generics:
+      OpenXmlDotNetHelper.AppendGeneric(DotNetShapeProperties, DotNetPresetGeometry);
+    END;
+
+    PROCEDURE SetShapeProperties@17024411(NewDotNetShapeProperties@17024400 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Drawing.Pictures.ShapeProperties");
+    BEGIN
+      DotNetShapeProperties := NewDotNetShapeProperties;
+    END;
+
+    PROCEDURE GetShapeProperties@17024400(VAR CurrentDotNetShapeProperties@17024400 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Drawing.Pictures.ShapeProperties");
+    BEGIN
+      CurrentDotNetShapeProperties := DotNetShapeProperties;
+    END;
+
+    BEGIN
+    END.
+  }
+}
+

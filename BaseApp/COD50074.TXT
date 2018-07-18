@@ -1,0 +1,77 @@
+OBJECT Codeunit 50074 DotNet_Word.NumberingInstance
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      DotNetNumberingInstance@17024400 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.NumberingInstance";
+
+    [External]
+    PROCEDURE Create@17024403();
+    BEGIN
+      DotNetNumberingInstance := DotNetNumberingInstance.NumberingInstance;
+    END;
+
+    [External]
+    PROCEDURE CreateFromOuterXml@17024408(OuterXml@17024400 : Text);
+    BEGIN
+      DotNetNumberingInstance := DotNetNumberingInstance.NumberingInstance(OuterXml);
+    END;
+
+    [External]
+    PROCEDURE GetOuterXml@17024401() : Text;
+    BEGIN
+      EXIT(DotNetNumberingInstance.OuterXml);
+    END;
+
+    [External]
+    PROCEDURE GetInnerText@17024410() : Text;
+    BEGIN
+      EXIT(DotNetNumberingInstance.InnerText);
+    END;
+
+    [External]
+    PROCEDURE SetNumberID@17024406(NewNumberID@17024401 : Integer);
+    VAR
+      DotNetInt32Value@17024402 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Int32Value";
+    BEGIN
+      DotNetNumberingInstance.NumberID := DotNetInt32Value.FromInt32(NewNumberID);
+    END;
+
+    [External]
+    PROCEDURE SetAbstractNumId@17024402(NewAbstractNumId@17024401 : Integer);
+    VAR
+      DotNetInt32Value@17024402 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Int32Value";
+      DotNetAbstractNumId@17024400 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.AbstractNumId";
+    BEGIN
+      DotNetAbstractNumId := DotNetAbstractNumId.AbstractNumId;
+      DotNetAbstractNumId.Val := DotNetInt32Value.FromInt32(NewAbstractNumId);
+      DotNetNumberingInstance.AbstractNumId := DotNetAbstractNumId;
+    END;
+
+    PROCEDURE SetNumberingInstance@17024411(NewDotNetNumberingInstance@17024400 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.NumberingInstance");
+    BEGIN
+      DotNetNumberingInstance := NewDotNetNumberingInstance;
+    END;
+
+    PROCEDURE GetNumberingInstance@17024400(VAR CurrentDotNetNumberingInstance@17024400 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.NumberingInstance");
+    BEGIN
+      CurrentDotNetNumberingInstance := DotNetNumberingInstance;
+    END;
+
+    BEGIN
+    END.
+  }
+}
+

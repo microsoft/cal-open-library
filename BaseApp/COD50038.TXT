@@ -1,0 +1,164 @@
+OBJECT Codeunit 50038 DotNet_Word.Style
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      DotNetStyle@17024400 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.Style";
+
+    [External]
+    PROCEDURE Create@17024403();
+    BEGIN
+      DotNetStyle := DotNetStyle.Style;
+    END;
+
+    [External]
+    PROCEDURE CreateFromOuterXml@17024416(OuterXml@17024400 : Text);
+    BEGIN
+      DotNetStyle := DotNetStyle.Style(OuterXml);
+    END;
+
+    [External]
+    PROCEDURE GetOuterXml@17024414() : Text;
+    BEGIN
+      EXIT(DotNetStyle.OuterXml);
+    END;
+
+    [External]
+    PROCEDURE GetInnerText@17024412() : Text;
+    BEGIN
+      EXIT(DotNetStyle.InnerText);
+    END;
+
+    [External]
+    PROCEDURE SetStyleName@17024405(NewStyleName@17024401 : Text);
+    VAR
+      DotNetStyleName@17024400 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.StyleName";
+      DotNetStringValue@17024402 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.StringValue";
+    BEGIN
+      DotNetStyleName := DotNetStyleName.StyleName;
+      DotNetStyleName.Val := DotNetStringValue.StringValue(NewStyleName);
+      DotNetStyle.StyleName := DotNetStyleName;
+    END;
+
+    [External]
+    PROCEDURE GetStyleName@17024413() : Text;
+    BEGIN
+      EXIT(DotNetStyle.StyleName.Val.Value);
+    END;
+
+    [External]
+    PROCEDURE SetBasedOn@17024409(NewBasedOn@17024401 : Text);
+    VAR
+      DotNetBasedOn@17024400 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.BasedOn";
+      DotNetStringValue@17024402 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.StringValue";
+    BEGIN
+      DotNetBasedOn := DotNetBasedOn.BasedOn;
+      DotNetBasedOn.Val := DotNetStringValue.StringValue(NewBasedOn);
+      DotNetStyle.BasedOn := DotNetBasedOn;
+    END;
+
+    [External]
+    PROCEDURE SetNextParagraphStyle@17024401(NewNextParagraphStyle@17024401 : Text);
+    VAR
+      DotNetNextParagraphStyle@17024400 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.NextParagraphStyle";
+      DotNetStringValue@17024402 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.StringValue";
+    BEGIN
+      DotNetNextParagraphStyle := DotNetNextParagraphStyle.NextParagraphStyle;
+      DotNetNextParagraphStyle.Val := DotNetStringValue.StringValue(NewNextParagraphStyle);
+      DotNetStyle.NextParagraphStyle := DotNetNextParagraphStyle;
+    END;
+
+    [External]
+    PROCEDURE SetUIPriority@17024406(NewUIPriority@17024401 : Integer);
+    VAR
+      DotNetUIPriority@17024400 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.UIPriority";
+      DotNetInt32Value@17024402 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Int32Value";
+    BEGIN
+      DotNetUIPriority := DotNetUIPriority.UIPriority;
+      DotNetUIPriority.Val := DotNetInt32Value.FromInt32(NewUIPriority);
+      DotNetStyle.UIPriority := DotNetUIPriority;
+    END;
+
+    [External]
+    PROCEDURE SetStyleId@17024404(NewStyleId@17024401 : Text);
+    VAR
+      DotNetStringValue@17024400 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.StringValue";
+    BEGIN
+      DotNetStyle.StyleId := DotNetStringValue.StringValue(NewStyleId);
+    END;
+
+    [External]
+    PROCEDURE GetStyleId@17024415() : Text;
+    BEGIN
+      EXIT(DotNetStyle.StyleId.Value);
+    END;
+
+    [External]
+    PROCEDURE SetCustomStyle@17024407(CustomStyle@17024401 : Boolean);
+    VAR
+      DotNetOnOffValue@17024400 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.OnOffValue";
+    BEGIN
+      DotNetStyle.CustomStyle := DotNetOnOffValue.FromBoolean(CustomStyle);
+    END;
+
+    [External]
+    PROCEDURE SetStyleType@17024410(NewStyleType@17024401 : 'Paragraph,Character,Table,Numbering');
+    VAR
+      DotNetStyleValues@17024400 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.StyleValues";
+      DotNetEnumValue@17024403 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.EnumValue`1";
+      OpenXmlDotNetHelper@17024402 : Codeunit 50067;
+    BEGIN
+      //We need this to deal with .NET Generics:
+      OpenXmlDotNetHelper.CreateEnumValueGeneric(GETDOTNETTYPE(DotNetStyleValues), NewStyleType, DotNetEnumValue);
+      DotNetStyle.Type := DotNetEnumValue;
+    END;
+
+    [External]
+    PROCEDURE GetStyleType@17024408() : Integer;
+    VAR
+      DotNetStyleValues@17024400 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.StyleValues";
+      DotNetEnumValue@17024401 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.EnumValue`1";
+    BEGIN
+      DotNetEnumValue := DotNetStyle.Type;
+      DotNetStyleValues := DotNetEnumValue.Value;
+      EXIT(DotNetStyleValues);
+    END;
+
+    [External]
+    PROCEDURE AppendStyleRunProperties@17024402(VAR WordStyleRunProperties@17024401 : Codeunit 50037);
+    VAR
+      DotNetStyleRunProperties@17024400 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.StyleRunProperties";
+      OpenXmlDotNetHelper@17024402 : Codeunit 50067;
+    BEGIN
+      WordStyleRunProperties.GetStyleRunProperties(DotNetStyleRunProperties);
+      //We need this to deal with .NET Generics:
+      OpenXmlDotNetHelper.AppendGeneric(DotNetStyle, DotNetStyleRunProperties);
+    END;
+
+    PROCEDURE SetStyle@17024411(NewDotNetStyle@17024400 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.Style");
+    BEGIN
+      DotNetStyle := NewDotNetStyle;
+    END;
+
+    PROCEDURE GetStyle@17024400(VAR CurrentDotNetStyle@17024400 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.Style");
+    BEGIN
+      CurrentDotNetStyle := DotNetStyle;
+    END;
+
+    BEGIN
+    END.
+  }
+}
+

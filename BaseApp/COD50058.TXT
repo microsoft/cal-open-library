@@ -1,0 +1,68 @@
+OBJECT Codeunit 50058 DotNet_Word.Stretch
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      DotNetStretch@17024400 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Drawing.Stretch";
+
+    [External]
+    PROCEDURE Create@17024403();
+    BEGIN
+      DotNetStretch := DotNetStretch.Stretch;
+    END;
+
+    [External]
+    PROCEDURE CreateFromOuterXml@17024408(OuterXml@17024400 : Text);
+    BEGIN
+      DotNetStretch := DotNetStretch.Stretch(OuterXml);
+    END;
+
+    [External]
+    PROCEDURE GetOuterXml@17024402() : Text;
+    BEGIN
+      EXIT(DotNetStretch.OuterXml);
+    END;
+
+    [External]
+    PROCEDURE GetInnerText@17024410() : Text;
+    BEGIN
+      EXIT(DotNetStretch.InnerText);
+    END;
+
+    [External]
+    PROCEDURE AppendFillRectangle@17024416();
+    VAR
+      DotNetFillRectangle@17024400 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Drawing.FillRectangle";
+      OpenXmlDotNetHelper@17024401 : Codeunit 50067;
+    BEGIN
+      //We need this to deal with .NET Generics:
+      OpenXmlDotNetHelper.AppendGeneric(DotNetStretch, DotNetFillRectangle.FillRectangle);
+    END;
+
+    PROCEDURE SetStretch@17024411(NewDotNetStretch@17024400 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Drawing.Stretch");
+    BEGIN
+      DotNetStretch := NewDotNetStretch;
+    END;
+
+    PROCEDURE GetStretch@17024400(VAR CurrentDotNetStretch@17024400 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Drawing.Stretch");
+    BEGIN
+      CurrentDotNetStretch := DotNetStretch;
+    END;
+
+    BEGIN
+    END.
+  }
+}
+

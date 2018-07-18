@@ -1,0 +1,103 @@
+OBJECT Codeunit 50023 DotNet_Word.Run
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      DotNetRun@17024400 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.Run";
+      OpenXmlDotNetHelper@17024401 : Codeunit 50067;
+
+    [External]
+    PROCEDURE Create@17024403();
+    VAR
+      DotNetXmlElem@17024400 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.Underline";
+    BEGIN
+      DotNetRun := DotNetRun.Run;
+    END;
+
+    [External]
+    PROCEDURE CreateFromOuterXml@17024409(OuterXml@17024400 : Text);
+    BEGIN
+      DotNetRun := DotNetRun.Run(OuterXml);
+    END;
+
+    [External]
+    PROCEDURE GetOuterXml@17024405() : Text;
+    BEGIN
+      EXIT(DotNetRun.OuterXml);
+    END;
+
+    [External]
+    PROCEDURE GetInnerText@17024406() : Text;
+    BEGIN
+      EXIT(DotNetRun.InnerText);
+    END;
+
+    [External]
+    PROCEDURE AppendText@17024401(VAR WordText@17024400 : Codeunit 50024);
+    VAR
+      DotNetText@17024401 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.Text";
+    BEGIN
+      WordText.GetTextObject(DotNetText);
+      //We need this to deal with .NET Generics:
+      OpenXmlDotNetHelper.AppendGeneric(DotNetRun, DotNetText);
+    END;
+
+    [External]
+    PROCEDURE AppendDrawing@17024404(VAR WordDrawing@17024400 : Codeunit 50043);
+    VAR
+      DotNetDrawing@17024401 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.Drawing";
+    BEGIN
+      WordDrawing.GetDrawing(DotNetDrawing);
+      //We need this to deal with .NET Generics:
+      OpenXmlDotNetHelper.AppendGeneric(DotNetRun, DotNetDrawing);
+    END;
+
+    [External]
+    PROCEDURE AppendProperties@17024402(VAR WordRunProperties@17024400 : Codeunit 50025);
+    VAR
+      DotNetRunProperties@17024401 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.RunProperties";
+    BEGIN
+      WordRunProperties.GetRunProperties(DotNetRunProperties);
+      //We need this to deal with .NET Generics:
+      OpenXmlDotNetHelper.AppendGeneric(DotNetRun, DotNetRunProperties);
+    END;
+
+    [External]
+    PROCEDURE GetTextEnumerator@17024408(VAR WordTextEnumerator@17024400 : Codeunit 50076);
+    VAR
+      EnumeratorHelper@17024401 : Codeunit 50067;
+      DotNetText@17024402 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.Text";
+      DotNetEnumerator@17024403 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Collections.IEnumerator";
+    BEGIN
+      //We need this to deal with .NET Generics:
+      EnumeratorHelper.GetEnumeratorOfTypeGeneric(DotNetRun.Elements, GETDOTNETTYPE(DotNetText), DotNetEnumerator);
+      WordTextEnumerator.SetEnumerator(DotNetEnumerator);
+    END;
+
+    PROCEDURE SetRun@17024411(NewDotNetRun@17024400 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.Run");
+    BEGIN
+      DotNetRun := NewDotNetRun;
+    END;
+
+    PROCEDURE GetRun@17024400(VAR CurrentDotNetRun@17024400 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.Run");
+    BEGIN
+      CurrentDotNetRun := DotNetRun;
+    END;
+
+    BEGIN
+    END.
+  }
+}
+

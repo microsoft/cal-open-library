@@ -1,0 +1,93 @@
+OBJECT Codeunit 50046 DotNet_Word.HorizontalPosition
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      DotNetHorizontalPosition@17024400 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Drawing.Wordprocessing.HorizontalPosition";
+
+    [External]
+    PROCEDURE Create@17024403();
+    BEGIN
+      DotNetHorizontalPosition := DotNetHorizontalPosition.HorizontalPosition;
+    END;
+
+    [External]
+    PROCEDURE CreateFromOuterXml@17024404(OuterXml@17024400 : Text);
+    BEGIN
+      DotNetHorizontalPosition := DotNetHorizontalPosition.HorizontalPosition(OuterXml);
+    END;
+
+    [External]
+    PROCEDURE GetOuterXml@17024402() : Text;
+    BEGIN
+      EXIT(DotNetHorizontalPosition.OuterXml);
+    END;
+
+    [External]
+    PROCEDURE GetInnerText@17024401() : Text;
+    BEGIN
+      EXIT(DotNetHorizontalPosition.InnerText);
+    END;
+
+    [External]
+    PROCEDURE SetPositionOffset@17024405(NewPositionOffset@17024401 : Text);
+    VAR
+      DotNetPositionOffset@17024402 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Drawing.Wordprocessing.PositionOffset";
+    BEGIN
+      DotNetHorizontalPosition.PositionOffset := DotNetPositionOffset.PositionOffset(NewPositionOffset);
+    END;
+
+    [External]
+    PROCEDURE SetRelativeFrom@17024408(NewRelativeFrom@17024401 : 'Margin,Page,Column,Character,LeftMargin,RightMargin,InsideMargin,OutsideMargin');
+    VAR
+      DotNetHorizontalRelativePositionValues@17024402 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Drawing.Wordprocessing.HorizontalRelativePositionValues";
+      DotNetEnumValue@17024403 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.EnumValue`1";
+      OpenXmlDotNetHelper@17024400 : Codeunit 50067;
+    BEGIN
+      OpenXmlDotNetHelper.CreateEnumValueGeneric(GETDOTNETTYPE(DotNetHorizontalRelativePositionValues), NewRelativeFrom, DotNetEnumValue);
+      DotNetHorizontalPosition.RelativeFrom := DotNetEnumValue;
+    END;
+
+    [External]
+    PROCEDURE SetHorizontalAlignment@17024410(NewHorizontalAlignment@17024401 : Text);
+    VAR
+      DotNetHorizontalAlignment@17024402 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Drawing.Wordprocessing.HorizontalAlignment";
+    BEGIN
+      DotNetHorizontalPosition.HorizontalAlignment := DotNetHorizontalAlignment.HorizontalAlignment(NewHorizontalAlignment);
+    END;
+
+    [External]
+    PROCEDURE SetPercentagePositionHeightOffset@17024413(NewPercentagePositionHeightOffset@17024401 : Text);
+    VAR
+      DotNetPercentagePositionHeigthOffset@17024402 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Office2010.Word.Drawing.PercentagePositionHeightOffset";
+    BEGIN
+      DotNetHorizontalPosition.PercentagePositionHeightOffset := DotNetPercentagePositionHeigthOffset.PercentagePositionHeightOffset(NewPercentagePositionHeightOffset);
+    END;
+
+    PROCEDURE SetHorizontalPosition@17024411(NewDotNetHorizontalPosition@17024400 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Drawing.Wordprocessing.HorizontalPosition");
+    BEGIN
+      DotNetHorizontalPosition := NewDotNetHorizontalPosition;
+    END;
+
+    PROCEDURE GetHorizontalPosition@17024400(VAR CurrentDotNetHorizontalPosition@17024400 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Drawing.Wordprocessing.HorizontalPosition");
+    BEGIN
+      CurrentDotNetHorizontalPosition := DotNetHorizontalPosition;
+    END;
+
+    BEGIN
+    END.
+  }
+}
+

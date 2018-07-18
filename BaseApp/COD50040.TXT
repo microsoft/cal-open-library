@@ -1,0 +1,52 @@
+OBJECT Codeunit 50040 DotNet_Word.StylesEnumerator
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      DotNetEnumerator@17024400 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Collections.IEnumerator";
+
+    PROCEDURE SetEnumerator@17024415(NewEnumerator@17024400 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Collections.IEnumerator");
+    BEGIN
+      DotNetEnumerator := NewEnumerator;
+    END;
+
+    PROCEDURE GetEnumerator@17024414(VAR CurrentEnumerator@17024400 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Collections.IEnumerator");
+    BEGIN
+      CurrentEnumerator := DotNetEnumerator;
+    END;
+
+    [External]
+    PROCEDURE Reset@17024401();
+    BEGIN
+      DotNetEnumerator.Reset;
+    END;
+
+    [External]
+    PROCEDURE MoveNext@17024402() : Boolean;
+    BEGIN
+      EXIT(DotNetEnumerator.MoveNext);
+    END;
+
+    [External]
+    PROCEDURE GetCurrent@17024403(VAR CurrentStyle@17024400 : Codeunit 50038);
+    BEGIN
+      CurrentStyle.SetStyle(DotNetEnumerator.Current);
+    END;
+
+    BEGIN
+    END.
+  }
+}
+
