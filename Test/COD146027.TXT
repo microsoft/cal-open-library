@@ -2,8 +2,8 @@ OBJECT Codeunit 146027 DotNet_Certificate Test
 {
   OBJECT-PROPERTIES
   {
-    Date=16.07.18;
-    Time=20:09:19;
+    Date=06.08.18;
+    Time=22:21:05;
     Modified=Yes;
     Version List=;
   }
@@ -20,24 +20,7 @@ OBJECT Codeunit 146027 DotNet_Certificate Test
       Assert@1000 : Codeunit 130000;
 
     [Test]
-    [LineStart(81)]
-    PROCEDURE TestCertificateCollection@2();
-    VAR
-      DotNet_Certificate@1000 : Codeunit 3027;
-      DotNet_CertificateCollection@1001 : Codeunit 3028;
-      Index@1002 : Integer;
-    BEGIN
-      // Read Certificate from Local Machine
-      DotNet_CertificateCollection.Init;
-
-      FOR Index := 1 TO DotNet_CertificateCollection.GetCount DO BEGIN
-        DotNet_CertificateCollection.GetX509Certificate(Index - 1,DotNet_Certificate);
-        TestCertificate(DotNet_Certificate);
-      END;
-    END;
-
-    [Test]
-    [LineStart(90)]
+    [LineStart(2)]
     PROCEDURE TestDemoCertificateFromBase64String@5();
     VAR
       TempBlob@1002 : Record 99008535;
@@ -53,7 +36,7 @@ OBJECT Codeunit 146027 DotNet_Certificate Test
       TestCertificate(DotNet_Certificate);
     END;
 
-    [LineStart(98)]
+    [LineStart(10)]
     LOCAL PROCEDURE TestCertificate@1(DotNet_Certificate@1000 : Codeunit 3027);
     VAR
       TempBlob@1012 : Record 99008535;
@@ -98,7 +81,7 @@ OBJECT Codeunit 146027 DotNet_Certificate Test
       Assert.AreEqual(HasPrivateKey,DotNet_Certificate.GetHasPrivateKey,'Certificate Details incorrect!');
     END;
 
-    [LineStart(127)]
+    [LineStart(39)]
     PROCEDURE DemoCertificate@6() : Text;
     BEGIN
       EXIT(
