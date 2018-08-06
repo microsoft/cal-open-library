@@ -2,8 +2,9 @@ OBJECT Codeunit 146007 Test_DotNet_String
 {
   OBJECT-PROPERTIES
   {
-    Date=;
-    Time=;
+    Date=06.08.18;
+    Time=22:35:50;
+    Modified=Yes;
     Version List=Test,W1,All;
   }
   PROPERTIES
@@ -21,6 +22,7 @@ OBJECT Codeunit 146007 Test_DotNet_String
       Assert@1000 : Codeunit 130000;
 
     [Test]
+    [LineStart(3)]
     PROCEDURE TestDotNetStringSplit@1();
     VAR
       DotNet_String@1000 : Codeunit 3007;
@@ -56,6 +58,40 @@ OBJECT Codeunit 146007 Test_DotNet_String
       Assert.AreEqual(TestValue[2],DotNet_ArrayResult.GetValueAsText(1),'Incorrect result value from split');
       Assert.AreEqual(TestValue[3],DotNet_ArrayResult.GetValueAsText(2),'Incorrect result value from split');
       Assert.AreEqual(TestValue[4],DotNet_ArrayResult.GetValueAsText(3),'Incorrect result value from split');
+    END;
+
+    [Test]
+    [LineStart(32)]
+    PROCEDURE TestDotNetStringEndsWith@2();
+    VAR
+      DotNet_String@1000 : Codeunit 3007;
+      Result@1001 : Boolean;
+    BEGIN
+      // [SCENARIO] Verify the end of a string
+
+      // [GIVEN] A default string
+      DotNet_String.Set('The quick brown fox jumped over the lazy dog');
+
+      // [THEN] The end should be 'dog'
+      Assert.IsTrue(DotNet_String.EndsWith('dog'),'Incorrect result value from EndsWith');
+      Assert.IsFalse(DotNet_String.EndsWith('fox'),'Incorrect result value from EndsWith');
+    END;
+
+    [Test]
+    [LineStart(42)]
+    PROCEDURE TestDotNetStringBeginsWith@3();
+    VAR
+      DotNet_String@1000 : Codeunit 3007;
+      Result@1001 : Boolean;
+    BEGIN
+      // [SCENARIO] Verify the start of a string
+
+      // [GIVEN] A default string
+      DotNet_String.Set('The quick brown fox jumped over the lazy dog');
+
+      // [THEN] The start should be 'The'
+      Assert.IsTrue(DotNet_String.StartsWith('The'),'Incorrect result value from StartsWith');
+      Assert.IsFalse(DotNet_String.StartsWith('dog'),'Incorrect result value from StartsWith');
     END;
 
     BEGIN
