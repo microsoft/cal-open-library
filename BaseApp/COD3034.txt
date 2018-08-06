@@ -1,0 +1,94 @@
+OBJECT Codeunit 3034 DotNet_Collection
+{
+  OBJECT-PROPERTIES
+  {
+    Date=06.08.18;
+    Time=23:28:15;
+    Modified=Yes;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      DotNetCollection@1000 : DotNet "'mscorlib'.System.Collections.Generic.Dictionary`2";
+
+    [External]
+    [LineStart(2)]
+    PROCEDURE Init@6();
+    BEGIN
+      DotNetCollection := DotNetCollection.Dictionary;
+    END;
+
+    [External]
+    [LineStart(5)]
+    PROCEDURE Count@12() : Integer;
+    BEGIN
+      EXIT(DotNetCollection.Count);
+    END;
+
+    [External]
+    [LineStart(8)]
+    PROCEDURE AddToCollection@5(PropertyName@1000 : Text;PropertyValue@1001 : Text);
+    BEGIN
+      DotNetCollection.Add(PropertyName,PropertyValue);
+    END;
+
+    [External]
+    [LineStart(11)]
+    PROCEDURE TryGetValue@9(PropertyName@1001 : Text;VAR PropertyValue@1000 : Text) : Boolean;
+    VAR
+      DotNetObject@1002 : DotNet "'mscorlib'.System.Object";
+    BEGIN
+      IF DotNetCollection.TryGetValue(PropertyName,DotNetObject) THEN BEGIN
+        PropertyValue := DotNetObject.ToString();
+        EXIT(TRUE);
+      END;
+    END;
+
+    [External]
+    [LineStart(17)]
+    PROCEDURE GetKeys@1(VAR DotNet_KeysArray@1000 : Codeunit 3000);
+    VAR
+      DotNetArray@1003 : DotNet "'mscorlib'.System.Array";
+      DotNetString@1002 : DotNet "'mscorlib'.System.String";
+    BEGIN
+      DotNetArray := DotNetArray.CreateInstance(GETDOTNETTYPE(DotNetString),DotNetCollection.Keys.Count);
+      DotNetCollection.Keys.CopyTo(DotNetArray,0);
+      DotNet_KeysArray.SetArray(DotNetArray);
+    END;
+
+    [External]
+    [LineStart(22)]
+    PROCEDURE GetValues@4(VAR DotNet_ValueArray@1000 : Codeunit 3000);
+    VAR
+      DotNetArray@1002 : DotNet "'mscorlib'.System.Array";
+      DotNetString@1001 : DotNet "'mscorlib'.System.String";
+    BEGIN
+      DotNetArray := DotNetArray.CreateInstance(GETDOTNETTYPE(DotNetString),DotNetCollection.Values.Count);
+      DotNetCollection.Values.CopyTo(DotNetArray,0);
+      DotNet_ValueArray.SetArray(DotNetArray);
+    END;
+
+    [LineStart(27)]
+    PROCEDURE GetCollection@2(VAR DotNetCollection2@1000 : DotNet "'mscorlib'.System.Collections.Generic.Dictionary`2");
+    BEGIN
+      DotNetCollection2 := DotNetCollection;
+    END;
+
+    [LineStart(30)]
+    PROCEDURE SetCollection@3(DotNetCollection2@1000 : DotNet "'mscorlib'.System.Collections.Generic.Dictionary`2");
+    BEGIN
+      DotNetCollection := DotNetCollection2;
+    END;
+
+    BEGIN
+    END.
+  }
+}
+
