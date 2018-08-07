@@ -12,22 +12,17 @@ OBJECT Table 1221 Data Exch. Field
   FIELDS
   {
     { 1   ;   ;Data Exch. No.      ;Integer       ;TableRelation="Data Exch.";
-                                                   CaptionML=ENU=Data Exch. No.;
                                                    NotBlank=Yes }
-    { 2   ;   ;Line No.            ;Integer       ;CaptionML=ENU=Line No.;
-                                                   NotBlank=Yes }
-    { 3   ;   ;Column No.          ;Integer       ;CaptionML=ENU=Column No.;
-                                                   NotBlank=Yes }
-    { 4   ;   ;Value               ;Text250       ;CaptionML=ENU=Value }
-    { 5   ;   ;Node ID             ;Text250       ;CaptionML=ENU=Node ID }
-    { 6   ;   ;Data Exch. Line Def Code;Code20    ;TableRelation="Data Exch. Line Def".Code;
-                                                   CaptionML=ENU=Data Exch. Line Def Code }
-    { 10  ;   ;Parent Node ID      ;Text250       ;CaptionML=ENU=Parent Node ID }
+    { 2   ;   ;Line No.            ;Integer       ;NotBlank=Yes }
+    { 3   ;   ;Column No.          ;Integer       ;NotBlank=Yes }
+    { 4   ;   ;Value               ;Text250        }
+    { 5   ;   ;Node ID             ;Text250        }
+    { 6   ;   ;Data Exch. Line Def Code;Code20    ;TableRelation="Data Exch. Line Def".Code }
+    { 10  ;   ;Parent Node ID      ;Text250        }
     { 11  ;   ;Data Exch. Def Code ;Code20        ;FieldClass=FlowField;
-                                                   CalcFormula=Lookup("Data Exch."."Data Exch. Def Code" WHERE (Entry No.=FIELD(Data Exch. No.)));
-                                                   CaptionML=ENU=Data Exch. Def Code }
-    { 16  ;   ;Value BLOB          ;BLOB          ;DataClassification=ToBeClassified;
-                                                   CaptionML=ENU=Value BLOB }
+                                                   CalcFormula=Lookup("Data Exch."."Data Exch. Def Code" WHERE (Entry No.=FIELD(Data Exch. No.))) }
+    { 16  ;   ;Value BLOB          ;BLOB           }
+
   }
   KEYS
   {

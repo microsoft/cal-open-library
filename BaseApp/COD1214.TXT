@@ -20,7 +20,6 @@ OBJECT Codeunit 1214 Map DataExch To Intermediate
       TempNameValueBuffer@1000 : TEMPORARY Record 823;
       TargetTableFieldDefinitionMustBeSpecifiedErr@1001 : TextConst 'ENU=You must specify a target table for the column definition.';
 
-    [Internal]
     PROCEDURE ProcessAllLinesColumnMapping@12(DataExch@1001 : Record 1220);
     VAR
       DataExchLineDef@1000 : Record 1227;

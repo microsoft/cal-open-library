@@ -29,6 +29,21 @@ OBJECT Codeunit 3007 DotNet_String
       EXIT(DotNetString.Replace(ToReplace,ReplacementText))
     END;
 
+    [External]
+    PROCEDURE Split@5(DotNet_ArraySplit@1001 : Codeunit 3000;VAR DotNet_ArrayReturn@1000 : Codeunit 3000);
+    VAR
+      DotNetArraySplit@1002 : DotNet "'mscorlib'.System.Array";
+    BEGIN
+      DotNet_ArraySplit.GetArray(DotNetArraySplit);
+      DotNet_ArrayReturn.SetArray(DotNetString.Split(DotNetArraySplit));
+    END;
+
+    [External]
+    PROCEDURE ToCharArray@1(StartIndex@1001 : Integer;Length@1002 : Integer;VAR DotNet_Array@1000 : Codeunit 3000);
+    BEGIN
+      DotNet_Array.SetArray(DotNetString.ToCharArray(StartIndex,Length));
+    END;
+
     PROCEDURE GetString@3(VAR DotNetString2@1000 : DotNet "'mscorlib'.System.String");
     BEGIN
       DotNetString2 := DotNetString

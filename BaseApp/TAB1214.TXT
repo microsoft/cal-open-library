@@ -11,22 +11,17 @@ OBJECT Table 1214 Intermediate Data Import
   }
   FIELDS
   {
-    { 1   ;   ;ID                  ;Integer       ;AutoIncrement=Yes;
-                                                   CaptionML=ENU=ID }
+    { 1   ;   ;ID                  ;Integer       ;AutoIncrement=Yes }
     { 2   ;   ;Data Exch. No.      ;Integer       ;TableRelation="Data Exch.";
-                                                   CaptionML=ENU=Data Exch. No.;
                                                    NotBlank=Yes }
     { 3   ;   ;Table ID            ;Integer       ;TableRelation=AllObjWithCaption."Object ID" WHERE (Object Type=CONST(Table));
-                                                   CaptionML=ENU=Table ID;
                                                    NotBlank=Yes }
-    { 4   ;   ;Record No.          ;Integer       ;CaptionML=ENU=Record No. }
-    { 5   ;   ;Field ID            ;Integer       ;TableRelation=Field.No. WHERE (TableNo=FIELD(Table ID));
-                                                   CaptionML=ENU=Field ID }
-    { 6   ;   ;Value               ;Text250       ;CaptionML=ENU=Value }
-    { 7   ;   ;Validate Only       ;Boolean       ;CaptionML=ENU=Validate Only }
-    { 8   ;   ;Parent Record No.   ;Integer       ;CaptionML=ENU=Parent Record No. }
-    { 16  ;   ;Value BLOB          ;BLOB          ;DataClassification=ToBeClassified;
-                                                   CaptionML=ENU=Value BLOB }
+    { 4   ;   ;Record No.          ;Integer        }
+    { 5   ;   ;Field ID            ;Integer       ;TableRelation=Field.No. WHERE (TableNo=FIELD(Table ID)) }
+    { 6   ;   ;Value               ;Text250        }
+    { 7   ;   ;Validate Only       ;Boolean        }
+    { 8   ;   ;Parent Record No.   ;Integer        }
+    { 16  ;   ;Value BLOB          ;BLOB           }    
   }
   KEYS
   {
