@@ -2,9 +2,8 @@ OBJECT Codeunit 3007 DotNet_String
 {
   OBJECT-PROPERTIES
   {
-    Date=23.07.18;
-    Time=20:47:19;
-    Modified=Yes;
+    Date=;
+    Time=;
     Version List=;
   }
   PROPERTIES

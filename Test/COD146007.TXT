@@ -2,9 +2,8 @@ OBJECT Codeunit 146007 Test_DotNet_String
 {
   OBJECT-PROPERTIES
   {
-    Date=06.08.18;
-    Time=22:35:50;
-    Modified=Yes;
+    Date=;
+    Time=;
     Version List=Test,W1,All;
   }
   PROPERTIES
