@@ -2,9 +2,8 @@ OBJECT Codeunit 146028 DotNet_Collection Test
 {
   OBJECT-PROPERTIES
   {
-    Date=06.08.18;
-    Time=23:30:12;
-    Modified=Yes;
+    Date=;
+    Time=;
     Version List=;
   }
   PROPERTIES
@@ -22,7 +21,6 @@ OBJECT Codeunit 146028 DotNet_Collection Test
       Assert@1001 : Codeunit 130000;
 
     [Test]
-    [LineStart(3)]
     PROCEDURE TestGetValue@1();
     VAR
       Result@1000 : Text;
@@ -43,7 +41,6 @@ OBJECT Codeunit 146028 DotNet_Collection Test
     END;
 
     [Test]
-    [LineStart(18)]
     PROCEDURE TestGetValues@2();
     VAR
       DotNet_Array@1000 : Codeunit 3000;
@@ -64,7 +61,6 @@ OBJECT Codeunit 146028 DotNet_Collection Test
     END;
 
     [Test]
-    [LineStart(33)]
     PROCEDURE TestGetKeys@3();
     VAR
       DotNet_Array@1000 : Codeunit 3000;
@@ -85,7 +81,6 @@ OBJECT Codeunit 146028 DotNet_Collection Test
     END;
 
     [Test]
-    [LineStart(48)]
     PROCEDURE TestCount@5();
     VAR
       Count@1000 : Integer;
@@ -102,7 +97,6 @@ OBJECT Codeunit 146028 DotNet_Collection Test
       Assert.AreEqual(4,Count,'Incorrect no. of entries in collection');
     END;
 
-    [LineStart(60)]
     LOCAL PROCEDURE InitCollection@4();
     BEGIN
       DotNet_Collection.Init;

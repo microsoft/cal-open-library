@@ -2,9 +2,8 @@ OBJECT Codeunit 3034 DotNet_Collection
 {
   OBJECT-PROPERTIES
   {
-    Date=06.08.18;
-    Time=23:33:13;
-    Modified=Yes;
+    Date=;
+    Time=;
     Version List=;
   }
   PROPERTIES
@@ -18,29 +17,21 @@ OBJECT Codeunit 3034 DotNet_Collection
     VAR
       DotNetCollection@1000 : DotNet "'mscorlib'.System.Collections.Generic.Dictionary`2";
 
-    [External]
-    [LineStart(2)]
     PROCEDURE Init@6();
     BEGIN
       DotNetCollection := DotNetCollection.Dictionary;
     END;
 
-    [External]
-    [LineStart(5)]
     PROCEDURE Count@12() : Integer;
     BEGIN
       EXIT(DotNetCollection.Count);
     END;
 
-    [External]
-    [LineStart(8)]
     PROCEDURE AddToCollection@5(PropertyName@1000 : Text;PropertyValue@1001 : Text);
     BEGIN
       DotNetCollection.Add(PropertyName,PropertyValue);
     END;
 
-    [External]
-    [LineStart(11)]
     PROCEDURE TryGetValue@9(PropertyName@1001 : Text;VAR PropertyValue@1000 : Text) : Boolean;
     VAR
       DotNetObject@1002 : DotNet "'mscorlib'.System.Object";
@@ -48,8 +39,6 @@ OBJECT Codeunit 3034 DotNet_Collection
       EXIT(DotNetCollection.TryGetValue(PropertyName,PropertyValue))
     END;
 
-    [External]
-    [LineStart(14)]
     PROCEDURE GetKeys@1(VAR DotNet_KeysArray@1000 : Codeunit 3000);
     VAR
       DotNetArray@1003 : DotNet "'mscorlib'.System.Array";
@@ -60,8 +49,6 @@ OBJECT Codeunit 3034 DotNet_Collection
       DotNet_KeysArray.SetArray(DotNetArray);
     END;
 
-    [External]
-    [LineStart(19)]
     PROCEDURE GetValues@4(VAR DotNet_ValueArray@1000 : Codeunit 3000);
     VAR
       DotNetArray@1002 : DotNet "'mscorlib'.System.Array";
@@ -72,13 +59,11 @@ OBJECT Codeunit 3034 DotNet_Collection
       DotNet_ValueArray.SetArray(DotNetArray);
     END;
 
-    [LineStart(24)]
     PROCEDURE GetCollection@2(VAR DotNetCollection2@1000 : DotNet "'mscorlib'.System.Collections.Generic.Dictionary`2");
     BEGIN
       DotNetCollection2 := DotNetCollection;
     END;
 
-    [LineStart(27)]
     PROCEDURE SetCollection@3(DotNetCollection2@1000 : DotNet "'mscorlib'.System.Collections.Generic.Dictionary`2");
     BEGIN
       DotNetCollection := DotNetCollection2;
