@@ -2,10 +2,9 @@ OBJECT Codeunit 3024 DotNet_Uri
 {
   OBJECT-PROPERTIES
   {
-    Date=16.07.18;
-    Time=20:32:31;
-    Modified=Yes;
-    Version List=NAVW113.00;
+    Date=;
+    Time=;
+    Version List=;
   }
   PROPERTIES
   {

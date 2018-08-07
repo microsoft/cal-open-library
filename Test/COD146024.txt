@@ -2,9 +2,8 @@ OBJECT Codeunit 146024 Test_DotNet_Uri
 {
   OBJECT-PROPERTIES
   {
-    Date=06.08.18;
-    Time=22:52:31;
-    Modified=Yes;
+    Date=;
+    Time=;
     Version List=Test,W1,All;
   }
   PROPERTIES
