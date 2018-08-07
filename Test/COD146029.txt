@@ -1,0 +1,58 @@
+OBJECT Codeunit 146029 DotNet_Credential Test
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    Subtype=Test;
+    OnRun=BEGIN
+            // [FEATURE] [.NET CREDENTIALS] [UT]
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      DotNet_Credential@1000 : Codeunit 3029;
+      Assert@1001 : Codeunit 130000;
+
+    [Test]
+    [LineStart(3)]
+    PROCEDURE TestCredentials@1();
+    VAR
+      Username@1000 : Text;
+      Password@1001 : Text;
+    BEGIN
+      // [SCENARIO] Set Credentials and verify username and password
+
+      // [GIVEN] A default credentials
+      InitCredential;
+
+      // [WHEN] The GetUserName method is called
+      Username := DotNet_Credential.GetUserName;
+
+      // [THEN] The result should match the default value
+      Assert.AreEqual('someone',Username,'Incorrect result from credentials!');
+
+      // [WHEN] The GetPassword method is called
+      Password := DotNet_Credential.GetPassword;
+
+      // [THEN] The result should match the default value
+      Assert.AreEqual('P@ssword.1',Password,'Incorrect result from credentials!');
+    END;
+
+    [LineStart(21)]
+    LOCAL PROCEDURE InitCredential@2();
+    BEGIN
+      DotNet_Credential.InitCredential('someone','P@ssword.1');
+    END;
+
+    BEGIN
+    END.
+  }
+}
+
