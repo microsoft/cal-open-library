@@ -37,6 +37,46 @@ OBJECT Codeunit 146024 Test_DotNet_Uri
       Assert.AreEqual(Text,DotNet_Uri.UnescapeDataString(EscapedText),'UnescapeDataString fails');
     END;
 
+    [Test]
+    PROCEDURE VerifyHttpScheme@2();
+    VAR
+      Scheme@1000 : Text;
+    BEGIN
+      // [GIVEN] A Url
+      DotNet_Uri.Init('http://microsoft.com');
+
+      // [THEN] The scheme should be 'http'
+      Assert.AreEqual('http',DotNet_Uri.GetScheme,'GetScheme fails');
+    END;
+
+    [Test]
+    PROCEDURE VerifyHttpsScheme@4();
+    VAR
+      Scheme@1000 : Text;
+    BEGIN
+      // [GIVEN] A Url
+      DotNet_Uri.Init('https://microsoft.com');
+
+      // [THEN] The scheme should be 'http'
+      Assert.AreEqual('https',DotNet_Uri.GetScheme,'GetScheme fails');
+    END;
+
+    [Test]
+    PROCEDURE VerifySegments@3();
+    VAR
+      DotNet_Array@1000 : Codeunit 3000;
+    BEGIN
+      // [GIVEN] A Url
+
+      DotNet_Uri.Init('https://microsoft.com/Dynamics365/BusinessCentral');
+
+      // [THEN] The segments should be
+      DotNet_Uri.GetSegments(DotNet_Array);
+      Assert.AreEqual('/',DotNet_Array.GetValueAsText(0),'GetSegments fails');
+      Assert.AreEqual('Dynamics365/',DotNet_Array.GetValueAsText(1),'GetSegments fails');
+      Assert.AreEqual('BusinessCentral',DotNet_Array.GetValueAsText(2),'GetSegments fails');
+    END;
+
     BEGIN
     END.
   }
