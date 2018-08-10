@@ -36,13 +36,13 @@ OBJECT Codeunit 3024 DotNet_Uri
     END;
 
     [External]
-    PROCEDURE GetScheme@6() : Text;
+    PROCEDURE Scheme@6() : Text;
     BEGIN
       EXIT(DotNetUri.Scheme);
     END;
 
     [External]
-    PROCEDURE GetSegments@7(VAR DotNet_Array@1000 : Codeunit 3000);
+    PROCEDURE Segments@7(VAR DotNet_Array@1000 : Codeunit 3000);
     BEGIN
       DotNet_Array.SetArray(DotNetUri.Segments);
     END;
