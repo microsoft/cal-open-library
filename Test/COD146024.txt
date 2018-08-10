@@ -21,7 +21,6 @@ OBJECT Codeunit 146024 Test_DotNet_Uri
       DotNet_Uri@1001 : Codeunit 3024;
 
     [Test]
-    [LineStart(2)]
     PROCEDURE EscapeAndUnescapeDataString@1();
     VAR
       Text@1000 : Text;
@@ -39,7 +38,6 @@ OBJECT Codeunit 146024 Test_DotNet_Uri
     END;
 
     [Test]
-    [LineStart(13)]
     PROCEDURE VerifyHttpScheme@2();
     VAR
       Scheme@1000 : Text;
@@ -52,7 +50,6 @@ OBJECT Codeunit 146024 Test_DotNet_Uri
     END;
 
     [Test]
-    [LineStart(20)]
     PROCEDURE VerifyHttpsScheme@4();
     VAR
       Scheme@1000 : Text;
@@ -65,7 +62,6 @@ OBJECT Codeunit 146024 Test_DotNet_Uri
     END;
 
     [Test]
-    [LineStart(27)]
     PROCEDURE VerifySegments@3();
     VAR
       DotNet_Array@1000 : Codeunit 3000;
