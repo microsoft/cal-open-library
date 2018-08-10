@@ -18,21 +18,18 @@ OBJECT Codeunit 3007 DotNet_String
       DotNetString@1000 : DotNet "'mscorlib'.System.String";
 
     [External]
-    [LineStart(2)]
     PROCEDURE Set@6(Text@1000 : Text);
     BEGIN
       DotNetString := Text
     END;
 
     [External]
-    [LineStart(5)]
     PROCEDURE Replace@2(ToReplace@1001 : Text;ReplacementText@1002 : Text) : Text;
     BEGIN
       EXIT(DotNetString.Replace(ToReplace,ReplacementText))
     END;
 
     [External]
-    [LineStart(8)]
     PROCEDURE Split@5(DotNet_ArraySplit@1001 : Codeunit 3000;VAR DotNet_ArrayReturn@1000 : Codeunit 3000);
     VAR
       DotNetArraySplit@1002 : DotNet "'mscorlib'.System.Array";
@@ -42,33 +39,28 @@ OBJECT Codeunit 3007 DotNet_String
     END;
 
     [External]
-    [LineStart(12)]
     PROCEDURE ToCharArray@1(StartIndex@1001 : Integer;Length@1002 : Integer;VAR DotNet_Array@1000 : Codeunit 3000);
     BEGIN
       DotNet_Array.SetArray(DotNetString.ToCharArray(StartIndex,Length));
     END;
 
     [External]
-    [LineStart(15)]
-    PROCEDURE StartsWith@8(Text@1000 : Text) : Boolean;
+    PROCEDURE StartsWith@7(Value@1000 : Text) : Boolean;
     BEGIN
-      EXIT(DotNetString.StartsWith(Text))
+      EXIT(DotNetString.StartsWith(Value))
     END;
 
     [External]
-    [LineStart(18)]
-    PROCEDURE EndsWith@7(Text@1000 : Text) : Boolean;
+    PROCEDURE EndsWith@8(Value@1000 : Text) : Boolean;
     BEGIN
-      EXIT(DotNetString.EndsWith(Text))
+      EXIT(DotNetString.EndsWith(Value))
     END;
 
-    [LineStart(21)]
     PROCEDURE GetString@3(VAR DotNetString2@1000 : DotNet "'mscorlib'.System.String");
     BEGIN
       DotNetString2 := DotNetString
     END;
 
-    [LineStart(24)]
     PROCEDURE SetString@4(DotNetString2@1000 : DotNet "'mscorlib'.System.String");
     BEGIN
       DotNetString := DotNetString2
