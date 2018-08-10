@@ -11,7 +11,7 @@ OBJECT Codeunit 146007 Test_DotNet_String
     Subtype=Test;
     TestPermissions=Disabled;
     OnRun=BEGIN
-            // [FEATURE] [.NET String] [UT]
+            // [FEATURE] [DotNet] [UT] [String]
           END;
 
   }
@@ -21,7 +21,6 @@ OBJECT Codeunit 146007 Test_DotNet_String
       Assert@1000 : Codeunit 130000;
 
     [Test]
-    [LineStart(3)]
     PROCEDURE TestDotNetStringSplit@1();
     VAR
       DotNet_String@1000 : Codeunit 3007;
@@ -60,7 +59,6 @@ OBJECT Codeunit 146007 Test_DotNet_String
     END;
 
     [Test]
-    [LineStart(32)]
     PROCEDURE TestDotNetStringEndsWith@2();
     VAR
       DotNet_String@1000 : Codeunit 3007;
@@ -77,7 +75,6 @@ OBJECT Codeunit 146007 Test_DotNet_String
     END;
 
     [Test]
-    [LineStart(42)]
     PROCEDURE TestDotNetStringBeginsWith@3();
     VAR
       DotNet_String@1000 : Codeunit 3007;
