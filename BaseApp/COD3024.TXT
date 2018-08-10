@@ -18,47 +18,40 @@ OBJECT Codeunit 3024 DotNet_Uri
       DotNetUri@1000 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Uri";
 
     [External]
-    [LineStart(2)]
     PROCEDURE Init@5(Url@1000 : Text);
     BEGIN
       DotNetUri := DotNetUri.Uri(Url);
     END;
 
     [External]
-    [LineStart(5)]
     PROCEDURE EscapeDataString@1(Text@1000 : Text) : Text;
     BEGIN
       EXIT(DotNetUri.EscapeDataString(Text));
     END;
 
     [External]
-    [LineStart(8)]
     PROCEDURE UnescapeDataString@2(Text@1000 : Text) : Text;
     BEGIN
       EXIT(DotNetUri.UnescapeDataString(Text));
     END;
 
     [External]
-    [LineStart(11)]
     PROCEDURE GetScheme@6() : Text;
     BEGIN
       EXIT(DotNetUri.Scheme);
     END;
 
     [External]
-    [LineStart(14)]
     PROCEDURE GetSegments@7(VAR DotNet_Array@1000 : Codeunit 3000);
     BEGIN
       DotNet_Array.SetArray(DotNetUri.Segments);
     END;
 
-    [LineStart(17)]
     PROCEDURE GetUri@3(VAR DotNetUri2@1000 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Uri");
     BEGIN
       DotNetUri2 := DotNetUri;
     END;
 
-    [LineStart(20)]
     PROCEDURE SetUri@4(DotNetUri2@1000 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Uri");
     BEGIN
       DotNetUri := DotNetUri2;
