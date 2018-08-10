@@ -44,6 +44,18 @@ OBJECT Codeunit 3007 DotNet_String
       DotNet_Array.SetArray(DotNetString.ToCharArray(StartIndex,Length));
     END;
 
+    [External]
+    PROCEDURE StartsWith@7(Value@1000 : Text) : Boolean;
+    BEGIN
+      EXIT(DotNetString.StartsWith(Value))
+    END;
+
+    [External]
+    PROCEDURE EndsWith@8(Value@1000 : Text) : Boolean;
+    BEGIN
+      EXIT(DotNetString.EndsWith(Value))
+    END;
+
     PROCEDURE GetString@3(VAR DotNetString2@1000 : DotNet "'mscorlib'.System.String");
     BEGIN
       DotNetString2 := DotNetString
