@@ -90,6 +90,73 @@ OBJECT Codeunit 132547 Test Data Exch.Import - XML
     END;
 
     [Test]
+    PROCEDURE ReadElementFromXMLFileUTF8NodeName@27();
+    VAR
+      DataExch@1001 : Record 1220;
+      DataExchDef@1003 : Record 1222;
+      DataExchField@1002 : Record 1221;
+      DataExchColumnDef@1007 : Record 1223;
+      TempBlobOEM@1005 : Record 99008535;
+      TempBlobUTF8@1000 : Record 99008535;
+      TempExpectedDataExchField@1004 : TEMPORARY Record 1221;
+      OutStream@1006 : OutStream;
+      Encoding@1009 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.Encoding";
+    BEGIN
+      // Pre-Setup
+      TempBlobOEM.Blob.CREATEOUTSTREAM(OutStream);
+      WriteCAMTFile(OutStream,'UTF-8',NamespaceTxt);
+      ConvertEncoding(TempBlobOEM,TempBlobUTF8,Encoding.UTF8);
+
+      // Setup
+      CreateFormatDefinition(DataExch,DataExchDef,TempBlobUTF8,'/Document/BkToCstmrStmt/GrpHdr/MsgId');
+      DataExchColumnDef.SETRANGE("Data Exch. Def Code",DataExchDef.Code);
+      DataExchColumnDef.MODIFYALL("Use Node Name as Value",TRUE);
+
+      // Execute
+      CODEUNIT.RUN(DataExchDef."Reading/Writing Codeunit",DataExch);
+
+      // Verify
+      TempExpectedDataExchField.InsertRecXMLField(DataExch."Entry No.",0,1,'0001000100010001','MsgId',
+        DataExch."Data Exch. Line Def Code");
+      DataExchField.SETRANGE("Data Exch. No.",DataExch."Entry No.");
+      AssertDataInTable(TempExpectedDataExchField,DataExchField,'');
+    END;
+
+    [Test]
+    PROCEDURE ReadElementFromXMLFileUTF8NodeNameUsingXmlReader@34();
+    VAR
+      DataExch@1001 : Record 1220;
+      DataExchDef@1003 : Record 1222;
+      DataExchField@1002 : Record 1221;
+      DataExchColumnDef@1007 : Record 1223;
+      TempBlobOEM@1005 : Record 99008535;
+      TempBlobUTF8@1000 : Record 99008535;
+      TempExpectedDataExchField@1004 : TEMPORARY Record 1221;
+      OutStream@1006 : OutStream;
+      Encoding@1009 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.Encoding";
+    BEGIN
+      // Pre-Setup
+      TempBlobOEM.Blob.CREATEOUTSTREAM(OutStream);
+      WriteCAMTFile(OutStream,'UTF-8',NamespaceTxt);
+      ConvertEncoding(TempBlobOEM,TempBlobUTF8,Encoding.UTF8);
+
+      // Setup
+      CreateFormatDefinition(DataExch,DataExchDef,TempBlobUTF8,'/Document/BkToCstmrStmt/GrpHdr/MsgId');
+      DataExchColumnDef.SETRANGE("Data Exch. Def Code",DataExchDef.Code);
+      DataExchColumnDef.MODIFYALL("Use Node Name as Value",TRUE);
+
+      // Execute
+      CODEUNIT.RUN(CODEUNIT::"Import XML File to Data Exch.",DataExch);
+
+      // Verify
+      TempExpectedDataExchField.InsertRecXMLField(DataExch."Entry No.",1,1,'00010001','MsgId',
+        DataExch."Data Exch. Line Def Code");
+      DataExchField.SETRANGE("Data Exch. No.",DataExch."Entry No.");
+      DataExchField.SETRANGE("Column No.",1);
+      AssertDataInTable(TempExpectedDataExchField,DataExchField,'');
+    END;
+
+    [Test]
     PROCEDURE ReadElementFromXMLFileUTF8BigData@33();
     VAR
       DataExch@1001 : Record 1220;
