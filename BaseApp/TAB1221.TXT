@@ -22,7 +22,6 @@ OBJECT Table 1221 Data Exch. Field
     { 11  ;   ;Data Exch. Def Code ;Code20        ;FieldClass=FlowField;
                                                    CalcFormula=Lookup("Data Exch."."Data Exch. Def Code" WHERE (Entry No.=FIELD(Data Exch. No.))) }
     { 16  ;   ;Value BLOB          ;BLOB           }
-
   }
   KEYS
   {
@@ -36,13 +35,13 @@ OBJECT Table 1221 Data Exch. Field
   {
 
     [External]
-    PROCEDURE InsertRec@2(DataExchNo@1000 : Integer;LineNo@1001 : Integer;ColumnNo@1002 : Integer;NewValue@1003 : Text[250];DataExchLineDefCode@1004 : Code[20]);
+    PROCEDURE InsertRec@2(DataExchNo@1000 : Integer;LineNo@1001 : Integer;ColumnNo@1002 : Integer;NewValue@1003 : Text;DataExchLineDefCode@1004 : Code[20]);
     BEGIN
       INIT;
       VALIDATE("Data Exch. No.",DataExchNo);
       VALIDATE("Line No.",LineNo);
       VALIDATE("Column No.",ColumnNo);
-      VALIDATE(Value,NewValue);
+      SetValueWithoutModifying(NewValue);
       VALIDATE("Data Exch. Line Def Code",DataExchLineDefCode);
       INSERT;
     END;

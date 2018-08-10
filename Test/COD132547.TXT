@@ -7,7 +7,7 @@ OBJECT Codeunit 132547 Test Data Exch.Import - XML
     Version List=Test,ERM,W1,All;
   }
   PROPERTIES
-  {
+  {    
     Subtype=Test;
     TestPermissions=Disabled;
     Permissions=TableData 1220=m;
@@ -87,6 +87,41 @@ OBJECT Codeunit 132547 Test Data Exch.Import - XML
         DataExch."Data Exch. Line Def Code");
       DataExchField.SETRANGE("Data Exch. No.",DataExch."Entry No.");
       AssertDataInTable(TempExpectedDataExchField,DataExchField,'');
+    END;
+
+    [Test]
+    PROCEDURE ReadElementFromXMLFileUTF8BigData@33();
+    VAR
+      DataExch@1001 : Record 1220;
+      DataExchDef@1003 : Record 1222;
+      DataExchField@1002 : Record 1221;
+      TempBlobBigXml@1007 : Record 99008535;
+      TempBlobOEM@1005 : Record 99008535;
+      TempBlobUTF8@1000 : Record 99008535;
+      TempExpectedDataExchField@1004 : TEMPORARY Record 1221;
+      OutStream@1006 : OutStream;
+      Encoding@1009 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.Encoding";
+    BEGIN
+      // Pre-Setup
+      TempBlobBigXml.Blob.CREATEOUTSTREAM(OutStream);
+      WriteCAMTFile(OutStream,'UTF-8',NamespaceTxt);
+      TempBlobOEM.Blob.CREATEOUTSTREAM(OutStream);
+      WriteCAMTFileWithBigXmlData(TempBlobBigXml,OutStream,'UTF-8',NamespaceTxt);
+      ConvertEncoding(TempBlobOEM,TempBlobUTF8,Encoding.UTF8);
+
+      // Setup
+      CreateFormatDefinition(DataExch,DataExchDef,TempBlobUTF8,'/Document/BkToCstmrStmt/GrpHdr/MsgId');
+
+      // Execute
+      CODEUNIT.RUN(DataExchDef."Reading/Writing Codeunit",DataExch);
+
+      // Verify
+      TempExpectedDataExchField.InsertRecXMLField(DataExch."Entry No.",0,1,'0001000100010001',TempBlobBigXml.ToBase64String,
+        DataExch."Data Exch. Line Def Code");
+      DataExchField.SETRANGE("Data Exch. No.",DataExch."Entry No.");
+      AssertDataInTable(TempExpectedDataExchField,DataExchField,'');
+      DataExchField.GET(DataExch."Entry No.",0,1,'0001000100010001');
+      Assert.AreEqual(TempBlobBigXml.ToBase64String,DataExchField.GetValue,'Big data mismatch!');
     END;
 
     [Test]
@@ -492,6 +527,108 @@ OBJECT Codeunit 132547 Test Data Exch.Import - XML
     END;
 
     [Test]
+    PROCEDURE MapToTableBlob@23();
+    VAR
+      Customer@1012 : Record 18;
+      DataExch@1001 : Record 1220;
+      DataExchDef@1002 : Record 1222;
+      DataExchLineDef@1007 : Record 1227;
+      DataExchMapping@1011 : Record 1224;
+      DataExchField@1004 : Record 1221;
+      TempBlobBigXml@1010 : Record 99008535;
+      TempBlobOEM@1005 : Record 99008535;
+      TempBlobUTF8@1000 : Record 99008535;
+      ProcessDataExch@1003 : Codeunit 1201;
+      RecRef@1008 : RecordRef;
+      OutStream@1006 : OutStream;
+      Encoding@1009 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.Encoding";
+    BEGIN
+      // Initialize
+      Customer.DELETEALL;
+
+      // Pre-Setup
+      TempBlobBigXml.Blob.CREATEOUTSTREAM(OutStream);
+      WriteCAMTFile(OutStream,'UTF-8',NamespaceTxt);
+      TempBlobOEM.Blob.CREATEOUTSTREAM(OutStream);
+      WriteCAMTFileWithBigXmlData(TempBlobBigXml,OutStream,'UTF-8',NamespaceTxt);
+      ConvertEncoding(TempBlobOEM,TempBlobUTF8,Encoding.UTF8);
+
+      // Setup
+      CreateFormatDefinition(DataExch,DataExchDef,TempBlobUTF8,'/Document/BkToCstmrStmt/GrpHdr/MsgId');
+      CreateDataExchMapping(DataExchMapping,DataExchDef,DATABASE::Customer,Customer.FIELDNO(Picture),1);
+      CODEUNIT.RUN(DataExchDef."Reading/Writing Codeunit",DataExch);
+
+      DataExchField.SETRANGE("Data Exch. No.",DataExch."Entry No.");
+      DataExchField.FINDLAST;
+      DataExchField.CALCFIELDS("Value BLOB");
+      DataExchField."Line No." += 1;
+      DataExchField.INSERT;
+
+      // Exercise.
+      RecRef.GETTABLE(Customer);
+      DataExchLineDef.SETRANGE("Data Exch. Def Code",DataExch."Data Exch. Def Code");
+      DataExchLineDef.FINDFIRST;
+      ProcessDataExch.ProcessColumnMapping(DataExch,DataExchLineDef,RecRef);
+
+      // Verify.
+      Customer.FINDFIRST;
+      Customer.CALCFIELDS(Picture);
+      TempBlobUTF8.Blob := Customer.Picture;
+      Assert.AreEqual(TempBlobBigXml.ToBase64String,TempBlobUTF8.ReadAsTextWithCRLFLineSeparator,'Big Xml Data does not match!');
+    END;
+
+    [Test]
+    PROCEDURE MapToTableBlobWithIntermediate@43();
+    VAR
+      Customer@1012 : Record 18;
+      IntermediateDataImport@1013 : Record 1214;
+      DataExch@1001 : Record 1220;
+      DataExchDef@1002 : Record 1222;
+      DataExchLineDef@1007 : Record 1227;
+      DataExchMapping@1011 : Record 1224;
+      DataExchFieldMapping@1014 : Record 1225;
+      DataExchField@1004 : Record 1221;
+      TempBlobBigXml@1010 : Record 99008535;
+      TempBlobOEM@1005 : Record 99008535;
+      TempBlobUTF8@1000 : Record 99008535;
+      ProcessDataExch@1003 : Codeunit 1201;
+      RecRef@1008 : RecordRef;
+      OutStream@1006 : OutStream;
+      Encoding@1009 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.Encoding";
+    BEGIN
+      // Initialize
+      Customer.DELETEALL;
+
+      // Pre-Setup
+      TempBlobBigXml.Blob.CREATEOUTSTREAM(OutStream);
+      WriteCAMTFile(OutStream,'UTF-8',NamespaceTxt);
+      TempBlobOEM.Blob.CREATEOUTSTREAM(OutStream);
+      WriteCAMTFileWithBigXmlData(TempBlobBigXml,OutStream,'UTF-8',NamespaceTxt);
+      ConvertEncoding(TempBlobOEM,TempBlobUTF8,Encoding.UTF8);
+
+      // Setup
+      CreateFormatDefinition(DataExch,DataExchDef,TempBlobUTF8,'/Document/BkToCstmrStmt/GrpHdr/MsgId');
+      CreateDataExchMapping(DataExchMapping,DataExchDef,DATABASE::"Intermediate Data Import",0,1);
+      CODEUNIT.RUN(DataExchDef."Reading/Writing Codeunit",DataExch);
+
+      DataExchMapping.SETRANGE("Data Exch. Def Code",DataExchDef.Code);
+      DataExchMapping.MODIFYALL("Use as Intermediate Table",TRUE);
+      DataExchMapping.FINDFIRST;
+      DataExchFieldMapping.SETRANGE("Data Exch. Def Code",DataExchDef.Code);
+      DataExchFieldMapping.MODIFYALL("Target Table ID",DATABASE::Customer);
+      DataExchFieldMapping.MODIFYALL("Target Field ID",Customer.FIELDNO(Picture));
+      DataExchFieldMapping.FINDFIRST;
+
+      // Exercise.
+      CODEUNIT.RUN(CODEUNIT::"Map DataExch To Intermediate",DataExch);
+
+      // Verify.
+      IntermediateDataImport.SETRANGE("Data Exch. No.",DataExch."Entry No.");
+      IntermediateDataImport.FINDFIRST;
+      Assert.AreEqual(TempBlobBigXml.ToBase64String,IntermediateDataImport.GetValue,'Big Xml Data does not match!');
+    END;
+
+    [Test]
     PROCEDURE RejectEmptyXMLFile@4();
     VAR
       DataExch@1001 : Record 1220;
@@ -652,6 +789,27 @@ OBJECT Codeunit 132547 Test Data Exch.Import - XML
       WriteLine(OutStream,'  <BkToCstmrStmt>');
       WriteLine(OutStream,'    <GrpHdr>');
       WriteLine(OutStream,'      <MsgId>AAAASESS-FP-STAT001</MsgId>');
+      WriteLine(OutStream,'    </GrpHdr>');
+      WriteLine(OutStream,'    <Stmt>');
+      WriteLine(OutStream,'      <Id>AAAASESS-FP-STAT001</Id>');
+      WriteLine(OutStream,'      <Ntry>');
+      WriteLine(OutStream,'        <Amt Ccy="SEK">105678.50</Amt>');
+      WriteLine(OutStream,'        <CdtDbtInd>CRDT</CdtDbtInd>');
+      WriteLine(OutStream,'        <Sts>BOOK</Sts>');
+      WriteLine(OutStream,'      </Ntry>');
+      WriteLine(OutStream,'    </Stmt>');
+      WriteLine(OutStream,'  </BkToCstmrStmt>');
+      WriteLine(OutStream,'</Document>');
+    END;
+
+    LOCAL PROCEDURE WriteCAMTFileWithBigXmlData@26(TempBlobBigXml@1003 : Record 99008535;OutStream@1000 : OutStream;Encoding@1001 : Text;Namespace@1002 : Text);
+    BEGIN
+      WriteLine(OutStream,'<?xml version="1.0" encoding="' + Encoding + '"?>');
+      WriteLine(OutStream,
+        '<Document xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="' + Namespace + '">');
+      WriteLine(OutStream,'  <BkToCstmrStmt>');
+      WriteLine(OutStream,'    <GrpHdr>');
+      WriteLine(OutStream,'      <MsgId>' + TempBlobBigXml.ToBase64String + '</MsgId>');
       WriteLine(OutStream,'    </GrpHdr>');
       WriteLine(OutStream,'    <Stmt>');
       WriteLine(OutStream,'      <Id>AAAASESS-FP-STAT001</Id>');
