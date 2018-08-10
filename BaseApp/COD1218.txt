@@ -44,6 +44,7 @@ OBJECT Codeunit 1218 Map Incoming Doc to Purch Doc
       TempNameValueBufferPurchLine@1009 : TEMPORARY Record 823;
       UnableToApplyDiscountErr@1010 : TextConst '@@@=%1 - a decimal number;ENU=The invoice discount of %1 cannot be applied. Invoice discount must be allowed on at least one invoice line and invoice total must not be 0.';
 
+    [Internal]
     PROCEDURE ProcessIntermediateData@1(DataExch@1001 : Record 1220);
     BEGIN
       ProcessHeaders(DataExch);
@@ -333,34 +334,34 @@ OBJECT Codeunit 1218 Map Incoming Doc to Purch Doc
         // Set PK and insert
         FldNo := PurchaseHeader.FIELDNO("Document Type");
         ProcessField(TempProcessedHdrFldId,RecRef,FldNo,
-          GetValue(IntermediateDataImport,RecRef,FldNo,PurchaseHeader.FIELDCAPTION("Document Type")));
+          GetValueFromIntermediate(IntermediateDataImport,RecRef,FldNo,PurchaseHeader.FIELDCAPTION("Document Type")));
         RecRef.INSERT(TRUE);
 
         // Vendor No.
         FldNo := PurchaseHeader.FIELDNO("Buy-from Vendor No.");
         ProcessField(TempProcessedHdrFldId,RecRef,FldNo,
-          GetValue(IntermediateDataImport,RecRef,FldNo,PurchaseHeader.FIELDCAPTION("Buy-from Vendor No.")));
+          GetValueFromIntermediate(IntermediateDataImport,RecRef,FldNo,PurchaseHeader.FIELDCAPTION("Buy-from Vendor No.")));
 
         // Buy-from Vendor Name
         FldNo := PurchaseHeader.FIELDNO("Buy-from Vendor Name");
-        IF TryGetValue(IntermediateDataImport,RecRef,FldNo,PurchaseHeader.FIELDCAPTION("Buy-from Vendor Name"),Value) THEN
+        IF TryGetValueFromIntermediate(IntermediateDataImport,RecRef,FldNo,PurchaseHeader.FIELDCAPTION("Buy-from Vendor Name"),Value) THEN
           ProcessFieldNoValidate(TempProcessedHdrFldId,RecRef,FldNo,
-            GetValue(IntermediateDataImport,RecRef,FldNo,PurchaseHeader.FIELDCAPTION("Buy-from Vendor Name")));
+            GetValueFromIntermediate(IntermediateDataImport,RecRef,FldNo,PurchaseHeader.FIELDCAPTION("Buy-from Vendor Name")));
 
         RecRef.MODIFY(TRUE);
         SetHeaderConfirmGeneratorFields(IntermediateDataImport,RecRef);
 
         // Pay-to Name
         FldNo := PurchaseHeader.FIELDNO("Pay-to Name");
-        IF TryGetValue(IntermediateDataImport,RecRef,FldNo,PurchaseHeader.FIELDCAPTION("Pay-to Name"),Value) THEN
+        IF TryGetValueFromIntermediate(IntermediateDataImport,RecRef,FldNo,PurchaseHeader.FIELDCAPTION("Pay-to Name"),Value) THEN
           IF NOT IsFieldProcessed(TempProcessedHdrFldId,FldNo) THEN
             ProcessFieldNoValidate(TempProcessedHdrFldId,RecRef,FldNo,
-              GetValue(IntermediateDataImport,RecRef,FldNo,PurchaseHeader.FIELDCAPTION("Pay-to Name")));
+              GetValueFromIntermediate(IntermediateDataImport,RecRef,FldNo,PurchaseHeader.FIELDCAPTION("Pay-to Name")));
 
         // Currency
         FldNo := PurchaseHeader.FIELDNO("Currency Code");
         ProcessField(TempProcessedHdrFldId,RecRef,FldNo,
-          GetValue(IntermediateDataImport,RecRef,FldNo,PurchaseHeader.FIELDCAPTION("Currency Code")));
+          GetValueFromIntermediate(IntermediateDataImport,RecRef,FldNo,PurchaseHeader.FIELDCAPTION("Currency Code")));
 
         // Incoming Doc Entry No
         FldNo := PurchaseHeader.FIELDNO("Incoming Document Entry No.");
@@ -384,7 +385,7 @@ OBJECT Codeunit 1218 Map Incoming Doc to Purch Doc
 
       // Pay-to Vendor
       FldNo := PurchaseHeader.FIELDNO("Pay-to Vendor No.");
-      IF TryGetValue(IntermediateDataImport,RecRef,FldNo,PurchaseHeader.FIELDCAPTION("Pay-to Vendor No."),Value) THEN BEGIN
+      IF TryGetValueFromIntermediate(IntermediateDataImport,RecRef,FldNo,PurchaseHeader.FIELDCAPTION("Pay-to Vendor No."),Value) THEN BEGIN
         PurchaseHeader.VALIDATE("Pay-to Vendor No.",COPYSTR(Value,1,MAXSTRLEN(PurchaseHeader."Pay-to Vendor No.")));
         SetFieldProcessed(TempProcessedHdrFldId,FldNo);
         SetFieldProcessed(TempProcessedHdrFldId,PurchaseHeader.FIELDNO("Pay-to Name"));
@@ -392,21 +393,21 @@ OBJECT Codeunit 1218 Map Incoming Doc to Purch Doc
 
       // Buy-from Contact No.
       FldNo := PurchaseHeader.FIELDNO("Buy-from Contact No.");
-      IF TryGetValue(IntermediateDataImport,RecRef,FldNo,PurchaseHeader.FIELDCAPTION("Buy-from Contact No."),Value) THEN BEGIN
+      IF TryGetValueFromIntermediate(IntermediateDataImport,RecRef,FldNo,PurchaseHeader.FIELDCAPTION("Buy-from Contact No."),Value) THEN BEGIN
         PurchaseHeader.VALIDATE("Buy-from Contact No.",COPYSTR(Value,1,MAXSTRLEN(PurchaseHeader."Buy-from Contact No.")));
         SetFieldProcessed(TempProcessedHdrFldId,FldNo);
       END;
 
       // Pay-to Contact No.
       FldNo := PurchaseHeader.FIELDNO("Pay-to Contact No.");
-      IF TryGetValue(IntermediateDataImport,RecRef,FldNo,PurchaseHeader.FIELDCAPTION("Pay-to Contact No."),Value) THEN BEGIN
+      IF TryGetValueFromIntermediate(IntermediateDataImport,RecRef,FldNo,PurchaseHeader.FIELDCAPTION("Pay-to Contact No."),Value) THEN BEGIN
         PurchaseHeader.VALIDATE("Pay-to Contact No.",COPYSTR(Value,1,MAXSTRLEN(PurchaseHeader."Pay-to Contact No.")));
         SetFieldProcessed(TempProcessedHdrFldId,FldNo);
       END;
 
       // VAT Base Discount %
       FldNo := PurchaseHeader.FIELDNO("VAT Base Discount %");
-      IF TryGetValue(IntermediateDataImport,RecRef,FldNo,PurchaseHeader.FIELDCAPTION("VAT Base Discount %"),Value) THEN BEGIN
+      IF TryGetValueFromIntermediate(IntermediateDataImport,RecRef,FldNo,PurchaseHeader.FIELDCAPTION("VAT Base Discount %"),Value) THEN BEGIN
         EVALUATE(DecimalValue,Value,9);
         PurchaseHeader.VALIDATE("VAT Base Discount %",DecimalValue);
         SetFieldProcessed(TempProcessedHdrFldId,FldNo);
@@ -466,46 +467,46 @@ OBJECT Codeunit 1218 Map Incoming Doc to Purch Doc
 
         // Type
         FldNo := PurchaseLine.FIELDNO(Type);
-        EVALUATE(Type,GetValue(IntermediateDataImport,RecRef,FldNo,PurchaseLine.FIELDCAPTION(Type)));
+        EVALUATE(Type,GetValueFromIntermediate(IntermediateDataImport,RecRef,FldNo,PurchaseLine.FIELDCAPTION(Type)));
         ProcessField(TempProcessedLineFldId,RecRef,FldNo,FORMAT(Type));
 
         IF Type <> PurchaseLine.Type::" " THEN BEGIN
           // No.
           FldNo := PurchaseLine.FIELDNO("No.");
           ProcessField(TempProcessedLineFldId,RecRef,FldNo,
-            GetValue(IntermediateDataImport,RecRef,FldNo,PurchaseLine.FIELDCAPTION("No.")));
+            GetValueFromIntermediate(IntermediateDataImport,RecRef,FldNo,PurchaseLine.FIELDCAPTION("No.")));
 
           // Quantity
           FldNo := PurchaseLine.FIELDNO(Quantity);
           ProcessField(TempProcessedLineFldId,RecRef,FldNo,
-            GetValue(IntermediateDataImport,RecRef,FldNo,PurchaseLine.FIELDCAPTION(Quantity)));
+            GetValueFromIntermediate(IntermediateDataImport,RecRef,FldNo,PurchaseLine.FIELDCAPTION(Quantity)));
 
           // UOM
           FldNo := PurchaseLine.FIELDNO("Unit of Measure Code");
-          IF TryGetValue(IntermediateDataImport,RecRef,FldNo,PurchaseLine.FIELDCAPTION("Unit of Measure Code"),Value) THEN
+          IF TryGetValueFromIntermediate(IntermediateDataImport,RecRef,FldNo,PurchaseLine.FIELDCAPTION("Unit of Measure Code"),Value) THEN
             ProcessField(TempProcessedLineFldId,RecRef,FldNo,Value);
 
           // Direct Unit Cost
           FldNo := PurchaseLine.FIELDNO("Direct Unit Cost");
           ProcessField(TempProcessedLineFldId,RecRef,FldNo,
-            GetValue(IntermediateDataImport,RecRef,FldNo,PurchaseLine.FIELDCAPTION("Direct Unit Cost")));
+            GetValueFromIntermediate(IntermediateDataImport,RecRef,FldNo,PurchaseLine.FIELDCAPTION("Direct Unit Cost")));
         END;
 
         RecRef.MODIFY(TRUE);
       END;
     END;
 
-    LOCAL PROCEDURE GetValue@16(VAR IntermediateDataImport@1000 : Record 1214;RecRef@1003 : RecordRef;FieldID@1001 : Integer;FieldName@1002 : Text) : Text[250];
+    LOCAL PROCEDURE GetValueFromIntermediate@16(VAR IntermediateDataImport@1000 : Record 1214;RecRef@1003 : RecordRef;FieldID@1001 : Integer;FieldName@1002 : Text) : Text[250];
     VAR
       Value@1004 : Text[250];
     BEGIN
-      TryGetValue(IntermediateDataImport,RecRef,FieldID,FieldName,Value);
+      TryGetValueFromIntermediate(IntermediateDataImport,RecRef,FieldID,FieldName,Value);
 
       EXIT(Value);
     END;
 
     [TryFunction]
-    LOCAL PROCEDURE TryGetValue@20(VAR IntermediateDataImport@1000 : Record 1214;RecRef@1003 : RecordRef;FieldID@1001 : Integer;FieldName@1002 : Text;VAR Value@1004 : Text[250]);
+    LOCAL PROCEDURE TryGetValueFromIntermediate@20(VAR IntermediateDataImport@1000 : Record 1214;RecRef@1003 : RecordRef;FieldID@1001 : Integer;FieldName@1002 : Text;VAR Value@1004 : Text[250]);
     BEGIN
       Value := '';
       IntermediateDataImport.SETRANGE("Field ID",FieldID);
