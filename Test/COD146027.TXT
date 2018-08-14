@@ -2,9 +2,8 @@ OBJECT Codeunit 146027 DotNet_Certificate Test
 {
   OBJECT-PROPERTIES
   {
-    Date=06.08.18;
-    Time=22:21:05;
-    Modified=Yes;
+    Date=;
+    Time=;
     Version List=;
   }
   PROPERTIES
@@ -20,7 +19,6 @@ OBJECT Codeunit 146027 DotNet_Certificate Test
       Assert@1000 : Codeunit 130000;
 
     [Test]
-    [LineStart(2)]
     PROCEDURE TestDemoCertificateFromBase64String@5();
     VAR
       TempBlob@1002 : Record 99008535;
@@ -36,7 +34,6 @@ OBJECT Codeunit 146027 DotNet_Certificate Test
       TestCertificate(DotNet_Certificate);
     END;
 
-    [LineStart(10)]
     LOCAL PROCEDURE TestCertificate@1(DotNet_Certificate@1000 : Codeunit 3027);
     VAR
       TempBlob@1012 : Record 99008535;
@@ -81,7 +78,6 @@ OBJECT Codeunit 146027 DotNet_Certificate Test
       Assert.AreEqual(HasPrivateKey,DotNet_Certificate.GetHasPrivateKey,'Certificate Details incorrect!');
     END;
 
-    [LineStart(39)]
     PROCEDURE DemoCertificate@6() : Text;
     BEGIN
       EXIT(
