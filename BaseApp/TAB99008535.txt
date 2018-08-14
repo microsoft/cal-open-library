@@ -185,14 +185,14 @@ OBJECT Table 99008535 TempBlob
     [External]
     PROCEDURE TryDownloadFromUrl@21(Url@1000 : Text);
     VAR
-      WebClient@1001 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Net.WebClient";
-      MemoryStream@1002 : DotNet "'mscorlib'.System.IO.MemoryStream";
+      DotNet_WebClient@1001 : Codeunit 3041;
+      DotNet_MemoryStream@1002 : Codeunit 3009;
       OutStr@1003 : OutStream;
     BEGIN
-      WebClient := WebClient.WebClient;
-      MemoryStream := MemoryStream.MemoryStream(WebClient.DownloadData(Url));
+      DotNet_WebClient.Init;
+      DotNet_WebClient.DownloadData(Url,DotNet_MemoryStream);
       Blob.CREATEOUTSTREAM(OutStr);
-      COPYSTREAM(OutStr,MemoryStream);
+      DotNet_MemoryStream.WriteTo(OutStr);
     END;
 
     [TryFunction]
