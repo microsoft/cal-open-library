@@ -1,15 +1,15 @@
-OBJECT Codeunit 50009 Test_DotNet_SmtpMessage
+OBJECT Codeunit 146031 Test_DotNet_SmtpMessage
 {
   OBJECT-PROPERTIES
   {
     Date=;
     Time=;
-    Modified=Yes;
     Version List=;
   }
   PROPERTIES
   {
     Subtype=Test;
+    TestPermissions=Disabled;
     OnRun=BEGIN
           END;
 
@@ -17,78 +17,77 @@ OBJECT Codeunit 50009 Test_DotNet_SmtpMessage
   CODE
   {
     VAR
-      Assert@17024400 : Codeunit 130000;
-      LibraryLowerPermissions@17024401 : Codeunit 132217;
-      DotNet_SmtpMessage@17024405 : Codeunit 50008;
-      DotNetSmtpMessage@17024402 : DotNet "'Microsoft.Dynamics.Nav.SMTP, Version=11.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.Microsoft.Dynamics.Nav.SMTP.SmtpMessage";
+      Assert@1000 : Codeunit 130000;
+      DotNet_SmtpMessage@1005 : Codeunit 3031;
+      DotNetSmtpMessage@1002 : DotNet "'Microsoft.Dynamics.Nav.SMTP, Version=13.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.Microsoft.Dynamics.Nav.SMTP.SmtpMessage";
 
     [Test]
-    PROCEDURE AddBCCTest@17024403();
+    PROCEDURE AddBCCTest@1();
     BEGIN
       DotNet_SmtpMessage.CreateMessage;
       // [WHEN] one address is added to BCC
       DotNet_SmtpMessage.AddBCC('testmail@mail.com');
       DotNet_SmtpMessage.GetSmtpMessage(DotNetSmtpMessage);
       // [THEN] Message BCC equals to added address
-      Assert.AreEqual('testmail@mail.com', DotNetSmtpMessage.Bcc, 'Bcc add failed');
+      Assert.AreEqual('testmail@mail.com',DotNetSmtpMessage.Bcc,'Bcc add failed');
       // [WHEN] additional address is added to BCC
       DotNet_SmtpMessage.AddBCC('testmail2@mail.com');
       DotNet_SmtpMessage.GetSmtpMessage(DotNetSmtpMessage);
       // [THEN] Message BCC equals to concatenation of both addresses
-      Assert.AreEqual('testmail@mail.com; testmail2@mail.com', DotNetSmtpMessage.Bcc, 'Bcc add failed');
+      Assert.AreEqual('testmail@mail.com; testmail2@mail.com',DotNetSmtpMessage.Bcc,'Bcc add failed');
     END;
 
     [Test]
-    PROCEDURE AddCCTest@17024408();
+    PROCEDURE AddCCTest@2();
     BEGIN
       DotNet_SmtpMessage.CreateMessage;
       // [WHEN] one address is added to CC
       DotNet_SmtpMessage.AddCC('testmail@mail.com');
       DotNet_SmtpMessage.GetSmtpMessage(DotNetSmtpMessage);
       // [THEN] Message CC equals to added address
-      Assert.AreEqual('testmail@mail.com', DotNetSmtpMessage.CC, 'CC add failed');
+      Assert.AreEqual('testmail@mail.com',DotNetSmtpMessage.CC,'CC add failed');
       // [WHEN] additional address is added to CC
       DotNet_SmtpMessage.AddCC('testmail2@mail.com');
       DotNet_SmtpMessage.GetSmtpMessage(DotNetSmtpMessage);
       // [THEN] Message CC equals to concatenation of both addresses
-      Assert.AreEqual('testmail@mail.com; testmail2@mail.com', DotNetSmtpMessage.CC, 'CC add failed');
+      Assert.AreEqual('testmail@mail.com; testmail2@mail.com',DotNetSmtpMessage.CC,'CC add failed');
     END;
 
     [Test]
-    PROCEDURE AddRecipientTest@17024410();
+    PROCEDURE AddRecipientTest@3();
     BEGIN
       DotNet_SmtpMessage.CreateMessage;
       // [WHEN] one address is added to BCC
       DotNet_SmtpMessage.SetToAddress('testmail@mail.com');
       DotNet_SmtpMessage.GetSmtpMessage(DotNetSmtpMessage);
       // [THEN] Message BCC equals to added address
-      Assert.AreEqual('testmail@mail.com', DotNetSmtpMessage."To", 'Recipient add failed');
+      Assert.AreEqual('testmail@mail.com',DotNetSmtpMessage."To",'Recipient add failed');
       // [WHEN] additional address is added to recipients
       DotNet_SmtpMessage.AddRecipients('testmail2@mail.com');
       DotNet_SmtpMessage.GetSmtpMessage(DotNetSmtpMessage);
       // [THEN] Message Recipients equals to concatenation of both addresses
-      Assert.AreEqual('testmail@mail.com; testmail2@mail.com', DotNetSmtpMessage."To", 'Recipient add failed');
+      Assert.AreEqual('testmail@mail.com; testmail2@mail.com',DotNetSmtpMessage."To",'Recipient add failed');
     END;
 
     [Test]
-    PROCEDURE AppendBodyTest@17024404();
+    PROCEDURE AppendBodyTest@4();
     BEGIN
       DotNet_SmtpMessage.CreateMessage;
       // [WHEN] body is cleared
       DotNet_SmtpMessage.ClearBody;
       DotNet_SmtpMessage.GetSmtpMessage(DotNetSmtpMessage);
       // [THEN] Message body equals to empty string
-      Assert.AreEqual('', DotNetSmtpMessage.Body, 'Body manipulation failed');
+      Assert.AreEqual('',DotNetSmtpMessage.Body,'Body manipulation failed');
       // [WHEN] 'test1' is added to body
       DotNet_SmtpMessage.AppendToBody('test1');
       DotNet_SmtpMessage.GetSmtpMessage(DotNetSmtpMessage);
       // [THEN] Message body equals to 'test1'
-      Assert.AreEqual('test1', DotNetSmtpMessage.Body, 'Body manipulation failed');
+      Assert.AreEqual('test1',DotNetSmtpMessage.Body,'Body manipulation failed');
       // [WHEN] additional text is added to body
       DotNet_SmtpMessage.AppendToBody('test2');
       DotNet_SmtpMessage.GetSmtpMessage(DotNetSmtpMessage);
       // [THEN] Message body equals concatenation sof both strings
-      Assert.AreEqual('test1test2', DotNetSmtpMessage.Body, 'Body manipulation failed');
+      Assert.AreEqual('test1test2',DotNetSmtpMessage.Body,'Body manipulation failed');
     END;
 
     BEGIN
