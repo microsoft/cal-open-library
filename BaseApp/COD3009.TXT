@@ -33,7 +33,6 @@ OBJECT Codeunit 3009 DotNet_MemoryStream
     END;
 
     [External]
-    [LineStart(9)]
     PROCEDURE ToArray@1(VAR DotNet_Array@1000 : Codeunit 3000);
     BEGIN
       DotNet_Array.SetArray(DotNetMemoryStream.ToArray)
