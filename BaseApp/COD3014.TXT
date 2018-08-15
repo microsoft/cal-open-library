@@ -30,6 +30,12 @@ OBJECT Codeunit 3014 DotNet_StringBuilder
     END;
 
     [External]
+    PROCEDURE AppendFormat@10(Format@1000 : Text;Value@1001 : Variant);
+    BEGIN
+      DotNetStringBuilder.AppendFormat(Format,Value);
+    END;
+
+    [External]
     PROCEDURE ToString@4() : Text;
     BEGIN
       EXIT(DotNetStringBuilder.ToString())
