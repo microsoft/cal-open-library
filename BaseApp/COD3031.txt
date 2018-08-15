@@ -57,7 +57,6 @@ OBJECT Codeunit 3031 DotNet_SmtpMessage
     PROCEDURE SetTimeout@7(Timeout@1000 : Integer);
     BEGIN
       DotNetSmtpMessage.Timeout := Timeout;
-      DotNetSmtpMessage.ConvertBase64ImagesToContentId;
     END;
 
     [External]
