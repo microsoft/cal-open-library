@@ -22,52 +22,44 @@ OBJECT Codeunit 146041 Test DotNet_WebClient
     [Test]
     PROCEDURE TestSuccessfulhttpDownload@1();
     VAR
-      TempBlob@1002 : Record 99008535;
       DotNet_WebClient@1000 : Codeunit 3041;
-      DotNet_MemoryStream@1001 : Codeunit 3009;
-      OutStream@1003 : OutStream;
+      DotNet_Array@1001 : Codeunit 3000;
       Url@1004 : Text;
     BEGIN
       // [GIVEN] A http Url
       Url := 'http://www.microsoft.com';
 
       // [WHEN] Downloaded with Web Client to Memory Stream
-      DotNet_WebClient.Init;
-      DotNet_WebClient.DownloadData(Url,DotNet_MemoryStream);
+      DotNet_WebClient.WebClient;
+      DotNet_WebClient.DownloadData(Url,DotNet_Array);
 
       // [THEN] Then data should be downloaded
-      TempBlob.Blob.CREATEOUTSTREAM(OutStream);
-      DotNet_MemoryStream.WriteTo(OutStream);
-      Assert.AreEqual(TRUE,TempBlob.Blob.HASVALUE,'http Download failed!');
+      Assert.AreEqual(TRUE,DotNet_Array.Length > 0,'http Download failed!');
     END;
 
     [Test]
     PROCEDURE TestSuccessfulhttpsDownload@2();
     VAR
-      TempBlob@1003 : Record 99008535;
       DotNet_WebClient@1002 : Codeunit 3041;
-      DotNet_MemoryStream@1001 : Codeunit 3009;
-      OutStream@1000 : OutStream;
+      DotNet_Array@1001 : Codeunit 3000;
       Url@1004 : Text;
     BEGIN
       // [GIVEN] A https Url
       Url := 'https://www.microsoft.com';
 
       // [WHEN] Downloaded with Web Client to Memory Stream
-      DotNet_WebClient.Init;
-      DotNet_WebClient.DownloadData(Url,DotNet_MemoryStream);
+      DotNet_WebClient.WebClient;
+      DotNet_WebClient.DownloadData(Url,DotNet_Array);
 
       // [THEN] Then data should be downloaded
-      TempBlob.Blob.CREATEOUTSTREAM(OutStream);
-      DotNet_MemoryStream.WriteTo(OutStream);
-      Assert.AreEqual(TRUE,TempBlob.Blob.HASVALUE,'https Download failed!');
+      Assert.AreEqual(TRUE,DotNet_Array.Length > 0,'https Download failed!');
     END;
 
     [Test]
     PROCEDURE TestFailedFileSystemDownload@3();
     VAR
       DotNet_WebClient@1002 : Codeunit 3041;
-      DotNet_MemoryStream@1001 : Codeunit 3009;
+      DotNet_Array@1001 : Codeunit 3000;
       FileManagement@1000 : Codeunit 419;
       Url@1003 : Text;
     BEGIN
@@ -75,8 +67,45 @@ OBJECT Codeunit 146041 Test DotNet_WebClient
       Url := FileManagement.CombinePath(APPLICATIONPATH,'CustomSettings.config');
 
       // [WHEN] Downloaded with Web Client to Memory Stream
-      DotNet_WebClient.Init;
-      ASSERTERROR DotNet_WebClient.DownloadData(Url,DotNet_MemoryStream);
+      DotNet_WebClient.WebClient;
+      ASSERTERROR DotNet_WebClient.DownloadData(Url,DotNet_Array);
+
+      // [THEN] Then data download should fail
+      Assert.AreEqual(UrlSecurityErr,GETLASTERRORTEXT,'Incorrect error message');
+    END;
+
+    [Test]
+    PROCEDURE TestSuccessfulhttpsStringDownload@8();
+    VAR
+      DotNet_WebClient@1002 : Codeunit 3041;
+      Content@1001 : Text;
+      Url@1004 : Text;
+    BEGIN
+      // [GIVEN] A https Url
+      Url := 'https://httpbin.org/get';
+
+      // [WHEN] Downloaded with Web Client to Memory Stream
+      DotNet_WebClient.WebClient;
+      Content := DotNet_WebClient.DownloadString(Url);
+
+      // [THEN] Then data should be downloaded
+      Assert.AreEqual(TRUE,STRLEN(Content) > 0,'https Download failed!');
+    END;
+
+    [Test]
+    PROCEDURE TestFailedFileSystemStringDownload@6();
+    VAR
+      DotNet_WebClient@1002 : Codeunit 3041;
+      FileManagement@1000 : Codeunit 419;
+      Content@1001 : Text;
+      Url@1003 : Text;
+    BEGIN
+      // [GIVEN] A Url
+      Url := FileManagement.CombinePath(APPLICATIONPATH,'CustomSettings.config');
+
+      // [WHEN] Downloaded with Web Client to Memory Stream
+      DotNet_WebClient.WebClient;
+      ASSERTERROR Content := DotNet_WebClient.DownloadString(Url);
 
       // [THEN] Then data download should fail
       Assert.AreEqual(UrlSecurityErr,GETLASTERRORTEXT,'Incorrect error message');
@@ -85,11 +114,9 @@ OBJECT Codeunit 146041 Test DotNet_WebClient
     [Test]
     PROCEDURE TestSuccessfulhttpsDownloadWithAuthentication@7();
     VAR
-      TempBlob@1003 : Record 99008535;
       DotNet_WebClient@1002 : Codeunit 3041;
-      DotNet_MemoryStream@1001 : Codeunit 3009;
+      DotNet_Array@1001 : Codeunit 3000;
       DotNet_Credential@1005 : Codeunit 3029;
-      OutStream@1000 : OutStream;
       Url@1004 : Text;
     BEGIN
       // [GIVEN] A https Url and authentication
@@ -97,14 +124,12 @@ OBJECT Codeunit 146041 Test DotNet_WebClient
       DotNet_Credential.InitCredential('testuser','testpassword');
 
       // [WHEN] Downloaded with Web Client to Memory Stream
-      DotNet_WebClient.Init;
-      DotNet_WebClient.SetCredentials(DotNet_Credential);
-      DotNet_WebClient.DownloadData(Url,DotNet_MemoryStream);
+      DotNet_WebClient.WebClient;
+      DotNet_WebClient.Credentials(DotNet_Credential);
+      DotNet_WebClient.DownloadData(Url,DotNet_Array);
 
       // [THEN] Then data should be downloaded
-      TempBlob.Blob.CREATEOUTSTREAM(OutStream);
-      DotNet_MemoryStream.WriteTo(OutStream);
-      Assert.AreEqual(TRUE,TempBlob.Blob.HASVALUE,'Basic authentication failed!');
+      Assert.AreEqual(TRUE,DotNet_Array.Length > 0,'Basic authentication failed!');
     END;
 
     [Test]

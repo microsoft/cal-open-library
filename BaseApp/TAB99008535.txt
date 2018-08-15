@@ -187,10 +187,12 @@ OBJECT Table 99008535 TempBlob
     VAR
       DotNet_WebClient@1001 : Codeunit 3041;
       DotNet_MemoryStream@1002 : Codeunit 3009;
+      DotNet_Array@1004 : Codeunit 3000;
       OutStr@1003 : OutStream;
     BEGIN
-      DotNet_WebClient.Init;
-      DotNet_WebClient.DownloadData(Url,DotNet_MemoryStream);
+      DotNet_WebClient.WebClient;
+      DotNet_WebClient.DownloadData(Url,DotNet_Array);
+      DotNet_MemoryStream.InitMemoryStreamFromArray(DotNet_Array);
       Blob.CREATEOUTSTREAM(OutStr);
       DotNet_MemoryStream.WriteTo(OutStr);
     END;

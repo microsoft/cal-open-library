@@ -19,13 +19,13 @@ OBJECT Codeunit 3041 DotNet_WebClient
       UrlSecurityErr@1001 : TextConst 'ENU=Security settings prevents download of this file.';
 
     [External]
-    PROCEDURE Init@4();
+    PROCEDURE WebClient@4();
     BEGIN
       DotNetWebClient := DotNetWebClient.WebClient;
     END;
 
     [External]
-    PROCEDURE SetCredentials@3(DotNet_Credential@1000 : Codeunit 3029);
+    PROCEDURE Credentials@3(DotNet_Credential@1000 : Codeunit 3029);
     VAR
       DotNetCredential@1001 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Net.NetworkCredential";
     BEGIN
@@ -34,26 +34,29 @@ OBJECT Codeunit 3041 DotNet_WebClient
     END;
 
     [External]
-    PROCEDURE DownloadData@5(Url@1000 : Text;VAR DotNet_MemoryStream@1001 : Codeunit 3009);
+    PROCEDURE DownloadData@5(Url@1000 : Text;VAR DotNet_Array@1001 : Codeunit 3000);
     VAR
       MemoryStream@1002 : DotNet "'mscorlib'.System.IO.MemoryStream";
     BEGIN
       VerifyUrl(Url);
-      DotNet_MemoryStream.SetMemoryStream(MemoryStream.MemoryStream(DotNetWebClient.DownloadData(Url)));
+      DotNet_Array.SetArray(DotNetWebClient.DownloadData(Url));
     END;
 
-    LOCAL PROCEDURE DownloadString@7(Url@1000 : Text) : Text;
+    [External]
+    PROCEDURE DownloadString@7(Url@1000 : Text) : Text;
     BEGIN
+      VerifyUrl(Url);
       EXIT(DotNetWebClient.DownloadString(Url));
     END;
 
     LOCAL PROCEDURE VerifyUrl@6(Url@1000 : Text);
     VAR
       DotNet_Uri@1001 : Codeunit 3024;
+      WebRequestHelper@1002 : Codeunit 1299;
     BEGIN
-      DotNet_Uri.Init(Url);
-      IF DotNet_Uri.Scheme IN ['http','https'] THEN EXIT;
-      ERROR(UrlSecurityErr);
+      WebRequestHelper.IsValidUri(Url);
+      IF NOT (WebRequestHelper.IsSecureHttpUrl(Url) OR WebRequestHelper.IsHttpUrl(Url)) THEN
+        ERROR(UrlSecurityErr);
     END;
 
     PROCEDURE GetWebClient@1(VAR DotNetWebClient2@1000 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Net.WebClient");
@@ -64,58 +67,6 @@ OBJECT Codeunit 3041 DotNet_WebClient
     PROCEDURE SetWebClient@2(DotNetWebClient2@1000 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Net.WebClient");
     BEGIN
       DotNetWebClient := DotNetWebClient2;
-    END;
-
-    EVENT DotNetWebClient@1000::WriteStreamClosed@105(sender@1001 : Variant;e@1000 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Net.WriteStreamClosedEventArgs");
-    BEGIN
-    END;
-
-    EVENT DotNetWebClient@1000::OpenReadCompleted@106(sender@1001 : Variant;e@1000 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Net.OpenReadCompletedEventArgs");
-    BEGIN
-    END;
-
-    EVENT DotNetWebClient@1000::OpenWriteCompleted@107(sender@1001 : Variant;e@1000 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Net.OpenWriteCompletedEventArgs");
-    BEGIN
-    END;
-
-    EVENT DotNetWebClient@1000::DownloadStringCompleted@108(sender@1001 : Variant;e@1000 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Net.DownloadStringCompletedEventArgs");
-    BEGIN
-    END;
-
-    EVENT DotNetWebClient@1000::DownloadDataCompleted@109(sender@1001 : Variant;e@1000 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Net.DownloadDataCompletedEventArgs");
-    BEGIN
-    END;
-
-    EVENT DotNetWebClient@1000::DownloadFileCompleted@110(sender@1001 : Variant;e@1000 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.ComponentModel.AsyncCompletedEventArgs");
-    BEGIN
-    END;
-
-    EVENT DotNetWebClient@1000::UploadStringCompleted@111(sender@1001 : Variant;e@1000 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Net.UploadStringCompletedEventArgs");
-    BEGIN
-    END;
-
-    EVENT DotNetWebClient@1000::UploadDataCompleted@112(sender@1001 : Variant;e@1000 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Net.UploadDataCompletedEventArgs");
-    BEGIN
-    END;
-
-    EVENT DotNetWebClient@1000::UploadFileCompleted@113(sender@1001 : Variant;e@1000 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Net.UploadFileCompletedEventArgs");
-    BEGIN
-    END;
-
-    EVENT DotNetWebClient@1000::UploadValuesCompleted@114(sender@1001 : Variant;e@1000 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Net.UploadValuesCompletedEventArgs");
-    BEGIN
-    END;
-
-    EVENT DotNetWebClient@1000::DownloadProgressChanged@115(sender@1001 : Variant;e@1000 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Net.DownloadProgressChangedEventArgs");
-    BEGIN
-    END;
-
-    EVENT DotNetWebClient@1000::UploadProgressChanged@116(sender@1001 : Variant;e@1000 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Net.UploadProgressChangedEventArgs");
-    BEGIN
-    END;
-
-    EVENT DotNetWebClient@1000::Disposed@117(sender@1001 : Variant;e@1000 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.EventArgs");
-    BEGIN
     END;
 
     BEGIN
