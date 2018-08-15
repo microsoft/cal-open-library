@@ -51,7 +51,6 @@ OBJECT Codeunit 3041 DotNet_WebClient
 
     LOCAL PROCEDURE VerifyUrl@6(Url@1000 : Text);
     VAR
-      DotNet_Uri@1001 : Codeunit 3024;
       WebRequestHelper@1002 : Codeunit 1299;
     BEGIN
       WebRequestHelper.IsValidUri(Url);
