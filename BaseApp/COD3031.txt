@@ -18,55 +18,55 @@ OBJECT Codeunit 3031 DotNet_SmtpMessage
       DotNetSmtpMessage@1000 : DotNet "'Microsoft.Dynamics.Nav.SMTP, Version=13.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.Microsoft.Dynamics.Nav.SMTP.SmtpMessage";
 
     [External]
-    PROCEDURE CreateMessage@1();
+    PROCEDURE SmtpMessage@1();
     BEGIN
       DotNetSmtpMessage := DotNetSmtpMessage.SmtpMessage;
     END;
 
     [External]
-    PROCEDURE SetFromAddress@2(FromAddress@1000 : Text);
+    PROCEDURE FromAddress@2(FromAddress@1000 : Text);
     BEGIN
       DotNetSmtpMessage.FromAddress := FromAddress;
     END;
 
     [External]
-    PROCEDURE SetFromName@3(FromName@1000 : Text);
+    PROCEDURE FromName@3(FromName@1000 : Text);
     BEGIN
-      DotNetSmtpMessage.FromAddress := FromName;
+      DotNetSmtpMessage.FromName := FromName;
     END;
 
     [External]
-    PROCEDURE SetToAddress@4(ToAddress@1000 : Text);
+    PROCEDURE ToAddress@4(ToAddress@1000 : Text);
     BEGIN
       DotNetSmtpMessage."To" := ToAddress;
     END;
 
     [External]
-    PROCEDURE SetSubject@5(Subject@1000 : Text);
+    PROCEDURE Subject@5(Subject@1000 : Text);
     BEGIN
       DotNetSmtpMessage.Subject := Subject;
     END;
 
     [External]
-    PROCEDURE SetAsHtmlFormatted@6(HtmlFormatted@1000 : Boolean);
+    PROCEDURE HtmlFormatted@6(HtmlFormatted@1000 : Boolean);
     BEGIN
       DotNetSmtpMessage.HtmlFormatted := HtmlFormatted;
     END;
 
     [External]
-    PROCEDURE SetTimeout@7(Timeout@1000 : Integer);
+    PROCEDURE Timeout@7(Timeout@1000 : Integer);
     BEGIN
       DotNetSmtpMessage.Timeout := Timeout;
     END;
 
     [External]
-    PROCEDURE ClearBody@8();
+    PROCEDURE Body@8(Text@1000 : Text);
     BEGIN
-      DotNetSmtpMessage.Body := '';
+      DotNetSmtpMessage.Body := Text;
     END;
 
     [External]
-    PROCEDURE AppendToBody@9(Text@1000 : Text);
+    PROCEDURE AppendBody@9(Text@1000 : Text);
     BEGIN
       DotNetSmtpMessage.AppendBody(Text);
     END;
@@ -96,7 +96,7 @@ OBJECT Codeunit 3031 DotNet_SmtpMessage
     END;
 
     [External]
-    PROCEDURE SendMail@14(ServerName@1001 : Text;ServerPort@1000 : Integer;UseAuthentication@1002 : Boolean;Username@1003 : Text;Password@1004 : Text;UseSSL@1005 : Boolean) : Text;
+    PROCEDURE Send@14(ServerName@1001 : Text;ServerPort@1000 : Integer;UseAuthentication@1002 : Boolean;Username@1003 : Text;Password@1004 : Text;UseSSL@1005 : Boolean) : Text;
     BEGIN
       EXIT(DotNetSmtpMessage.Send(ServerName,ServerPort,UseAuthentication,Username,Password,UseSSL));
     END;
