@@ -26,7 +26,7 @@ OBJECT Codeunit 146014 DotNet_StringBuilder Test
       JsonString@1002 : Text;
     BEGIN
       // [GIVEN] A Windows string with Icelandic characters
-      WindowsString := 'FriÐrik J¢nsson ehf. - Reikningur 5527.PDF';
+      WindowsString := 'Friï¿½rik Jï¿½nsson ehf. - Reikningur 5527.PDF';
 
       // [WHEN] Converted to Json using the StringBuilde Wrapper
       JsonString := WindowsToJson(WindowsString);
@@ -52,7 +52,7 @@ OBJECT Codeunit 146014 DotNet_StringBuilder Test
             10: StringBuilder.Append('\n');
             12: StringBuilder.Append('\f');
             13: StringBuilder.Append('\r');
-            34: StringBuilder.Append('\\"');
+            34: StringBuilder.Append('\"');
             92: StringBuilder.Append('\\');
             ELSE BEGIN
               Int := InText[Index];
