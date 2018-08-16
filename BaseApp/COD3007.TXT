@@ -56,6 +56,20 @@ OBJECT Codeunit 3007 DotNet_String
       EXIT(DotNetString.EndsWith(Value))
     END;
 
+    [External]
+    PROCEDURE ToText@17024400() : Text;
+    BEGIN
+      IF IsEmpty THEN  //Handling NullReferenceException
+        EXIT('');
+      EXIT(DotNetString.ToString);
+    END;
+
+    [External]
+    PROCEDURE IsEmpty@17024401() : Boolean;
+    BEGIN
+      EXIT(ISNULL(DotNetString));
+    END;
+
     PROCEDURE GetString@3(VAR DotNetString2@1000 : DotNet "'mscorlib'.System.String");
     BEGIN
       DotNetString2 := DotNetString

@@ -1,0 +1,185 @@
+OBJECT Codeunit 50101 Test_DotNet_StreamReader
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    Subtype=Test;
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      Assert@17024401 : Codeunit 130000;
+      LibraryLowerPermissions@17024400 : Codeunit 132217;
+      DotNet_StreamWriter@17024402 : Codeunit 3025;
+      DotNet_StreamReader@17024403 : Codeunit 50100;
+      DotNet_Encoding@17024404 : Codeunit 3026;
+      TempBlob@17024411 : TEMPORARY Record 99008535;
+
+    [Test]
+    PROCEDURE TestReadingUsingReadLine@17024400();
+    VAR
+      Expected@17024403 : Text;
+      Actual@17024400 : Text;
+      CurrentLine@17024401 : Text;
+      Count@17024402 : Integer;
+      ActualCodepage@17024404 : Integer;
+    BEGIN
+      LibraryLowerPermissions.SetO365Basic;
+      //[WHEN] One-linen text file with encoding 1252 is created
+      CreateSampleStreamFromText('Test', 1, 1252);
+      ReadLineByLineInGivenCodepage(1252, Count, Actual, ActualCodepage);
+      //[THEN] Expected line count is 1 and concatenation of all lines should be 'Test'
+      Assert.AreEqual(1252, ActualCodepage, 'Codepage check failed');
+      Assert.AreEqual(1, Count, 'Line count check failed');
+      Expected := 'Test';
+      Assert.AreEqual(Expected, Actual, 'Simple text file read failed');
+
+      //[WHEN] Two-lined text file with encoding 1252 is created
+      CreateSampleStreamFromText('Test', 2, 1252);
+      ReadLineByLineInGivenCodepage(1252, Count, Actual, ActualCodepage);
+      //[THEN] Expected line count is 2 and concatenation of all lines should be 'TestTest'
+      Assert.AreEqual(2, Count, 'Line count check failed');
+      Expected := 'TestTest';
+      Assert.AreEqual(Expected, Actual, 'Simple text file read failed');
+    END;
+
+    [Test]
+    PROCEDURE TestReadingUsingReadToEnd@17024410();
+    VAR
+      Expected@17024403 : Text;
+      Actual@17024400 : Text;
+      CurrentLine@17024401 : Text;
+      Count@17024402 : Integer;
+    BEGIN
+      LibraryLowerPermissions.SetO365Basic;
+      //[WHEN] One-linen text file with encoding 1252 is created
+      CreateSampleStreamFromText('Test', 0, 1252);
+      Actual := ReadToEndInGivenCodepage(1252);
+      //[THEN] Expected line count is 1 and concatenation of all lines should be 'Test'
+      Expected := 'Test';
+      Assert.AreEqual(Expected, Actual, 'Simple text file read failed');
+    END;
+
+    [Test]
+    PROCEDURE TestReadingFromStreamsInBalticEncodings@17024406();
+    VAR
+      Expected@17024403 : Text;
+      Actual@17024400 : Text;
+      CurrentLine@17024401 : Text;
+      Count@17024402 : Integer;
+    BEGIN
+      LibraryLowerPermissions.SetO365Basic;
+
+      //[GIVEN] A sample text full of Baltic specific characters encoded using Utf8
+      CreateSampleStreamFromBase64('xIXEjcSZxJfEr8WhxbPFq8W+xITEjMSYxJbErsWgxbLFqsW9YWJjZA==');
+      Expected := ReadToEndInGivenCodepage(0);
+
+      //[WHEN] The same text is read from stream in Windows-1257 encoding:
+      CreateSampleStreamFromBase64('4Ojm6+Hw+Pv+wMjGy8HQ2NveYWJjZA==');
+      Actual := ReadToEndInGivenCodepage(1257);
+      //[THEN] Final string from Windows-1257 encoded stream should be the same to string from Utf-8 stream
+      Assert.AreEqual(Expected, Actual, 'Windows-1257 stream check failed');
+
+      //[WHEN] The same text is read from stream in OEM-775 encoding:
+      CreateSampleStreamFromBase64('0NHS09TV1tfYtba3uL2+xsfPYWJjZA==');
+      Actual := ReadToEndInGivenCodepage(775);
+      //[THEN] Final string from OEM-775 encoded stream should be the same to string from Utf-8 stream
+      Assert.AreEqual(Expected, Actual, 'OEM-775 stream check failed');
+
+      //[WHEN] The same text is read from stream in ISO-8859-4 (Windows-28594) encoding:
+      CreateSampleStreamFromBase64('sejq7Oe5+f6+ocjKzMep2d6uYWJjZA==');
+      Actual := ReadToEndInGivenCodepage(28594);
+      //[THEN] Final string from ISO-8859-4 encoded stream should be the same to string from Utf-8 stream
+      Assert.AreEqual(Expected, Actual, 'ISO-8859-4 stream check failed');
+
+      //[WHEN] The same text is read from stream in ISO-8859-13 (Windows-28603) encoding:
+      CreateSampleStreamFromBase64('4Ojm6+Hw+Pv+wMjGy8HQ2NveYWJjZA==');
+      Actual := ReadToEndInGivenCodepage(28603);
+      //[THEN] Final string from ISO-8859-13 encoded stream should be the same to string from Utf-8 stream
+      Assert.AreEqual(Expected, Actual, 'ISO-8859-13 stream check failed');
+    END;
+
+    PROCEDURE CreateSampleStreamFromText@17024402(SampleText@17024400 : Text;LineCount@17024403 : Integer;Codepage@17024401 : Integer);
+    VAR
+      OutputStream@17024402 : OutStream;
+      LineNo@17024404 : Integer;
+    BEGIN
+      CLEAR(TempBlob);
+      TempBlob.Blob.CREATEOUTSTREAM(OutputStream);
+      DotNet_Encoding.Encoding(Codepage);
+      DotNet_StreamWriter.StreamWriter(OutputStream, DotNet_Encoding);
+      FOR LineNo := 1 TO LineCount DO
+        DotNet_StreamWriter.WriteLine(SampleText);
+      IF LineCount = 0 THEN
+        DotNet_StreamWriter.Write(SampleText);
+
+      DotNet_StreamWriter.Close;
+      DotNet_StreamWriter.Dispose;
+    END;
+
+    PROCEDURE CreateSampleStreamFromBase64@17024403(Base64@17024400 : Text);
+    BEGIN
+      CLEAR(TempBlob);
+      TempBlob.FromBase64String(Base64);
+    END;
+
+    PROCEDURE ReadToEndInGivenCodepage@17024407(Codepage@17024400 : Integer) : Text;
+    VAR
+      InputStream@17024401 : InStream;
+      ResultText@17024402 : Text;
+    BEGIN
+      TempBlob.Blob.CREATEINSTREAM(InputStream);
+      IF Codepage > 0 THEN
+        DotNet_Encoding.Encoding(Codepage)
+      ELSE
+        DotNet_Encoding.UTF8;
+
+      DotNet_StreamReader.StreamReader(InputStream, DotNet_Encoding);
+      ResultText := DotNet_StreamReader.ReadToEnd;
+      DotNet_StreamReader.Close;
+      DotNet_StreamReader.Dispose;
+      EXIT(ResultText);
+    END;
+
+    PROCEDURE ReadLineByLineInGivenCodepage@17024405(Codepage@17024400 : Integer;VAR LineCount@17024403 : Integer;VAR ResultText@17024404 : Text;VAR StreamCodepage@17024405 : Integer);
+    VAR
+      InputStream@17024401 : InStream;
+      CurrentLine@17024402 : Text;
+    BEGIN
+      TempBlob.Blob.CREATEINSTREAM(InputStream);
+      IF Codepage > 0 THEN
+        DotNet_Encoding.Encoding(Codepage)
+      ELSE
+        DotNet_Encoding.UTF8;
+
+      DotNet_StreamReader.StreamReader(InputStream, DotNet_Encoding);
+      LineCount := 0;
+      ResultText := '';
+      REPEAT
+        CurrentLine := DotNet_StreamReader.ReadLine;
+        IF NOT DotNet_StreamReader.LastReadWasNull THEN
+          BEGIN
+            LineCount += 1;
+            ResultText += CurrentLine;
+          END;
+      UNTIL DotNet_StreamReader.LastReadWasNull;
+
+      DotNet_StreamReader.CurrentEncoding(DotNet_Encoding);
+      StreamCodepage := DotNet_Encoding.Codepage;
+      DotNet_StreamReader.Close;
+      DotNet_StreamReader.Dispose;
+    END;
+
+    BEGIN
+    END.
+  }
+}
+
