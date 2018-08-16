@@ -15,13 +15,13 @@ OBJECT Codeunit 50100 DotNet_StreamReader
   CODE
   {
     VAR
-      DotNetStreamReader@17024400 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.IO.StreamReader";
+      DotNetStreamReader@17024400 : DotNet "'mscorlib'.System.IO.StreamReader";
       LastReadWasNullFlag@17024402 : Boolean;
 
     [External]
     PROCEDURE StreamReader@1000000004(VAR InputStream@1000000000 : InStream;VAR DotNet_Encoding@1000000002 : Codeunit 3026);
     VAR
-      DotNetEncoding@1000000003 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.Encoding";
+      DotNetEncoding@1000000003 : DotNet "'mscorlib'.System.Text.Encoding";
     BEGIN
       DotNet_Encoding.GetEncoding(DotNetEncoding);
       DotNetStreamReader := DotNetStreamReader.StreamReader(InputStream, DotNetEncoding);
@@ -35,16 +35,12 @@ OBJECT Codeunit 50100 DotNet_StreamReader
 
     [External]
     PROCEDURE Close@1000000003();
-    VAR
-      cduPAObjectWrapper@17024400 : Codeunit 17024825;
     BEGIN
       DotNetStreamReader.Close;
     END;
 
     [External]
     PROCEDURE Dispose@17024401();
-    VAR
-      cduPAObjectWrapper@17024400 : Codeunit 17024825;
     BEGIN
       DotNetStreamReader.Dispose;
     END;

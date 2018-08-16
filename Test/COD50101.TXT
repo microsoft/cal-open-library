@@ -33,7 +33,7 @@ OBJECT Codeunit 50101 Test_DotNet_StreamReader
       ActualCodepage@17024404 : Integer;
     BEGIN
       LibraryLowerPermissions.SetO365Basic;
-      //[WHEN] One-linen text file with encoding 1252 is created
+      //[WHEN] One-lined text file with encoding 1252 is created as read line by line
       CreateSampleStreamFromText('Test', 1, 1252);
       ReadLineByLineInGivenCodepage(1252, Count, Actual, ActualCodepage);
       //[THEN] Expected line count is 1 and concatenation of all lines should be 'Test'
@@ -56,14 +56,12 @@ OBJECT Codeunit 50101 Test_DotNet_StreamReader
     VAR
       Expected@17024403 : Text;
       Actual@17024400 : Text;
-      CurrentLine@17024401 : Text;
-      Count@17024402 : Integer;
     BEGIN
       LibraryLowerPermissions.SetO365Basic;
-      //[WHEN] One-linen text file with encoding 1252 is created
+      //[WHEN] One-lined text file with encoding 1252 is created and whole content is read
       CreateSampleStreamFromText('Test', 0, 1252);
       Actual := ReadToEndInGivenCodepage(1252);
-      //[THEN] Expected line count is 1 and concatenation of all lines should be 'Test'
+      //[THEN] Actual content that was read should be 'Test'
       Expected := 'Test';
       Assert.AreEqual(Expected, Actual, 'Simple text file read failed');
     END;
@@ -73,8 +71,6 @@ OBJECT Codeunit 50101 Test_DotNet_StreamReader
     VAR
       Expected@17024403 : Text;
       Actual@17024400 : Text;
-      CurrentLine@17024401 : Text;
-      Count@17024402 : Integer;
     BEGIN
       LibraryLowerPermissions.SetO365Basic;
 

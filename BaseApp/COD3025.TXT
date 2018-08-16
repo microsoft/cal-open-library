@@ -32,7 +32,7 @@ OBJECT Codeunit 3025 DotNet_StreamWriter
     [External]
     PROCEDURE StreamWriter@1(VAR OutStream@1000 : OutStream;DotNet_Encoding@1001 : Codeunit 3026);
     VAR
-      DotNetEncoding@1002 : DotNet "'mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.Encoding";
+      DotNetEncoding@1002 : DotNet "'mscorlib'.System.Text.Encoding";
     BEGIN
       DotNet_Encoding.GetEncoding(DotNetEncoding);
       DotNetStreamWriter := DotNetStreamWriter.StreamWriter(OutStream,DotNetEncoding);
