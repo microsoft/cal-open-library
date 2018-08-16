@@ -1,10 +1,10 @@
-OBJECT Codeunit 146014 DotNet_StringBuilder Test
+OBJECT Codeunit 146014 Test_DotNet_StringBuilder
 {
   OBJECT-PROPERTIES
   {
     Date=;
     Time=;
-    Version List=;
+    Version List=Test,W1,All;
   }
   PROPERTIES
   {
@@ -21,54 +21,65 @@ OBJECT Codeunit 146014 DotNet_StringBuilder Test
     [Test]
     PROCEDURE TestAppendFormat@1();
     VAR
-      DotNet_StringBuilder@1000 : Codeunit 3014;
       WindowsString@1001 : Text;
       JsonString@1002 : Text;
     BEGIN
       // [GIVEN] A Windows string with Icelandic characters
       WindowsString := 'Fri�rik J�nsson ehf. - Reikningur 5527.PDF';
 
-      // [WHEN] Converted to Json using the StringBuilde Wrapper
+      // [WHEN] Converted to Json using the StringBuilder Wrapper
       JsonString := WindowsToJson(WindowsString);
 
       // [THEN] The result should be encoded string
-      Assert.AreEqual('Fri\u00f0rik J\u00f3nsson ehf. - Reikningur 5527.PDF',JsonString,'String convertion failed!');
+      Assert.AreEqual('Fri\u00f0rik J\u00f3nsson ehf. - Reikningur 5527.PDF',JsonString,'String conversion failed.');
     END;
 
-    LOCAL PROCEDURE WindowsToJson@11(InText@1100408000 : Text) : Text;
+    LOCAL PROCEDURE WindowsToJson@11(InText@1000 : Text) : Text;
     VAR
-      StringBuilder@1100408002 : Codeunit 3014;
-      Index@1100408001 : Integer;
-      Int@1100408003 : Integer;
+      DotNet_StringBuilder@1001 : Codeunit 3014;
+      Index@1002 : Integer;
+      Int@1003 : Integer;
     BEGIN
-      StringBuilder.InitStringBuilder('');
+      DotNet_StringBuilder.InitStringBuilder('');
 
-      IF STRLEN(InText) = 0 THEN EXIT('');
+      IF STRLEN(InText) = 0 THEN
+        EXIT('');
+
       FOR Index := 1 TO STRLEN(InText) DO
         IF NeedJsonEscape(InText[Index]) THEN
           CASE InText[Index] OF
-             8: StringBuilder.Append('\b');
-             9: StringBuilder.Append('\t');
-            10: StringBuilder.Append('\n');
-            12: StringBuilder.Append('\f');
-            13: StringBuilder.Append('\r');
-            34: StringBuilder.Append('\"');
-            92: StringBuilder.Append('\\');
+            8:
+              DotNet_StringBuilder.Append('\b');
+            9:
+              DotNet_StringBuilder.Append('\t');
+            10:
+              DotNet_StringBuilder.Append('\n');
+            12:
+              DotNet_StringBuilder.Append('\f');
+            13:
+              DotNet_StringBuilder.Append('\r');
+            34:
+              DotNet_StringBuilder.Append('\"');
+            92:
+              DotNet_StringBuilder.Append('\\');
             ELSE BEGIN
               Int := InText[Index];
-              StringBuilder.AppendFormat('\u{0:x4}',Int);
+              DotNet_StringBuilder.AppendFormat('\u{0:x4}',Int);
             END;
           END
         ELSE
-          StringBuilder.Append(COPYSTR(InText,Index,1));
-      EXIT(StringBuilder.ToString());
+          DotNet_StringBuilder.Append(COPYSTR(InText,Index,1));
+      EXIT(DotNet_StringBuilder.ToString);
     END;
 
-    LOCAL PROCEDURE NeedJsonEscape@12(InChar@1100408000 : Char) : Boolean;
+    LOCAL PROCEDURE NeedJsonEscape@12(InChar@1000 : Char) : Boolean;
     BEGIN
-      IF (InChar >= 0) AND (InChar <= 31) THEN EXIT(TRUE);
-      IF InChar IN [34,92] THEN EXIT(TRUE);
-      IF InChar >= 123 THEN EXIT(TRUE);
+      IF (InChar >= 0) AND (InChar <= 31) THEN
+        EXIT(TRUE);
+      IF InChar IN [34,92] THEN
+        EXIT(TRUE);
+      IF InChar >= 123 THEN
+        EXIT(TRUE);
     END;
 
     BEGIN
