@@ -18,7 +18,7 @@ OBJECT Codeunit 3025 DotNet_StreamWriter
       DotNetStreamWriter@1001 : DotNet "'mscorlib'.System.IO.StreamWriter";
 
     [External]
-    PROCEDURE Write@17024400(Text@1000 : Text);
+    PROCEDURE Write@6(Text@1000 : Text);
     BEGIN
       DotNetStreamWriter.Write(Text);
     END;
@@ -39,7 +39,7 @@ OBJECT Codeunit 3025 DotNet_StreamWriter
     END;
 
     [External]
-    PROCEDURE StreamWriterWithDefaultEncoding@17024401(VAR OutStream@1000 : OutStream);
+    PROCEDURE StreamWriterWithDefaultEncoding@7(VAR OutStream@1000 : OutStream);
     BEGIN
       DotNetStreamWriter := DotNetStreamWriter.StreamWriter(OutStream);
     END;
