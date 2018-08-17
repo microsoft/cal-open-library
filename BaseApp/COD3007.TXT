@@ -57,15 +57,15 @@ OBJECT Codeunit 3007 DotNet_String
     END;
 
     [External]
-    PROCEDURE ToText@17024400() : Text;
+    PROCEDURE ToText@9() : Text;
     BEGIN
-      IF IsEmpty THEN  //Handling NullReferenceException
+      IF IsEmpty THEN
         EXIT('');
       EXIT(DotNetString.ToString);
     END;
 
     [External]
-    PROCEDURE IsEmpty@17024401() : Boolean;
+    PROCEDURE IsEmpty@10() : Boolean;
     BEGIN
       EXIT(ISNULL(DotNetString));
     END;
