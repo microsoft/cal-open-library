@@ -1,0 +1,276 @@
+OBJECT Codeunit 50000 Report Helper
+{
+  OBJECT-PROPERTIES
+  {
+    Date=27.02.18;
+    Time=09:44:37;
+    Modified=Yes;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+
+    PROCEDURE GetReportRequestPageStructureAsXml@6002002(ReportID@6003000 : Integer;LanguageID@6003001 : Integer;VAR ReturnValue@6003002 : Text);
+    VAR
+      Field@6004000 : Record 2000000041;
+      AllObjWithCaption@1109100008 : Record 2000000058;
+      Caption@6004006 : Text;
+      DataType@6004005 : Text;
+      Id@1109100006 : Text;
+      Name@1109100005 : Text;
+      TableCap@6004007 : Text;
+      FieldNumber@6004003 : Integer;
+      I@6004001 : Integer;
+      TableNo@6004004 : Integer;
+      DataItemList@6004008 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlNodeList";
+      InputParam@6004009 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlElement";
+      InputParameters@6004010 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlNodeList";
+      ResultXmlDocument@1109100000 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlDocument";
+      XmlAttribute@1109100003 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlAttribute";
+      XmlDocument@6004011 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlDocument";
+      XmlElement@1109100001 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlElement";
+      XmlElement2@1109100007 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlElement";
+      XmlElement3@1109100002 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlElement";
+      XmlExpression@6004012 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlElement";
+      XmlNamespaceManager@6004013 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlNamespaceManager";
+      XmlNode@1109100004 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlNode";
+    BEGIN
+      GetObjectMetadata(ReportID,XmlDocument);
+
+      IF ISNULL(XmlNamespaceManager) THEN BEGIN
+        XmlNamespaceManager := XmlNamespaceManager.XmlNamespaceManager(XmlDocument.NameTable);
+        XmlNamespaceManager.AddNamespace('xsi', 'http://www.w3.org/2001/XMLSchema-instance');
+        XmlNamespaceManager.AddNamespace('xsd', 'http://www.w3.org/2001/XMLSchema');
+        XmlNamespaceManager.AddNamespace('ns1', 'urn:schemas-microsoft-com:dynamics:NAV:MetaObjects');
+      END;
+
+      XmlNode := XmlDocument.SelectSingleNode('/Report/ID');
+      Id := XmlNode.InnerText;
+
+      XmlNode := XmlDocument.SelectSingleNode('/Report/Name');
+      Name := XmlNode.InnerText;
+
+      ResultXmlDocument := ResultXmlDocument.XmlDocument;
+      XmlElement := ResultXmlDocument.CreateElement('ReportParameters');
+
+      XmlAttribute := ResultXmlDocument.CreateAttribute('name');
+      XmlAttribute.Value := Name;
+      XmlElement.Attributes.Append(XmlAttribute);
+
+      XmlAttribute := ResultXmlDocument.CreateAttribute('id');
+      XmlAttribute.Value := Id;
+      XmlElement.Attributes.Append(XmlAttribute);
+
+      ResultXmlDocument.AppendChild(XmlElement);
+
+      XmlElement2 := ResultXmlDocument.CreateElement('Options');
+      XmlElement.AppendChild(XmlElement2);
+
+      InputParameters := XmlDocument.SelectNodes('//ns1:Controls[@xsi:type=''ControlDefinition'']',XmlNamespaceManager);
+
+      IF InputParameters.Count <> 0 THEN
+        FOR I := 0 TO InputParameters.Count-1 DO BEGIN
+          InputParam := InputParameters.Item(I);
+          XmlElement3 := ResultXmlDocument.CreateElement('Field');
+          XmlElement2.AppendChild(XmlElement3);
+
+          XmlAttribute := ResultXmlDocument.CreateAttribute('name');
+          XmlExpression := XmlDocument.SelectSingleNode(STRSUBSTNO('//ns1:Expression[@Name=''%1'']',InputParam.GetAttribute('DataColumnName')),XmlNamespaceManager);
+          XmlAttribute.Value := XmlExpression.GetAttribute('SourceExpression');
+
+          XmlElement3.Attributes.Append(XmlAttribute);
+
+          XmlAttribute := ResultXmlDocument.CreateAttribute('datatype');
+
+          DataType := XmlExpression.GetAttribute('Datatype');
+          IF DataType = '' THEN BEGIN
+            EVALUATE(TableNo,XmlExpression.GetAttribute('TableNo'));
+            EVALUATE(FieldNumber,XmlExpression.GetAttribute('FieldNo'));
+            IF Field.GET(TableNo,FieldNumber) THEN
+              DataType := FORMAT(Field.Type);
+          END;
+
+          XmlAttribute.Value := DataType;
+          XmlElement3.Attributes.Append(XmlAttribute);
+
+          XmlAttribute := ResultXmlDocument.CreateAttribute('caption');
+          XmlAttribute.Value := GetTextFromTextML(InputParam.GetAttribute('CaptionML'),LanguageID);
+          XmlElement3.Attributes.Append(XmlAttribute);
+
+          IF XmlExpression.GetAttribute('OptionString') <> '' THEN BEGIN
+            XmlAttribute := ResultXmlDocument.CreateAttribute('optionstring');
+            XmlAttribute.Value := XmlExpression.GetAttribute('OptionString');
+            XmlElement3.Attributes.Append(XmlAttribute);
+
+            XmlAttribute := ResultXmlDocument.CreateAttribute('optioncaption');
+            XmlAttribute.Value := GetTextFromTextML(InputParam.GetAttribute('OptionCaptionML'),LanguageID);
+            XmlElement3.Attributes.Append(XmlAttribute);
+          END;
+        END;
+
+      XmlElement2 := ResultXmlDocument.CreateElement('DataItems');
+      XmlElement.AppendChild(XmlElement2);
+
+      DataItemList := XmlDocument.SelectNodes('//DataItem/DataItemVarName');
+      InputParameters := XmlDocument.SelectNodes('//ns1:Controls[@xsi:type=''FilterControlDefinition'']',XmlNamespaceManager);
+
+      IF InputParameters.Count <> 0 THEN BEGIN
+        FOR I := 0 TO InputParameters.Count-1 DO BEGIN
+          InputParam := InputParameters.Item(I);
+          XmlElement3 := ResultXmlDocument.CreateElement('DataItem');
+          XmlElement2.AppendChild(XmlElement3);
+
+          XmlAttribute := ResultXmlDocument.CreateAttribute('name');
+          XmlAttribute.Value := DataItemList.Item(I).InnerText;
+          XmlElement3.Attributes.Append(XmlAttribute);
+
+          XmlAttribute := ResultXmlDocument.CreateAttribute('table');
+          XmlAttribute.Value := InputParam.GetAttribute('FilterTableID');
+          XmlElement3.Attributes.Append(XmlAttribute);
+
+          EVALUATE(TableNo,XmlAttribute.Value);
+
+          IF AllObjWithCaption.GET(AllObjWithCaption."Object Type"::Table,TableNo) THEN
+            TableCap := AllObjWithCaption."Object Caption"
+          ELSE
+            TableCap := '';
+
+          XmlAttribute := ResultXmlDocument.CreateAttribute('caption');
+          XmlExpression := InputParam.SelectSingleNode('..');
+          Caption := GetTextFromTextML(XmlExpression.GetAttribute('CaptionML'),LanguageID);
+          IF Caption = '' THEN
+            Caption := TableCap;
+          XmlAttribute.Value := Caption;
+          XmlElement3.Attributes.Append(XmlAttribute);
+
+          XmlAttribute := ResultXmlDocument.CreateAttribute('visible');
+          XmlExpression := InputParam.SelectSingleNode('./ns1:DataItemTableView/ns1:Sorting',XmlNamespaceManager);
+          XmlAttribute.Value := FORMAT(ISNULL(XmlExpression),0,9);
+          XmlElement3.Attributes.Append(XmlAttribute);
+
+          XmlAttribute := ResultXmlDocument.CreateAttribute('requestfilterfields');
+          XmlAttribute.Value :=  FillRequestFieldData(InputParam);
+          XmlElement3.Attributes.Append(XmlAttribute);
+        END;
+      END;
+
+      ReturnValue := ResultXmlDocument.OuterXml;
+    END;
+
+    LOCAL PROCEDURE GetObjectMetadata@6002008(ReportID@6003000 : Integer;VAR XmlDocument@6003001 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlDocument");
+    VAR
+      ObjectMetadata@6004000 : Record 2000000071;
+      NAVAppObjectMetadata@1109100000 : Record 2000000150;
+      NAVInstream@6004001 : InStream;
+      ReportDoesNotExistErr@1109100001 : TextConst 'DEU=Der angegebene Bericht mit der Nummer %1 existiert nicht!;ENU=The specified report with the number %1 does not exist!';
+      MemoryStream@6004002 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.IO.MemoryStream";
+    BEGIN
+      IF ObjectMetadata.GET(ObjectMetadata."Object Type"::Report,ReportID) THEN BEGIN
+        ObjectMetadata.CALCFIELDS(Metadata);
+
+        MemoryStream := MemoryStream.MemoryStream;
+        ObjectMetadata.Metadata.CREATEINSTREAM(NAVInstream);
+        COPYSTREAM(MemoryStream,NAVInstream);
+        MemoryStream.Position := 0;
+      END ELSE BEGIN
+        NAVAppObjectMetadata.RESET;
+        NAVAppObjectMetadata.SETRANGE("Metadata Format",NAVAppObjectMetadata."Metadata Format"::Full);
+        NAVAppObjectMetadata.SETRANGE("Object Type",NAVAppObjectMetadata."Object Type"::Report);
+        NAVAppObjectMetadata.SETRANGE("Object ID",ReportID);
+        IF NOT NAVAppObjectMetadata.FINDFIRST THEN
+          ERROR(ReportDoesNotExistErr,ReportID);
+
+        MemoryStream := MemoryStream.MemoryStream;
+        NAVAppObjectMetadata.Metadata.CREATEINSTREAM(NAVInstream);
+        COPYSTREAM(MemoryStream,NAVInstream);
+        MemoryStream.Position := 0;
+      END;
+
+      XmlDocument := XmlDocument.XmlDocument;
+      XmlDocument.Load(MemoryStream);
+    END;
+
+    LOCAL PROCEDURE FillRequestFieldData@6002014(VAR InputParam@6003001 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlElement") ResultText : Text;
+    VAR
+      ReqFilterFields@6004000 : Text;
+      FieldID@6004002 : Integer;
+      I@6004001 : Integer;
+      RegEx@6004003 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.RegularExpressions.Regex";
+      RegExMatch@6004005 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.RegularExpressions.Match";
+      RegExMatchCollection@6004004 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.RegularExpressions.MatchCollection";
+    BEGIN
+      ReqFilterFields := InputParam.GetAttribute('ReqFilterFields');
+      RegExMatchCollection := RegEx.Matches(ReqFilterFields,'Field(?<FieldNo>[0-9]*)');
+      IF RegExMatchCollection.Count = 0 THEN
+        EXIT('');
+
+      FOR I := 0 TO RegExMatchCollection.Count - 1
+      DO BEGIN
+        IF I <> 0 THEN
+          ResultText += ',';
+
+        RegExMatch := RegExMatchCollection.Item(I);
+        EVALUATE(FieldID,RegExMatch.Groups.Item('FieldNo').Value);
+        ResultText += FORMAT(FieldID,0,9);
+      END;
+    END;
+
+    LOCAL PROCEDURE GetTextFromTextML@6002018(TextML@6003000 : Text;LanguageID@1109100000 : Integer) : Text;
+    VAR
+      WindowsLang@6004001 : Record 2000000045;
+      WindowsLang2@1109100002 : Record 2000000045;
+      RetValue@1109100003 : Text;
+      I@6004007 : Integer;
+      RegEx@6004002 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.RegularExpressions.Regex";
+      RegExGroup@6004005 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.RegularExpressions.Group";
+      RegExGroup2@1109100001 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.RegularExpressions.Group";
+      RegExGroup3@1109100004 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.RegularExpressions.Group";
+      RegExMatch@6004004 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.RegularExpressions.Match";
+      RegExMatchCollection@6004003 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.RegularExpressions.MatchCollection";
+      ReturnValue@6004006 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.String";
+    BEGIN
+      WindowsLang.GET(LanguageID);
+      WindowsLang2.GET(1033);
+
+      RegExMatchCollection := RegEx.Matches(TextML,'(?<Language>[A-Z]*)\=(?<Text>([^\;]*|\"(\"\"|[^\"])*\"))');
+
+      FOR I := 0 TO RegExMatchCollection.Count - 1
+      DO BEGIN
+        RegExMatch := RegExMatchCollection.Item(I);
+        RegExGroup := RegExMatch.Groups.Item('Language');
+        IF RegExGroup.Value = WindowsLang."Abbreviated Name" THEN
+          RegExGroup2 := RegExMatch.Groups.Item('Text');
+        IF RegExGroup.Value = WindowsLang2."Abbreviated Name" THEN
+          RegExGroup3 := RegExMatch.Groups.Item('Text');
+      END;
+
+      IF ISNULL(RegExGroup2) THEN BEGIN
+        IF NOT ISNULL(RegExGroup3) THEN
+          ReturnValue := RegExGroup3.Value;
+      END ELSE
+        ReturnValue := RegExGroup2.Value;
+
+      IF NOT ISNULL(ReturnValue) THEN BEGIN
+        IF ReturnValue.StartsWith('"') THEN BEGIN
+          ReturnValue := ReturnValue.Replace('""','"');
+          ReturnValue := ReturnValue.Substring(1,ReturnValue.Length - 2);
+        END;
+
+        RetValue := ReturnValue;
+        EXIT(RetValue);
+      END;
+
+      EXIT('');
+    END;
+
+    BEGIN
+    END.
+  }
+}
+

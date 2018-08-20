@@ -1,0 +1,145 @@
+OBJECT Codeunit 50001 Report Helper Tests
+{
+  OBJECT-PROPERTIES
+  {
+    Date=27.02.18;
+    Time=09:44:37;
+    Modified=Yes;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    Subtype=Test;
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+
+    [Test]
+    PROCEDURE TestRequestPageHelperReport205@1109100000();
+    VAR
+      ReportHelper@1109100000 : Codeunit 50000;
+      ResultXmlDocument@1109100001 : Text;
+      DataItemNotFoundErr@1109100007 : TextConst 'DEU=Das DataItem %1 kann nicht gefunden werden, obwohl es existiert!;ENU=DataItem %1 cannot be found although it exists!';
+      DataTypeNotExpErr@1109100008 : TextConst 'DEU=Der Datentyp %1 wurde erwartet.;ENU=The data type %1 was expected.';
+      NodeNotFoundErr@1109100005 : TextConst 'DEU=Der angegebene Knoten %1 kann nicht gefunden werden.;ENU=The specified node %1 cannot be found.';
+      ParamFoundErr@1109100006 : TextConst 'DEU=Der Knoten %1 wird gefunden, obowhl dieser nicht exisitert!;ENU=The node %1 is found, whether it does not exist!';
+      XmlDocument@1109100004 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlDocument";
+      XmlNode@1109100002 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlElement";
+    BEGIN
+      ReportHelper.GetReportRequestPageStructureAsXml(REPORT::"Order Confirmation",GLOBALLANGUAGE,ResultXmlDocument);
+      XmlDocument := XmlDocument.XmlDocument;
+      XmlDocument.LoadXml(ResultXmlDocument);
+
+      XmlNode := XmlDocument.SelectSingleNode('/ReportParameters/Options/Field[@name=''NoOfCopies'']');
+      IF ISNULL(XmlNode) THEN
+        ERROR(NodeNotFoundErr,'NoOfCopies');
+
+      IF XmlNode.GetAttribute('datatype') <> 'Integer' THEN
+        ERROR(DataTypeNotExpErr,'Integer');
+
+      XmlNode := XmlDocument.SelectSingleNode('/ReportParameters/Options/Field[@name=''ArchiveDocument'']');
+      IF ISNULL(XmlNode) THEN
+        ERROR(NodeNotFoundErr,'ArchiveDocument');
+
+      XmlNode := XmlDocument.SelectSingleNode('/ReportParameters/Options/Field[@name=''Test'']');
+      IF NOT ISNULL(XmlNode) THEN
+        ERROR(ParamFoundErr,'Test');
+
+      XmlNode := XmlDocument.SelectSingleNode('/ReportParameters/DataItems/DataItem[@name=''VATCounterLCY'']');
+      IF ISNULL(XmlNode) THEN
+        ERROR(DataItemNotFoundErr,'VATCounterLCY');
+    END;
+
+    [Test]
+    PROCEDURE TestRequestPageHelperReport111@1109100001();
+    VAR
+      ReportHelper@1109100000 : Codeunit 50000;
+      ResultXmlDocument@1109100001 : Text;
+      DataItemNotFoundErr@1109100007 : TextConst 'DEU=Das DataItem %1 kann nicht gefunden werden, obwohl es existiert!;ENU=DataItem %1 cannot be found although it exists!';
+      NodeNotFoundErr@1109100005 : TextConst 'DEU=Der angegebene Knoten %1 kann nicht gefunden werden.;ENU=The specified node %1 cannot be found.';
+      OptionStringErr@1109100008 : TextConst 'DEU=Es wurde ein OptionString erwartet, zurÅckgegeben wurde jedoch ein leeres Ergebnis!;ENU=An OptionString was expected, but returned an empty result!';
+      ParamFoundErr@1109100006 : TextConst 'DEU=Der Knoten %1 wird gefunden, obowhl dieser nicht exisitert!;ENU=The node %1 is found, whether it does not exist!';
+      XmlDocument@1109100004 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlDocument";
+      XmlNode@1109100002 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlElement";
+    BEGIN
+      ReportHelper.GetReportRequestPageStructureAsXml(REPORT::"Customer - Top 10 List",GLOBALLANGUAGE,ResultXmlDocument);
+      XmlDocument := XmlDocument.XmlDocument;
+      XmlDocument.LoadXml(ResultXmlDocument);
+      XmlNode := XmlDocument.SelectSingleNode('/ReportParameters/Options/Field[@name=''ShowType'']');
+      IF ISNULL(XmlNode) THEN
+        ERROR(NodeNotFoundErr,'ShowType');
+
+      IF XmlNode.GetAttribute('optionstring') = '' THEN
+        ERROR(OptionStringErr);
+
+      XmlNode := XmlDocument.SelectSingleNode('/ReportParameters/Options/Field[@name=''NoOfRecordsToPrint'']');
+      IF ISNULL(XmlNode) THEN
+        ERROR(NodeNotFoundErr,'NoOfRecordsToPrint');
+
+      XmlNode := XmlDocument.SelectSingleNode('/ReportParameters/Options/Field[@name=''Test'']');
+      IF NOT ISNULL(XmlNode) THEN
+        ERROR(ParamFoundErr,'Test');
+
+      XmlNode := XmlDocument.SelectSingleNode('/ReportParameters/DataItems/DataItem[@name=''Customer'']');
+      IF ISNULL(XmlNode) THEN
+        ERROR(DataItemNotFoundErr,'Customer');
+    END;
+
+    [Test]
+    PROCEDURE TestRequestPageHelperReport1@1109100006();
+    VAR
+      ReportHelper@1109100000 : Codeunit 50000;
+      ResultXmlDocument@1109100001 : Text;
+      DataItemNotFoundErr@1109100007 : TextConst 'DEU=Das DataItem %1 kann nicht gefunden werden, obwohl es existiert!;ENU=DataItem %1 cannot be found although it exists!';
+      ParamFoundErr@1109100006 : TextConst 'DEU=Der Knoten %1 wird gefunden, obowhl dieser nicht exisitert!;ENU=The node %1 is found, whether it does not exist!';
+      RequestFieldsErr@1109100009 : TextConst 'DEU=Es wurden RequestFilterFields erwartet!;ENU=RequestFilterFields were expected!';
+      XmlDocument@1109100004 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlDocument";
+      XmlNode@1109100002 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlElement";
+    BEGIN
+      ReportHelper.GetReportRequestPageStructureAsXml(REPORT::"Chart of Accounts",GLOBALLANGUAGE,ResultXmlDocument);
+      XmlDocument := XmlDocument.XmlDocument;
+      XmlDocument.LoadXml(ResultXmlDocument);
+
+      XmlNode := XmlDocument.SelectSingleNode('/ReportParameters/Options/Field[@name=''Test'']');
+      IF NOT ISNULL(XmlNode) THEN
+        ERROR(ParamFoundErr,'Test');
+
+      XmlNode := XmlDocument.SelectSingleNode('/ReportParameters/DataItems/DataItem[@name=''G/L Account'']');
+      IF ISNULL(XmlNode) THEN
+        ERROR(DataItemNotFoundErr,'G/L Account');
+
+      IF XmlNode.GetAttribute('requestfilterfields') = '' THEN
+        ERROR(RequestFieldsErr);
+    END;
+
+    [Test]
+    PROCEDURE TestRequestPageHelperReport34@1109100010();
+    VAR
+      ReportHelper@1109100000 : Codeunit 50000;
+      ResultXmlDocument@1109100001 : Text;
+      NoDataItemFoundErr@1109100010 : TextConst 'DEU=Es wurden keine DataItems erwartet.;ENU=No data items were expected.';
+      ParamFoundErr@1109100006 : TextConst 'DEU=Der Knoten %1 wird gefunden, obowhl dieser nicht exisitert!;ENU=The node %1 is found, whether it does not exist!';
+      XmlDocument@1109100004 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlDocument";
+      XmlNode@1109100002 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlElement";
+    BEGIN
+      ReportHelper.GetReportRequestPageStructureAsXml(REPORT::"Change Payment Tolerance",GLOBALLANGUAGE,ResultXmlDocument);
+      XmlDocument := XmlDocument.XmlDocument;
+      XmlDocument.LoadXml(ResultXmlDocument);
+
+      XmlNode := XmlDocument.SelectSingleNode('/ReportParameters/Options/Field[@name=''Test'']');
+      IF NOT ISNULL(XmlNode) THEN
+        ERROR(ParamFoundErr,'Test');
+
+      XmlNode := XmlDocument.SelectSingleNode('/ReportParameters/DataItems/DataItem');
+      IF NOT ISNULL(XmlNode) THEN
+        ERROR(NoDataItemFoundErr);
+    END;
+
+    BEGIN
+    END.
+  }
+}
+
