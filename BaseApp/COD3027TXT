@@ -4,7 +4,6 @@ OBJECT Codeunit 3027 DotNet_StreamReader
   {
     Date=;
     Time=;
-    Modified=Yes;
     Version List=;
   }
   PROPERTIES
@@ -17,10 +16,9 @@ OBJECT Codeunit 3027 DotNet_StreamReader
   {
     VAR
       DotNetStreamReader@1000 : DotNet "'mscorlib'.System.IO.StreamReader";
-      LastReadWasNullFlag@1001 : Boolean;
 
     [External]
-    PROCEDURE StreamReader@1(VAR InputStream@1000 : InStream;VAR DotNet_Encoding@1001 : Codeunit 3026);
+    PROCEDURE StreamReader@1(VAR InputStream@1000 : InStream;DotNet_Encoding@1001 : Codeunit 3026);
     VAR
       DotNetEncoding@1002 : DotNet "'mscorlib'.System.Text.Encoding";
     BEGIN
@@ -47,12 +45,6 @@ OBJECT Codeunit 3027 DotNet_StreamReader
     END;
 
     [External]
-    PROCEDURE LastReadWasNull@5() : Boolean;
-    BEGIN
-      EXIT(LastReadWasNullFlag); // We need this to be able to check if last read was null
-    END;
-
-    [External]
     PROCEDURE EndOfStream@6() : Boolean;
     BEGIN
       EXIT(DotNetStreamReader.EndOfStream);
@@ -66,22 +58,14 @@ OBJECT Codeunit 3027 DotNet_StreamReader
 
     [External]
     PROCEDURE ReadLine@8() : Text;
-    VAR
-      DotNet_String@1000 : Codeunit 3007;
     BEGIN
-      DotNet_String.SetString(DotNetStreamReader.ReadLine);
-      LastReadWasNullFlag := DotNet_String.IsEmpty; // We need this to be able to check if last read was null
-      EXIT(DotNet_String.ToText);
+      EXIT(DotNetStreamReader.ReadLine);
     END;
 
     [External]
     PROCEDURE ReadToEnd@9() : Text;
-    VAR
-      DotNet_String@1000 : Codeunit 3007;
     BEGIN
-      DotNet_String.SetString(DotNetStreamReader.ReadToEnd);
-      LastReadWasNullFlag := DotNet_String.IsEmpty; // We need this to be able to check if last read was null
-      EXIT(DotNet_String.ToText);
+      EXIT(DotNetStreamReader.ReadToEnd);
     END;
 
     BEGIN
