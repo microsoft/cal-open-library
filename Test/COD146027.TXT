@@ -150,6 +150,7 @@ OBJECT Codeunit 146027 Test_DotNet_StreamReader
     VAR
       InputStream@1001 : InStream;
       CurrentLine@1002 : Text;
+      IsEmpty@1006 : Boolean;
     BEGIN
       TempBlob.Blob.CREATEINSTREAM(InputStream);
       IF Codepage > 0 THEN
@@ -162,11 +163,12 @@ OBJECT Codeunit 146027 Test_DotNet_StreamReader
       ResultText := '';
       REPEAT
         CurrentLine := DotNet_StreamReader.ReadLine;
-        IF NOT DotNet_StreamReader.LastReadWasNull THEN BEGIN
+        IsEmpty := (CurrentLine = '') AND DotNet_StreamReader.EndOfStream;
+        IF NOT IsEmpty THEN BEGIN
           LineCount += 1;
           ResultText += CurrentLine;
         END;
-      UNTIL DotNet_StreamReader.LastReadWasNull;
+      UNTIL IsEmpty;
 
       DotNet_StreamReader.CurrentEncoding(DotNet_Encoding);
       StreamCodepage := DotNet_Encoding.Codepage;
