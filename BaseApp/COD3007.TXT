@@ -56,6 +56,18 @@ OBJECT Codeunit 3007 DotNet_String
       EXIT(DotNetString.EndsWith(Value))
     END;
 
+    [External]
+    PROCEDURE ToString@9() : Text;
+    BEGIN
+      EXIT(DotNetString.ToString);
+    END;
+
+    [External]
+    PROCEDURE IsDotNetNull@10() : Boolean;
+    BEGIN
+      EXIT(ISNULL(DotNetString));
+    END;
+
     PROCEDURE GetString@3(VAR DotNetString2@1000 : DotNet "'mscorlib'.System.String");
     BEGIN
       DotNetString2 := DotNetString
