@@ -56,6 +56,18 @@ OBJECT Codeunit 3009 DotNet_MemoryStream
       COPYSTREAM(DotNetMemoryStream,InStream)
     END;
 
+    [External]
+    PROCEDURE CastToStream@10(VAR DotNet_Stream@17024400 : Codeunit 50122);
+    BEGIN
+      DotNet_Stream.SetStream(DotNetMemoryStream);
+    END;
+
+    [External]
+    PROCEDURE SetPosition@11(NewPosition@17024400 : Integer);
+    BEGIN
+      DotNetMemoryStream.Position := NewPosition;
+    END;
+
     PROCEDURE GetMemoryStream@4(VAR DotNetMemoryStream2@1000 : DotNet "'mscorlib'.System.IO.MemoryStream");
     BEGIN
       DotNetMemoryStream2 := DotNetMemoryStream
