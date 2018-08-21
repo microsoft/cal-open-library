@@ -1,0 +1,153 @@
+OBJECT Codeunit 50300 Test_DotNet_Encoding
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    Subtype=Test;
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      Assert@1000 : Codeunit 130000;
+      LibraryLowerPermissions@1001 : Codeunit 132217;
+      DotNet_Encoding@1002 : Codeunit 3026;
+      DotNet_String@1003 : Codeunit 3007;
+      DotNet_ByteArray@1004 : Codeunit 3000;
+      DotNet_CharArray@1005 : Codeunit 3000;
+
+    [Test]
+    PROCEDURE TestEncodingGetCharsMethod@1();
+    VAR
+      ExpectedChar@1000 : Char;
+    BEGIN
+      LibraryLowerPermissions.SetO365Basic;
+      // [Given] A byte array of raw utf-8 encoded data
+      DotNet_ByteArray.ByteArray(5);
+      DotNet_ByteArray.SetByteValue(0, 196);
+      DotNet_ByteArray.SetByteValue(1, 133);
+      DotNet_ByteArray.SetByteValue(2, 196);
+      DotNet_ByteArray.SetByteValue(3, 141);
+      DotNet_ByteArray.SetByteValue(4, 100);
+      // [WHEN] byte array is converted to char array using UTF-8 encoding
+      DotNet_Encoding.UTF8;
+      DotNet_Encoding.GetChars(DotNet_ByteArray, 0, DotNet_ByteArray.Length, DotNet_CharArray);
+      // [THEN] Byte array must not be null
+      Assert.AreEqual(FALSE, DotNet_ByteArray.IsDotNetNull, 'Byte array check not null failed');
+      // [THEN] Byte array length must be 5
+      Assert.AreEqual(5, DotNet_ByteArray.Length, 'Byte array length check failed');
+      // [THEN] First element of byte array must be 196
+      Assert.AreEqual(196, DotNet_ByteArray.GetValueAsInteger(0), 'Byte array first element check failed');
+      // [THEN] Char array must not be null
+      Assert.AreEqual(FALSE, DotNet_CharArray.IsDotNetNull, 'Char array check not null failed');
+      // [THEN] Char array length must be 3
+      Assert.AreEqual(3, DotNet_CharArray.Length, 'Char array length check failed');
+      // [THEN] First element of char array must be character with code 261
+      ExpectedChar := 261;
+      Assert.AreEqual(ExpectedChar, DotNet_CharArray.GetValueAsChar(0), 'Char array first element check failed');
+      // [WHEN] char array is converted to string
+      DotNet_String.FromCharArray(DotNet_CharArray);
+      // [THEN] string must be not null
+      Assert.AreEqual(FALSE, DotNet_String.IsDotNetNull, 'String check not null failed');
+      // [THEN] string length must be 3
+      Assert.AreEqual(3, DotNet_String.Length, 'String length check failed');
+    END;
+
+    [Test]
+    PROCEDURE TestEncodingGetBytesMethod@2();
+    VAR
+      ExpectedChar@1000 : Char;
+    BEGIN
+      LibraryLowerPermissions.SetO365Basic;
+      // [Given] A char array with non-ansi characters
+      DotNet_CharArray.CharArray(2);
+      DotNet_CharArray.SetCharValue(0, 261);
+      DotNet_CharArray.SetCharValue(1, 100);
+      // [WHEN] char array is converted to byte array using UTF-8 encoding
+      DotNet_Encoding.UTF8;
+      DotNet_Encoding.GetBytes(DotNet_CharArray, 0, DotNet_CharArray.Length, DotNet_ByteArray);
+      // [THEN] Char array must not be null
+      Assert.AreEqual(FALSE, DotNet_CharArray.IsDotNetNull, 'Char array check not null failed');
+      // [THEN] Char array length must be 2
+      Assert.AreEqual(2, DotNet_CharArray.Length, 'Char array length check failed');
+      // [THEN] First element of char array must be character of code 261
+      ExpectedChar := 261;
+      Assert.AreEqual(ExpectedChar, DotNet_CharArray.GetValueAsChar(0), 'Char array first element check failed');
+      // [THEN] Byte array must not be null
+      Assert.AreEqual(FALSE, DotNet_ByteArray.IsDotNetNull, 'Byte array check not null failed');
+      // [THEN] Byte array length must be 3
+      Assert.AreEqual(3, DotNet_ByteArray.Length, 'Byte array length check failed');
+      // [THEN] First element of byte array must be 196
+      Assert.AreEqual(196, DotNet_ByteArray.GetValueAsInteger(0), 'Byte array first element check failed');
+    END;
+
+    [Test]
+    PROCEDURE TestEncodingGetBytesWithOffsetMethod@3();
+    VAR
+      ExpectedChar@1000 : Char;
+    BEGIN
+      LibraryLowerPermissions.SetO365Basic;
+      // [Given] A char array with non-ansi characters
+      DotNet_CharArray.CharArray(2);
+      DotNet_CharArray.SetCharValue(0, 261);
+      DotNet_CharArray.SetCharValue(1, 100);
+      // [Given] And a byte array of 5 elements filled with value 1
+      DotNet_ByteArray.ByteArray(5);
+      DotNet_ByteArray.SetByteValue(0, 1);
+      DotNet_ByteArray.SetByteValue(1, 1);
+      DotNet_ByteArray.SetByteValue(2, 1);
+      DotNet_ByteArray.SetByteValue(3, 1);
+      DotNet_ByteArray.SetByteValue(4, 1);
+      // [WHEN] char array is converted to byte array using UTF-8 encoding
+      DotNet_Encoding.UTF8;
+      DotNet_Encoding.GetBytesWithOffset(DotNet_CharArray, 0, DotNet_CharArray.Length, DotNet_ByteArray, 2);
+      // [THEN] Char array must not be null
+      Assert.AreEqual(FALSE, DotNet_CharArray.IsDotNetNull, 'Char array check not null failed');
+      // [THEN] Char array length must be 2
+      Assert.AreEqual(2, DotNet_CharArray.Length, 'Char array length check failed');
+      // [THEN] First element of char array must be character of code 261
+      ExpectedChar := 261;
+      Assert.AreEqual(ExpectedChar, DotNet_CharArray.GetValueAsChar(0), 'Char array first element check failed');
+      // [THEN] Byte array must not be null
+      Assert.AreEqual(FALSE, DotNet_ByteArray.IsDotNetNull, 'Byte array check not null failed');
+      // [THEN] Byte array length must be 3
+      Assert.AreEqual(5, DotNet_ByteArray.Length, 'Byte array length check failed');
+      // [THEN] First element must be unchanged and third element of byte array must be 196
+      Assert.AreEqual(1, DotNet_ByteArray.GetValueAsInteger(0), 'Byte array first element check failed');
+      Assert.AreEqual(196, DotNet_ByteArray.GetValueAsInteger(2), 'Byte array third element check failed');
+    END;
+
+    [Test]
+    PROCEDURE TestEncodingGetStringMethod@4();
+    VAR
+      ExpectedChar@1000 : Char;
+    BEGIN
+      LibraryLowerPermissions.SetO365Basic;
+      // [Given] A byte array of raw utf-8 encoded data
+      DotNet_ByteArray.ByteArray(5);
+      DotNet_ByteArray.SetByteValue(0, 196);
+      DotNet_ByteArray.SetByteValue(1, 133);
+      DotNet_ByteArray.SetByteValue(2, 196);
+      DotNet_ByteArray.SetByteValue(3, 141);
+      DotNet_ByteArray.SetByteValue(4, 100);
+      // [WHEN] byte array is converted to string using UTF-8 encoding
+      DotNet_Encoding.UTF8;
+      DotNet_Encoding.GetString(DotNet_ByteArray, 0, DotNet_ByteArray.Length);
+      // [THEN] string must be not null
+      Assert.AreEqual(FALSE, DotNet_String.IsDotNetNull, 'String check not null failed');
+      // [THEN] string length must be 3
+      Assert.AreEqual(3, DotNet_String.Length, 'String length check failed');
+    END;
+
+    BEGIN
+    END.
+  }
+}
+
