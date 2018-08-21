@@ -16,30 +16,35 @@ OBJECT Codeunit 50016 XslTransform Helpers
   {
 
     [External]
-    PROCEDURE CreateXslTransformFromBlob@17024400(VAR TempBlob@17024400 : Record 99008535;VAR XslTransform@17024402 : Codeunit 50003);
+    PROCEDURE CreateXslTransformFromBlob@1(VAR TempBlob@1000 : Record 99008535;VAR XslCompiledTransform@1001 : Codeunit 50003);
     VAR
-      TransformStream@17024401 : InStream;
+      TransformStream@1002 : InStream;
+      XmlDocument@1003 : Codeunit 3013;
     BEGIN
       TempBlob.Blob.CREATEINSTREAM(TransformStream);
-      XslTransform.Create(TransformStream);
+      XslCompiledTransform.XslCompiledTransform;
+      XmlDocument.InitXmlDocument;
+      XmlDocument.Load(TransformStream);
+      XslCompiledTransform.Load(XmlDocument);
     END;
 
     [External]
-    PROCEDURE TransformBlob@17024408(VAR XslTransform@17024401 : Codeunit 50003;VAR TempBlob@17024405 : Record 99008535;VAR DestinationStream@17024404 : OutStream);
+    PROCEDURE TransformBlob@2(VAR XslCompiledTransform@1000 : Codeunit 50003;VAR TempBlob@1001 : Record 99008535;VAR DestinationStream@1002 : OutStream);
     VAR
-      SourceStream@17024400 : InStream;
+      SourceStream@1003 : InStream;
     BEGIN
       TempBlob.Blob.CREATEINSTREAM(SourceStream);
-      TransformStream(XslTransform, SourceStream, DestinationStream);
+      TransformStream(XslCompiledTransform, SourceStream, DestinationStream);
     END;
 
     [External]
-    PROCEDURE TransformStream@17024428(VAR XslTransform@17024400 : Codeunit 50003;VAR SourceXmlStream@17024405 : InStream;VAR DestinationStream@17024404 : OutStream);
+    PROCEDURE TransformStream@3(VAR XslCompiledTransform@1000 : Codeunit 50003;VAR SourceXmlStream@1001 : InStream;VAR DestinationStream@1002 : OutStream);
     VAR
-      XmlDocument@17024406 : Codeunit 3013;
+      XmlDocument@1003 : Codeunit 3013;
     BEGIN
+      XmlDocument.InitXmlDocument;
       XmlDocument.Load(SourceXmlStream);
-      XslTransform.Transform(XmlDocument, DestinationStream);
+      XslCompiledTransform.Transform(XmlDocument, DestinationStream);
     END;
 
     BEGIN

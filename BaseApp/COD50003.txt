@@ -1,4 +1,4 @@
-OBJECT Codeunit 50003 DotNet_XslTransform
+OBJECT Codeunit 50003 DotNet_XslCompiledTransform
 {
   OBJECT-PROPERTIES
   {
@@ -15,36 +15,41 @@ OBJECT Codeunit 50003 DotNet_XslTransform
   CODE
   {
     VAR
-      DotNetXslTransform@17024400 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.Xsl.XslCompiledTransform";
+      DotNetXslCompiledTransform@1000 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.Xsl.XslCompiledTransform";
 
     [External]
-    PROCEDURE Create@17024424(XslTransformationStream@17024400 : InStream);
-    VAR
-      DotNetXmlReader@17024402 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlReader";
+    PROCEDURE XslCompiledTransform@1();
     BEGIN
-      DotNetXmlReader := DotNetXmlReader.Create(XslTransformationStream);
-      DotNetXslTransform := DotNetXslTransform.XslCompiledTransform;
-      DotNetXslTransform.Load(DotNetXmlReader);
+      DotNetXslCompiledTransform := DotNetXslCompiledTransform.XslCompiledTransform;
     END;
 
     [External]
-    PROCEDURE Transform@17024407(VAR XmlDocument@17024405 : Codeunit 3013;VAR DestinationStream@17024404 : OutStream);
+    PROCEDURE Load@2(VAR XslTransformation@1000 : Codeunit 3013);
     VAR
-      DotNetXPathNavigatable@17024401 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XPath.IXPathNavigable";
-      DotNetXsltArgumentList@17024400 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.Xsl.XsltArgumentList";
+      DotNetXPathNavigatable@1001 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XPath.IXPathNavigable";
+    BEGIN
+      XslTransformation.GetXmlDocument(DotNetXPathNavigatable);
+      DotNetXslCompiledTransform.Load(DotNetXPathNavigatable);
+    END;
+
+    [External]
+    PROCEDURE Transform@3(VAR XmlDocument@1000 : Codeunit 3013;VAR DestinationStream@1001 : OutStream);
+    VAR
+      DotNetXPathNavigatable@1002 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XPath.IXPathNavigable";
+      DotNetXsltArgumentList@1003 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.Xsl.XsltArgumentList";
     BEGIN
       XmlDocument.GetXmlDocument(DotNetXPathNavigatable);
-      DotNetXslTransform.Transform(DotNetXPathNavigatable, DotNetXsltArgumentList, DestinationStream);
+      DotNetXslCompiledTransform.Transform(DotNetXPathNavigatable, DotNetXsltArgumentList, DestinationStream);
     END;
 
-    PROCEDURE GetXslTransform@17024402(VAR CurrentDotNetXslTransform@17024400 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.Xsl.XslCompiledTransform");
+    PROCEDURE GetXslCompiledTransform@4(VAR CurrentDotNetXslCompiledTransform@1000 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.Xsl.XslCompiledTransform");
     BEGIN
-      CurrentDotNetXslTransform := DotNetXslTransform;
+      CurrentDotNetXslCompiledTransform := DotNetXslCompiledTransform;
     END;
 
-    PROCEDURE SetXslTransform@17024404(NewDotNetXslTransform@17024400 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.Xsl.XslCompiledTransform");
+    PROCEDURE SetXslCompiledTransform@5(NewDotNetXslCompiledTransform@1000 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.Xsl.XslCompiledTransform");
     BEGIN
-      DotNetXslTransform := NewDotNetXslTransform;
+      DotNetXslCompiledTransform := NewDotNetXslCompiledTransform;
     END;
 
     BEGIN

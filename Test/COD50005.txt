@@ -16,17 +16,17 @@ OBJECT Codeunit 50005 Test_DotNet_XslTransform
   CODE
   {
     VAR
-      Assert@17024400 : Codeunit 130000;
-      LibraryLowerPermissions@17024401 : Codeunit 132217;
-      DotNet_XslTransform@17024402 : Codeunit 50003;
-      DotNet_XmlDocument@17024404 : Codeunit 3013;
-      XslTransformHelpers@17024403 : Codeunit 50016;
+      Assert@1000 : Codeunit 130000;
+      LibraryLowerPermissions@1001 : Codeunit 132217;
+      DotNet_XslTransform@1002 : Codeunit 50003;
+      DotNet_XmlDocument@1003 : Codeunit 3013;
+      XslTransformHelpers@1004 : Codeunit 50016;
 
-    PROCEDURE TransformXmlHelper@17024401(XsltTransformationText@17024400 : Text;XmlData@17024401 : Text) : Text;
+    PROCEDURE TransformXmlHelper@1(XsltTransformationText@1000 : Text;XmlData@1001 : Text) : Text;
     VAR
-      TempBlob@17024405 : TEMPORARY Record 99008535;
-      ResultStream@17024404 : OutStream;
-      InputStream@17024403 : InStream;
+      TempBlob@1002 : TEMPORARY Record 99008535;
+      ResultStream@1003 : OutStream;
+      InputStream@1004 : InStream;
     BEGIN
       TempBlob.WriteAsText(XsltTransformationText, TEXTENCODING::UTF8);
       CLEAR(DotNet_XslTransform);
@@ -38,10 +38,10 @@ OBJECT Codeunit 50005 Test_DotNet_XslTransform
       EXIT(TempBlob.ReadAsTextWithCRLFLineSeparator);
     END;
 
-    PROCEDURE LoadXmlDocumentHelper@17024414(XmlAsText@17024400 : Text);
+    PROCEDURE LoadXmlDocumentHelper@2(XmlAsText@1000 : Text);
     VAR
-      TempBlob@17024402 : TEMPORARY Record 99008535;
-      InputStream@17024401 : InStream;
+      TempBlob@1001 : TEMPORARY Record 99008535;
+      InputStream@1002 : InStream;
     BEGIN
       CLEAR(TempBlob);
       TempBlob.WriteAsText(XmlAsText, TEXTENCODING::UTF8);
@@ -51,12 +51,12 @@ OBJECT Codeunit 50005 Test_DotNet_XslTransform
     END;
 
     [Test]
-    PROCEDURE XmlSimpleTransformationToText@17024403();
+    PROCEDURE XmlSimpleTransformationToText@3();
     VAR
-      XmlData@17024400 : Text;
-      Xslt@17024401 : Text;
-      ExpectedResult@17024402 : Text;
-      Result@17024403 : Text;
+      XmlData@1000 : Text;
+      Xslt@1001 : Text;
+      ExpectedResult@1002 : Text;
+      Result@1003 : Text;
     BEGIN
       LibraryLowerPermissions.SetO365Basic;
       // [Given] Xslt tranformation:
@@ -84,12 +84,12 @@ OBJECT Codeunit 50005 Test_DotNet_XslTransform
     END;
 
     [Test]
-    PROCEDURE XmlSimpleTransformationToXml@17024412();
+    PROCEDURE XmlSimpleTransformationToXml@4();
     VAR
-      XmlData@17024400 : Text;
-      Xslt@17024401 : Text;
-      ExpectedResult@17024402 : Text;
-      Result@17024403 : Text;
+      XmlData@1000 : Text;
+      Xslt@1001 : Text;
+      ExpectedResult@1002 : Text;
+      Result@1003 : Text;
     BEGIN
       LibraryLowerPermissions.SetO365Basic;
       // [Given] Xslt tranformation:
