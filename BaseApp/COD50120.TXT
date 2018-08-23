@@ -1,0 +1,134 @@
+OBJECT Codeunit 50120 DotNet_BinaryReader
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      DotNetBinaryReader@1000 : DotNet "'mscorlib'.System.IO.BinaryReader";
+
+    [External]
+    PROCEDURE BinaryReader@1(VAR Stream@1000 : Codeunit 50122);
+    VAR
+      DotNetStream@1001 : DotNet "'mscorlib'.System.IO.Stream";
+    BEGIN
+      Stream.GetStream(DotNetStream);
+      DotNetBinaryReader := DotNetBinaryReader.BinaryReader(DotNetStream);
+    END;
+
+    [External]
+    PROCEDURE BinaryReaderWithEncoding@2(VAR Stream@1000 : Codeunit 50122;VAR DotNet_Encoding@1001 : Codeunit 3026);
+    VAR
+      DotNetEncoding@1002 : DotNet "'mscorlib'.System.Text.Encoding";
+      DotNetStream@1003 : DotNet "'mscorlib'.System.IO.Stream";
+    BEGIN
+      Stream.GetStream(DotNetStream);
+      DotNet_Encoding.GetEncoding(DotNetEncoding);
+      DotNetBinaryReader := DotNetBinaryReader.BinaryReader(DotNetStream, DotNetEncoding);
+    END;
+
+    [External]
+    PROCEDURE Close@3();
+    BEGIN
+      DotNetBinaryReader.Close;
+    END;
+
+    [External]
+    PROCEDURE Dispose@4();
+    BEGIN
+      DotNetBinaryReader.Dispose;
+    END;
+
+    [External]
+    PROCEDURE ReadByte@5() : Integer;
+    BEGIN
+      EXIT(DotNetBinaryReader.ReadByte());
+    END;
+
+    [External]
+    PROCEDURE ReadUInt32@6() : Integer;
+    BEGIN
+      EXIT(DotNetBinaryReader.ReadUInt32());
+    END;
+
+    [External]
+    PROCEDURE ReadUInt16@7() : Integer;
+    BEGIN
+      EXIT(DotNetBinaryReader.ReadUInt16());
+    END;
+
+    [External]
+    PROCEDURE ReadInt16@8() : Integer;
+    BEGIN
+      EXIT(DotNetBinaryReader.ReadInt16());
+    END;
+
+    [External]
+    PROCEDURE ReadInt32@9() : Integer;
+    BEGIN
+      EXIT(DotNetBinaryReader.ReadInt32());
+    END;
+
+    [External]
+    PROCEDURE ReadBytes@10(Count@1000 : Integer;VAR Result@1001 : Codeunit 3000);
+    BEGIN
+      Result.SetArray(DotNetBinaryReader.ReadBytes(Count));
+    END;
+
+    [External]
+    PROCEDURE ReadChars@11(Count@1000 : Integer;VAR Result@1001 : Codeunit 3000);
+    BEGIN
+      Result.SetArray(DotNetBinaryReader.ReadChars(Count));
+    END;
+
+    [External]
+    PROCEDURE IsDotNetNull@12() : Boolean;
+    BEGIN
+      EXIT(ISNULL(DotNetBinaryReader));
+    END;
+
+    [External]
+    PROCEDURE BaseStream@13(VAR Result@1000 : Codeunit 50122);
+    BEGIN
+      Result.SetStream(DotNetBinaryReader.BaseStream);
+    END;
+
+    [External]
+    PROCEDURE ReadChar@14() : Char;
+    BEGIN
+      EXIT(DotNetBinaryReader.ReadChar());
+    END;
+
+    [External]
+    PROCEDURE ReadString@15() : Text;
+    BEGIN
+      EXIT(DotNetBinaryReader.ReadString());
+    END;
+
+    [External]
+    PROCEDURE ReadBoolean@16() : Boolean;
+    BEGIN
+      EXIT(DotNetBinaryReader.ReadBoolean());
+    END;
+
+    [External]
+    PROCEDURE ReadDecimal@17() : Decimal;
+    BEGIN
+      EXIT(DotNetBinaryReader.ReadDecimal());
+    END;
+
+    BEGIN
+    END.
+  }
+}
+

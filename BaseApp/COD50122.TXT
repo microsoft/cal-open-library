@@ -1,0 +1,137 @@
+OBJECT Codeunit 50122 DotNet_Stream
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      DotNetStream@1000 : DotNet "'mscorlib'.System.IO.Stream";
+
+    [External]
+    PROCEDURE FromInStream@1(InputStream@1000 : InStream);
+    BEGIN
+      DotNetStream := InputStream;
+    END;
+
+    [External]
+    PROCEDURE FromOutStream@2(OutputStream@1000 : OutStream);
+    BEGIN
+      DotNetStream := OutputStream;
+    END;
+
+    [External]
+    PROCEDURE IsDotNetNull@3() : Boolean;
+    BEGIN
+      EXIT(ISNULL(DotNetStream));
+    END;
+
+    [External]
+    PROCEDURE Close@4();
+    BEGIN
+      DotNetStream.Close();
+    END;
+
+    [External]
+    PROCEDURE Dispose@5();
+    BEGIN
+      DotNetStream.Dispose();
+    END;
+
+    [External]
+    PROCEDURE CanSeek@6() : Boolean;
+    BEGIN
+      EXIT(DotNetStream.CanSeek);
+    END;
+
+    [External]
+    PROCEDURE CanRead@7() : Boolean;
+    BEGIN
+      EXIT(DotNetStream.CanRead);
+    END;
+
+    [External]
+    PROCEDURE CanWrite@8() : Boolean;
+    BEGIN
+      EXIT(DotNetStream.CanWrite);
+    END;
+
+    [External]
+    PROCEDURE Length@9() : BigInteger;
+    BEGIN
+      EXIT(DotNetStream.Length);
+    END;
+
+    [External]
+    PROCEDURE Position@10() : BigInteger;
+    BEGIN
+      EXIT(DotNetStream.Position);
+    END;
+
+    [External]
+    PROCEDURE ReadByte@11() : Integer;
+    BEGIN
+      EXIT(DotNetStream.ReadByte());
+    END;
+
+    [External]
+    PROCEDURE WriteByte@12(Value@1000 : Integer);
+    BEGIN
+      DotNetStream.WriteByte(Value);
+    END;
+
+    [External]
+    PROCEDURE Seek@13(Offset@1000 : Integer;Origin@1001 : 'Begin,Current,End') : BigInteger;
+    VAR
+      DotNetSeekOrigin@1002 : DotNet "'mscorlib'.System.IO.SeekOrigin";
+    BEGIN
+      CASE Origin OF
+        Origin::"Begin": DotNetSeekOrigin := DotNetSeekOrigin."Begin";
+        Origin::Current: DotNetSeekOrigin := DotNetSeekOrigin.Current;
+        Origin::"End": DotNetSeekOrigin := DotNetSeekOrigin."End";
+      END;
+      EXIT(DotNetStream.Seek(Offset, DotNetSeekOrigin));
+    END;
+
+    [External]
+    PROCEDURE Read@14(VAR Buffer@1000 : Codeunit 3000;Offset@1001 : Integer;Count@1002 : Integer) : Integer;
+    VAR
+      DotNetArray@1003 : DotNet "'mscorlib'.System.Array";
+    BEGIN
+      Buffer.GetArray(DotNetArray);
+      EXIT(DotNetStream.Read(DotNetArray, Offset, Count));
+    END;
+
+    [External]
+    PROCEDURE Write@15(VAR Buffer@1000 : Codeunit 3000;Offset@1001 : Integer;Count@1002 : Integer);
+    VAR
+      DotNetArray@1003 : DotNet "'mscorlib'.System.Array";
+    BEGIN
+      Buffer.GetArray(DotNetArray);
+      DotNetStream.Write(DotNetArray, Offset, Count);
+    END;
+
+    PROCEDURE GetStream@1000(VAR CurrentDotNetStream@1000 : DotNet "'mscorlib'.System.IO.Stream");
+    BEGIN
+      CurrentDotNetStream := DotNetStream;
+    END;
+
+    PROCEDURE SetStream@1001(NewDotNetStream@1000 : DotNet "'mscorlib'.System.IO.Stream");
+    BEGIN
+      DotNetStream := NewDotNetStream;
+    END;
+
+    BEGIN
+    END.
+  }
+}
+

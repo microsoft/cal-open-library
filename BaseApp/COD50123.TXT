@@ -1,0 +1,62 @@
+OBJECT Codeunit 50123 DotNet_Buffer
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      DotNetBuffer@1000 : DotNet "'mscorlib'.System.Buffer";
+
+    [External]
+    PROCEDURE BlockCopy@1(VAR Src@1000 : Codeunit 3000;SrcOffset@1001 : Integer;VAR Dst@1002 : Codeunit 3000;DstOffset@1003 : Integer;Count@1004 : Integer);
+    VAR
+      SrcArray@1005 : DotNet "'mscorlib'.System.Array";
+      DstArray@1006 : DotNet "'mscorlib'.System.Array";
+    BEGIN
+      Src.GetArray(SrcArray);
+      Dst.GetArray(DstArray);
+      DotNetBuffer.BlockCopy(SrcArray, SrcOffset, DstArray, DstOffset, Count);
+    END;
+
+    [External]
+    PROCEDURE ByteLength@2(VAR ArrayObject@1000 : Codeunit 3000) : Integer;
+    VAR
+      DotNetArray@1001 : DotNet "'mscorlib'.System.Array";
+    BEGIN
+      ArrayObject.GetArray(DotNetArray);
+      EXIT(DotNetBuffer.ByteLength(DotNetArray));
+    END;
+
+    [External]
+    PROCEDURE GetByte@3(VAR ArrayObject@1000 : Codeunit 3000;Index@1001 : Integer) : Integer;
+    VAR
+      DotNetArray@1002 : DotNet "'mscorlib'.System.Array";
+    BEGIN
+      ArrayObject.GetArray(DotNetArray);
+      EXIT(DotNetBuffer.GetByte(DotNetArray, Index));
+    END;
+
+    [External]
+    PROCEDURE SetByte@4(VAR ArrayObject@1000 : Codeunit 3000;Index@1001 : Integer;Value@1002 : Integer);
+    VAR
+      DotNetArray@1003 : DotNet "'mscorlib'.System.Array";
+    BEGIN
+      ArrayObject.GetArray(DotNetArray);
+      DotNetBuffer.SetByte(DotNetArray, Index, Value);
+    END;
+
+    BEGIN
+    END.
+  }
+}
+
