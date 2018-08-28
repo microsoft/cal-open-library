@@ -1,0 +1,35 @@
+OBJECT Codeunit 53082 DotNet_ChiperMode
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      DotNetCipherMode@1000 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Security.Cryptography.CipherMode";
+
+    [External]
+    PROCEDURE ECB@3();
+    BEGIN
+      DotNetCipherMode := DotNetCipherMode.ECB;
+    END;
+
+    PROCEDURE GetChiperMode@1(VAR DotNetCipherMode2@1000 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Security.Cryptography.CipherMode");
+    BEGIN
+      DotNetCipherMode2 := DotNetCipherMode;
+    END;
+
+    BEGIN
+    END.
+  }
+}
+

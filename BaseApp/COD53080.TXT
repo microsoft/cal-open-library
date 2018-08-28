@@ -1,0 +1,39 @@
+OBJECT Codeunit 53080 DotNet_MD5 Crypto Service
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      DotNetMD5@1000 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Security.Cryptography.MD5CryptoServiceProvider";
+
+    [External]
+    PROCEDURE MD5CryptoServiceProvider@1();
+    BEGIN
+      DotNetMD5 := DotNetMD5.MD5CryptoServiceProvider;
+    END;
+
+    [External]
+    PROCEDURE ComputeHash@2(DotNet_MemoryStream@1000 : Codeunit 3009;VAR DotNet_Array@1001 : Codeunit 3000);
+    VAR
+      DotNetMemoryStream@1002 : DotNet "'mscorlib'.System.IO.MemoryStream";
+    BEGIN
+      DotNet_MemoryStream.GetMemoryStream(DotNetMemoryStream);
+      DotNet_Array.SetArray(DotNetMD5.ComputeHash(DotNetMemoryStream));
+    END;
+
+    BEGIN
+    END.
+  }
+}
+

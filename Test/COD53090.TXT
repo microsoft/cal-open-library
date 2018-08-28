@@ -1,0 +1,133 @@
+OBJECT Codeunit 53090 TripleDes Test
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    Subtype=Test;
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      Assert@1000 : Codeunit 130000;
+
+    [Test]
+    PROCEDURE TestEncryption@10000202();
+    VAR
+      DotNet_MD5CryptoService@10000200 : Codeunit 53080;
+      DotNet_TripleDesCryptoServic@1000 : Codeunit 53081;
+      DotNet_ChiperMode@1001 : Codeunit 53082;
+      DotNet_PaddingMode@1002 : Codeunit 53083;
+      DotNet_ICryptoTransform@1003 : Codeunit 53084;
+      DotNet_Array@1004 : Codeunit 3000;
+      DotNet_Encoding@1005 : Codeunit 3026;
+      DotNet_MemoryStream@1009 : Codeunit 3009;
+      DotNet_Convert@1006 : Codeunit 3008;
+      EncryptionResult@1007 : Text;
+    BEGIN
+      // Get Bytes from Key
+      DotNet_Encoding.UTF8;
+      DotNet_Encoding.GetBytes(GetKey,DotNet_Array);
+      DotNet_MemoryStream.InitMemoryStreamFromArray(DotNet_Array);
+
+      // Get Hash from Key
+      DotNet_MD5CryptoService.MD5CryptoServiceProvider;
+      DotNet_MD5CryptoService.ComputeHash(DotNet_MemoryStream,DotNet_Array);
+
+      // Configure TripleDESCrypto
+      DotNet_ChiperMode.ECB;
+      DotNet_PaddingMode.PCKS7;
+      DotNet_TripleDesCryptoServic.TripleDESCryptoServiceProvider;
+      DotNet_TripleDesCryptoServic.Key(DotNet_Array);
+      DotNet_TripleDesCryptoServic.Mode(DotNet_ChiperMode);
+      DotNet_TripleDesCryptoServic.Padding(DotNet_PaddingMode);
+
+      // Get Transformer
+      DotNet_TripleDesCryptoServic.CreateEncryptor(DotNet_ICryptoTransform);
+
+      // Load text to encrypt
+      DotNet_Encoding.UTF8;
+      DotNet_Encoding.GetBytes(TextToEncrypt,DotNet_Array);
+
+      // Encrypt text
+      DotNet_ICryptoTransform.TransformFinalBlock(DotNet_Array,0,DotNet_Array.Length,DotNet_Array);
+      EncryptionResult := DotNet_Convert.ToBase64String(DotNet_Array);
+
+      // Verify Encrypted text
+      Assert.AreEqual(EncryptedText,EncryptionResult,'Encryption failed');
+    END;
+
+    [Test]
+    PROCEDURE TestDecryption@10000203();
+    VAR
+      DotNet_MD5CryptoService@1009 : Codeunit 53080;
+      DotNet_TripleDesCryptoServic@1008 : Codeunit 53081;
+      DotNet_ChiperMode@1007 : Codeunit 53082;
+      DotNet_PaddingMode@1006 : Codeunit 53083;
+      DotNet_ICryptoTransform@1005 : Codeunit 53084;
+      DotNet_Array@1004 : Codeunit 3000;
+      DotNet_Encoding@1003 : Codeunit 3026;
+      DotNet_MemoryStream@1002 : Codeunit 3009;
+      DotNet_Convert@1001 : Codeunit 3008;
+      DecryptionResult@1000 : Text;
+    BEGIN
+      // Get Bytes from Key
+      DotNet_Encoding.UTF8;
+      DotNet_Encoding.GetBytes(GetKey,DotNet_Array);
+      DotNet_MemoryStream.InitMemoryStreamFromArray(DotNet_Array);
+
+      // Get Hash from Key
+      DotNet_MD5CryptoService.MD5CryptoServiceProvider;
+      DotNet_MD5CryptoService.ComputeHash(DotNet_MemoryStream,DotNet_Array);
+
+      // Configure TripleDESCrypto
+      DotNet_ChiperMode.ECB;
+      DotNet_PaddingMode.PCKS7;
+      DotNet_TripleDesCryptoServic.TripleDESCryptoServiceProvider;
+      DotNet_TripleDesCryptoServic.Key(DotNet_Array);
+      DotNet_TripleDesCryptoServic.Mode(DotNet_ChiperMode);
+      DotNet_TripleDesCryptoServic.Padding(DotNet_PaddingMode);
+
+      // Get Transformer
+      DotNet_TripleDesCryptoServic.CreateDecryptor(DotNet_ICryptoTransform);
+
+      // Load data to decrypt
+      DotNet_Convert.FromBase64String(EncryptedText,DotNet_Array);
+
+      // Decrypt text
+      DotNet_ICryptoTransform.TransformFinalBlock(DotNet_Array,0,DotNet_Array.Length,DotNet_Array);
+      DotNet_Encoding.UTF8;
+      DecryptionResult := DotNet_Encoding.GetString(DotNet_Array);
+
+      // Verify decrypted text
+      Assert.AreEqual(TextToEncrypt,DecryptionResult,'Decryption failed');
+    END;
+
+    LOCAL PROCEDURE TextToEncrypt@10000200() : Text;
+    BEGIN
+      EXIT('The quick brown fox jumped over the lazy dog');
+    END;
+
+    LOCAL PROCEDURE EncryptedText@10000201() : Text;
+    BEGIN
+      EXIT('Ql4oMyKp27hxmvhPqrd1DJlhcQlnHXcTNqDGv+bRCIvJUu1Qsb7du7x528BDhydQ');
+    END;
+
+    LOCAL PROCEDURE GetKey@3() : Text;
+    BEGIN
+      //EXIT('s0JsHAtlCaeZOY6D7b7vUDb0cjMTJt3X1Ci3mIphayGvX4VWdeE9SYTMK4aSu609L0Ghc6EvoWm96X9cixOyug==');
+      EXIT('This is the key used to encrypt and decrypt the text');
+    END;
+
+    BEGIN
+    END.
+  }
+}
+

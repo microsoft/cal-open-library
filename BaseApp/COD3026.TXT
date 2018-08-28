@@ -54,6 +54,21 @@ OBJECT Codeunit 3026 DotNet_Encoding
     END;
 
     [External]
+    PROCEDURE GetBytes@9(Value@1000 : Text;VAR DotNet_Array@1001 : Codeunit 3000);
+    BEGIN
+      DotNet_Array.SetArray(DotNetEncoding.GetBytes(Value));
+    END;
+
+    [External]
+    PROCEDURE GetString@11(DotNet_Array@1000 : Codeunit 3000) : Text;
+    VAR
+      DotNetArray@1001 : DotNet "'mscorlib'.System.Array";
+    BEGIN
+      DotNet_Array.GetArray(DotNetArray);
+      EXIT(DotNetEncoding.GetString(DotNetArray));
+    END;
+
+    [External]
     PROCEDURE GetEncoding@2(VAR DotNetEncoding2@1000 : DotNet "'mscorlib'.System.Text.Encoding");
     BEGIN
       DotNetEncoding2 := DotNetEncoding;

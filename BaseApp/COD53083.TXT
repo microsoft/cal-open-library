@@ -1,0 +1,35 @@
+OBJECT Codeunit 53083 DotNet_PaddingMode
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      DotNetPaddingMode@1000 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Security.Cryptography.PaddingMode";
+
+    [External]
+    PROCEDURE PCKS7@3();
+    BEGIN
+      DotNetPaddingMode := DotNetPaddingMode.PKCS7;
+    END;
+
+    PROCEDURE GetPaddingMode@2(VAR DotNetPaddingMode2@1000 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Security.Cryptography.PaddingMode");
+    BEGIN
+      DotNetPaddingMode2 := DotNetPaddingMode;
+    END;
+
+    BEGIN
+    END.
+  }
+}
+

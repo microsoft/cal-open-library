@@ -1,0 +1,38 @@
+OBJECT Codeunit 53084 DotNet_ICryptoTransform
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      DotNetICryptoTransform@1000 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Security.Cryptography.ICryptoTransform";
+
+    [External]
+    PROCEDURE TransformFinalBlock@2(InputBuffer@1000 : Codeunit 3000;InputOffset@1001 : Integer;InputCount@1002 : Integer;VAR DotNet_Array@1003 : Codeunit 3000);
+    VAR
+      DotNetArray@1004 : DotNet "'mscorlib'.System.Array";
+    BEGIN
+      InputBuffer.GetArray(DotNetArray);
+      DotNet_Array.SetArray(DotNetICryptoTransform.TransformFinalBlock(DotNetArray,InputOffset,InputCount));
+    END;
+
+    PROCEDURE SetICryptoTransform@1(DotNetICryptoTransform2@1000 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Security.Cryptography.ICryptoTransform");
+    BEGIN
+      DotNetICryptoTransform := DotNetICryptoTransform2;
+    END;
+
+    BEGIN
+    END.
+  }
+}
+

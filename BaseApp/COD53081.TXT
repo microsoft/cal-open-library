@@ -1,0 +1,69 @@
+OBJECT Codeunit 53081 DotNet_TripleDes Crypto Servic
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      DotNetTripleDes@1000 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Security.Cryptography.TripleDESCryptoServiceProvider";
+
+    [External]
+    PROCEDURE TripleDESCryptoServiceProvider@2();
+    BEGIN
+      DotNetTripleDes := DotNetTripleDes.TripleDESCryptoServiceProvider;
+    END;
+
+    [External]
+    PROCEDURE Key@3(DotNet_Array@1000 : Codeunit 3000);
+    VAR
+      DotNetArray@1001 : DotNet "'mscorlib'.System.Array";
+    BEGIN
+      DotNet_Array.GetArray(DotNetArray);
+      DotNetTripleDes.Key := DotNetArray;
+    END;
+
+    [External]
+    PROCEDURE Mode@6(DotNet_ChiperMode@1000 : Codeunit 53082);
+    VAR
+      DotNetCipherMode@1001 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Security.Cryptography.CipherMode";
+    BEGIN
+      DotNet_ChiperMode.GetChiperMode(DotNetCipherMode);
+      DotNetTripleDes.Mode := DotNetCipherMode;
+    END;
+
+    [External]
+    PROCEDURE Padding@7(DotNet_PaddingMode@1000 : Codeunit 53083);
+    VAR
+      DotNetPaddingMode@1001 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Security.Cryptography.PaddingMode";
+    BEGIN
+      DotNet_PaddingMode.GetPaddingMode(DotNetPaddingMode);
+      DotNetTripleDes.Padding := DotNetPaddingMode;
+    END;
+
+    [External]
+    PROCEDURE CreateEncryptor@8(VAR DotNet_ICryptoTransform@1000 : Codeunit 53084);
+    BEGIN
+      DotNet_ICryptoTransform.SetICryptoTransform(DotNetTripleDes.CreateEncryptor);
+    END;
+
+    [External]
+    PROCEDURE CreateDecryptor@4(VAR DotNet_ICryptoTransform@1000 : Codeunit 53084);
+    BEGIN
+      DotNet_ICryptoTransform.SetICryptoTransform(DotNetTripleDes.CreateDecryptor);
+    END;
+
+    BEGIN
+    END.
+  }
+}
+
