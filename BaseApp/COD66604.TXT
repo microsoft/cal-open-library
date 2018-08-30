@@ -1,0 +1,155 @@
+OBJECT Codeunit 66604 RegexArray
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      This@1000000000 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Array";
+
+    [External]
+    PROCEDURE Length@1000000001() : Integer;
+    BEGIN
+      EXIT(This.Length);
+    END;
+
+    [External]
+    PROCEDURE Copy@1000000015(SourceArray@1000000001 : Codeunit 66604;VAR DestinationArray@1000000000 : Codeunit 66604;Length@1000000002 : Integer);
+    VAR
+      SourceArrayObject@1000000003 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Array";
+      DestinationArrayObject@1000000004 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Array";
+    BEGIN
+      SourceArray.Get(SourceArrayObject);
+      This.Copy(SourceArrayObject, DestinationArrayObject, Length);
+      DestinationArray.Set(DestinationArrayObject);
+    END;
+
+    [External]
+    PROCEDURE CopySourceIndexDestinationIndex@1000000007(SourceArray@1000000001 : Codeunit 66604;SourceIndex@1000000006 : Integer;VAR DestinationArray@1000000000 : Codeunit 66604;DestinationIndex@1000000005 : Integer;Length@1000000002 : Integer);
+    VAR
+      SourceArrayObject@1000000003 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Array";
+      DestinationArrayObject@1000000004 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Array";
+    BEGIN
+      SourceArray.Get(SourceArrayObject);
+      This.Copy(SourceArrayObject, SourceIndex, DestinationArrayObject, DestinationIndex, Length);
+      DestinationArray.Set(DestinationArrayObject);
+    END;
+
+    [External]
+    PROCEDURE CopyTo@1000000014(VAR DestinationArray@1000000000 : Codeunit 66604;Index@1000000002 : Integer);
+    VAR
+      DestinationArrayObject@1000000001 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Array";
+    BEGIN
+      This.CopyTo(DestinationArrayObject, Index);
+      DestinationArray.Set(DestinationArrayObject);
+    END;
+
+    [External]
+    PROCEDURE Equals@1000000012(Array@1000000000 : Codeunit 66604) : Boolean;
+    VAR
+      ArrayObject@1000000001 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Array";
+    BEGIN
+      "Array".Get(ArrayObject);
+      EXIT(This.Equals(ArrayObject));
+    END;
+
+    [External]
+    PROCEDURE GetValue@1000000003(Index@1000000000 : Integer;VAR Value@1000000001 : Variant);
+    BEGIN
+      Value := This.GetValue(Index);
+    END;
+
+    [External]
+    PROCEDURE GetValueInteger@1000000006(Index@1000000000 : Integer) : Integer;
+    BEGIN
+      EXIT(This.GetValue(Index));
+    END;
+
+    [External]
+    PROCEDURE GetValueText@1000000008(Index@1000000000 : Integer) : Text;
+    BEGIN
+      EXIT(This.GetValue(Index));
+    END;
+
+    [External]
+    PROCEDURE IndexOf@1000000010(Value@1000000000 : Variant) : Integer;
+    BEGIN
+      EXIT(This.IndexOf(This, Value));
+    END;
+
+    [External]
+    PROCEDURE LastIndexOf@1000000005(Value@1000000000 : Variant) : Integer;
+    BEGIN
+      EXIT(This.LastIndexOf(This, Value));
+    END;
+
+    [External]
+    PROCEDURE ToString@1000000002() : Text;
+    BEGIN
+      EXIT(This.ToString());
+    END;
+
+    PROCEDURE Get@1000000018(VAR Destination@1000000000 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Array");
+    BEGIN
+      Destination := This;
+    END;
+
+    PROCEDURE Set@1000000000(Source@1000000000 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Array");
+    BEGIN
+      This := Source;
+    END;
+
+    BEGIN
+    {
+      // Regex wrapper for C/AL; The 365 People; http://www.the365people.com; 2018
+      // Distributed as a part of Open C/AL Library
+      //
+      // The API is constructed as close to .NET as possible, with an idea of a codeunit as equivalent of a class or enum.
+      // It can be used directly from C/AL or from AL extension.
+      //
+      // Available C/AL codeunits and their .NET equivalents:
+      // ---------------------------------------------------------------------------------------------------------------------
+      // | Codeunit                       | .NET Element   | .NET Namespace                      | .NET Name                 |
+      // ---------------------------------------------------------------------------------------------------------------------
+      // | Regex                          | class          | System.Text.RegularExpressions      | Regex                     |
+      // | RegexOptions                   | enum           | System.Text.RegularExpressions      | RegexOptions              |
+      // | RegexMatch                     | class          | System.Text.RegularExpressions      | Match                     |
+      // | RegexMatchCollection           | class          | System.Text.RegularExpressions      | MatchCollection           |
+      // | RegexArray                     | class          | System                              | Array                     |
+      // | RegexGroup                     | class          | System.Text.RegularExpressions      | Group                     |
+      // | RegexGroupCollection           | class          | System.Text.RegularExpressions      | GroupCollection           |
+      // | RegexCapture                   | class          | System.Text.RegularExpressions      | Capture                   |
+      // | RegexCaptureCollection         | class          | System.Text.RegularExpressions      | CaptureCollection         |
+      // ---------------------------------------------------------------------------------------------------------------------
+      //
+      // Available C/AL CODEUNIT::"RegexArray" members:
+      // ---------------------------------------------------------------------------------------------------------------------
+      // | C/AL Function                        | .NET Member   | .NET Name and Arguments                                    |
+      // ---------------------------------------------------------------------------------------------------------------------
+      // | Length                               | property      | Length                                                     |
+      // | Copy                                 | static method | Copy(Array, Array, int)                                    |
+      // | CopySourceIndexDestinationIndex      | static method | Copy(Array, int, Array, int)                               |
+      // | CopyTo                               | method        | CopyTo(Array, int)                                         |
+      // | Equals                               | method        | Equals(object)                                             |
+      // | GetValue                             | method        | GetValue(int)                                              |
+      // | GetValueInteger                      | method        | GetValue(int)                                              |
+      // | GetValueText                         | method        | GetValue(int)                                              |
+      // | IndexOf                              | method        | IndexOf(object)                                            |
+      // | LastIndexOf                          | method        | LastIndexOf(object)                                        |
+      // | ToString                             | method        | ToString()                                                 |
+      // ---------------------------------------------------------------------------------------------------------------------
+    }
+    END.
+  }
+}
+

@@ -1,0 +1,152 @@
+OBJECT Codeunit 66605 RegexGroup
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      This@1000000000 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.RegularExpressions.Group";
+
+    [External]
+    PROCEDURE Captures@1000000002(Captures@1000000000 : Codeunit 66608);
+    BEGIN
+      Captures.Set(This.Captures);
+    END;
+
+    [External]
+    PROCEDURE Index@1000000006() : Integer;
+    BEGIN
+      EXIT(This.Index);
+    END;
+
+    [External]
+    PROCEDURE Length@1000000005() : Integer;
+    BEGIN
+      EXIT(This.Length);
+    END;
+
+    [External]
+    PROCEDURE Name@1000000007() : Text;
+    BEGIN
+      EXIT(This.Name);
+    END;
+
+    [External]
+    PROCEDURE Success@1000000008() : Boolean;
+    BEGIN
+      EXIT(This.Success);
+    END;
+
+    [External]
+    PROCEDURE Value@1000000009() : Text;
+    BEGIN
+      EXIT(This.Value);
+    END;
+
+    [External]
+    PROCEDURE Equals@1000000014(Group@1000000000 : Codeunit 66605) : Boolean;
+    VAR
+      GroupObject@1000000001 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.RegularExpressions.Match";
+    BEGIN
+      Group.Get(GroupObject);
+      EXIT(This.Equals(GroupObject));
+    END;
+
+    [External]
+    PROCEDURE EqualsGroupGroup@1000000003(GroupA@1000000000 : Codeunit 66605;GroupB@1000000001 : Codeunit 66605) : Boolean;
+    VAR
+      GroupAObject@1000000002 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.RegularExpressions.Group";
+      GroupBObject@1000000003 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.RegularExpressions.Group";
+    BEGIN
+      GroupA.Get(GroupAObject);
+      GroupB.Get(GroupBObject);
+      EXIT(This.Equals(GroupAObject, GroupBObject));
+    END;
+
+    [External]
+    PROCEDURE GetHashCode@1000000012() : Integer;
+    BEGIN
+      EXIT(This.GetHashCode());
+    END;
+
+    [External]
+    PROCEDURE Synchronized@1000000011(InnerGroup@1000000000 : Codeunit 66605;VAR SynchronizedGroup@1000000002 : Codeunit 66605);
+    VAR
+      InnerGroupObject@1000000003 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.RegularExpressions.Match";
+      SynchronizedGroupObject@1000000001 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.RegularExpressions.Match";
+    BEGIN
+      InnerGroup.Get(InnerGroupObject);
+      SynchronizedGroupObject := This.Synchronized(InnerGroupObject);
+      SynchronizedGroup.Set(SynchronizedGroupObject);
+    END;
+
+    [External]
+    PROCEDURE ToString@1000000015() : Text;
+    BEGIN
+      EXIT(This.ToString());
+    END;
+
+    PROCEDURE Get@1000000001(VAR Destination@1000000000 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.RegularExpressions.Group");
+    BEGIN
+      Destination := This;
+    END;
+
+    PROCEDURE Set@1000000000(Source@1000000000 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.RegularExpressions.Group");
+    BEGIN
+      This := Source;
+    END;
+
+    BEGIN
+    {
+      // Regex wrapper for C/AL; The 365 People; http://www.the365people.com; 2018
+      // Distributed as a part of Open C/AL Library
+      //
+      // The API is constructed as close to .NET as possible, with an idea of a codeunit as equivalent of a class or enum.
+      // It can be used directly from C/AL or from AL extension.
+      //
+      // Available C/AL codeunits and their .NET equivalents:
+      // ---------------------------------------------------------------------------------------------------------------------
+      // | Codeunit                       | .NET Element   | .NET Namespace                      | .NET Name                 |
+      // ---------------------------------------------------------------------------------------------------------------------
+      // | Regex                          | class          | System.Text.RegularExpressions      | Regex                     |
+      // | RegexOptions                   | enum           | System.Text.RegularExpressions      | RegexOptions              |
+      // | RegexMatch                     | class          | System.Text.RegularExpressions      | Match                     |
+      // | RegexMatchCollection           | class          | System.Text.RegularExpressions      | MatchCollection           |
+      // | RegexArray                     | class          | System                              | Array                     |
+      // | RegexGroup                     | class          | System.Text.RegularExpressions      | Group                     |
+      // | RegexGroupCollection           | class          | System.Text.RegularExpressions      | GroupCollection           |
+      // | RegexCapture                   | class          | System.Text.RegularExpressions      | Capture                   |
+      // | RegexCaptureCollection         | class          | System.Text.RegularExpressions      | CaptureCollection         |
+      // ---------------------------------------------------------------------------------------------------------------------
+      //
+      // Available C/AL CODEUNIT::"RegexGroup" members:
+      // ---------------------------------------------------------------------------------------------------------------------
+      // | C/AL Function                        | .NET Member   | .NET Name and Arguments                                    |
+      // ---------------------------------------------------------------------------------------------------------------------
+      // | Captures                             | property      | Captures                                                   |
+      // | Index                                | property      | Index                                                      |
+      // | Length                               | property      | Length                                                     |
+      // | Name                                 | property      | Name                                                       |
+      // | Success                              | property      | Success                                                    |
+      // | Value                                | property      | Value                                                      |
+      // | Equals                               | method        | Equals(object)                                             |
+      // | EqualsGroupGroup                     | static method | Equals(object, object)                                     |
+      // | GetHashCode                          | method        | GetHashCode()                                              |
+      // | Synchronized                         | method        | Synchronized(Group)                                        |
+      // | ToString                             | method        | ToString()                                                 |
+      // ---------------------------------------------------------------------------------------------------------------------
+    }
+    END.
+  }
+}
+

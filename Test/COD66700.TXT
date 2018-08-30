@@ -1,0 +1,28 @@
+OBJECT Codeunit 66700 TestRegexRunner
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    Subtype=TestRunner;
+    TestIsolation=Function;
+    OnRun=BEGIN
+            CODEUNIT.RUN(CODEUNIT::TestRegex);
+            CODEUNIT.RUN(CODEUNIT::TestRegexOptions);
+            CODEUNIT.RUN(CODEUNIT::TestRegexMatchGroupCapture);
+            CODEUNIT.RUN(CODEUNIT::TestRegexArray);
+          END;
+
+  }
+  CODE
+  {
+
+    BEGIN
+    END.
+  }
+}
+

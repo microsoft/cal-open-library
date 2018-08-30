@@ -1,0 +1,89 @@
+OBJECT Codeunit 66713 TestRegexArray
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    Subtype=Test;
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      TestRegexToolkit@1000000000 : Codeunit 66799;
+
+    [Test]
+    PROCEDURE TestGetValueText@1000000000();
+    VAR
+      Pattern@1000000000 : Text;
+      ExpectedNames@1000000001 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Collections.ArrayList";
+    BEGIN
+      Pattern := '(?<Family>[A-Z]\d{2}[A-Z])-(?<Series>\d{3})-(?<Variant>[A-Z])';
+      TestRegexToolkit.SetArray4(ExpectedNames, '0', 'Family', 'Series', 'Variant');
+      RunGetValueText('Part No.: A23B-234-C, Replacement: C99Z-902-M', Pattern, 4, ExpectedNames);
+      RunGetValueText('Part No.: 123B-234-C, Replacement: C99Z-902-M', Pattern, 4, ExpectedNames);
+    END;
+
+    LOCAL PROCEDURE RunGetValueText@1000000008(Input@1000000003 : Text;Pattern@1000000002 : Text;ExpectedLength@1000000004 : Integer;ExpectedNames@1000000006 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Collections.ArrayList");
+    VAR
+      Regex@1000000001 : Codeunit 66600;
+      Match@1000000000 : Codeunit 66602;
+      GroupNames@1000000005 : Codeunit 66604;
+      GroupName@1000000008 : Text;
+      Index@1000000007 : Integer;
+      ExpectedName@1000000009 : Text;
+    BEGIN
+      Regex.Construct(Pattern);
+      Regex.Match(Input, Match);
+      Regex.GetGroupNames(GroupNames);
+      TestRegexToolkit.VerifyIntegerResult(TestRegexToolkit.ArgsToString3('Input', Input, 'Pattern', Pattern, 'Parameter', 'Length'), GroupNames.Length, ExpectedLength);
+      FOR Index := 0 TO GroupNames.Length - 1 DO BEGIN
+        ExpectedName := ExpectedNames.Item(Index);
+        GroupName := GroupNames.GetValueText(Index);
+        TestRegexToolkit.VerifyTextResult(TestRegexToolkit.ArgsToString4('Input', Input, 'Pattern', Pattern, 'Index', Index, 'Parameter', 'Name'), GroupName, ExpectedName);
+      END;
+    END;
+
+    [Test]
+    PROCEDURE TestGetValueInteger@1000000002();
+    VAR
+      Pattern@1000000000 : Text;
+      ExpectedNumbers@1000000001 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Collections.ArrayList";
+    BEGIN
+      Pattern := '(?<Family>[A-Z]\d{2}[A-Z])-(?<Series>\d{3})-(?<Variant>[A-Z])';
+      TestRegexToolkit.SetArray4(ExpectedNumbers, 0, 1, 2, 3);
+      RunGetValueInteger('Part No.: A23B-234-C, Replacement: C99Z-902-M', Pattern, 4, ExpectedNumbers);
+      RunGetValueInteger('Part No.: 123B-234-C, Replacement: C99Z-902-M', Pattern, 4, ExpectedNumbers);
+    END;
+
+    LOCAL PROCEDURE RunGetValueInteger@1000000001(Input@1000000003 : Text;Pattern@1000000002 : Text;ExpectedLength@1000000004 : Integer;ExpectedNumbers@1000000006 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Collections.ArrayList");
+    VAR
+      Regex@1000000001 : Codeunit 66600;
+      Match@1000000000 : Codeunit 66602;
+      GroupNumbers@1000000005 : Codeunit 66604;
+      GroupNumber@1000000008 : Integer;
+      Index@1000000007 : Integer;
+      ExpectedNumber@1000000009 : Integer;
+    BEGIN
+      Regex.Construct(Pattern);
+      Regex.Match(Input, Match);
+      Regex.GetGroupNumbers(GroupNumbers);
+      TestRegexToolkit.VerifyIntegerResult(TestRegexToolkit.ArgsToString3('Input', Input, 'Pattern', Pattern, 'Parameter', 'Length'), GroupNumbers.Length, ExpectedLength);
+      FOR Index := 0 TO GroupNumbers.Length - 1 DO BEGIN
+        ExpectedNumber := ExpectedNumbers.Item(Index);
+        GroupNumber := GroupNumbers.GetValueInteger(Index);
+        TestRegexToolkit.VerifyIntegerResult(TestRegexToolkit.ArgsToString4('Input', Input, 'Pattern', Pattern, 'Index', Index, 'Parameter', 'Number'), GroupNumber, ExpectedNumber);
+      END;
+    END;
+
+    BEGIN
+    END.
+  }
+}
+

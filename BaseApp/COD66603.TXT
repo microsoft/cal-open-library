@@ -1,0 +1,113 @@
+OBJECT Codeunit 66603 RegexMatchCollection
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      This@1000000000 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.RegularExpressions.MatchCollection";
+
+    [External]
+    PROCEDURE Count@1000000004() : Integer;
+    BEGIN
+      EXIT(This.Count);
+    END;
+
+    [External]
+    PROCEDURE Item@1000000005(Index@1000000002 : Integer;VAR Match@1000000001 : Codeunit 66602);
+    VAR
+      MatchObject@1000000000 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.RegularExpressions.MatchCollection";
+    BEGIN
+      MatchObject := This.Item(Index);
+      Match.Set(MatchObject);
+    END;
+
+    [External]
+    PROCEDURE CopyTo@1000000010(VAR Matches@1000000000 : Codeunit 66603;Index@1000000002 : Integer);
+    VAR
+      MatchesObject@1000000001 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.RegularExpressions.MatchCollection";
+    BEGIN
+      This.CopyTo(MatchesObject, Index);
+      Matches.Set(MatchesObject);
+    END;
+
+    [External]
+    PROCEDURE Equals@1000000012(Matches@1000000000 : Codeunit 66603) : Boolean;
+    VAR
+      MatchesObject@1000000001 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.RegularExpressions.MatchCollection";
+    BEGIN
+      Matches.Get(MatchesObject);
+      EXIT(This.Equals(MatchesObject));
+    END;
+
+    [External]
+    PROCEDURE GetHashCode@1000000013() : Integer;
+    BEGIN
+      EXIT(This.GetHashCode());
+    END;
+
+    [External]
+    PROCEDURE ToString@1000000014() : Text;
+    BEGIN
+      EXIT(This.ToString());
+    END;
+
+    PROCEDURE Get@1000000002(VAR Destionation@1000000000 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.RegularExpressions.MatchCollection");
+    BEGIN
+      Destionation := This;
+    END;
+
+    PROCEDURE Set@1000000000(Source@1000000000 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.RegularExpressions.MatchCollection");
+    BEGIN
+      This := Source;
+    END;
+
+    BEGIN
+    {
+      // Regex wrapper for C/AL; The 365 People; http://www.the365people.com; 2018
+      // Distributed as a part of Open C/AL Library
+      //
+      // The API is constructed as close to .NET as possible, with an idea of a codeunit as equivalent of a class or enum.
+      // It can be used directly from C/AL or from AL extension.
+      //
+      // Available C/AL codeunits and their .NET equivalents:
+      // ---------------------------------------------------------------------------------------------------------------------
+      // | Codeunit                       | .NET Element   | .NET Namespace                      | .NET Name                 |
+      // ---------------------------------------------------------------------------------------------------------------------
+      // | Regex                          | class          | System.Text.RegularExpressions      | Regex                     |
+      // | RegexOptions                   | enum           | System.Text.RegularExpressions      | RegexOptions              |
+      // | RegexMatch                     | class          | System.Text.RegularExpressions      | Match                     |
+      // | RegexMatchCollection           | class          | System.Text.RegularExpressions      | MatchCollection           |
+      // | RegexArray                     | class          | System                              | Array                     |
+      // | RegexGroup                     | class          | System.Text.RegularExpressions      | Group                     |
+      // | RegexGroupCollection           | class          | System.Text.RegularExpressions      | GroupCollection           |
+      // | RegexCapture                   | class          | System.Text.RegularExpressions      | Capture                   |
+      // | RegexCaptureCollection         | class          | System.Text.RegularExpressions      | CaptureCollection         |
+      // ---------------------------------------------------------------------------------------------------------------------
+      //
+      // Available C/AL CODEUNIT::"RegexMatchCollection" members:
+      // ---------------------------------------------------------------------------------------------------------------------
+      // | C/AL Function                        | .NET Member   | .NET Name and Arguments                                    |
+      // ---------------------------------------------------------------------------------------------------------------------
+      // | Count                                | property      | Count                                                      |
+      // | Item                                 | indexer       | Item[int]                                                  |
+      // | CopyTo                               | method        | CopyTo(Array, int)                                         |
+      // | Equals                               | method        | Equals(object)                                             |
+      // | GetHashCode                          | method        | GetHashCode()                                              |
+      // | ToString                             | method        | ToString()                                                 |
+      // ---------------------------------------------------------------------------------------------------------------------
+    }
+    END.
+  }
+}
+

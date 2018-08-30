@@ -1,0 +1,135 @@
+OBJECT Codeunit 66606 RegexGroupCollection
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      This@1000000000 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.RegularExpressions.GroupCollection";
+
+    [External]
+    PROCEDURE Count@1000000004() : Integer;
+    BEGIN
+      EXIT(This.Count);
+    END;
+
+    [External]
+    PROCEDURE Item@1000000009(GroupNumber@1000000000 : Integer;VAR Group@1000000002 : Codeunit 66605);
+    VAR
+      GroupObject@1000000001 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.RegularExpressions.Group";
+    BEGIN
+      GroupObject := This.Item(GroupNumber);
+      Group.Set(GroupObject);
+    END;
+
+    [External]
+    PROCEDURE ItemGroupName@1000000010(GroupName@1000000000 : Text;VAR Group@1000000001 : Codeunit 66605);
+    VAR
+      GroupObject@1000000002 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.RegularExpressions.Group";
+    BEGIN
+      GroupObject := This.Item(GroupName);
+      Group.Set(GroupObject);
+    END;
+
+    [External]
+    PROCEDURE CopyTo@1000000013(VAR Groups@1000000000 : Codeunit 66606;Index@1000000002 : Integer) : Integer;
+    VAR
+      GroupsObject@1000000001 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.RegularExpressions.GroupCollection";
+    BEGIN
+      This.CopyTo(GroupsObject, Index);
+      Groups.Set(GroupsObject);
+    END;
+
+    [External]
+    PROCEDURE Equals@1000000016(Groups@1000000000 : Codeunit 66606) : Boolean;
+    VAR
+      GroupsObject@1000000001 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.RegularExpressions.GroupCollection";
+    BEGIN
+      Groups.Get(GroupsObject);
+      EXIT(This.Equals(GroupsObject));
+    END;
+
+    [External]
+    PROCEDURE EqualsGroupsGroups@1000000002(GroupsA@1000000000 : Codeunit 66606;GroupsB@1000000001 : Codeunit 66606) : Boolean;
+    VAR
+      GroupsAObject@1000000002 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.RegularExpressions.GroupCollection";
+      GroupsBObject@1000000003 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.RegularExpressions.GroupCollection";
+    BEGIN
+      GroupsA.Get(GroupsAObject);
+      GroupsB.Get(GroupsBObject);
+      EXIT(This.Equals(GroupsAObject, GroupsBObject));
+    END;
+
+    [External]
+    PROCEDURE GetHashCode@1000000017() : Integer;
+    BEGIN
+      EXIT(This.GetHashCode());
+    END;
+
+    [External]
+    PROCEDURE ToString@1000000018() : Text;
+    BEGIN
+      EXIT(This.ToString());
+    END;
+
+    PROCEDURE Get@1000000001(VAR Destination@1000000000 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.RegularExpressions.GroupCollection");
+    BEGIN
+      Destination := This;
+    END;
+
+    PROCEDURE Set@1000000000(Source@1000000000 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.RegularExpressions.GroupCollection");
+    BEGIN
+      This := Source;
+    END;
+
+    BEGIN
+    {
+      // Regex wrapper for C/AL; The 365 People; http://www.the365people.com; 2018
+      // Distributed as a part of Open C/AL Library
+      //
+      // The API is constructed as close to .NET as possible, with an idea of a codeunit as equivalent of a class or enum.
+      // It can be used directly from C/AL or from AL extension.
+      //
+      // Available C/AL codeunits and their .NET equivalents:
+      // ---------------------------------------------------------------------------------------------------------------------
+      // | Codeunit                       | .NET Element   | .NET Namespace                      | .NET Name                 |
+      // ---------------------------------------------------------------------------------------------------------------------
+      // | Regex                          | class          | System.Text.RegularExpressions      | Regex                     |
+      // | RegexOptions                   | enum           | System.Text.RegularExpressions      | RegexOptions              |
+      // | RegexMatch                     | class          | System.Text.RegularExpressions      | Match                     |
+      // | RegexMatchCollection           | class          | System.Text.RegularExpressions      | MatchCollection           |
+      // | RegexArray                     | class          | System                              | Array                     |
+      // | RegexGroup                     | class          | System.Text.RegularExpressions      | Group                     |
+      // | RegexGroupCollection           | class          | System.Text.RegularExpressions      | GroupCollection           |
+      // | RegexCapture                   | class          | System.Text.RegularExpressions      | Capture                   |
+      // | RegexCaptureCollection         | class          | System.Text.RegularExpressions      | CaptureCollection         |
+      // ---------------------------------------------------------------------------------------------------------------------
+      //
+      // Available C/AL CODEUNIT::"RegexGroupCollection" members:
+      // ---------------------------------------------------------------------------------------------------------------------
+      // | C/AL Function                        | .NET Member   | .NET Name and Arguments                                    |
+      // ---------------------------------------------------------------------------------------------------------------------
+      // | Count                                | property      | Count                                                      |
+      // | Item                                 | indexer       | Item[int]                                                  |
+      // | ItemGroupName                        | indexer       | Item[string]                                               |
+      // | CopyTo                               | method        | CopyTo(Array, int)                                         |
+      // | Equals                               | method        | Equals(object)                                             |
+      // | EqualsGroupsGroups                   | static method | Equals(object, object)                                     |
+      // | GetHashCode                          | method        | GetHashCode()                                              |
+      // | ToString                             | method        | ToString()                                                 |
+      // ---------------------------------------------------------------------------------------------------------------------
+    }
+    END.
+  }
+}
+
