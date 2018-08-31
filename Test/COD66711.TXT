@@ -1,0 +1,72 @@
+OBJECT Codeunit 66711 TestRegexOptions
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    Subtype=Test;
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      TestRegexToolkit@1000000000 : Codeunit 66799;
+
+    [Test]
+    PROCEDURE TestEmpty@1000000001();
+    VAR
+      RegexOptions@1000000000 : Codeunit 66601;
+      RegexOptionsString@1000000001 : Text;
+    BEGIN
+      RegexOptionsString := RegexOptions.ToString();
+      TestRegexToolkit.VerifyTextResult('', RegexOptionsString, '');
+    END;
+
+    [Test]
+    PROCEDURE TestAdd@1000000000();
+    VAR
+      RegexOptions@1000000000 : Codeunit 66601;
+      RegexOptionsString@1000000001 : Text;
+    BEGIN
+      RegexOptions.AddCompiled();
+      RegexOptions.AddIgnoreCase();
+      RegexOptions.AddMultiline();
+      RegexOptionsString := RegexOptions.ToString();
+      TestRegexToolkit.VerifyTextResult(TestRegexToolkit.ToString3('Compiled', 'IgnoreCase', 'Multiline'), RegexOptionsString, 'IgnoreCase, Multiline, Compiled');
+    END;
+
+    [Test]
+    PROCEDURE TestGet@1000000002();
+    VAR
+      RegexOptions@1000000000 : Codeunit 66601;
+      RegexOptionsObject@1000000001 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.RegularExpressions.RegexOptions";
+    BEGIN
+      RegexOptions.AddMultiline();
+      RegexOptions.AddIgnoreCase();
+      RegexOptions.Get(RegexOptionsObject);
+      TestRegexToolkit.VerifyTextResult(TestRegexToolkit.ToString2('Multiline', 'IgnoreCase'), RegexOptionsObject.ToString(), 'IgnoreCase, Multiline');
+    END;
+
+    [Test]
+    PROCEDURE TestSet@1000000003();
+    VAR
+      RegexOptions@1000000002 : Codeunit 66601;
+      RegexOptionsObject@1000000001 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.RegularExpressions.RegexOptions";
+    BEGIN
+      RegexOptionsObject := RegexOptionsObject.None;
+      RegexOptionsObject := RegexOptionsObject.Parse(RegexOptionsObject.GetType(), 'Compiled,IgnoreCase,Multiline');
+      RegexOptions.Set(RegexOptionsObject);
+      TestRegexToolkit.VerifyTextResult(TestRegexToolkit.ToString3('Compiled', 'IgnoreCase', 'Multiline'), RegexOptions.ToString(), 'IgnoreCase, Multiline, Compiled');
+    END;
+
+    BEGIN
+    END.
+  }
+}
+

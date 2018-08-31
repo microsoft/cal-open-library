@@ -1,0 +1,635 @@
+OBJECT Codeunit 66710 TestRegex
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    Subtype=Test;
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      TestRegexToolkit@1000000000 : Codeunit 66799;
+
+    [Test]
+    PROCEDURE TestIsMatch@1000000000();
+    VAR
+      Pattern@1000000000 : Text;
+    BEGIN
+      Pattern := '[a-zA-Z0-9]\d{2}[a-zA-Z0-9](-\d{3}){2}[A-Za-z0-9]';
+      RunIsMatch('1298-673-4192', Pattern, TRUE);
+      RunIsMatch('A08Z-931-468A', Pattern, TRUE);
+      RunIsMatch('_A90-123-129X', Pattern, FALSE);
+      RunIsMatch('12345-KKA-1230', Pattern, FALSE);
+      RunIsMatch('0919-2893-1256', Pattern, FALSE);
+    END;
+
+    [Test]
+    PROCEDURE TestIsMatchStartAt@1000000004();
+    VAR
+      Pattern@1000000000 : Text;
+    BEGIN
+      Pattern := '[A-Z0-9]\d{2}[A-Z0-9](-\d{3}){2}[A-Z0-9]';
+      RunIsMatchStartAt('Part Number: 1298-673-4192', Pattern, 11, TRUE);
+      RunIsMatchStartAt('Part Number: 1298-673-4192', Pattern, 18, FALSE);
+      RunIsMatchStartAt('Part No: A08Z-931-468A', Pattern, 7, TRUE);
+      RunIsMatchStartAt('Part No: A08Z-931-468A', Pattern, 15, FALSE);
+      RunIsMatchStartAt('_A90-123-129X', Pattern, 0, FALSE);
+      RunIsMatchStartAt('123K-000-AA30', Pattern, 0, FALSE);
+      RunIsMatchStartAt('SKU: 0919-289-1256', Pattern, 3, TRUE);
+      RunIsMatchStartAt('SKU: 0919-289-1256', Pattern, 10, FALSE);
+    END;
+
+    [Test]
+    PROCEDURE TestIsMatchPattern@1000000003();
+    VAR
+      Pattern@1000000000 : Text;
+    BEGIN
+      Pattern := '[A-Z0-9]\d{2}[A-Z0-9](-\d{3}){2}[A-Z0-9]';
+      RunIsMatchPattern('1298-673-4192', Pattern, TRUE);
+      RunIsMatchPattern('A08Z-931-468A', Pattern, TRUE);
+      RunIsMatchPattern('_A90-123-129X', Pattern, FALSE);
+      RunIsMatchPattern('12345-KKA-1230', Pattern, FALSE);
+      RunIsMatchPattern('0919-2893-1256', Pattern, FALSE);
+    END;
+
+    [Test]
+    PROCEDURE TestIsMatchPatternOptions@1000000011();
+    VAR
+      Pattern@1000000000 : Text;
+      Options@1000000001 : Codeunit 66601;
+    BEGIN
+      Pattern := '[A-Z0-9]\d{2}[A-Z0-9](-\d{3}){2}[A-Z0-9]';
+      Options.AddIgnoreCase();
+      RunIsMatchPatternOptions('1298-673-4192', Pattern, Options, TRUE);
+      RunIsMatchPatternOptions('A08Z-931-468a', Pattern, Options, TRUE);
+      RunIsMatchPatternOptions('_A90-123-129X', Pattern, Options, FALSE);
+      RunIsMatchPatternOptions('12345-KKA-1230', Pattern, Options, FALSE);
+      RunIsMatchPatternOptions('0919-2893-1256', Pattern, Options, FALSE);
+    END;
+
+    LOCAL PROCEDURE RunIsMatch@1000000002(Input@1000000001 : Text;Pattern@1000000000 : Text;ExpectedResult@1000000002 : Boolean);
+    VAR
+      Regex@1000000006 : Codeunit 66600;
+      Result@1000000004 : Boolean;
+    BEGIN
+      Regex.Construct(Pattern);
+      Result := Regex.IsMatch(Input);
+      TestRegexToolkit.VerifyBooleanResult(TestRegexToolkit.ArgsToString2('Input', Input, 'Pattern', Pattern), Result, ExpectedResult);
+    END;
+
+    LOCAL PROCEDURE RunIsMatchStartAt@1000000005(Input@1000000005 : Text;Pattern@1000000004 : Text;StartAt@1000000006 : Integer;ExpectedResult@1000000003 : Boolean);
+    VAR
+      Regex@1000000001 : Codeunit 66600;
+      Result@1000000000 : Boolean;
+    BEGIN
+      Regex.Construct(Pattern);
+      Result := Regex.IsMatchStartAt(Input, StartAt);
+      TestRegexToolkit.VerifyBooleanResult(TestRegexToolkit.ArgsToString3('Input', Input, 'StartAt', StartAt, 'Pattern', Pattern), Result, ExpectedResult);
+    END;
+
+    LOCAL PROCEDURE RunIsMatchPattern@1000000006(Input@1000000002 : Text;Pattern@1000000003 : Text;ExpectedResult@1000000004 : Boolean);
+    VAR
+      Regex@1000000001 : Codeunit 66600;
+      Result@1000000000 : Boolean;
+    BEGIN
+      Result := Regex.IsMatchPattern(Input, Pattern);
+      TestRegexToolkit.VerifyBooleanResult(TestRegexToolkit.ArgsToString2('Input', Input, 'Pattern', Pattern), Result, ExpectedResult);
+    END;
+
+    LOCAL PROCEDURE RunIsMatchPatternOptions@1000000012(Input@1000000002 : Text;Pattern@1000000001 : Text;VAR Options@1000000003 : Codeunit 66601;ExpectedResult@1000000000 : Boolean);
+    VAR
+      Regex@1000000005 : Codeunit 66600;
+      Result@1000000004 : Boolean;
+    BEGIN
+      Result := Regex.IsMatchPatternOptions(Input, Pattern, Options);
+      TestRegexToolkit.VerifyBooleanResult(TestRegexToolkit.ArgsToString3('Input', Input, 'Options', Options.ToString(), 'Pattern', Pattern), Result, ExpectedResult);
+    END;
+
+    [Test]
+    PROCEDURE TestMatch@1000000009();
+    VAR
+      Pattern@1000000000 : Text;
+    BEGIN
+      Pattern := '[A-Z0-9]\d{2}[A-Z0-9](-\d{3}){2}[A-Z0-9]';
+      RunMatch('Part No.: 1298-673-4192, On Stock: TRUE', Pattern, TRUE, 10, '1298-673-4192');
+      RunMatch('Number: A08Z-931-468A', Pattern, TRUE, 8, 'A08Z-931-468A');
+      RunMatch('Article _A90-123-129X', Pattern, FALSE, 0, '');
+      RunMatch('12345-KKA-1230 in Warehouse', Pattern, FALSE, 0, '');
+      RunMatch('0919-2893-1256', Pattern, FALSE, 0, '');
+    END;
+
+    [Test]
+    PROCEDURE TestMatchStartAt@1000000036();
+    VAR
+      Pattern@1000000000 : Text;
+    BEGIN
+      Pattern := '(Code|Text)\[\d+\]';
+      RunMatchStartAt('Create Code[20] or Text[20] variable and initialise.', 10, Pattern, TRUE, 19, 'Text[20]');
+      RunMatchStartAt('Make it Code[1024] or Text[MAX].', 15, Pattern, FALSE, 0, '');
+      RunMatchStartAt('In classic you can declare Text[1024].', 20, Pattern, TRUE, 27, 'Text[1024]');
+    END;
+
+    [Test]
+    PROCEDURE TestMatchBeginningLength@1000000043();
+    VAR
+      Pattern@1000000000 : Text;
+    BEGIN
+      Pattern := '(Code|Text)\[\d+\]';
+      RunMatchBeginningLength('Create Code[20] or Text[20] variable and initialise.', Pattern, 10, 30, TRUE, 19, 'Text[20]');
+      RunMatchBeginningLength('Create Code[20] or Text[20] variable and initialise.', Pattern, 10, 15, FALSE, 0, '');
+    END;
+
+    [Test]
+    PROCEDURE TestMatchPattern@1000000052();
+    VAR
+      Pattern@1000000000 : Text;
+    BEGIN
+      Pattern := '[A-Z0-9]\d{2}[A-Z0-9](-\d{3}){2}[A-Z0-9]';
+      RunMatchPattern('Part No.: 1298-673-4192, On Stock: TRUE', Pattern, TRUE, 10, '1298-673-4192');
+      RunMatchPattern('Number: A08Z-931-468A', Pattern, TRUE, 8, 'A08Z-931-468A');
+      RunMatchPattern('Article _A90-123-129X', Pattern, FALSE, 0, '');
+      RunMatchPattern('12345-KKA-1230 in Warehouse', Pattern, FALSE, 0, '');
+      RunMatchPattern('0919-2893-1256', Pattern, FALSE, 0, '');
+    END;
+
+    [Test]
+    PROCEDURE TestMatchPatternOptions@1000000059();
+    VAR
+      Pattern@1000000000 : Text;
+      Options@1000000001 : Codeunit 66601;
+    BEGIN
+      Pattern := '[A-Z0-9]\d{2}[A-Z0-9](-\d{3}){2}[A-Z0-9]';
+      Options.AddIgnoreCase();
+      RunMatchPatternOptions('Part No.: 1298-673-4192, On Stock: TRUE', Options, Pattern, TRUE, 10, '1298-673-4192');
+      RunMatchPatternOptions('Number: a08Z-931-468a', Options, Pattern, TRUE, 8, 'a08Z-931-468a');
+      RunMatchPatternOptions('Article _A90-123-129X', Options, Pattern, FALSE, 0, '');
+      RunMatchPatternOptions('12345-KKa-1230 in Warehouse', Options, Pattern, FALSE, 0, '');
+      RunMatchPatternOptions('0919-2893-1256', Options, Pattern, FALSE, 0, '');
+    END;
+
+    LOCAL PROCEDURE RunMatch@1000000010(Input@1000000002 : Text;Pattern@1000000003 : Text;ExpectedSuccess@1000000005 : Boolean;ExpectedIndex@1000000007 : Integer;ExpectedValue@1000000004 : Text);
+    VAR
+      Regex@1000000001 : Codeunit 66600;
+      Match@1000000000 : Codeunit 66602;
+    BEGIN
+      Regex.Construct(Pattern);
+      Regex.Match(Input, Match);
+      VerifyMatch(TestRegexToolkit.ArgsToString2('Input', Input, 'Pattern', Pattern), Match, ExpectedSuccess, ExpectedIndex, ExpectedValue);
+    END;
+
+    LOCAL PROCEDURE RunMatchStartAt@1000000037(Input@1000000001 : Text;StartAt@1000000003 : Integer;Pattern@1000000007 : Text;ExpectedSuccess@1000000005 : Boolean;ExpectedIndex@1000000008 : Integer;ExpectedValue@1000000009 : Text);
+    VAR
+      Regex@1000000000 : Codeunit 66600;
+      Match@1000000004 : Codeunit 66602;
+    BEGIN
+      Regex.Construct(Pattern);
+      Regex.MatchStartAt(Input, StartAt, Match);
+      VerifyMatch(TestRegexToolkit.ArgsToString3('Input', Input, 'StartAt', StartAt, 'Pattern', Pattern), Match, ExpectedSuccess, ExpectedIndex, ExpectedValue);
+    END;
+
+    LOCAL PROCEDURE RunMatchBeginningLength@1000000042(Input@1000000001 : Text;Pattern@1000000007 : Text;Beginning@1000000003 : Integer;Length@1000000012 : Integer;ExpectedSuccess@1000000005 : Boolean;ExpectedIndex@1000000008 : Integer;ExpectedValue@1000000009 : Text);
+    VAR
+      Regex@1000000000 : Codeunit 66600;
+      Match@1000000004 : Codeunit 66602;
+    BEGIN
+      Regex.Construct(Pattern);
+      Regex.MatchBeginningLength(Input, Beginning, Length, Match);
+      VerifyMatch(TestRegexToolkit.ArgsToString4('Input', Input, 'Beginning', Beginning, 'Length', Length, 'Pattern', Pattern), Match, ExpectedSuccess, ExpectedIndex, ExpectedValue);
+    END;
+
+    LOCAL PROCEDURE RunMatchPattern@1000000053(Input@1000000000 : Text;Pattern@1000000001 : Text;ExpectedSuccess@1000000006 : Boolean;ExpectedIndex@1000000005 : Integer;ExpectedValue@1000000004 : Text);
+    VAR
+      Regex@1000000002 : Codeunit 66600;
+      Match@1000000003 : Codeunit 66602;
+    BEGIN
+      Regex.MatchPattern(Input, Pattern, Match);
+      VerifyMatch(TestRegexToolkit.ArgsToString2('Input', Input, 'Pattern', Pattern), Match, ExpectedSuccess, ExpectedIndex, ExpectedValue);
+    END;
+
+    LOCAL PROCEDURE RunMatchPatternOptions@1000000058(Input@1000000000 : Text;VAR Options@1000000007 : Codeunit 66601;Pattern@1000000001 : Text;ExpectedSuccess@1000000006 : Boolean;ExpectedIndex@1000000005 : Integer;ExpectedValue@1000000004 : Text);
+    VAR
+      Regex@1000000002 : Codeunit 66600;
+      Match@1000000003 : Codeunit 66602;
+    BEGIN
+      Regex.MatchPatternOptions(Input, Pattern, Options, Match);
+      VerifyMatch(TestRegexToolkit.ArgsToString3('Input', Input, 'Options', Options.ToString(), 'Pattern', Pattern), Match, ExpectedSuccess, ExpectedIndex, ExpectedValue);
+    END;
+
+    LOCAL PROCEDURE VerifyMatch@1000000013(Arguments@1000000001 : Text;Match@1000000002 : Codeunit 66602;ExpectedSuccess@1000000003 : Boolean;ExpectedIndex@1000000004 : Integer;ExpectedValue@1000000005 : Text);
+    BEGIN
+      TestRegexToolkit.VerifyBooleanResult(Arguments, Match.Success, ExpectedSuccess);
+      TestRegexToolkit.VerifyIntegerResult(Arguments, Match.Index, ExpectedIndex);
+      TestRegexToolkit.VerifyTextResult(Arguments, Match.Value, ExpectedValue);
+    END;
+
+    [Test]
+    PROCEDURE TestMatches@1000000063();
+    VAR
+      Pattern@1000000000 : Text;
+      ExpectedIndexes@1000000001 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Collections.ArrayList";
+      ExpectedValues@1000000002 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Collections.ArrayList";
+    BEGIN
+      Pattern := '[A-Z0-9]\d{2}[A-Z0-9](-\d{3}){2}[A-Z0-9]';
+
+      TestRegexToolkit.SetArray3(ExpectedIndexes, 11, 26, 44);
+      TestRegexToolkit.SetArray3(ExpectedValues, '1298-673-4192', '1321-675-8745', 'A234-342-834Z');
+      RunMatches('Part Nos.: 1298-673-4192, 1321-675-8745 and A234-342-834Z', Pattern, 3, ExpectedIndexes, ExpectedValues);
+
+      TestRegexToolkit.SetArray1(ExpectedIndexes, 25);
+      TestRegexToolkit.SetArray1(ExpectedValues, 'Z093-902-234B');
+      RunMatches('a08Z-931-468a = On Hold, Z093-902-234B = Active', Pattern, 1, ExpectedIndexes, ExpectedValues);
+
+      TestRegexToolkit.SetArray2(ExpectedIndexes, 28, 58);
+      TestRegexToolkit.SetArray2(ExpectedValues, 'A08Z-931-468A', 'K892-222-893L');
+      RunMatches('Alternatives _A90-123-129X, A08Z-931-468A, A034-KKK-468D, K892-222-893L', Pattern, 2, ExpectedIndexes, ExpectedValues);
+    END;
+
+    [Test]
+    PROCEDURE TestMatchesStartAt@1000000022();
+    VAR
+      Pattern@1000000000 : Text;
+      ExpectedIndexes@1000000002 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Collections.ArrayList";
+      ExpectedValues@1000000001 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Collections.ArrayList";
+    BEGIN
+      Pattern := '[A-Z0-9]\d{2}[A-Z0-9](-\d{3}){2}[A-Z0-9]';
+
+      TestRegexToolkit.SetArray2(ExpectedIndexes, 15, 30);
+      TestRegexToolkit.SetArray2(ExpectedValues, '1321-675-8745', 'A234-342-834Z');
+      RunMatchesStartAt('1298-673-4192, 1321-675-8745, A234-342-834Z', 10, Pattern, 2, ExpectedIndexes, ExpectedValues);
+
+      TestRegexToolkit.SetArray1(ExpectedIndexes, 30);
+      TestRegexToolkit.SetArray1(ExpectedValues, 'Z093-902-234B');
+      RunMatchesStartAt('B111-223-023S, a08Z-931-468a, Z093-902-234B, M123-A1A-902N', 4, Pattern, 1, ExpectedIndexes, ExpectedValues);
+    END;
+
+    [Test]
+    PROCEDURE TestMatchesPattern@1000000033();
+    VAR
+      Pattern@1000000000 : Text;
+      ExpectedIndexes@1000000001 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Collections.ArrayList";
+      ExpectedValues@1000000002 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Collections.ArrayList";
+    BEGIN
+      Pattern := '[A-Z0-9]\d{2}[A-Z0-9](-\d{3}){2}[A-Z0-9]';
+
+      TestRegexToolkit.SetArray3(ExpectedIndexes, 11, 26, 44);
+      TestRegexToolkit.SetArray3(ExpectedValues, '1298-673-4192', '1321-675-8745', 'A234-342-834Z');
+      RunMatchesPattern('Part Nos.: 1298-673-4192, 1321-675-8745 and A234-342-834Z', Pattern, 3, ExpectedIndexes, ExpectedValues);
+
+      TestRegexToolkit.SetArray1(ExpectedIndexes, 25);
+      TestRegexToolkit.SetArray1(ExpectedValues, 'Z093-902-234B');
+      RunMatchesPattern('a08Z-931-468a = On Hold, Z093-902-234B = Active', Pattern, 1, ExpectedIndexes, ExpectedValues);
+
+      TestRegexToolkit.SetArray2(ExpectedIndexes, 28, 58);
+      TestRegexToolkit.SetArray2(ExpectedValues, 'A08Z-931-468A', 'K892-222-893L');
+      RunMatchesPattern('Alternatives _A90-123-129X, A08Z-931-468A, A034-KKK-468D, K892-222-893L', Pattern, 2, ExpectedIndexes, ExpectedValues);
+    END;
+
+    [Test]
+    PROCEDURE TestMatchesPatternOptions@1000000034();
+    VAR
+      Pattern@1000000000 : Text;
+      Options@1000000003 : Codeunit 66601;
+      ExpectedIndexes@1000000001 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Collections.ArrayList";
+      ExpectedValues@1000000002 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Collections.ArrayList";
+    BEGIN
+      Pattern := '[A-Z0-9]\d{2}[A-Z0-9](-\d{3}){2}[A-Z0-9]';
+      Options.AddIgnoreCase();
+
+      TestRegexToolkit.SetArray3(ExpectedIndexes, 11, 26, 44);
+      TestRegexToolkit.SetArray3(ExpectedValues, '1298-673-4192', '1321-675-8745', 'a234-342-834z');
+      RunMatchesPatternOptions('Part Nos.: 1298-673-4192, 1321-675-8745 and a234-342-834z', Pattern, Options, 3, ExpectedIndexes, ExpectedValues);
+
+      TestRegexToolkit.SetArray2(ExpectedIndexes, 0, 25);
+      TestRegexToolkit.SetArray2(ExpectedValues, 'a08Z-931-468a', 'Z093-902-234b');
+      RunMatchesPatternOptions('a08Z-931-468a = On Hold, Z093-902-234b = Active', Pattern, Options, 2, ExpectedIndexes, ExpectedValues);
+
+      TestRegexToolkit.SetArray2(ExpectedIndexes, 28, 58);
+      TestRegexToolkit.SetArray2(ExpectedValues, 'A08Z-931-468a', 'k892-222-893L');
+      RunMatchesPatternOptions('Alternatives _A90-123-129X, A08Z-931-468a, A034-KKK-468D, k892-222-893L', Pattern, Options, 2, ExpectedIndexes, ExpectedValues);
+    END;
+
+    LOCAL PROCEDURE RunMatches@1000000064(Input@1000000002 : Text;Pattern@1000000003 : Text;ExpectedMatchesCount@1000000004 : Integer;ExpectedIndexes@1000000006 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Collections.ArrayList";ExpectedValues@1000000005 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Collections.ArrayList");
+    VAR
+      Regex@1000000000 : Codeunit 66600;
+      Matches@1000000001 : Codeunit 66603;
+    BEGIN
+      Regex.Construct(Pattern);
+      Regex.Matches(Input, Matches);
+      VerifyMatches(TestRegexToolkit.ArgsToString2('Input', Input, 'Pattern', Pattern), Matches, ExpectedMatchesCount, ExpectedIndexes, ExpectedValues);
+    END;
+
+    LOCAL PROCEDURE RunMatchesStartAt@1000000023(Input@1000000001 : Text;StartAt@1000000004 : Integer;Pattern@1000000000 : Text;ExpectedMatchesCount@1000000007 : Integer;ExpectedIndexes@1000000006 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Collections.ArrayList";ExpectedValues@1000000005 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Collections.ArrayList");
+    VAR
+      Regex@1000000003 : Codeunit 66600;
+      Matches@1000000002 : Codeunit 66603;
+    BEGIN
+      Regex.Construct(Pattern);
+      Regex.MatchesStartAt(Input, StartAt, Matches);
+      VerifyMatches(TestRegexToolkit.ArgsToString2('Input', Input, 'Pattern', Pattern), Matches, ExpectedMatchesCount, ExpectedIndexes, ExpectedValues);
+    END;
+
+    LOCAL PROCEDURE RunMatchesPattern@1000000029(Input@1000000002 : Text;Pattern@1000000003 : Text;ExpectedMatchesCount@1000000004 : Integer;ExpectedIndexes@1000000006 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Collections.ArrayList";ExpectedValues@1000000005 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Collections.ArrayList");
+    VAR
+      Regex@1000000000 : Codeunit 66600;
+      Matches@1000000001 : Codeunit 66603;
+    BEGIN
+      Regex.MatchesPattern(Input, Pattern, Matches);
+      VerifyMatches(TestRegexToolkit.ArgsToString2('Input', Input, 'Pattern', Pattern), Matches, ExpectedMatchesCount, ExpectedIndexes, ExpectedValues);
+    END;
+
+    LOCAL PROCEDURE RunMatchesPatternOptions@1000000031(Input@1000000002 : Text;Pattern@1000000003 : Text;VAR Options@1000000007 : Codeunit 66601;ExpectedMatchesCount@1000000004 : Integer;ExpectedIndexes@1000000006 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Collections.ArrayList";ExpectedValues@1000000005 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Collections.ArrayList");
+    VAR
+      Regex@1000000000 : Codeunit 66600;
+      Matches@1000000001 : Codeunit 66603;
+    BEGIN
+      Regex.MatchesPatternOptions(Input, Pattern, Options, Matches);
+      VerifyMatches(TestRegexToolkit.ArgsToString3('Input', Input, 'Options', Options.ToString(), 'Pattern', Pattern), Matches, ExpectedMatchesCount, ExpectedIndexes, ExpectedValues);
+    END;
+
+    LOCAL PROCEDURE VerifyMatches@1000000008(Arguments@1000000004 : Text;Matches@1000000005 : Codeunit 66603;ExpectedMatchesCount@1000000002 : Integer;ExpectedIndexes@1000000001 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Collections.ArrayList";ExpectedValues@1000000000 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Collections.ArrayList");
+    VAR
+      Index@1000000006 : Integer;
+      Match@1000000007 : Codeunit 66602;
+    BEGIN
+      TestRegexToolkit.VerifyIntegerResult(Arguments, Matches.Count, ExpectedMatchesCount);
+      FOR Index := 0 TO Matches.Count - 1 DO BEGIN
+        Matches.Item(Index, Match);
+        TestRegexToolkit.VerifyIntegerResult(Arguments, Match.Index, ExpectedIndexes.Item(Index));
+        TestRegexToolkit.VerifyTextResult(Arguments, Match.Value, ExpectedValues.Item(Index));
+      END;
+    END;
+
+    [Test]
+    PROCEDURE TestReplace@1000000001();
+    VAR
+      Pattern@1000000000 : Text;
+      Replacement@1000000001 : Text;
+    BEGIN
+      Pattern := '([A-Z0-9]\d{2}[A-Z0-9])-(\d{3})-(\d{3}[A-Z0-9])';
+      Replacement := 'C=$1;P=$3;V=$2';
+      RunReplace('1298-673-4192', Pattern, Replacement, 'C=1298;P=4192;V=673');
+      RunReplace('A08Z-931-468A', Pattern, Replacement, 'C=A08Z;P=468A;V=931');
+      RunReplace('_A90-123-129X', Pattern, Replacement, '_A90-123-129X');
+      RunReplace('12345-KKA-1230', Pattern, Replacement, '12345-KKA-1230');
+    END;
+
+    [Test]
+    PROCEDURE TestReplaceCount@1000000007();
+    VAR
+      Pattern@1000000000 : Text;
+      Replacement@1000000001 : Text;
+    BEGIN
+      Pattern := '([A-Z0-9]\d{2}[A-Z0-9])-(\d{3})-(\d{3}[A-Z0-9])';
+      Replacement := 'C=$1;P=$3;V=$2';
+      RunReplaceCount('1298-673-4192, A08Z-931-468A', Pattern, Replacement, 2, 'C=1298;P=4192;V=673, C=A08Z;P=468A;V=931');
+      RunReplaceCount('1298-673-4192, A08Z-931-468A', Pattern, Replacement, 1, 'C=1298;P=4192;V=673, A08Z-931-468A');
+      RunReplaceCount('12345-KKA-1230, B00B-094-190M', Pattern, Replacement, 1, '12345-KKA-1230, C=B00B;P=190M;V=094');
+    END;
+
+    [Test]
+    PROCEDURE TestReplaceCountStartAt@1000000014();
+    VAR
+      Pattern@1000000001 : Text;
+      Replacement@1000000000 : Text;
+    BEGIN
+      Pattern := '([A-Z0-9]\d{2}[A-Z0-9])-(\d{3})-(\d{3}[A-Z0-9])';
+      Replacement := 'C=$1;P=$3;V=$2';
+      RunReplaceCountStartAt('1298-673-4192, A08Z-931-468A', Pattern, Replacement, 2, 10, '1298-673-4192, C=A08Z;P=468A;V=931');
+      RunReplaceCountStartAt('1298-673-4192, A08Z-931-468A, J90D-032-J90F', Pattern, Replacement, 1, 10, '1298-673-4192, C=A08Z;P=468A;V=931, J90D-032-J90F');
+    END;
+
+    [Test]
+    PROCEDURE TestReplacePattern@1000000015();
+    VAR
+      Pattern@1000000001 : Text;
+      Replacement@1000000000 : Text;
+    BEGIN
+      Pattern := '([A-Z0-9]\d{2}[A-Z0-9])-(\d{3})-(\d{3}[A-Z0-9])';
+      Replacement := 'C=$1;P=$3;V=$2';
+      RunReplacePattern('1298-673-4192', Pattern, Replacement, 'C=1298;P=4192;V=673');
+      RunReplacePattern('A08Z-931-468A', Pattern, Replacement, 'C=A08Z;P=468A;V=931');
+      RunReplacePattern('_A90-123-129X', Pattern, Replacement, '_A90-123-129X');
+      RunReplacePattern('12345-KKA-1230', Pattern, Replacement, '12345-KKA-1230');
+    END;
+
+    [Test]
+    PROCEDURE TestReplacePatternOptions@1000000016();
+    VAR
+      Pattern@1000000001 : Text;
+      Replacement@1000000000 : Text;
+      Options@1000000002 : Codeunit 66601;
+    BEGIN
+      Pattern := '([A-Z0-9]\d{2}[A-Z0-9])-(\d{3})-(\d{3}[A-Z0-9])';
+      Replacement := 'C=$1;P=$3;V=$2';
+      Options.AddIgnoreCase();
+      RunReplacePatternOptions('1298-673-4192', Pattern, Replacement, Options, 'C=1298;P=4192;V=673');
+      RunReplacePatternOptions('a08Z-931-468a', Pattern, Replacement, Options, 'C=a08Z;P=468a;V=931');
+      RunReplacePatternOptions('_A90-123-129X', Pattern, Replacement, Options, '_A90-123-129X');
+      RunReplacePatternOptions('12345-KKA-1230', Pattern, Replacement, Options, '12345-KKA-1230');
+    END;
+
+    LOCAL PROCEDURE RunReplace@1000000026(Input@1000000000 : Text;Pattern@1000000001 : Text;Replacement@1000000003 : Text;ExpectedReplacedText@1000000005 : Text);
+    VAR
+      Regex@1000000002 : Codeunit 66600;
+      ReplacedText@1000000004 : Text;
+    BEGIN
+      Regex.Construct(Pattern);
+      ReplacedText := Regex.Replace(Input, Replacement);
+      VerifyReplacedText(TestRegexToolkit.ArgsToString3('Input', Input, 'Pattern', Pattern, 'Replacement', Replacement), ReplacedText, ExpectedReplacedText);
+    END;
+
+    LOCAL PROCEDURE RunReplaceCount@1000000032(Input@1000000003 : Text;Pattern@1000000002 : Text;Replacement@1000000001 : Text;Count@1000000004 : Integer;ExpectedReplacedText@1000000000 : Text);
+    VAR
+      Regex@1000000006 : Codeunit 66600;
+      ReplacedText@1000000005 : Text;
+    BEGIN
+      Regex.Construct(Pattern);
+      ReplacedText := Regex.ReplaceCount(Input, Replacement, Count);
+      VerifyReplacedText(TestRegexToolkit.ArgsToString4('Input', Input, 'Pattern', Pattern, 'Replacement', Replacement, 'Count', Count), ReplacedText, ExpectedReplacedText);
+    END;
+
+    LOCAL PROCEDURE RunReplaceCountStartAt@1000000030(Input@1000000006 : Text;Pattern@1000000005 : Text;Replacement@1000000004 : Text;Count@1000000003 : Integer;StartAt@1000000007 : Integer;ExpectedReplacedText@1000000002 : Text);
+    VAR
+      Regex@1000000001 : Codeunit 66600;
+      ReplacedText@1000000000 : Text;
+    BEGIN
+      Regex.Construct(Pattern);
+      ReplacedText := Regex.ReplaceCountStartAt(Input, Replacement, Count, StartAt);
+      VerifyReplacedText(TestRegexToolkit.ArgsToString5('Input', Input, 'Pattern', Pattern, 'Replacement', Replacement, 'Count', Count, 'StartAt', StartAt), ReplacedText, ExpectedReplacedText);
+    END;
+
+    LOCAL PROCEDURE RunReplacePattern@1000000028(Input@1000000003 : Text;Pattern@1000000002 : Text;Replacement@1000000001 : Text;ExpectedReplacedText@1000000000 : Text);
+    VAR
+      Regex@1000000005 : Codeunit 66600;
+      ReplacedText@1000000004 : Text;
+    BEGIN
+      ReplacedText := Regex.ReplacePattern(Input, Pattern, Replacement);
+      VerifyReplacedText(TestRegexToolkit.ArgsToString3('Input', Input, 'Pattern', Pattern, 'Replacement', Replacement), ReplacedText, ExpectedReplacedText);
+    END;
+
+    LOCAL PROCEDURE RunReplacePatternOptions@1000000027(Input@1000000003 : Text;Pattern@1000000002 : Text;Replacement@1000000001 : Text;VAR Options@1000000004 : Codeunit 66601;ExpectedReplacedText@1000000000 : Text);
+    VAR
+      Regex@1000000006 : Codeunit 66600;
+      ReplacedText@1000000005 : Text;
+    BEGIN
+      ReplacedText := Regex.ReplacePatternOptions(Input, Pattern, Replacement, Options);
+      VerifyReplacedText(TestRegexToolkit.ArgsToString4('Input', Input, 'Pattern', Pattern, 'Replacement', Replacement, 'Options', Options.ToString()), ReplacedText, ExpectedReplacedText);
+    END;
+
+    LOCAL PROCEDURE VerifyReplacedText@1000000050(Arguments@1000000003 : Text;ReplacedText@1000000001 : Text;ExpectedReplacedText@1000000000 : Text);
+    BEGIN
+      TestRegexToolkit.VerifyTextResult(Arguments, ReplacedText, ExpectedReplacedText);
+    END;
+
+    [Test]
+    PROCEDURE TestSplit@1000000017();
+    VAR
+      Pattern@1000000000 : Text;
+      ExpectedStrings@1000000002 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Collections.ArrayList";
+    BEGIN
+      Pattern := '\w+=|,\w+=';
+      TestRegexToolkit.SetArray4(ExpectedStrings, '', 'one.jpg', 'two.jpg', 'three.jpg');
+      RunSplit('File=one.jpg,File=two.jpg,File=three.jpg', Pattern, ExpectedStrings);
+      TestRegexToolkit.SetArray4(ExpectedStrings, '', '123', 'One Two Three', 'true');
+      RunSplit('Id=123,Name=One Two Three,Enabled=true', Pattern, ExpectedStrings);
+    END;
+
+    [Test]
+    PROCEDURE TestSplitCount@1000000018();
+    VAR
+      Pattern@1000000000 : Text;
+      ExpectedStrings@1000000001 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Collections.ArrayList";
+    BEGIN
+      Pattern := '\w+=|,\w+=';
+      TestRegexToolkit.SetArray3(ExpectedStrings, '', '123', 'Active=false,Enabled=true');
+      RunSplitCount('Id=123,Name=Active=false,Enabled=true', Pattern, 3, ExpectedStrings);
+      TestRegexToolkit.SetArray3(ExpectedStrings, '', 'Check Item Quality', 'Name=John Smith,Frequency=Daily,Time=12:00:00');
+      RunSplitCount('Process=Check Item Quality,Details=Name=John Smith,Frequency=Daily,Time=12:00:00', Pattern, 3, ExpectedStrings);
+    END;
+
+    [Test]
+    PROCEDURE TestSplitCountStartAt@1000000019();
+    VAR
+      Pattern@1000000000 : Text;
+      ExpectedStrings@1000000001 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Collections.ArrayList";
+    BEGIN
+      Pattern := '\w+=|,\w+=';
+      TestRegexToolkit.SetArray2(ExpectedStrings, 'Id=123,Nam', 'One Two Three,Enabled=true');
+      RunSplitCountStartAt('Id=123,Name=One Two Three,Enabled=true', Pattern, 2, 10, ExpectedStrings);
+      TestRegexToolkit.SetArray2(ExpectedStrings, 'Process=Check Item Quality', 'Name=John Smith,Frequency=Daily,Time=12:00:00');
+      RunSplitCountStartAt('Process=Check Item Quality,Details=Name=John Smith,Frequency=Daily,Time=12:00:00', Pattern, 2, 25, ExpectedStrings);
+    END;
+
+    [Test]
+    PROCEDURE TestSplitPattern@1000000021();
+    VAR
+      Pattern@1000000000 : Text;
+      ExpectedStrings@1000000001 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Collections.ArrayList";
+    BEGIN
+      Pattern := '\w+=|,\w+=';
+      TestRegexToolkit.SetArray4(ExpectedStrings, '', '123', 'One Two Three', 'true');
+      RunSplitPattern('Id=123,Name=One Two Three,Enabled=true', Pattern, ExpectedStrings);
+      TestRegexToolkit.SetArray5(ExpectedStrings, '', 'Check Item Quality', 'John Smith', 'Daily', '12:00:00');
+      RunSplitPattern('Process=Check Item Quality,Responsible=John Smith,Frequency=Daily,Time=12:00:00', Pattern, ExpectedStrings);
+    END;
+
+    [Test]
+    PROCEDURE TestSplitPatternOptions@1000000024();
+    VAR
+      Pattern@1000000000 : Text;
+      Options@1000000002 : Codeunit 66601;
+      ExpectedStrings@1000000001 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Collections.ArrayList";
+    BEGIN
+      Pattern := '[A-Z]+=|,[A-Z]+=';
+      Options.AddIgnoreCase();
+      TestRegexToolkit.SetArray4(ExpectedStrings, '', '123', 'One Two Three', 'true');
+      RunSplitPatternOptions('Id=123,Name=One Two Three,Enabled=true', Pattern, Options, ExpectedStrings);
+      TestRegexToolkit.SetArray5(ExpectedStrings, '', 'Check Item Quality', 'John Smith', 'Daily', '12:00:00');
+      RunSplitPatternOptions('Process=Check Item Quality,Responsible=John Smith,Frequency=Daily,Time=12:00:00', Pattern, Options, ExpectedStrings);
+    END;
+
+    LOCAL PROCEDURE RunSplit@1000000038(Input@1000000001 : Text;Pattern@1000000003 : Text;ExpectedStrings@1000000005 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Collections.ArrayList");
+    VAR
+      Regex@1000000000 : Codeunit 66600;
+      Strings@1000000002 : Codeunit 66604;
+    BEGIN
+      Regex.Construct(Pattern);
+      Regex.Split(Input, Strings);
+      VerifyStrings(TestRegexToolkit.ArgsToString2('Input', Input, 'Pattern', Pattern), Strings, ExpectedStrings);
+    END;
+
+    LOCAL PROCEDURE RunSplitCount@1000000039(Input@1000000002 : Text;Pattern@1000000001 : Text;Count@1000000003 : Integer;ExpectedStrings@1000000006 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Collections.ArrayList");
+    VAR
+      Regex@1000000005 : Codeunit 66600;
+      Strings@1000000004 : Codeunit 66604;
+    BEGIN
+      Regex.Construct(Pattern);
+      Regex.SplitCount(Input, Count, Strings);
+      VerifyStrings(TestRegexToolkit.ArgsToString3('Input', Input, 'Pattern', Pattern, 'Count', Count), Strings, ExpectedStrings);
+    END;
+
+    LOCAL PROCEDURE RunSplitCountStartAt@1000000040(Input@1000000003 : Text;Pattern@1000000002 : Text;Count@1000000001 : Integer;StartAt@1000000004 : Integer;ExpectedStrings@1000000007 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Collections.ArrayList");
+    VAR
+      Regex@1000000006 : Codeunit 66600;
+      Strings@1000000005 : Codeunit 66604;
+    BEGIN
+      Regex.Construct(Pattern);
+      Regex.SplitCountStartAt(Input, Count, StartAt, Strings);
+      VerifyStrings(TestRegexToolkit.ArgsToString4('Input', Input, 'Pattern', Pattern, 'Count', Count, 'StartAt', StartAt), Strings, ExpectedStrings);
+    END;
+
+    LOCAL PROCEDURE RunSplitPattern@1000000041(Input@1000000003 : Text;Pattern@1000000002 : Text;ExpectedStrings@1000000005 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Collections.ArrayList");
+    VAR
+      Regex@1000000001 : Codeunit 66600;
+      Strings@1000000000 : Codeunit 66604;
+    BEGIN
+      Regex.SplitPattern(Input, Pattern, Strings);
+      VerifyStrings(TestRegexToolkit.ArgsToString2('Input', Input, 'Pattern', Pattern), Strings, ExpectedStrings);
+    END;
+
+    LOCAL PROCEDURE RunSplitPatternOptions@1000000044(Input@1000000003 : Text;Pattern@1000000002 : Text;VAR Options@1000000004 : Codeunit 66601;ExpectedStrings@1000000006 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Collections.ArrayList");
+    VAR
+      Regex@1000000001 : Codeunit 66600;
+      Strings@1000000000 : Codeunit 66604;
+    BEGIN
+      Regex.SplitPatternOptions(Input, Pattern, Options, Strings);
+      VerifyStrings(TestRegexToolkit.ArgsToString3('Input', Input, 'Pattern', Pattern, 'Options', Options.ToString()), Strings, ExpectedStrings);
+    END;
+
+    LOCAL PROCEDURE VerifyStrings@1000000047(Arguments@1000000003 : Text;Strings@1000000001 : Codeunit 66604;ExpectedStrings@1000000004 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Collections.ArrayList");
+    VAR
+      Equal@1000000000 : Boolean;
+      Index@1000000005 : Integer;
+      String@1000000008 : Text;
+      ExpectedString@1000000009 : Text;
+      StringsArray@1000000002 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Array";
+    BEGIN
+      Equal := (Strings.Length = ExpectedStrings.Count);
+      IF (Equal) THEN BEGIN
+        FOR Index := 0 TO Strings.Length - 1 DO BEGIN
+          String := Strings.GetValueText(Index);
+          ExpectedString := ExpectedStrings.Item(Index);
+          Equal := ((Equal) AND (String = ExpectedString));
+          IF ( NOT (Equal)) THEN BEGIN
+            Index := Strings.Length;
+          END;
+        END;
+      END;
+      Strings.Get(StringsArray);
+      TestRegexToolkit.VerifyResult(Arguments, Equal, STRSUBSTNO('[%1] %2', StringsArray.Length, TestRegexToolkit.ArrayToString(StringsArray)),
+        STRSUBSTNO('[%1] %2', ExpectedStrings.Count, TestRegexToolkit.ArrayListToString(ExpectedStrings)));
+    END;
+
+    BEGIN
+    END.
+  }
+}
+

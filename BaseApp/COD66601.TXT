@@ -1,0 +1,182 @@
+OBJECT Codeunit 66601 RegexOptions
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      This@1000000001 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.RegularExpressions.RegexOptions";
+      ThisValues@1000000000 : TEMPORARY Record 823;
+
+    [External]
+    PROCEDURE AddCompiled@1000000009();
+    BEGIN
+      Add(This.Compiled);
+    END;
+
+    [External]
+    PROCEDURE AddCultureInvariant@1000000017();
+    BEGIN
+      Add(This.CultureInvariant);
+    END;
+
+    [External]
+    PROCEDURE AddECMAScript@1000000018();
+    BEGIN
+      Add(This.ECMAScript);
+    END;
+
+    [External]
+    PROCEDURE AddExplicitCapture@1000000019();
+    BEGIN
+      Add(This.ExplicitCapture);
+    END;
+
+    [External]
+    PROCEDURE AddIgnoreCase@1000000020();
+    BEGIN
+      Add(This.IgnoreCase);
+    END;
+
+    [External]
+    PROCEDURE AddIgnorePatternWhitespace@1000000021();
+    BEGIN
+      Add(This.IgnorePatternWhitespace);
+    END;
+
+    [External]
+    PROCEDURE AddMultiline@1000000022();
+    BEGIN
+      Add(This.Multiline);
+    END;
+
+    [External]
+    PROCEDURE AddRightToLeft@1000000024();
+    BEGIN
+      Add(This.RightToLeft);
+    END;
+
+    [External]
+    PROCEDURE AddSingleline@1000000025();
+    BEGIN
+      Add(This.Singleline);
+    END;
+
+    LOCAL PROCEDURE Add@1000000014(Value@1000000000 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.RegularExpressions.RegexOptions");
+    VAR
+      ValueInteger@1000000001 : Integer;
+    BEGIN
+      ValueInteger := Value;
+      IF ( NOT (ThisValues.GET(ValueInteger))) THEN BEGIN
+        ThisValues.ID := ValueInteger;
+        ThisValues.Name := Value.ToString();
+        ThisValues.INSERT();
+      END;
+    END;
+
+    PROCEDURE Get@1000000002(VAR Destination@1000000000 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.RegularExpressions.RegexOptions");
+    VAR
+      RegexOptions@1000000001 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.RegularExpressions.RegexOptions";
+      ThisString@1000000002 : Text;
+    BEGIN
+      RegexOptions := RegexOptions.None;
+      ThisString := ToString();
+      IF (ThisString <> '') THEN BEGIN
+        Destination := This.Parse(RegexOptions.GetType(), ThisString);
+      END ELSE BEGIN
+        Destination := RegexOptions;
+      END;
+    END;
+
+    PROCEDURE Set@1000000004(Source@1000000000 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.RegularExpressions.RegexOptions");
+    VAR
+      String@1000000001 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.String";
+      Separators@1000000002 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.String";
+      StringParts@1000000003 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Array";
+      StringPart@1000000004 : Text;
+      RegexOptions@1000000005 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.RegularExpressions.RegexOptions";
+    BEGIN
+      ThisValues.RESET();
+      ThisValues.DELETEALL();
+      String := Source.ToString();
+      Separators := ',';
+      StringParts := String.Split(Separators.ToCharArray());
+      FOREACH StringPart IN StringParts DO BEGIN
+        RegexOptions := RegexOptions.None;
+        RegexOptions := RegexOptions.Parse(RegexOptions.GetType(), StringPart);
+        ThisValues.ID := RegexOptions;
+        ThisValues.Name := RegexOptions.ToString();
+        ThisValues.INSERT();
+      END;
+    END;
+
+    PROCEDURE ToString@1000000003() : Text;
+    VAR
+      String@1000000000 : Text;
+      ThisValue@1000000002 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.RegularExpressions.RegexOptions";
+    BEGIN
+      String := '';
+      ThisValues.RESET();
+      IF (ThisValues.FINDSET()) THEN BEGIN
+        REPEAT
+          IF (String <> '') THEN BEGIN
+            String := String + ', ';
+          END;
+          String := String + ThisValues.Name;
+        UNTIL (ThisValues.NEXT() = 0);
+      END;
+      EXIT(String);
+    END;
+
+    BEGIN
+    {
+      // Regex wrapper for C/AL; The 365 People; http://www.the365people.com; 2018
+      // Distributed as a part of Open C/AL Library
+      //
+      // The API is constructed as close to .NET as possible, with an idea of a codeunit as equivalent of a class or enum.
+      // It can be used directly from C/AL or from AL extension.
+      //
+      // Available C/AL codeunits and their .NET equivalents:
+      // ---------------------------------------------------------------------------------------------------------------------
+      // | Codeunit                       | .NET Element   | .NET Namespace                      | .NET Name                 |
+      // ---------------------------------------------------------------------------------------------------------------------
+      // | Regex                          | class          | System.Text.RegularExpressions      | Regex                     |
+      // | RegexOptions                   | enum           | System.Text.RegularExpressions      | RegexOptions              |
+      // | RegexMatch                     | class          | System.Text.RegularExpressions      | Match                     |
+      // | RegexMatchCollection           | class          | System.Text.RegularExpressions      | MatchCollection           |
+      // | RegexArray                     | class          | System                              | Array                     |
+      // | RegexGroup                     | class          | System.Text.RegularExpressions      | Group                     |
+      // | RegexGroupCollection           | class          | System.Text.RegularExpressions      | GroupCollection           |
+      // | RegexCapture                   | class          | System.Text.RegularExpressions      | Capture                   |
+      // | RegexCaptureCollection         | class          | System.Text.RegularExpressions      | CaptureCollection         |
+      // ---------------------------------------------------------------------------------------------------------------------
+      //
+      // Available C/AL CODEUNIT::"RegexOptions" members:
+      // ---------------------------------------------------------------------------------------------------------------------
+      // | C/AL Function                        | .NET Member   | .NET Name and Arguments                                    |
+      // ---------------------------------------------------------------------------------------------------------------------
+      // | AddCompiled                          | enum value    | RegexOptions.Compiled                                      |
+      // | AddCultureInvariant                  | enum value    | RegexOptions.CultureInvariant                              |
+      // | AddECMAScript                        | enum value    | RegexOptions.ECMAScript                                    |
+      // | AddExplicitCapture                   | enum value    | RegexOptions.ExplicitCapture                               |
+      // | AddIgnoreCase                        | enum value    | RegexOptions.IgnoreCase                                    |
+      // | AddIgnorePatternWhitespace           | enum value    | RegexOptions.IgnorePatternWhitespace                       |
+      // | AddMultiline                         | enum value    | RegexOptions.Multiline                                     |
+      // | AddRightToLeft                       | enum value    | RegexOptions.RightToLeft                                   |
+      // | AddSingleline                        | enum value    | RegexOptions.Singleline                                    |
+      // ---------------------------------------------------------------------------------------------------------------------
+    }
+    END.
+  }
+}
+

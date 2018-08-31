@@ -1,0 +1,138 @@
+OBJECT Codeunit 66608 RegexCaptureCollection
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      This@1000000001 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.RegularExpressions.CaptureCollection";
+
+    [External]
+    PROCEDURE Count@1000000002() : Integer;
+    BEGIN
+      EXIT(This.Count);
+    END;
+
+    [External]
+    PROCEDURE IsReadOnly@1000000003() : Boolean;
+    BEGIN
+      EXIT(This.IsReadOnly);
+    END;
+
+    [External]
+    PROCEDURE IsSynchronized@1000000004() : Boolean;
+    BEGIN
+      EXIT(This.IsSynchronized);
+    END;
+
+    [External]
+    PROCEDURE Item@1000000005(CaptureNumber@1000000001 : Integer;VAR Capture@1000000000 : Codeunit 66607);
+    VAR
+      CaptureObject@1000000002 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.RegularExpressions.Capture";
+    BEGIN
+      CaptureObject := This.Item(CaptureNumber);
+      Capture.Set(CaptureObject);
+    END;
+
+    LOCAL PROCEDURE CopyTo@1000000009(VAR Captures@1000000000 : Codeunit 66608;Index@1000000002 : Integer);
+    VAR
+      CapturesObject@1000000001 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.RegularExpressions.CaptureCollection";
+    BEGIN
+      This.CopyTo(CapturesObject, Index);
+      Captures.Set(CapturesObject);
+    END;
+
+    [External]
+    PROCEDURE Equals@1000000010(Capture@1000000000 : Codeunit 66607) : Boolean;
+    VAR
+      CaptureObject@1000000001 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.RegularExpressions.Capture";
+    BEGIN
+      Capture.Get(CaptureObject);
+      EXIT(This.Equals(CaptureObject));
+    END;
+
+    [External]
+    PROCEDURE EqualsCapturesCaptures@1000000006(CapturesA@1000000000 : Codeunit 66608;CapturesB@1000000001 : Codeunit 66608) : Boolean;
+    VAR
+      CapturesAObject@1000000002 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.RegularExpressions.CaptureCollection";
+      CapturesBObject@1000000003 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.RegularExpressions.CaptureCollection";
+    BEGIN
+      CapturesA.Get(CapturesAObject);
+      CapturesB.Get(CapturesBObject);
+      EXIT(This.Equals(CapturesAObject, CapturesBObject));
+    END;
+
+    [External]
+    PROCEDURE GetHashCode@1000000012() : Integer;
+    BEGIN
+      EXIT(This.GetHashCode());
+    END;
+
+    [External]
+    PROCEDURE ToString@1000000013() : Text;
+    BEGIN
+      EXIT(This.ToString());
+    END;
+
+    PROCEDURE Get@1000000001(VAR Destination@1000000000 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.RegularExpressions.CaptureCollection");
+    BEGIN
+      Destination := This;
+    END;
+
+    PROCEDURE Set@1000000000(Source@1000000000 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.RegularExpressions.CaptureCollection");
+    BEGIN
+      This := Source;
+    END;
+
+    BEGIN
+    {
+      // Regex wrapper for C/AL; The 365 People; http://www.the365people.com; 2018
+      // Distributed as a part of Open C/AL Library
+      //
+      // The API is constructed as close to .NET as possible, with an idea of a codeunit as equivalent of a class or enum.
+      // It can be used directly from C/AL or from AL extension.
+      //
+      // Available C/AL codeunits and their .NET equivalents:
+      // ---------------------------------------------------------------------------------------------------------------------
+      // | Codeunit                       | .NET Element   | .NET Namespace                      | .NET Name                 |
+      // ---------------------------------------------------------------------------------------------------------------------
+      // | Regex                          | class          | System.Text.RegularExpressions      | Regex                     |
+      // | RegexOptions                   | enum           | System.Text.RegularExpressions      | RegexOptions              |
+      // | RegexMatch                     | class          | System.Text.RegularExpressions      | Match                     |
+      // | RegexMatchCollection           | class          | System.Text.RegularExpressions      | MatchCollection           |
+      // | RegexArray                     | class          | System                              | Array                     |
+      // | RegexGroup                     | class          | System.Text.RegularExpressions      | Group                     |
+      // | RegexGroupCollection           | class          | System.Text.RegularExpressions      | GroupCollection           |
+      // | RegexCapture                   | class          | System.Text.RegularExpressions      | Capture                   |
+      // | RegexCaptureCollection         | class          | System.Text.RegularExpressions      | CaptureCollection         |
+      // ---------------------------------------------------------------------------------------------------------------------
+      //
+      // Available C/AL CODEUNIT::"RegexCaptureCollection" members:
+      // ---------------------------------------------------------------------------------------------------------------------
+      // | C/AL Function                        | .NET Member   | .NET Name and Arguments                                    |
+      // ---------------------------------------------------------------------------------------------------------------------
+      // | Count                                | property      | Count                                                      |
+      // | IsReadOnly                           | property      | IsReadOnly                                                 |
+      // | IsSynchronized                       | property      | IsSynchronized                                             |
+      // | Item                                 | indexer       | Item[int]                                                  |
+      // | CopyTo                               | method        | CopyTo(Array, int)                                         |
+      // | Equals                               | method        | Equals(object)                                             |
+      // | EqualsCapturesCaptures               | static method | Equals(object, object)                                     |
+      // | GetHashCode                          | method        | GetHashCode()                                              |
+      // | ToString                             | method        | ToString()                                                 |
+      // ---------------------------------------------------------------------------------------------------------------------
+    }
+    END.
+  }
+}
+

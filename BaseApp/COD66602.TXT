@@ -1,0 +1,169 @@
+OBJECT Codeunit 66602 RegexMatch
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      This@1000000000 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.RegularExpressions.Match";
+
+    [External]
+    PROCEDURE Groups@1000000003(VAR Groups@1000000000 : Codeunit 66606);
+    BEGIN
+      Groups.Set(This.Groups);
+    END;
+
+    [External]
+    PROCEDURE Index@1000000006() : Integer;
+    BEGIN
+      EXIT(This.Index);
+    END;
+
+    [External]
+    PROCEDURE Length@1000000005() : Integer;
+    BEGIN
+      EXIT(This.Length);
+    END;
+
+    [External]
+    PROCEDURE Name@1000000007() : Text;
+    BEGIN
+      EXIT(This.Name);
+    END;
+
+    [External]
+    PROCEDURE Success@1000000008() : Boolean;
+    BEGIN
+      EXIT(This.Success);
+    END;
+
+    [External]
+    PROCEDURE Value@1000000009() : Text;
+    BEGIN
+      EXIT(This.Value);
+    END;
+
+    [External]
+    PROCEDURE Equals@1000000010(Match@1000000001 : Codeunit 66602) : Boolean;
+    VAR
+      MatchObject@1000000000 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.RegularExpressions.Match";
+    BEGIN
+      Match.Get(MatchObject);
+      EXIT(This.Equals(MatchObject));
+    END;
+
+    [External]
+    PROCEDURE GetHashCode@1000000012() : Integer;
+    BEGIN
+      EXIT(This.GetHashCode());
+    END;
+
+    [External]
+    PROCEDURE NextMatch@1000000011(VAR NextMatch@1000000000 : Codeunit 66602);
+    VAR
+      NextMatchObject@1000000001 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.RegularExpressions.Match";
+    BEGIN
+      NextMatchObject := This.NextMatch();
+      NextMatch.Set(NextMatchObject);
+    END;
+
+    [External]
+    PROCEDURE Result@1000000013(Replacement@1000000000 : Text) : Text;
+    BEGIN
+      EXIT(This.Result(Replacement));
+    END;
+
+    [External]
+    PROCEDURE Synchronized@1000000014(InnerMatch@1000000000 : Codeunit 66602;VAR SynchronizedMatch@1000000001 : Codeunit 66602);
+    VAR
+      InnerMatchObject@1000000002 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.RegularExpressions.Match";
+      SynchronizedMatchObject@1000000003 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.RegularExpressions.Match";
+    BEGIN
+      InnerMatch.Get(InnerMatchObject);
+      SynchronizedMatchObject := This.Synchronized(InnerMatchObject);
+      SynchronizedMatch.Set(SynchronizedMatchObject);
+    END;
+
+    [External]
+    PROCEDURE SynchronizedGroup@1000000027(InnerGroup@1000000000 : Codeunit 66605;VAR SynchronizedGroup@1000000003 : Codeunit 66605);
+    VAR
+      InnerGroupObject@1000000002 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.RegularExpressions.Group";
+      SynchronizedGroupObject@1000000001 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.RegularExpressions.Group";
+    BEGIN
+      InnerGroup.Get(InnerGroupObject);
+      SynchronizedGroupObject := This.Synchronized(InnerGroupObject);
+      SynchronizedGroup.Set(SynchronizedGroupObject);
+    END;
+
+    [External]
+    PROCEDURE ToString@1000000015() : Text;
+    BEGIN
+      EXIT(This.ToString());
+    END;
+
+    PROCEDURE Get@1000000028(VAR Destination@1000000000 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.RegularExpressions.Match");
+    BEGIN
+      Destination := This;
+    END;
+
+    PROCEDURE Set@1000000000(Source@1000000000 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.RegularExpressions.Match");
+    BEGIN
+      This := Source;
+    END;
+
+    BEGIN
+    {
+      // Regex wrapper for C/AL; The 365 People; http://www.the365people.com; 2018
+      // Distributed as a part of Open C/AL Library
+      //
+      // The API is constructed as close to .NET as possible, with an idea of a codeunit as equivalent of a class or enum.
+      // It can be used directly from C/AL or from AL extension.
+      //
+      // Available C/AL codeunits and their .NET equivalents:
+      // ---------------------------------------------------------------------------------------------------------------------
+      // | Codeunit                       | .NET Element   | .NET Namespace                      | .NET Name                 |
+      // ---------------------------------------------------------------------------------------------------------------------
+      // | Regex                          | class          | System.Text.RegularExpressions      | Regex                     |
+      // | RegexOptions                   | enum           | System.Text.RegularExpressions      | RegexOptions              |
+      // | RegexMatch                     | class          | System.Text.RegularExpressions      | Match                     |
+      // | RegexMatchCollection           | class          | System.Text.RegularExpressions      | MatchCollection           |
+      // | RegexArray                     | class          | System                              | Array                     |
+      // | RegexGroup                     | class          | System.Text.RegularExpressions      | Group                     |
+      // | RegexGroupCollection           | class          | System.Text.RegularExpressions      | GroupCollection           |
+      // | RegexCapture                   | class          | System.Text.RegularExpressions      | Capture                   |
+      // | RegexCaptureCollection         | class          | System.Text.RegularExpressions      | CaptureCollection         |
+      // ---------------------------------------------------------------------------------------------------------------------
+      //
+      // Available C/AL CODEUNIT::"RegexMatch" members:
+      // ---------------------------------------------------------------------------------------------------------------------
+      // | C/AL Function                        | .NET Member   | .NET Name and Arguments                                    |
+      // ---------------------------------------------------------------------------------------------------------------------
+      // | Groups                               | property      | Groups                                                     |
+      // | Index                                | property      | Index                                                      |
+      // | Length                               | property      | Length                                                     |
+      // | Name                                 | property      | Name                                                       |
+      // | Success                              | property      | Success                                                    |
+      // | Value                                | property      | Value                                                      |
+      // | Equals                               | method        | Equals(object)                                             |
+      // | GetHashCode                          | method        | GetHashCode()                                              |
+      // | NextMatch                            | method        | NextMatch()                                                |
+      // | Result                               | method        | Result(string)                                             |
+      // | Synchronized                         | method        | Synchronized(Match)                                        |
+      // | SynchronizedGroup                    | method        | Synchronized(Match, Group)                                 |
+      // | ToString                             | method        | ToString()                                                 |
+      // ---------------------------------------------------------------------------------------------------------------------
+    }
+    END.
+  }
+}
+

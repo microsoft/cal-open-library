@@ -1,0 +1,413 @@
+OBJECT Codeunit 66600 Regex
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      This@1000000000 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.RegularExpressions.Regex";
+
+    [External]
+    PROCEDURE Construct@1000000001(Pattern@1000000000 : Text);
+    BEGIN
+      This := This.Regex(Pattern);
+    END;
+
+    [External]
+    PROCEDURE ConstructOptions@1000000002(Pattern@1000000000 : Text;VAR Options@1000000003 : Codeunit 66601);
+    VAR
+      RegexOptionsObject@1000000002 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.RegularExpressions.RegexOptions";
+    BEGIN
+      Options.Get(RegexOptionsObject);
+      This := This.Regex(Pattern, RegexOptionsObject);
+    END;
+
+    [External]
+    PROCEDURE ConstructOptionsMatchTimeout@1000000017(Pattern@1000000001 : Text;VAR Options@1000000000 : Codeunit 66601;MatchTimeout@1000000002 : Duration);
+    VAR
+      RegexOptionsObject@1000000003 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.RegularExpressions.RegexOptions";
+    BEGIN
+      Options.Get(RegexOptionsObject);
+      This := This.Regex(Pattern, RegexOptionsObject, MatchTimeout);
+    END;
+
+    [External]
+    PROCEDURE GetCacheSize@1000000006() : Integer;
+    BEGIN
+      EXIT(This.CacheSize);
+    END;
+
+    [External]
+    PROCEDURE SetCacheSize@1000000007(CacheSize@1000000000 : Integer);
+    BEGIN
+      This.CacheSize := CacheSize;
+    END;
+
+    [External]
+    PROCEDURE GetGroupNames@1000000026(VAR Names@1000000002 : Codeunit 66604);
+    VAR
+      NamesObject@1000000000 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Array";
+    BEGIN
+      NamesObject := This.GetGroupNames();
+      Names.Set(NamesObject);
+    END;
+
+    [External]
+    PROCEDURE GetGroupNumbers@1000000027(VAR Numbers@1000000002 : Codeunit 66604);
+    VAR
+      NumbersObject@1000000000 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Array";
+    BEGIN
+      NumbersObject := This.GetGroupNumbers();
+      Numbers.Set(NumbersObject);
+    END;
+
+    [External]
+    PROCEDURE GroupNameFromNumber@1000000030(Number@1000000000 : Integer) : Text;
+    BEGIN
+      EXIT(This.GroupNameFromNumber(Number));
+    END;
+
+    [External]
+    PROCEDURE GroupNumberFromName@1000000032(Name@1000000000 : Text) : Integer;
+    BEGIN
+      EXIT(This.GroupNumberFromName(Name));
+    END;
+
+    [External]
+    PROCEDURE IsMatch@1000000034(Input@1000000000 : Text) : Boolean;
+    BEGIN
+      EXIT(This.IsMatch(Input));
+    END;
+
+    [External]
+    PROCEDURE IsMatchStartAt@1000000036(Input@1000000000 : Text;StartAt@1000000001 : Integer) : Boolean;
+    BEGIN
+      EXIT(This.IsMatch(Input, StartAt));
+    END;
+
+    [External]
+    PROCEDURE IsMatchPattern@1000000038(Input@1000000000 : Text;Pattern@1000000001 : Text) : Boolean;
+    VAR
+      Regex@1000000002 : Codeunit 66600;
+    BEGIN
+      Regex.Construct(Pattern);
+      EXIT(Regex.IsMatch(Input));
+    END;
+
+    [External]
+    PROCEDURE IsMatchPatternOptions@1000000041(Input@1000000001 : Text;Pattern@1000000000 : Text;VAR Options@1000000004 : Codeunit 66601) : Boolean;
+    VAR
+      Regex@1000000003 : Codeunit 66600;
+    BEGIN
+      Regex.ConstructOptions(Pattern, Options);
+      EXIT(Regex.IsMatch(Input));
+    END;
+
+    [External]
+    PROCEDURE IsMatchPatternOptionsMatchTimeout@1000000043(Input@1000000001 : Text;Pattern@1000000000 : Text;VAR Options@1000000005 : Codeunit 66601;MatchTimeout@1000000004 : Duration) : Boolean;
+    VAR
+      Regex@1000000003 : Codeunit 66600;
+    BEGIN
+      Regex.ConstructOptionsMatchTimeout(Pattern, Options, MatchTimeout);
+      EXIT(Regex.IsMatch(Input));
+    END;
+
+    [External]
+    PROCEDURE Match@1000000000(Input@1000000000 : Text;VAR Match@1000000001 : Codeunit 66602);
+    VAR
+      MatchObject@1000000003 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.RegularExpressions.Match";
+    BEGIN
+      MatchObject := This.Match(Input);
+      Match.Set(MatchObject);
+    END;
+
+    [External]
+    PROCEDURE MatchStartAt@1000000009(Input@1000000000 : Text;StartAt@1000000002 : Integer;VAR Match@1000000001 : Codeunit 66602);
+    VAR
+      MatchObject@1000000003 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.RegularExpressions.Match";
+    BEGIN
+      MatchObject := This.Match(Input, StartAt);
+      Match.Set(MatchObject);
+    END;
+
+    [External]
+    PROCEDURE MatchBeginningLength@1000000011(Input@1000000000 : Text;Beginning@1000000002 : Integer;Length@1000000003 : Integer;VAR Match@1000000001 : Codeunit 66602);
+    VAR
+      MatchObject@1000000004 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.RegularExpressions.Match";
+    BEGIN
+      MatchObject := This.Match(Input, Beginning, Length);
+      Match.Set(MatchObject);
+    END;
+
+    [External]
+    PROCEDURE MatchPattern@1000000013(Input@1000000000 : Text;Pattern@1000000002 : Text;VAR Match@1000000001 : Codeunit 66602);
+    VAR
+      Regex@1000000003 : Codeunit 66600;
+    BEGIN
+      Regex.Construct(Pattern);
+      Regex.Match(Input, Match);
+    END;
+
+    [External]
+    PROCEDURE MatchPatternOptions@1000000012(Input@1000000000 : Text;Pattern@1000000002 : Text;VAR Options@1000000005 : Codeunit 66601;VAR Match@1000000001 : Codeunit 66602);
+    VAR
+      Regex@1000000003 : Codeunit 66600;
+    BEGIN
+      Regex.ConstructOptions(Pattern, Options);
+      Regex.Match(Input, Match);
+    END;
+
+    [External]
+    PROCEDURE MatchPatternOptionsMatchTimeout@1000000016(Input@1000000000 : Text;Pattern@1000000002 : Text;VAR Options@1000000006 : Codeunit 66601;MatchTimeout@1000000005 : Duration;VAR Match@1000000001 : Codeunit 66602);
+    VAR
+      Regex@1000000003 : Codeunit 66600;
+    BEGIN
+      Regex.ConstructOptionsMatchTimeout(Pattern, Options, MatchTimeout);
+      Regex.Match(Input, Match);
+    END;
+
+    [External]
+    PROCEDURE Matches@1000000019(Input@1000000000 : Text;VAR MatchCollection@1000000001 : Codeunit 66603);
+    VAR
+      MatchCollectionObject@1000000002 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.RegularExpressions.MatchCollection";
+    BEGIN
+      MatchCollectionObject := This.Matches(Input);
+      MatchCollection.Set(MatchCollectionObject);
+    END;
+
+    [External]
+    PROCEDURE MatchesStartAt@1000000010(Input@1000000000 : Text;StartAt@1000000003 : Integer;VAR MatchCollection@1000000001 : Codeunit 66603);
+    VAR
+      MatchCollectionObject@1000000002 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.RegularExpressions.MatchCollection";
+    BEGIN
+      MatchCollectionObject := This.Matches(Input, StartAt);
+      MatchCollection.Set(MatchCollectionObject);
+    END;
+
+    [External]
+    PROCEDURE MatchesPattern@1000000015(Input@1000000000 : Text;Pattern@1000000003 : Text;VAR MatchCollection@1000000001 : Codeunit 66603);
+    VAR
+      Regex@1000000004 : Codeunit 66600;
+    BEGIN
+      Regex.Construct(Pattern);
+      Regex.Matches(Input, MatchCollection);
+    END;
+
+    [External]
+    PROCEDURE MatchesPatternOptions@1000000014(Input@1000000000 : Text;Pattern@1000000003 : Text;VAR Options@1000000005 : Codeunit 66601;VAR MatchCollection@1000000001 : Codeunit 66603);
+    VAR
+      Regex@1000000004 : Codeunit 66600;
+    BEGIN
+      Regex.ConstructOptions(Pattern, Options);
+      Regex.Matches(Input, MatchCollection);
+    END;
+
+    [External]
+    PROCEDURE MatchesPatternOptionsMatchTimeout@1000000022(Input@1000000000 : Text;Pattern@1000000003 : Text;VAR Options@1000000006 : Codeunit 66601;MatchTimeout@1000000005 : Duration;VAR MatchCollection@1000000001 : Codeunit 66603);
+    VAR
+      Regex@1000000004 : Codeunit 66600;
+    BEGIN
+      Regex.ConstructOptionsMatchTimeout(Pattern, Options, MatchTimeout);
+      Regex.Matches(Input, MatchCollection);
+    END;
+
+    [External]
+    PROCEDURE Replace@1000000024(Input@1000000000 : Text;Replacement@1000000001 : Text) : Text;
+    BEGIN
+      EXIT(This.Replace(Input, Replacement));
+    END;
+
+    [External]
+    PROCEDURE ReplaceCount@1000000031(Input@1000000000 : Text;Replacement@1000000001 : Text;Count@1000000002 : Integer) : Text;
+    BEGIN
+      EXIT(This.Replace(Input, Replacement, Count));
+    END;
+
+    [External]
+    PROCEDURE ReplaceCountStartAt@1000000035(Input@1000000000 : Text;Replacement@1000000001 : Text;Count@1000000002 : Integer;StartAt@1000000003 : Integer) : Text;
+    BEGIN
+      EXIT(This.Replace(Input, Replacement, Count, StartAt));
+    END;
+
+    [External]
+    PROCEDURE ReplacePattern@1000000039(Input@1000000000 : Text;Pattern@1000000002 : Text;Replacement@1000000001 : Text) : Text;
+    VAR
+      Regex@1000000003 : Codeunit 66600;
+    BEGIN
+      Regex.Construct(Pattern);
+      EXIT(Regex.Replace(Input, Replacement));
+    END;
+
+    [External]
+    PROCEDURE ReplacePatternOptions@1000000008(Input@1000000000 : Text;Pattern@1000000002 : Text;Replacement@1000000001 : Text;VAR Options@1000000005 : Codeunit 66601) : Text;
+    VAR
+      Regex@1000000003 : Codeunit 66600;
+    BEGIN
+      Regex.ConstructOptions(Pattern, Options);
+      EXIT(Regex.Replace(Input, Replacement));
+    END;
+
+    [External]
+    PROCEDURE ReplacePatternOptionsMatchTimeout@1000000023(Input@1000000000 : Text;Pattern@1000000002 : Text;Replacement@1000000001 : Text;VAR Options@1000000006 : Codeunit 66601;MatchTimeout@1000000005 : Duration) : Text;
+    VAR
+      Regex@1000000003 : Codeunit 66600;
+    BEGIN
+      Regex.ConstructOptionsMatchTimeout(Pattern, Options, MatchTimeout);
+      EXIT(Regex.Replace(Input, Replacement));
+    END;
+
+    [External]
+    PROCEDURE Split@1000000033(Input@1000000000 : Text;VAR Strings@1000000001 : Codeunit 66604);
+    VAR
+      StringsObject@1000000002 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Array";
+    BEGIN
+      StringsObject := This.Split(Input);
+      Strings.Set(StringsObject);
+    END;
+
+    [External]
+    PROCEDURE SplitCount@1000000044(Input@1000000000 : Text;Count@1000000003 : Integer;VAR Strings@1000000001 : Codeunit 66604);
+    VAR
+      StringsObject@1000000002 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Array";
+    BEGIN
+      StringsObject := This.Split(Input, Count);
+      Strings.Set(StringsObject);
+    END;
+
+    [External]
+    PROCEDURE SplitCountStartAt@1000000046(Input@1000000000 : Text;Count@1000000003 : Integer;StartAt@1000000004 : Integer;VAR Strings@1000000001 : Codeunit 66604);
+    VAR
+      StringsObject@1000000002 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Array";
+    BEGIN
+      StringsObject := This.Split(Input, Count, StartAt);
+      Strings.Set(StringsObject);
+    END;
+
+    [External]
+    PROCEDURE SplitPattern@1000000049(Input@1000000000 : Text;Pattern@1000000003 : Text;VAR Strings@1000000001 : Codeunit 66604);
+    VAR
+      Regex@1000000004 : Codeunit 66600;
+    BEGIN
+      Regex.Construct(Pattern);
+      Regex.Split(Input, Strings);
+    END;
+
+    [External]
+    PROCEDURE SplitPatternOptions@1000000018(Input@1000000000 : Text;Pattern@1000000003 : Text;VAR Options@1000000005 : Codeunit 66601;VAR Strings@1000000001 : Codeunit 66604);
+    VAR
+      Regex@1000000004 : Codeunit 66600;
+    BEGIN
+      Regex.ConstructOptions(Pattern, Options);
+      Regex.Split(Input, Strings);
+    END;
+
+    [External]
+    PROCEDURE SplitPatternOptionsMatchTimeout@1000000029(Input@1000000000 : Text;Pattern@1000000003 : Text;VAR Options@1000000006 : Codeunit 66601;MatchTimeout@1000000005 : Duration;VAR Strings@1000000001 : Codeunit 66604);
+    VAR
+      Regex@1000000004 : Codeunit 66600;
+    BEGIN
+      Regex.ConstructOptionsMatchTimeout(Pattern, Options, MatchTimeout);
+      Regex.Split(Input, Strings);
+    END;
+
+    [External]
+    PROCEDURE GetHashCode@1000000028() : Integer;
+    BEGIN
+      EXIT(This.GetHashCode());
+    END;
+
+    [External]
+    PROCEDURE Escape@1000000021(String@1000000000 : Text) : Text;
+    BEGIN
+      EXIT(This.Escape(String));
+    END;
+
+    [External]
+    PROCEDURE Unescape@1000000048(String@1000000000 : Text) : Text;
+    BEGIN
+      EXIT(This.Unescape(String));
+    END;
+
+    BEGIN
+    {
+      // Regex wrapper for C/AL; The 365 People; http://www.the365people.com; 2018
+      // Distributed as a part of Open C/AL Library
+      //
+      // The API is constructed as close to .NET as possible, with an idea of a codeunit as equivalent of a class or enum.
+      // It can be used directly from C/AL or from AL extension.
+      //
+      // Available C/AL codeunits and their .NET equivalents:
+      // ---------------------------------------------------------------------------------------------------------------------
+      // | Codeunit                       | .NET Element   | .NET Namespace                      | .NET Name                 |
+      // ---------------------------------------------------------------------------------------------------------------------
+      // | Regex                          | class          | System.Text.RegularExpressions      | Regex                     |
+      // | RegexOptions                   | enum           | System.Text.RegularExpressions      | RegexOptions              |
+      // | RegexMatch                     | class          | System.Text.RegularExpressions      | Match                     |
+      // | RegexMatchCollection           | class          | System.Text.RegularExpressions      | MatchCollection           |
+      // | RegexArray                     | class          | System                              | Array                     |
+      // | RegexGroup                     | class          | System.Text.RegularExpressions      | Group                     |
+      // | RegexGroupCollection           | class          | System.Text.RegularExpressions      | GroupCollection           |
+      // | RegexCapture                   | class          | System.Text.RegularExpressions      | Capture                   |
+      // | RegexCaptureCollection         | class          | System.Text.RegularExpressions      | CaptureCollection         |
+      // ---------------------------------------------------------------------------------------------------------------------
+      //
+      // Available C/AL CODEUNIT::"Regex" members:
+      // ---------------------------------------------------------------------------------------------------------------------
+      // | C/AL Function                        | .NET Member   | .NET Name and Arguments                                    |
+      // ---------------------------------------------------------------------------------------------------------------------
+      // | Construct                            | constructor   | Regex(string)                                              |
+      // | ConstructOptions                     | constructor   | Regex(string, RegexOptions)                                |
+      // | ConstructOptionsMatchTimeout         | constructor   | Regex(string, RegexOptions, TimeSpan)                      |
+      // | GetCacheSize                         | property      | CacheSize                                                  |
+      // | SetCacheSize                         | property      | CacheSize                                                  |
+      // | GetGroupNames                        | method        | GetGroupNames()                                            |
+      // | GetGroupNumbers                      | method        | GetGroupNumbers()                                          |
+      // | GroupNameFromNumber                  | method        | GroupNameFromNumber(int)                                   |
+      // | GroupNumberFromName                  | method        | GroupNumberFromName(string)                                |
+      // | IsMatch                              | method        | IsMatch(string)                                            |
+      // | IsMatchStartAt                       | method        | IsMatch(string, int)                                       |
+      // | IsMatchPattern                       | static method | IsMatch(string, string)                                    |
+      // | IsMatchPatternOptions                | static method | IsMatch(string, string, RegexOptions)                      |
+      // | IsMatchPatternOptionsMatchTimeout    | static method | IsMatch(string, string, RegexOptions, TimeSpan)            |
+      // | Match                                | method        | Match(string)                                              |
+      // | MatchStartAt                         | method        | Match(string, int)                                         |
+      // | MatchBeginningLength                 | method        | Match(string, int, int)                                    |
+      // | MatchPattern                         | static method | Match(string, string)                                      |
+      // | MatchPatternOptions                  | static method | Match(string, string, RegexOptions)                        |
+      // | MatchPatternOptionsMatchTimeout      | static method | Match(string, string, RegexOptions, TimeSpan)              |
+      // | Matches                              | method        | Matches(string)                                            |
+      // | MatchesStartAt                       | method        | Matches(string, int)                                       |
+      // | MatchesPattern                       | static method | Matches(string, string)                                    |
+      // | MatchesPatternOptions                | static method | Matches(string, string, RegexOptions)                      |
+      // | MatchesPatternOptionsMatchTimeout    | static method | Matches(string, string, RegexOptions, TimeSpan)            |
+      // | Replace                              | method        | Replace(string, string)                                    |
+      // | ReplaceCount                         | method        | Replace(string, string, int)                               |
+      // | ReplaceCountStartAt                  | method        | Replace(string, string, int, int)                          |
+      // | ReplacePattern                       | static method | Replace(string, string, string)                            |
+      // | ReplacePatternOptions                | static method | Replace(string, string, string, RegexOptions)              |
+      // | ReplacePatternOptionsMatchTimeout    | static method | Replace(string, string, string, RegexOptions, TimeSpan)    |
+      // | Split                                | method        | Split(string)                                              |
+      // | SplitCount                           | method        | Split(string, int)                                         |
+      // | SplitCountStartAt                    | method        | Split(string, int, int)                                    |
+      // | SplitPattern                         | static method | Split(string, string)                                      |
+      // | SplitPatternOptions                  | static method | Split(string, string, RegexOptions)                        |
+      // | SplitPatternOptionsMatchTimeout      | static method | Split(string, string, RegexOptions, TimeSpan)              |
+      // | GetHashCode                          | method        | GetHashCode()                                              |
+      // | Escape                               | method        | Escape(string)                                             |
+      // | Unescape                             | method        | Unescape(string)                                           |
+      // ---------------------------------------------------------------------------------------------------------------------
+    }
+    END.
+  }
+}
+
