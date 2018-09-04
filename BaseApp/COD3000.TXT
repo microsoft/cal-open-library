@@ -39,6 +39,12 @@ OBJECT Codeunit 3000 DotNet_Array
       DotNetArray := DotNetArray2
     END;
 
+    [External]
+    PROCEDURE GetValueAsInteger@1000000000(Index@1000 : Integer) : Integer;
+    BEGIN
+      EXIT(DotNetArray.GetValue(Index))
+    END;
+
     BEGIN
     END.
   }

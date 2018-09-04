@@ -1,0 +1,27 @@
+OBJECT Codeunit 145900 Test_DotNet_Regex_Runner
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    Subtype=TestRunner;
+    TestIsolation=Function;
+    OnRun=BEGIN
+            CODEUNIT.RUN(CODEUNIT::Test_DotNet_Regex);
+            CODEUNIT.RUN(CODEUNIT::Test_DotNet_MatchGroupCapture);
+            CODEUNIT.RUN(CODEUNIT::Test_DotNet_Array);
+          END;
+
+  }
+  CODE
+  {
+
+    BEGIN
+    END.
+  }
+}
+

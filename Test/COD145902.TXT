@@ -1,0 +1,318 @@
+OBJECT Codeunit 145902 Test_DotNet_MatchGroupCapture
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    Subtype=Test;
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      TestToolkit@1000000000 : Codeunit 145904;
+
+    [Test]
+    PROCEDURE TestMatchGroups@1000000000();
+    VAR
+      Pattern@1000000000 : Text;
+      ExpectedLengths@1000000003 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Collections.ArrayList";
+      ExpectedNames@1000000002 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Collections.ArrayList";
+      ExpectedValues@1000000001 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Collections.ArrayList";
+    BEGIN
+      Pattern := '(?<Family>[A-Z]\d{2}[A-Z])-(?<Series>\d{3})-(?<Variant>[A-Z])';
+
+      TestToolkit.SetArray4(ExpectedLengths, 10, 4, 3, 1);
+      TestToolkit.SetArray4(ExpectedNames, '0', 'Family', 'Series', 'Variant');
+      TestToolkit.SetArray4(ExpectedValues, 'A23B-234-C', 'A23B', '234', 'C');
+      TestMatchGroupsOnce('Part No.: A23B-234-C, Replacement: C99Z-902-M', Pattern, 4, ExpectedLengths, ExpectedNames, ExpectedValues);
+
+      TestToolkit.SetArray4(ExpectedLengths, 10, 4, 3, 1);
+      TestToolkit.SetArray4(ExpectedNames, '0', 'Family', 'Series', 'Variant');
+      TestToolkit.SetArray4(ExpectedValues, 'C99Z-902-M', 'C99Z', '902', 'M');
+      TestMatchGroupsOnce('Part No.: 123B-234-C, Replacement: C99Z-902-M', Pattern, 4, ExpectedLengths, ExpectedNames, ExpectedValues);
+
+      TestToolkit.SetArray1(ExpectedLengths, 0);
+      TestToolkit.SetArray1(ExpectedNames, '0');
+      TestToolkit.SetArray1(ExpectedValues, '');
+      TestMatchGroupsOnce('Part No.: 123B-234-C, Replacement: C99Z-AA2-M', Pattern, 1, ExpectedLengths, ExpectedNames, ExpectedValues);
+    END;
+
+    LOCAL PROCEDURE TestMatchGroupsOnce@1000000003(Input@1000000003 : Text;Pattern@1000000002 : Text;ExpectedCount@1000000004 : Integer;ExpectedLengths@1000000009 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Collections.ArrayList";ExpectedNames@1000000008 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Collections.ArrayList";ExpectedValues@1000000010 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Collections.ArrayList");
+    VAR
+      Regex@1000000001 : Codeunit 3001;
+      Match@1000000000 : Codeunit 3042;
+      Groups@1000000006 : Codeunit 3046;
+      Group@1000000005 : Codeunit 3045;
+      Index@1000000007 : Integer;
+      ExpectedLength@1000000011 : Integer;
+      ExpectedName@1000000012 : Text;
+      ExpectedValue@1000000013 : Text;
+    BEGIN
+      Regex.Regex(Pattern);
+      Regex.Match(Input, Match);
+      Match.Groups(Groups);
+      TestToolkit.VerifyIntegerResult(TestToolkit.ArgsToString2('Input', Input, 'Pattern', Pattern), Groups.Count, ExpectedCount);
+      FOR Index := 0 TO Groups.Count-1 DO BEGIN
+        ExpectedLength := ExpectedLengths.Item(Index);
+        ExpectedName := ExpectedNames.Item(Index);
+        ExpectedValue := ExpectedValues.Item(Index);
+        Groups.Item(Index, Group);
+        TestToolkit.VerifyIntegerResult(TestToolkit.ArgsToString4('Input', Input, 'Pattern', Pattern, 'GroupIndex', Index, 'Property', 'Length'), Group.Length, ExpectedLength);
+        TestToolkit.VerifyTextResult(TestToolkit.ArgsToString4('Input', Input, 'Pattern', Pattern, 'GroupIndex', Index, 'Property', 'Name'), Group.Name, ExpectedName);
+        TestToolkit.VerifyTextResult(TestToolkit.ArgsToString4('Input', Input, 'Pattern', Pattern, 'GroupIndex', Index, 'Property', 'Value'), Group.Value, ExpectedValue);
+      END;
+    END;
+
+    [Test]
+    PROCEDURE TestMatchIndex@1000000001();
+    VAR
+      Pattern@1000000000 : Text;
+    BEGIN
+      Pattern := '[A-Z]\d{2}[A-Z]-\d{3}-[A-Z]';
+      TestMatchIndexOnce('Part No.: A23B-234-C, Replacement: C99Z-902-M', Pattern, 10);
+      TestMatchIndexOnce('Part No.: 123B-234-C, Replacement: C99Z-902-M', Pattern, 35);
+      TestMatchIndexOnce('Part No.: 123B-234-C, Replacement: C99Z-AA2-M', Pattern, 0);
+    END;
+
+    LOCAL PROCEDURE TestMatchIndexOnce@1000000008(Input@1000000003 : Text;Pattern@1000000002 : Text;ExpectedIndex@1000000004 : Integer);
+    VAR
+      Regex@1000000001 : Codeunit 3001;
+      Match@1000000000 : Codeunit 3042;
+    BEGIN
+      Regex.Regex(Pattern);
+      Regex.Match(Input, Match);
+      TestToolkit.VerifyIntegerResult(TestToolkit.ArgsToString2('Input', Input, 'Pattern', Pattern), Match.Index, ExpectedIndex);
+    END;
+
+    [Test]
+    PROCEDURE TestMatchLength@1000000002();
+    VAR
+      Pattern@1000000000 : Text;
+    BEGIN
+      Pattern := '[A-Z]\d{2}[A-Z]-\d{3}-[A-Z]';
+      TestMatchLengthOnce('Part No.: A23B-234-C, Replacement: C99Z-902-M', Pattern, 10);
+      TestMatchLengthOnce('Part No.: 123B-234-C, Replacement: C99Z-902-M', Pattern, 10);
+      TestMatchLengthOnce('Part No.: 123B-234-C, Replacement: C99Z-AA2-M', Pattern, 0);
+    END;
+
+    LOCAL PROCEDURE TestMatchLengthOnce@1000000007(Input@1000000003 : Text;Pattern@1000000002 : Text;ExpectedLength@1000000004 : Integer);
+    VAR
+      Regex@1000000001 : Codeunit 3001;
+      Match@1000000000 : Codeunit 3042;
+    BEGIN
+      Regex.Regex(Pattern);
+      Regex.Match(Input, Match);
+      TestToolkit.VerifyIntegerResult(TestToolkit.ArgsToString2('Input', Input, 'Pattern', Pattern), Match.Length, ExpectedLength);
+    END;
+
+    [Test]
+    PROCEDURE TestMatchSuccess@1000000004();
+    VAR
+      Pattern@1000000000 : Text;
+    BEGIN
+      Pattern := '[A-Z]\d{2}[A-Z]-\d{3}-[A-Z]';
+      TestMatchSuccessOnce('Part No.: A23B-234-C, Replacement: C99Z-902-M', Pattern, TRUE);
+      TestMatchSuccessOnce('Part No.: 123B-234-C, Replacement: C99Z-902-M', Pattern, TRUE);
+      TestMatchSuccessOnce('Part No.: 123B-234-C, Replacement: C99Z-AA2-M', Pattern, FALSE);
+    END;
+
+    LOCAL PROCEDURE TestMatchSuccessOnce@1000000012(Input@1000000003 : Text;Pattern@1000000002 : Text;ExpectedSuccess@1000000004 : Boolean);
+    VAR
+      Regex@1000000001 : Codeunit 3001;
+      Match@1000000000 : Codeunit 3042;
+    BEGIN
+      Regex.Regex(Pattern);
+      Regex.Match(Input, Match);
+      TestToolkit.VerifyBooleanResult(TestToolkit.ArgsToString2('Input', Input, 'Pattern', Pattern), Match.Success, ExpectedSuccess);
+    END;
+
+    [Test]
+    PROCEDURE TestMatchValue@1000000005();
+    VAR
+      Pattern@1000000000 : Text;
+    BEGIN
+      Pattern := '[A-Z]\d{2}[A-Z]-\d{3}-[A-Z]';
+      TestMatchValueOnce('Part No.: A23B-234-C, Replacement: C99Z-902-M', Pattern, 'A23B-234-C');
+      TestMatchValueOnce('Part No.: 123B-234-C, Replacement: C99Z-902-M', Pattern, 'C99Z-902-M');
+      TestMatchValueOnce('Part No.: 123B-234-C, Replacement: C99Z-AA2-M', Pattern, '');
+    END;
+
+    LOCAL PROCEDURE TestMatchValueOnce@1000000011(Input@1000000003 : Text;Pattern@1000000002 : Text;ExpectedValue@1000000004 : Text);
+    VAR
+      Regex@1000000001 : Codeunit 3001;
+      Match@1000000000 : Codeunit 3042;
+    BEGIN
+      Regex.Regex(Pattern);
+      Regex.Match(Input, Match);
+      TestToolkit.VerifyTextResult(TestToolkit.ArgsToString2('Input', Input, 'Pattern', Pattern), Match.Value, ExpectedValue);
+    END;
+
+    [Test]
+    PROCEDURE TestMatchResult@1000000006();
+    VAR
+      Pattern@1000000000 : Text;
+      Replacement@1000000001 : Text;
+    BEGIN
+      Pattern := '([A-Z]\d{2}[A-Z])-(\d{3})-([A-Z])';
+      Replacement := 'Series: $2; Family: $1; Variant: $3';
+      TestMatchResultOnce('Part No.: A23B-234-C, Replacement: C99Z-902-M', Pattern, Replacement, 'Series: 234; Family: A23B; Variant: C');
+      TestMatchResultOnce('Part No.: 123B-234-C, Replacement: C99Z-902-M', Pattern, Replacement, 'Series: 902; Family: C99Z; Variant: M');
+    END;
+
+    LOCAL PROCEDURE TestMatchResultOnce@1000000009(Input@1000000003 : Text;Pattern@1000000002 : Text;Replacement@1000000005 : Text;ExpectedResult@1000000004 : Text);
+    VAR
+      Regex@1000000001 : Codeunit 3001;
+      Match@1000000000 : Codeunit 3042;
+    BEGIN
+      Regex.Regex(Pattern);
+      Regex.Match(Input, Match);
+      TestToolkit.VerifyTextResult(TestToolkit.ArgsToString2('Input', Input, 'Pattern', Pattern), Match.Result(Replacement), ExpectedResult);
+    END;
+
+    [Test]
+    PROCEDURE TestMatchNextMatch@1000000014();
+    VAR
+      Pattern@1000000000 : Text;
+    BEGIN
+      Pattern := '[A-Z]\d{2}[A-Z]-\d{3}-[A-Z]';
+      TestMatchNextMatchOnce('Part No.: A23B-234-C, Replacement: C99Z-902-M', Pattern, 'A23B-234-C', 'C99Z-902-M');
+      TestMatchNextMatchOnce('Part No.: 123B-234-C, Replacement: C99Z-902-M', Pattern, 'C99Z-902-M', '');
+      TestMatchNextMatchOnce('Part No.: 123B-234-C, Replacement: C99Z-AA2-M', Pattern, '', '');
+    END;
+
+    LOCAL PROCEDURE TestMatchNextMatchOnce@1000000019(Input@1000000003 : Text;Pattern@1000000002 : Text;ExpectedValue@1000000000 : Text;ExpectedValue2@1000000006 : Text);
+    VAR
+      Regex@1000000004 : Codeunit 3001;
+      Match@1000000001 : Codeunit 3042;
+      Match2@1000000005 : Codeunit 3042;
+    BEGIN
+      Regex.Regex(Pattern);
+      Regex.Match(Input, Match);
+      Match.NextMatch(Match2);
+      TestToolkit.VerifyTextResult(TestToolkit.ArgsToString3('Input', Input, 'Pattern', Pattern, 'Property', 'Value'), Match.Value, ExpectedValue);
+      TestToolkit.VerifyTextResult(TestToolkit.ArgsToString3('Input', Input, 'Pattern', Pattern, 'Property', 'Value2'), Match2.Value, ExpectedValue2);
+    END;
+
+    [Test]
+    PROCEDURE TestMatchesCount@1000000016();
+    VAR
+      Pattern@1000000000 : Text;
+    BEGIN
+      Pattern := '[A-Z]\d{2}[A-Z]-\d{3}-[A-Z]';
+      TestMatchesCountOnce('Part No.: A23B-234-C, Replacement: C99Z-902-M', Pattern, 2);
+      TestMatchesCountOnce('Part No.: 123B-234-C, Replacement: C99Z-902-M', Pattern, 1);
+      TestMatchesCountOnce('Part No.: 123B-234-C, Replacement: C99Z-AA2-M', Pattern, 0);
+    END;
+
+    LOCAL PROCEDURE TestMatchesCountOnce@1000000015(Input@1000000003 : Text;Pattern@1000000002 : Text;ExpectedCount@1000000004 : Integer);
+    VAR
+      Regex@1000000001 : Codeunit 3001;
+      Matches@1000000000 : Codeunit 3043;
+    BEGIN
+      Regex.Regex(Pattern);
+      Regex.Matches(Input, Matches);
+      TestToolkit.VerifyIntegerResult(TestToolkit.ArgsToString2('Input', Input, 'Pattern', Pattern), Matches.Count, ExpectedCount);
+    END;
+
+    [Test]
+    PROCEDURE TestMatchesItem@1000000013();
+    VAR
+      Pattern@1000000000 : Text;
+      ExpectedIndexes@1000000002 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Collections.ArrayList";
+      ExpectedValues@1000000001 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Collections.ArrayList";
+    BEGIN
+      Pattern := '[A-Z]\d{2}[A-Z]-\d{3}-[A-Z]';
+
+      TestToolkit.SetArray2(ExpectedIndexes, 10, 35);
+      TestToolkit.SetArray2(ExpectedValues, 'A23B-234-C', 'C99Z-902-M');
+      TestMatchesItemOnce('Part No.: A23B-234-C, Replacement: C99Z-902-M', Pattern, ExpectedIndexes, ExpectedValues);
+
+      TestToolkit.SetArray1(ExpectedIndexes, 35);
+      TestToolkit.SetArray1(ExpectedValues, 'C99Z-902-M');
+      TestMatchesItemOnce('Part No.: 123B-234-C, Replacement: C99Z-902-M', Pattern, ExpectedIndexes, ExpectedValues);
+    END;
+
+    LOCAL PROCEDURE TestMatchesItemOnce@1000000010(Input@1000000003 : Text;Pattern@1000000002 : Text;ExpectedIndexes@1000000005 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Collections.ArrayList";ExpectedValues@1000000004 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Collections.ArrayList");
+    VAR
+      Regex@1000000001 : Codeunit 3001;
+      Matches@1000000000 : Codeunit 3043;
+      Match@1000000006 : Codeunit 3042;
+      Index@1000000007 : Integer;
+      ExpectedIndex@1000000008 : Integer;
+      ExpectedValue@1000000009 : Text;
+    BEGIN
+      Regex.Regex(Pattern);
+      Regex.Matches(Input, Matches);
+      FOR Index := 0 TO Matches.Count - 1 DO BEGIN
+        ExpectedIndex := ExpectedIndexes.Item(Index);
+        ExpectedValue := ExpectedValues.Item(Index);
+        Matches.Item(Index, Match);
+        TestToolkit.VerifyIntegerResult(TestToolkit.ArgsToString4('Input', Input, 'Pattern', Pattern, 'Index', Index, 'Property', 'Index'), Match.Index, ExpectedIndex);
+        TestToolkit.VerifyTextResult(TestToolkit.ArgsToString4('Input', Input, 'Pattern', Pattern, 'Index', Index, 'Property', 'Value'), Match.Value, ExpectedValue);
+      END;
+    END;
+
+    [Test]
+    PROCEDURE TestGroupCaptures@1000000017();
+    VAR
+      Pattern@1000000000 : Text;
+      ExpectedIndexes@1000000002 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Collections.ArrayList";
+      ExpectedLengths@1000000003 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Collections.ArrayList";
+      ExpectedValues@1000000001 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Collections.ArrayList";
+    BEGIN
+      Pattern := '\b(\w+\s*)+\.';
+
+      TestToolkit.SetArray5(ExpectedIndexes, 0, 4, 8, 14, 19);
+      TestToolkit.SetArray5(ExpectedLengths, 4, 4, 6, 5, 4);
+      TestToolkit.SetArray5(ExpectedValues, 'One ', 'Two ', 'Three ', 'Four ', 'Five');
+      TestGroupCapturesOnce('One Two Three Four Five.', Pattern, 5, ExpectedIndexes, ExpectedLengths, ExpectedValues);
+
+      TestToolkit.SetArray6(ExpectedIndexes, 0, 5, 8, 10, 19, 22);
+      TestToolkit.SetArray6(ExpectedLengths, 5, 3, 2, 9, 3, 7);
+      TestToolkit.SetArray6(ExpectedValues, 'This ', 'is ', 'a ', 'sentence ', 'in ', 'English');
+      TestGroupCapturesOnce('This is a sentence in English.', Pattern, 6, ExpectedIndexes, ExpectedLengths, ExpectedValues);
+    END;
+
+    LOCAL PROCEDURE TestGroupCapturesOnce@1000000018(Input@1000000001 : Text;Pattern@1000000000 : Text;ExpectedCount@1000000006 : Integer;ExpectedIndexes@1000000011 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Collections.ArrayList";ExpectedLengths@1000000012 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Collections.ArrayList";ExpectedValues@1000000010 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Collections.ArrayList");
+    VAR
+      Regex@1000000005 : Codeunit 3001;
+      Match@1000000004 : Codeunit 3042;
+      Groups@1000000003 : Codeunit 3046;
+      Group@1000000002 : Codeunit 3045;
+      Captures@1000000007 : Codeunit 3048;
+      Capture@1000000008 : Codeunit 3047;
+      Index@1000000009 : Integer;
+      ExpectedIndex@1000000014 : Integer;
+      ExpectedLength@1000000015 : Integer;
+      ExpectedValue@1000000013 : Text;
+    BEGIN
+      Regex.Regex(Pattern);
+      Regex.Match(Input, Match);
+      Match.Groups(Groups);
+      TestToolkit.VerifyIntegerResult(TestToolkit.ArgsToString3('Input', Input, 'Pattern', Pattern, 'Property', 'No. of Groups'), Groups.Count, 2);
+      Groups.Item(1, Group);
+      Group.Captures(Captures);
+      TestToolkit.VerifyIntegerResult(TestToolkit.ArgsToString3('Input', Input, 'Pattern', Pattern, 'Property', 'No. of Captures'), Captures.Count, ExpectedCount);
+      FOR Index := 0 TO Captures.Count-1 DO BEGIN
+        ExpectedIndex := ExpectedIndexes.Item(Index);
+        ExpectedLength := ExpectedLengths.Item(Index);
+        ExpectedValue := ExpectedValues.Item(Index);
+        Captures.Item(Index, Capture);
+        TestToolkit.VerifyIntegerResult(TestToolkit.ArgsToString4('Input', Input, 'Pattern', Pattern, 'CaptureIndex', Index, 'Property', 'Index'), Capture.Index, ExpectedIndex);
+        TestToolkit.VerifyIntegerResult(TestToolkit.ArgsToString4('Input', Input, 'Pattern', Pattern, 'CaptureIndex', Index, 'Property', 'Length'), Capture.Length, ExpectedLength);
+        TestToolkit.VerifyTextResult(TestToolkit.ArgsToString4('Input', Input, 'Pattern', Pattern, 'CaptureIndex', Index, 'Property', 'Value'), Capture.Value, ExpectedValue);
+      END;
+    END;
+
+    BEGIN
+    END.
+  }
+}
+
