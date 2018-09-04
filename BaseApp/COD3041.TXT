@@ -1,0 +1,156 @@
+OBJECT Codeunit 3041 DotNet_RegexOptions
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      DotNetRegexOptions@1000000001 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.RegularExpressions.RegexOptions";
+      DotNetRegexOptionsValues@1000000000 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Collections.Generic.Dictionary`2";
+
+    [External]
+    PROCEDURE AddCompiled@1000000009();
+    BEGIN
+      Add(DotNetRegexOptions.Compiled);
+    END;
+
+    [External]
+    PROCEDURE AddCultureInvariant@1000000017();
+    BEGIN
+      Add(DotNetRegexOptions.CultureInvariant);
+    END;
+
+    [External]
+    PROCEDURE AddECMAScript@1000000018();
+    BEGIN
+      Add(DotNetRegexOptions.ECMAScript);
+    END;
+
+    [External]
+    PROCEDURE AddExplicitCapture@1000000019();
+    BEGIN
+      Add(DotNetRegexOptions.ExplicitCapture);
+    END;
+
+    [External]
+    PROCEDURE AddIgnoreCase@1000000020();
+    BEGIN
+      Add(DotNetRegexOptions.IgnoreCase);
+    END;
+
+    [External]
+    PROCEDURE AddIgnorePatternWhitespace@1000000021();
+    BEGIN
+      Add(DotNetRegexOptions.IgnorePatternWhitespace);
+    END;
+
+    [External]
+    PROCEDURE AddMultiline@1000000022();
+    BEGIN
+      Add(DotNetRegexOptions.Multiline);
+    END;
+
+    [External]
+    PROCEDURE AddRightToLeft@1000000024();
+    BEGIN
+      Add(DotNetRegexOptions.RightToLeft);
+    END;
+
+    [External]
+    PROCEDURE AddSingleline@1000000025();
+    BEGIN
+      Add(DotNetRegexOptions.Singleline);
+    END;
+
+    [External]
+    PROCEDURE ToString@1000000003() : Text;
+    VAR
+      String@1000000000 : Text;
+      DotNetKeyValuePair@1000000001 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Collections.Generic.KeyValuePair`2";
+      DotNetKeys@1000000002 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Collections.Generic.List`1";
+      Key@1000000003 : Integer;
+    BEGIN
+      String := '';
+      IF (ISNULL(DotNetRegexOptionsValues)) THEN BEGIN
+        DotNetRegexOptionsValues := DotNetRegexOptionsValues.Dictionary();
+      END;
+      DotNetKeys := DotNetKeys.List();
+      FOREACH DotNetKeyValuePair IN DotNetRegexOptionsValues DO BEGIN
+        DotNetKeys.Add(DotNetKeyValuePair.Key);
+      END;
+      DotNetKeys.Sort();
+      FOREACH Key IN DotNetKeys DO BEGIN
+        IF (String <> '') THEN BEGIN
+          String := String + ', ';
+        END;
+        String := String + FORMAT(DotNetRegexOptionsValues.Item(Key));
+      END;
+      EXIT(String);
+    END;
+
+    PROCEDURE GetRegexOptions@1000000002(VAR DotNetRegexOptions2@1000000000 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.RegularExpressions.RegexOptions");
+    VAR
+      String@1000000002 : Text;
+    BEGIN
+      DotNetRegexOptions := DotNetRegexOptions.None;
+      String := ToString();
+      IF (String <> '') THEN BEGIN
+        DotNetRegexOptions2 := DotNetRegexOptions.Parse(DotNetRegexOptions.GetType(), String);
+      END ELSE BEGIN
+        DotNetRegexOptions2 := DotNetRegexOptions;
+      END;
+    END;
+
+    PROCEDURE SetRegexOptions@1000000004(VAR DotNetRegexOptions2@1000000000 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.RegularExpressions.RegexOptions");
+    VAR
+      String@1000000001 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.String";
+      Separators@1000000002 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.String";
+      StringParts@1000000003 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Array";
+      StringPart@1000000004 : Text;
+      IntegerValue@1000000005 : Integer;
+    BEGIN
+      IF (ISNULL(DotNetRegexOptionsValues)) THEN BEGIN
+        DotNetRegexOptionsValues := DotNetRegexOptionsValues.Dictionary();
+      END ELSE BEGIN
+        DotNetRegexOptionsValues.Clear();
+      END;
+      String := DotNetRegexOptions2.ToString();
+      Separators := ',';
+      StringParts := String.Split(Separators.ToCharArray());
+      FOREACH StringPart IN StringParts DO BEGIN
+        DotNetRegexOptions := DotNetRegexOptions.None;
+        DotNetRegexOptions := DotNetRegexOptions.Parse(DotNetRegexOptions.GetType(), StringPart);
+        IntegerValue := DotNetRegexOptions;
+        DotNetRegexOptionsValues.Add(IntegerValue, DotNetRegexOptions.ToString());
+      END;
+    END;
+
+    LOCAL PROCEDURE Add@1000000014(DotNetValue@1000000000 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.RegularExpressions.RegexOptions");
+    VAR
+      IntegerValue@1000000001 : Integer;
+      StringValue@1000000002 : Text;
+    BEGIN
+      IntegerValue := DotNetValue;
+      IF (ISNULL(DotNetRegexOptionsValues)) THEN BEGIN
+        DotNetRegexOptionsValues := DotNetRegexOptionsValues.Dictionary();
+      END;
+      IF ( NOT (DotNetRegexOptionsValues.ContainsKey(IntegerValue))) THEN BEGIN
+        DotNetRegexOptionsValues.Add(IntegerValue, DotNetValue.ToString());
+      END;
+    END;
+
+    BEGIN
+    END.
+  }
+}
+
