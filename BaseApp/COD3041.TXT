@@ -1,0 +1,75 @@
+OBJECT Codeunit 3041 DotNet_WebClient
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      DotNetWebClient@1000 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Net.WebClient";
+      UrlSecurityErr@1001 : TextConst 'ENU=Security settings prevents download of this file.';
+
+    [External]
+    PROCEDURE WebClient@4();
+    BEGIN
+      DotNetWebClient := DotNetWebClient.WebClient;
+    END;
+
+    [External]
+    PROCEDURE Credentials@3(DotNet_Credential@1000 : Codeunit 3029);
+    VAR
+      DotNetCredential@1001 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Net.NetworkCredential";
+    BEGIN
+      DotNet_Credential.GetCredential(DotNetCredential);
+      DotNetWebClient.Credentials := DotNetCredential;
+    END;
+
+    [External]
+    PROCEDURE DownloadData@5(Url@1000 : Text;VAR DotNet_Array@1001 : Codeunit 3000);
+    VAR
+      MemoryStream@1002 : DotNet "'mscorlib'.System.IO.MemoryStream";
+    BEGIN
+      VerifyUrl(Url);
+      DotNet_Array.SetArray(DotNetWebClient.DownloadData(Url));
+    END;
+
+    [External]
+    PROCEDURE DownloadString@7(Url@1000 : Text) : Text;
+    BEGIN
+      VerifyUrl(Url);
+      EXIT(DotNetWebClient.DownloadString(Url));
+    END;
+
+    LOCAL PROCEDURE VerifyUrl@6(Url@1000 : Text);
+    VAR
+      WebRequestHelper@1002 : Codeunit 1299;
+    BEGIN
+      WebRequestHelper.IsValidUri(Url);
+      IF NOT (WebRequestHelper.IsSecureHttpUrl(Url) OR WebRequestHelper.IsHttpUrl(Url)) THEN
+        ERROR(UrlSecurityErr);
+    END;
+
+    PROCEDURE GetWebClient@1(VAR DotNetWebClient2@1000 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Net.WebClient");
+    BEGIN
+      DotNetWebClient2 := DotNetWebClient;
+    END;
+
+    PROCEDURE SetWebClient@2(DotNetWebClient2@1000 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Net.WebClient");
+    BEGIN
+      DotNetWebClient := DotNetWebClient2;
+    END;
+
+    BEGIN
+    END.
+  }
+}
+
