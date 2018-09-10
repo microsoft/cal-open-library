@@ -21,6 +21,7 @@ OBJECT Table 1214 Intermediate Data Import
     { 6   ;   ;Value               ;Text250        }
     { 7   ;   ;Validate Only       ;Boolean        }
     { 8   ;   ;Parent Record No.   ;Integer        }
+    { 16  ;   ;Value BLOB          ;BLOB           }    
   }
   KEYS
   {
@@ -38,16 +39,15 @@ OBJECT Table 1214 Intermediate Data Import
     [External]
     PROCEDURE InsertOrUpdateEntry@2(EntryNo@1002 : Integer;TableID@1003 : Integer;FieldID@1004 : Integer;ParentRecordNo@1001 : Integer;RecordNo@1000 : Integer;NewValue@1005 : Text[250]);
     BEGIN
-      IF FindEntry(EntryNo,TableID,FieldID,ParentRecordNo,RecordNo) THEN BEGIN
-        Value := NewValue;
-        MODIFY;
-      END ELSE BEGIN
+      IF FindEntry(EntryNo,TableID,FieldID,ParentRecordNo,RecordNo) THEN
+        SetValue(NewValue)
+      ELSE BEGIN
         CLEAR(Rec);
         "Data Exch. No." := EntryNo;
         "Table ID" := TableID;
         "Record No." := RecordNo;
         "Field ID" := FieldID;
-        Value := NewValue;
+        SetValueWithoutModifying(NewValue);
         "Parent Record No." := ParentRecordNo;
         "Validate Only" := FALSE;
         INSERT;
@@ -72,9 +72,42 @@ OBJECT Table 1214 Intermediate Data Import
     PROCEDURE GetEntryValue@4(EntryNo@1002 : Integer;TableID@1003 : Integer;FieldID@1004 : Integer;ParentRecordNo@1001 : Integer;RecordNo@1000 : Integer) : Text[250];
     BEGIN
       IF FindEntry(EntryNo,TableID,FieldID,ParentRecordNo,RecordNo) THEN
-        EXIT(Value);
+        EXIT(GetValue);
 
       EXIT('');
+    END;
+
+    PROCEDURE GetValue@16() : Text;
+    VAR
+      TempBlob@1000 : Record 99008535;
+      CR@1001 : Text[1];
+    BEGIN
+      IF NOT "Value BLOB".HASVALUE THEN
+        EXIT(Value);
+      CR[1] := 10;
+      CALCFIELDS("Value BLOB");
+      TempBlob.Blob := "Value BLOB";
+      EXIT(TempBlob.ReadAsText(CR,TEXTENCODING::Windows));
+    END;
+
+    PROCEDURE SetValue@17(NewValue@1001 : Text);
+    BEGIN
+      SetValueWithoutModifying(NewValue);
+      MODIFY;
+    END;
+
+    PROCEDURE SetValueWithoutModifying@12(NewValue@1001 : Text);
+    VAR
+      TempBlob@1000 : Record 99008535;
+    BEGIN
+      CLEAR("Value BLOB");
+      Value := COPYSTR(NewValue,1,MAXSTRLEN(Value));
+      IF STRLEN(NewValue) <= MAXSTRLEN(Value) THEN
+        EXIT; // No need to store anything in the blob
+      IF NewValue = '' THEN
+        EXIT;
+      TempBlob.WriteAsText(NewValue,TEXTENCODING::Windows);
+      "Value BLOB" := TempBlob.Blob;
     END;
 
     BEGIN
