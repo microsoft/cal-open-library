@@ -1,0 +1,113 @@
+OBJECT Codeunit 146028 DotNet_Collection Test
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    Subtype=Test;
+    OnRun=BEGIN
+            // [FEATURE] [.NET COLLECTION] [UT]
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      DotNet_Collection@1000 : Codeunit 3034;
+      Assert@1001 : Codeunit 130000;
+
+    [Test]
+    PROCEDURE TestGetValue@1();
+    VAR
+      Result@1000 : Text;
+    BEGIN
+      // [SCENARIO] Get Value for a key
+
+      // [GIVEN] A default collection
+      InitCollection;
+
+      // [WHEN] The TryGetValue method is called for a known key
+      Assert.IsTrue(DotNet_Collection.TryGetValue('Key1',Result),'Key not found!');
+
+      // [THEN] The result should match the default value
+      Assert.AreEqual('Text1',Result,'Incorrect result from collection!');
+
+      // [WHEN] The TryGetValue method is called for an unknown key
+      Assert.IsFalse(DotNet_Collection.TryGetValue('Key5',Result),'Unknoknw key found!');
+    END;
+
+    [Test]
+    PROCEDURE TestGetValues@2();
+    VAR
+      DotNet_Array@1000 : Codeunit 3000;
+    BEGIN
+      // [SCENARIO] Get Values
+
+      // [GIVEN] A default collection
+      InitCollection;
+
+      // [WHEN] GetValues method is called
+      DotNet_Collection.GetValues(DotNet_Array);
+
+      // [THEN] The result should match the default value
+      Assert.AreEqual('Text1',DotNet_Array.GetValueAsText(0),'Incorrect value found in collection');
+      Assert.AreEqual('Text2',DotNet_Array.GetValueAsText(1),'Incorrect value found in collection');
+      Assert.AreEqual('300',DotNet_Array.GetValueAsText(2),'Incorrect value found in collection');
+      Assert.AreEqual('400',DotNet_Array.GetValueAsText(3),'Incorrect value found in collection');
+    END;
+
+    [Test]
+    PROCEDURE TestGetKeys@3();
+    VAR
+      DotNet_Array@1000 : Codeunit 3000;
+    BEGIN
+      // [SCENARIO] Get Keys
+
+      // [GIVEN] A default collection
+      InitCollection;
+
+      // [WHEN] GetKeys method is called
+      DotNet_Collection.GetKeys(DotNet_Array);
+
+      // [THEN] The result should match the default value
+      Assert.AreEqual('Key1',DotNet_Array.GetValueAsText(0),'Incorrect value found in collection');
+      Assert.AreEqual('Key2',DotNet_Array.GetValueAsText(1),'Incorrect value found in collection');
+      Assert.AreEqual('Key3',DotNet_Array.GetValueAsText(2),'Incorrect value found in collection');
+      Assert.AreEqual('Key4',DotNet_Array.GetValueAsText(3),'Incorrect value found in collection');
+    END;
+
+    [Test]
+    PROCEDURE TestCount@5();
+    VAR
+      Count@1000 : Integer;
+    BEGIN
+      // [SCENARIO] Get Count
+
+      // [GIVEN] A default collection
+      InitCollection;
+
+      // [WHEN] Count method is called
+      Count := DotNet_Collection.Count;
+
+      // [THEN] The result should match the default value
+      Assert.AreEqual(4,Count,'Incorrect no. of entries in collection');
+    END;
+
+    LOCAL PROCEDURE InitCollection@4();
+    BEGIN
+      DotNet_Collection.Init;
+      DotNet_Collection.AddToCollection('Key1','Text1');
+      DotNet_Collection.AddToCollection('Key2','Text2');
+      DotNet_Collection.AddToCollection('Key3','300');
+      DotNet_Collection.AddToCollection('Key4','400');
+    END;
+
+    BEGIN
+    END.
+  }
+}
+

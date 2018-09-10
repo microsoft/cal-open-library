@@ -1,0 +1,76 @@
+OBJECT Codeunit 3034 DotNet_Collection
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      DotNetCollection@1000 : DotNet "'mscorlib'.System.Collections.Generic.Dictionary`2";
+
+    PROCEDURE Init@6();
+    BEGIN
+      DotNetCollection := DotNetCollection.Dictionary;
+    END;
+
+    PROCEDURE Count@12() : Integer;
+    BEGIN
+      EXIT(DotNetCollection.Count);
+    END;
+
+    PROCEDURE AddToCollection@5(PropertyName@1000 : Text;PropertyValue@1001 : Text);
+    BEGIN
+      DotNetCollection.Add(PropertyName,PropertyValue);
+    END;
+
+    PROCEDURE TryGetValue@9(PropertyName@1001 : Text;VAR PropertyValue@1000 : Text) : Boolean;
+    VAR
+      DotNetObject@1002 : DotNet "'mscorlib'.System.Object";
+    BEGIN
+      EXIT(DotNetCollection.TryGetValue(PropertyName,PropertyValue))
+    END;
+
+    PROCEDURE GetKeys@1(VAR DotNet_KeysArray@1000 : Codeunit 3000);
+    VAR
+      DotNetArray@1003 : DotNet "'mscorlib'.System.Array";
+      DotNetString@1002 : DotNet "'mscorlib'.System.String";
+    BEGIN
+      DotNetArray := DotNetArray.CreateInstance(GETDOTNETTYPE(DotNetString),DotNetCollection.Keys.Count);
+      DotNetCollection.Keys.CopyTo(DotNetArray,0);
+      DotNet_KeysArray.SetArray(DotNetArray);
+    END;
+
+    PROCEDURE GetValues@4(VAR DotNet_ValueArray@1000 : Codeunit 3000);
+    VAR
+      DotNetArray@1002 : DotNet "'mscorlib'.System.Array";
+      DotNetString@1001 : DotNet "'mscorlib'.System.String";
+    BEGIN
+      DotNetArray := DotNetArray.CreateInstance(GETDOTNETTYPE(DotNetString),DotNetCollection.Values.Count);
+      DotNetCollection.Values.CopyTo(DotNetArray,0);
+      DotNet_ValueArray.SetArray(DotNetArray);
+    END;
+
+    PROCEDURE GetCollection@2(VAR DotNetCollection2@1000 : DotNet "'mscorlib'.System.Collections.Generic.Dictionary`2");
+    BEGIN
+      DotNetCollection2 := DotNetCollection;
+    END;
+
+    PROCEDURE SetCollection@3(DotNetCollection2@1000 : DotNet "'mscorlib'.System.Collections.Generic.Dictionary`2");
+    BEGIN
+      DotNetCollection := DotNetCollection2;
+    END;
+
+    BEGIN
+    END.
+  }
+}
+
