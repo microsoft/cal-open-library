@@ -505,7 +505,7 @@ OBJECT Codeunit 1218 Map Incoming Doc to Purch Doc
     END;
 
     [TryFunction]
-    LOCAL PROCEDURE TryGetValueFromIntermediate@20(VAR IntermediateDataImport@1000 : Record 1214;RecRef@1003 : RecordRef;FieldID@1001 : Integer;FieldName@1002 : Text;VAR Value@1004 : Text);
+    LOCAL PROCEDURE TryGetValueFromIntermediate@20(VAR IntermediateDataImport@1000 : Record 1214;RecRef@1003 : RecordRef;FieldID@1001 : Integer;FieldName@1002 : Text;VAR Value@1004 : Text[250]);
     BEGIN
       Value := '';
       IntermediateDataImport.SETRANGE("Field ID",FieldID);
@@ -513,7 +513,7 @@ OBJECT Codeunit 1218 Map Incoming Doc to Purch Doc
       IF NOT IntermediateDataImport.FINDFIRST THEN
         ERROR(NotFoundErr,FieldName,RecRef.CAPTION,IntermediateDataImport.TABLECAPTION);
 
-      Value := IntermediateDataImport.GetValue;
+      Value := IntermediateDataImport.Value;
     END;
 
     LOCAL PROCEDURE ProcessField@58(VAR TempInt@1003 : Record 2000000026;RecRef@1000 : RecordRef;FieldNo@1004 : Integer;Value@1002 : Text[250]);
