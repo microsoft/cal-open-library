@@ -1,0 +1,63 @@
+OBJECT Codeunit 3029 DotNet_Credential
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      DotNetCredential@1000 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Net.NetworkCredential";
+
+    [External]
+    PROCEDURE InitCredential@16(Username@1000 : Text;Password@1001 : Text);
+    VAR
+      Credential@1002 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Net.NetworkCredential";
+    BEGIN
+      DotNetCredential := DotNetCredential.NetworkCredential;
+      DotNetCredential.UserName := Username;
+      DotNetCredential.Password := Password;
+    END;
+
+    [External]
+    PROCEDURE HasCredentials@1() : Boolean;
+    BEGIN
+      IF ISNULL(DotNetCredential) THEN EXIT;
+      EXIT(DotNetCredential.UserName <> '');
+    END;
+
+    [External]
+    PROCEDURE GetUserName@4() : Text;
+    BEGIN
+      EXIT(DotNetCredential.UserName);
+    END;
+
+    [External]
+    PROCEDURE GetPassword@5() : Text;
+    BEGIN
+      EXIT(DotNetCredential.Password);
+    END;
+
+    PROCEDURE GetCredential@2(VAR DotNetCredential2@1000 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Net.NetworkCredential");
+    BEGIN
+      DotNetCredential2 := DotNetCredential;
+    END;
+
+    PROCEDURE SetCredential@3(DotNetCredential2@1000 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Net.NetworkCredential");
+    BEGIN
+      DotNetCredential := DotNetCredential2;
+    END;
+
+    BEGIN
+    END.
+  }
+}
+
