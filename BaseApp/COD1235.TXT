@@ -267,12 +267,18 @@ OBJECT Codeunit 1235 XML Buffer Writer
     END;
 
     LOCAL PROCEDURE AddXmlTextNodeIntoParentXMLBuffer@11(VAR XMLBuffer@1000 : Record 1235);
+    VAR
+      CRLF@1001 : Text[2];
     BEGIN
-      IF XMLBuffer.Value <> '' THEN
-        EXIT;
-
-      XMLBuffer.SetValueWithoutModifying(XmlReader.Value);
-      XMLBuffer.VALIDATE("Data Type",GetType(XMLBuffer.Value));
+      XMLBuffer.GET(XMLBuffer."Entry No.");
+      IF XMLBuffer.GetValue() <> '' THEN BEGIN
+        CRLF[1] := 13;
+        CRLF[2] := 10;
+        XMLBuffer.SetValueWithoutModifying(XMLBuffer.GetValue() + CRLF + XmlReader.Value);
+      END ELSE BEGIN
+        XMLBuffer.SetValueWithoutModifying(XmlReader.Value);
+        XMLBuffer.VALIDATE("Data Type",GetType(XMLBuffer.Value));
+      END;
       XMLBuffer.MODIFY;
     END;
 
