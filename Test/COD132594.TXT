@@ -10,6 +10,7 @@ OBJECT Codeunit 132594 Zip Stream Wrapper Test
   {
     Subtype=Test;
     OnRun=BEGIN
+            // [FEATURE] [Zip] [Stream] [UT]
           END;
 
   }

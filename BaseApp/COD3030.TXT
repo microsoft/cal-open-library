@@ -1,0 +1,92 @@
+OBJECT Codeunit 3030 DotNet_HybridDeployment
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      DotNetALHybridDeployManagement@1000 : DotNet "'Microsoft.Dynamics.Nav.Ncl, Version=13.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.Microsoft.Dynamics.Nav.Runtime.HybridDeploy.ALHybridDeployManagement";
+
+    PROCEDURE Initialize@2();
+    BEGIN
+      DotNetALHybridDeployManagement := DotNetALHybridDeployManagement.ALHybridDeployManagement;
+    END;
+
+    PROCEDURE GetALHybridDeployManagement@8(VAR DotNetALHybridDeployManagement2@1001 : DotNet "'Microsoft.Dynamics.Nav.Ncl, Version=13.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.Microsoft.Dynamics.Nav.Runtime.HybridDeploy.ALHybridDeployManagement");
+    BEGIN
+      DotNetALHybridDeployManagement2 := DotNetALHybridDeployManagement;
+    END;
+
+    PROCEDURE SetALHybridDeployManagement@9(DotNetALHybridDeployManagement2@1000 : DotNet "'Microsoft.Dynamics.Nav.Ncl, Version=13.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.Microsoft.Dynamics.Nav.Runtime.HybridDeploy.ALHybridDeployManagement");
+    BEGIN
+      DotNetALHybridDeployManagement := DotNetALHybridDeployManagement2;
+    END;
+
+    PROCEDURE CreateIntegrationRuntime@1(SourceProduct@1001 : Text) InstanceId : Text;
+    BEGIN
+      InstanceId := DotNetALHybridDeployManagement.CreateIntegrationRuntime(SourceProduct);
+    END;
+
+    PROCEDURE DisableReplication@3(SourceProduct@1002 : Text) InstanceId : Text;
+    BEGIN
+      InstanceId := DotNetALHybridDeployManagement.DisableReplication(SourceProduct);
+    END;
+
+    PROCEDURE EnableReplication@5(SourceProduct@1009 : Text;OnPremiseConnectionString@1001 : Text;DatabaseType@1000 : Text;IntegrationRuntimeName@1002 : Text;NotificationUrl@1010 : Text;ClientState@1011 : Text;SubscriptionId@1012 : Text) InstanceId : Text;
+    BEGIN
+      InstanceId :=
+        DotNetALHybridDeployManagement.EnableReplication(
+          SourceProduct,OnPremiseConnectionString,DatabaseType,IntegrationRuntimeName,NotificationUrl,ClientState,SubscriptionId);
+    END;
+
+    PROCEDURE GetIntegrationRuntimeKey@7(SourceProduct@1002 : Text) InstanceId : Text;
+    BEGIN
+      InstanceId := DotNetALHybridDeployManagement.GetIntegrationRuntimeKey(SourceProduct);
+    END;
+
+    PROCEDURE GetReplicationRunErrors@6(SourceProduct@1001 : Text;RunId@1000 : Text) InstanceId : Text;
+    BEGIN
+      InstanceId := DotNetALHybridDeployManagement.GetReplicationRunErrors(SourceProduct,RunId);
+    END;
+
+    PROCEDURE GetRequestStatus@11(InstanceId@1001 : Text;VAR JsonOutput@1000 : Text) Status : Text;
+    VAR
+      AlGetResponse@1002 : DotNet "'Microsoft.Dynamics.Nav.Ncl, Version=13.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.Microsoft.Dynamics.Nav.Runtime.HybridDeploy.ALGetStatusResponse";
+    BEGIN
+      AlGetResponse := DotNetALHybridDeployManagement.GetRequestStatus(InstanceId);
+      JsonOutput := AlGetResponse.ResponseJson;
+      Status := AlGetResponse.Status;
+    END;
+
+    PROCEDURE RegenerateIntegrationRuntimeKey@4(SourceProduct@1002 : Text) InstanceId : Text;
+    BEGIN
+      InstanceId := DotNetALHybridDeployManagement.RegenerateIntegrationRuntimeKey(SourceProduct);
+    END;
+
+    PROCEDURE RunReplication@10(SourceProduct@1000 : Text) InstanceId : Text;
+    BEGIN
+      InstanceId := DotNetALHybridDeployManagement.RunReplication(SourceProduct);
+    END;
+
+    PROCEDURE SetReplicationSchedule@12(SourceProduct@1005 : Text;ReplicationFrequency@1000 : Text;DaysToRun@1001 : Text;TimeToRun@1002 : Time;Activate@1004 : Boolean) InstanceId : Text;
+    BEGIN
+      InstanceId :=
+        DotNetALHybridDeployManagement.SetReplicationSchedule(
+          SourceProduct,ReplicationFrequency,DaysToRun,CREATEDATETIME(TODAY,TimeToRun),Activate);
+    END;
+
+    BEGIN
+    END.
+  }
+}
+

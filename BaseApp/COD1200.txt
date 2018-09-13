@@ -52,13 +52,16 @@ OBJECT Codeunit 1200 Import Bank Statement
       END;
 
       IF XMLNode.NodeType.Equals(XMLNodeType.Text) OR XMLNode.NodeType.Equals(XMLNodeType.CDATA) THEN
-        InsertColumn(ParentPath,CurrentLineNo,NodeId,XMLNode.Value,DataExchLineDef,EntryNo);
+        InsertColumn(ParentPath,
+          CurrentLineNo,NodeId,XMLNode.Value,XMLNode.ParentNode.Name,
+          DataExchLineDef,EntryNo);
 
       IF NOT ISNULL(XMLNode.Attributes) THEN BEGIN
         XMLAttributeCollection := XMLNode.Attributes;
         FOR i := 1 TO XMLAttributeCollection.Count DO
           InsertColumn(ParentPath + '/' + XMLNode.LocalName + '[@' + XMLAttributeCollection.Item(i - 1).Name + ']',
-            CurrentLineNo,NodeId,XMLAttributeCollection.Item(i - 1).Value,DataExchLineDef,EntryNo);
+            CurrentLineNo,NodeId,XMLAttributeCollection.Item(i - 1).Value,XMLAttributeCollection.Item(i - 1).Name,
+            DataExchLineDef,EntryNo);
       END;
 
       IF XMLNode.HasChildNodes THEN BEGIN
@@ -69,7 +72,7 @@ OBJECT Codeunit 1200 Import Bank Statement
       END;
     END;
 
-    LOCAL PROCEDURE InsertColumn@2(Path@1000 : Text;LineNo@1001 : Integer;NodeId@1006 : Text[250];Value@1002 : Text;VAR DataExchLineDef@1003 : Record 1227;EntryNo@1007 : Integer);
+    LOCAL PROCEDURE InsertColumn@2(Path@1000 : Text;LineNo@1001 : Integer;NodeId@1006 : Text[250];Value@1002 : Text;Name@1008 : Text;VAR DataExchLineDef@1003 : Record 1227;EntryNo@1007 : Integer);
     VAR
       DataExchColumnDef@1004 : Record 1223;
       DataExchField@1005 : Record 1221;
@@ -81,8 +84,12 @@ OBJECT Codeunit 1200 Import Bank Statement
 
       IF DataExchColumnDef.FINDFIRST THEN BEGIN
         ProgressWindow.UPDATE(1,LineNo);
-        DataExchField.InsertRecXMLField(EntryNo,LineNo,DataExchColumnDef."Column No.",NodeId,Value,
-          DataExchLineDef.Code);
+        IF DataExchColumnDef."Use Node Name as Value" THEN
+          DataExchField.InsertRecXMLField(EntryNo,LineNo,DataExchColumnDef."Column No.",NodeId,Name,
+            DataExchLineDef.Code)
+        ELSE
+          DataExchField.InsertRecXMLField(EntryNo,LineNo,DataExchColumnDef."Column No.",NodeId,Value,
+            DataExchLineDef.Code);
       END;
     END;
 

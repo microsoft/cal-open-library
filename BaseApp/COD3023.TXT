@@ -1,0 +1,40 @@
+OBJECT Codeunit 3023 DotNet_ActionableMessage
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      DotNetActionableMessage@1000 : DotNet "'Microsoft.Dynamics.Nav.O365ActionableMessageWrapper, Version=13.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.Microsoft.Dynamics.Nav.O365ActionableMessageWrapper.ActionableMessage";
+
+    [External]
+    PROCEDURE Create@11(MessageCardContext@1002 : Text;SenderEmail@1008 : Text;OpayCardOriginatorForNav@1000 : Text;OpayCardPrivateKey@1001 : Text) : Text;
+    BEGIN
+      EXIT(DotNetActionableMessage.Create(MessageCardContext,SenderEmail,OpayCardOriginatorForNav,OpayCardPrivateKey))
+    END;
+
+    PROCEDURE GetActionableMessage@2(VAR DotNetActionableMessage2@1000 : DotNet "'Microsoft.Dynamics.Nav.O365ActionableMessageWrapper, Version=13.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.Microsoft.Dynamics.Nav.O365ActionableMessageWrapper.ActionableMessage");
+    BEGIN
+      DotNetActionableMessage2 := DotNetActionableMessage
+    END;
+
+    PROCEDURE SetActionableMessage@3(DotNetActionableMessage2@1000 : DotNet "'Microsoft.Dynamics.Nav.O365ActionableMessageWrapper, Version=13.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.Microsoft.Dynamics.Nav.O365ActionableMessageWrapper.ActionableMessage");
+    BEGIN
+      DotNetActionableMessage := DotNetActionableMessage2
+    END;
+
+    BEGIN
+    END.
+  }
+}
+

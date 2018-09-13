@@ -9,12 +9,13 @@ OBJECT Page 1799 Data Migration Overview
   PROPERTIES
   {
     Editable=No;
-    CaptionML=ENU=Data Migration Overview;
+    ApplicationArea=#Basic,#Suite;
     InsertAllowed=No;
     DeleteAllowed=No;
     ModifyAllowed=No;
     SourceTable=Table1799;
     PageType=List;
+    UsageCategory=Administration;
     RefreshOnActivate=Yes;
     OnOpenPage=BEGIN
                  ShowNotifications;
@@ -242,14 +243,13 @@ OBJECT Page 1799 Data Migration Overview
     LOCAL PROCEDURE ShowErrors@3();
     VAR
       DataMigrationError@1000 : Record 1797;
-      DataMigrationErrorPage@1001 : Page 1797;
     BEGIN
       DataMigrationError.SETRANGE("Migration Type","Migration Type");
       DataMigrationError.SETRANGE("Destination Table ID","Destination Table ID");
-      DataMigrationErrorPage.SetMigrationType("Migration Type");
-      DataMigrationErrorPage.SETRECORD(DataMigrationError);
-      DataMigrationErrorPage.RUNMODAL;
-      CurrPage.UPDATE;
+      IF DataMigrationError.FINDFIRST THEN BEGIN
+        PAGE.RUNMODAL(PAGE::"Data Migration Error",DataMigrationError);
+        CurrPage.UPDATE;
+      END;
     END;
 
     LOCAL PROCEDURE ShowNotifications@4();

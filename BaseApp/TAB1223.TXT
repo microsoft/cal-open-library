@@ -52,6 +52,7 @@ OBJECT Table 1223 Data Exch. Column Def
     { 15  ;   ;Text Padding Required;Boolean       }
     { 16  ;   ;Pad Character       ;Text1          }
     { 17  ;   ;Justification       ;Option        ;OptionString=Right,Left }
+    { 18  ;   ;Use Node Name as Value;Boolean      }
   }
   KEYS
   {

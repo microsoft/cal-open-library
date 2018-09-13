@@ -12,6 +12,7 @@ OBJECT Codeunit 132569 Data Encryption Mgmt. Tests
     Subtype=Test;
     TestPermissions=Disabled;
     OnRun=BEGIN
+            // [FEATURE] [Encryption Management]
           END;
 
   }
@@ -790,9 +791,6 @@ OBJECT Codeunit 132569 Data Encryption Mgmt. Tests
     END;
 
     BEGIN
-    {
-      // [FEATURE] [Encryption Management]
-    }
     END.
   }
 }
