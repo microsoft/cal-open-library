@@ -78,6 +78,34 @@ OBJECT Codeunit 1797 Data Migration Facade Helper
       EXIT(PaymentTerms.Code);
     END;
 
+    PROCEDURE CreateTerritoryIfNeeded@11(CodeToSet@1001 : Code[10];Name@1002 : Text[50]) : Code[10];
+    VAR
+      Territory@1000 : Record 286;
+    BEGIN
+      IF Territory.GET(CodeToSet) THEN
+        EXIT(CodeToSet);
+
+      Territory.INIT;
+      Territory.VALIDATE(Code,CodeToSet);
+      Territory.VALIDATE(Name,Name);
+      Territory.INSERT(TRUE);
+      EXIT(Territory.Code);
+    END;
+
+    PROCEDURE CreateTaxAreaIfNeeded@13(CodeToSet@1001 : Code[20];Description@1002 : Text[50]) : Code[20];
+    VAR
+      TaxArea@1000 : Record 318;
+    BEGIN
+      IF TaxArea.GET(CodeToSet) THEN
+        EXIT(CodeToSet);
+
+      TaxArea.INIT;
+      TaxArea.VALIDATE(Code,CodeToSet);
+      TaxArea.VALIDATE(Description,Description);
+      TaxArea.INSERT(TRUE);
+      EXIT(TaxArea.Code);
+    END;
+
     PROCEDURE CreatePaymentMethodIfNeeded@6(CodeToSet@1002 : Code[10];DescriptionToSet@1001 : Text[50]) : Code[10];
     VAR
       PaymentMethod@1000 : Record 289;

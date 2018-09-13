@@ -55,8 +55,8 @@ OBJECT Page 1910 Camera Interaction
   {
     VAR
       TempPictureTempBlob@1011 : TEMPORARY Record 99008535;
-      CameraProvider@1001 : DotNet "'Microsoft.Dynamics.Nav.ClientExtensions, Version=11.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.Microsoft.Dynamics.Nav.Client.Capabilities.CameraProvider" WITHEVENTS RUNONCLIENT;
-      CameraOptions@1000 : DotNet "'Microsoft.Dynamics.Nav.ClientExtensions, Version=11.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.Microsoft.Dynamics.Nav.Client.Capabilities.CameraOptions";
+      CameraProvider@1001 : DotNet "'Microsoft.Dynamics.Nav.ClientExtensions, Version=13.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.Microsoft.Dynamics.Nav.Client.Capabilities.CameraProvider" WITHEVENTS RUNONCLIENT;
+      CameraOptions@1000 : DotNet "'Microsoft.Dynamics.Nav.ClientExtensions, Version=13.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.Microsoft.Dynamics.Nav.Client.Capabilities.CameraOptions";
       CameraAvailable@1002 : Boolean INDATASET;
       RequestedAllowEdit@1003 : Boolean;
       SavedPictureName@1004 : Text;
@@ -140,3 +140,4 @@ OBJECT Page 1910 Camera Interaction
     END.
   }
 }
+

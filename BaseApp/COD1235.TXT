@@ -25,6 +25,8 @@ OBJECT Codeunit 1235 XML Buffer Writer
       StringReader@1008 : DotNet "'mscorlib'.System.IO.StringReader";
       OnlyGenerateStructure@1007 : Boolean;
       UnsupportedInputTypeErr@1005 : TextConst 'ENU=The supplied variable type is not supported.';
+      ValueStringToLongErr@1010 : TextConst '@@@="%1 field Value; %2 the length of the string";ENU=%1 must not be longer than %2.';
+      rdfaboutTok@1011 : TextConst '@@@={Locked};ENU=rdf:about';
 
     [External]
     PROCEDURE InitializeXMLBufferFrom@15(VAR XMLBuffer@1002 : Record 1235;StreamOrServerFile@1001 : Variant);
@@ -45,7 +47,6 @@ OBJECT Codeunit 1235 XML Buffer Writer
       ParseXML(XMLBuffer);
     END;
 
-    [Internal]
     PROCEDURE GenerateStructureFromPath@1(VAR XMLBuffer@1002 : Record 1235;Path@1000 : Text);
     BEGIN
       OnlyGenerateStructure := TRUE;
@@ -81,7 +82,10 @@ OBJECT Codeunit 1235 XML Buffer Writer
     END;
 
     LOCAL PROCEDURE CreateXMLReaderFromPath@4(Path@1000 : Text);
+    VAR
+      FileManagement@1001 : Codeunit 419;
     BEGIN
+      FileManagement.IsAllowedPath(Path,FALSE);
       XmlReader := XmlReader.Create(Path,XmlReaderSettings);
     END;
 
@@ -231,7 +235,8 @@ OBJECT Codeunit 1235 XML Buffer Writer
             EXIT;
         END;
 
-        InsertAttribute(XMLBuffer,ParentXMLBuffer,AttributeNumber,XmlReader.Depth + 1,XmlReader.Name,XmlReader.Value);
+        IF CanPassValue(XmlReader.Name,XmlReader.Value) THEN
+          InsertAttribute(XMLBuffer,ParentXMLBuffer,AttributeNumber,XmlReader.Depth + 1,XmlReader.Name,XmlReader.Value);
       END;
     END;
 
@@ -367,6 +372,17 @@ OBJECT Codeunit 1235 XML Buffer Writer
     LOCAL PROCEDURE ReadXmlReader@23();
     BEGIN
       XmlReader.Read
+    END;
+
+    LOCAL PROCEDURE CanPassValue@26(Name@1000 : Text;Value@1001 : Text) : Boolean;
+    VAR
+      XMLBuffer@1002 : Record 1235;
+    BEGIN
+      IF STRLEN(Value) <= MAXSTRLEN(XMLBuffer.Value) THEN
+        EXIT(TRUE);
+      IF Name = rdfaboutTok THEN
+        EXIT(FALSE);
+      ERROR(ValueStringToLongErr,XMLBuffer.FIELDCAPTION(Value),MAXSTRLEN(XMLBuffer.Value))
     END;
 
     BEGIN

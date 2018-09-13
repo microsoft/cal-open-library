@@ -10,6 +10,7 @@ OBJECT Codeunit 139211 Json Text Reader/Writer Test
   {
     Subtype=Test;
     OnRun=BEGIN
+            // [FEATURE] [JSON] [UT]
           END;
 
   }
@@ -24,9 +25,12 @@ OBJECT Codeunit 139211 Json Text Reader/Writer Test
     VAR
       TempJSONBuffer@1000 : TEMPORARY Record 1236;
       JsonTextReaderWriter@1001 : Codeunit 1234;
+      LibraryLowerPermissions@1003 : Codeunit 132217;
       Json@1002 : Text;
     BEGIN
       // [SCENARIO] Write Json and verify read Json
+      LibraryLowerPermissions.SetO365Basic;
+
       // [GIVEN] https://en.wikipedia.org/wiki/JSON
 
       // [WHEN] Writing
