@@ -24,8 +24,6 @@ OBJECT Codeunit 132543 Data Exch. Def UT
       LibraryXMLRead@1007 : Codeunit 131335;
       DefaultTxt@1004 : TextConst '@@@=Please translate;ENU=DEFAULT';
       ServerFileName@1005 : Text;
-      PositivePayFileTypeErr@1000 : TextConst 'ENU=The positive pay file that you are exporting must be of type Fixed Text or Variable Text.';
-      AssertIsNotFalseOnInsertFailedErr@1001 : TextConst 'ENU=The record should not be inserted.';
       AssertIsNotTrueOnInsertFailedErr@1008 : TextConst 'ENU=The record should be inserted.';
 
     [Test]
@@ -326,55 +324,7 @@ OBJECT Codeunit 132543 Data Exch. Def UT
       DataExchLineDef.SETRANGE("Data Exch. Def Code",DataExchDef.Code);
       Assert.RecordCount(DataExchLineDef,2);
     END;
-
-    [Test]
-    PROCEDURE OnModifyDefinitionCheckPositivePayExportFileTypeJSON@14();
-    VAR
-      DataExchDef@1000 : Record 1222;
-    BEGIN
-      // [FEATURE] [UT]
-      // [SCENARIO 381084] When the Data Exch. Def. "Type" has value of "Positive Pay Export", then the "File Type" can not be changed to "JSON"
-      // Updated Test Coverage from TFSID 122828 Test that the user can create a "Positive Pay Export" type Data Exchange Definition
-
-      // [GIVEN] Empty Data Exch. Definition inserted
-      // [GIVEN] Validating "Type" as "Positive Pay Export" and "File Type" as "JSON"
-      DataExchDef.INIT;
-      DataExchDef.VALIDATE(Code,LibraryUtility.GenerateGUID);
-      DataExchDef.INSERT(TRUE);
-      DataExchDef.VALIDATE("File Type",DataExchDef."File Type"::Json);
-      DataExchDef.VALIDATE(Type,DataExchDef.Type::"Positive Pay Export");
-
-      // [WHEN] Modify the record
-      ASSERTERROR DataExchDef.MODIFY(TRUE);
-
-      // [THEN] The record with "File Type" as "JSON" is not modified with error: Only Fixed Text or Variable Text are allowed
-      Assert.ExpectedError(PositivePayFileTypeErr);
-    END;
-
-    [Test]
-    PROCEDURE OnModifyDefinitionCheckPositivePayExportFileTypeXML@15();
-    VAR
-      DataExchDef@1000 : Record 1222;
-    BEGIN
-      // [FEATURE] [UT]
-      // [SCENARIO 381084] When the Data Exch. Def. "Type" has value of "Positive Pay Export", then the "File Type" can not be changed to "XML"
-      // Updated Test Coverage from TFSID 122828 Test that the user can create a "Positive Pay Export" type Data Exchange Definition
-
-      // [GIVEN] Empty Data Exch. Definition inserted
-      // [GIVEN] Validating "Type" as "Positive Pay Export" and "File Type" as "XML"
-      DataExchDef.INIT;
-      DataExchDef.VALIDATE(Code,LibraryUtility.GenerateGUID);
-      DataExchDef.INSERT(TRUE);
-      DataExchDef.VALIDATE("File Type",DataExchDef."File Type"::Xml);
-      DataExchDef.VALIDATE(Type,DataExchDef.Type::"Positive Pay Export");
-
-      // [WHEN] Modify the record
-      ASSERTERROR DataExchDef.MODIFY(TRUE);
-
-      // [THEN] The record with "File Type" as "XML" is not modified with error: Only Fixed Text or Variable Text are allowed
-      Assert.ExpectedError(PositivePayFileTypeErr);
-    END;
-
+    
     [Test]
     PROCEDURE OnModifyDefinitionCheckPositivePayExportFileTypeFixedText@17();
     VAR
@@ -423,54 +373,6 @@ OBJECT Codeunit 132543 Data Exch. Def UT
       // [THEN] The record is modified and "File Type" as "Variable Text" is saved
       DataExchDef.FIND;
       DataExchDef.TESTFIELD("File Type",DataExchDef."File Type"::"Variable Text");
-    END;
-
-    [Test]
-    PROCEDURE OnInsertDefinitionCheckPositivePayExportFileTypeJSON@25();
-    VAR
-      DataExchDef@1000 : Record 1222;
-    BEGIN
-      // [FEATURE] [UT]
-      // [SCENARIO 381084] A newly created Data Exch. Def. with "Type" of "Positive Pay Export" cannot have "File Type" as "JSON"
-      // Updated Test Coverage from TFSID 122828 Test that the user can create a "Positive Pay Export" type Data Exchange Definition
-
-      // [GIVEN] Empty Data Exch. Definition
-      // [GIVEN] Validate "Type" as "Positive Pay Export" and "File Type" as "JSON"
-      DataExchDef.INIT;
-      DataExchDef.VALIDATE(Code,LibraryUtility.GenerateGUID);
-      DataExchDef.VALIDATE(Type,DataExchDef.Type::"Positive Pay Export");
-      DataExchDef.VALIDATE("File Type",DataExchDef."File Type"::Json);
-
-      // [WHEN] Insert a record
-      ASSERTERROR DataExchDef.INSERT(TRUE);
-
-      // [THEN] The record with "File Type" as "JSON" is not inserted with error: Only Fixed Text or Variable Text are allowed
-      Assert.ExpectedError(PositivePayFileTypeErr);
-      Assert.IsFalse(DataExchDef.FIND,AssertIsNotFalseOnInsertFailedErr);
-    END;
-
-    [Test]
-    PROCEDURE OnInsertDefinitionCheckPositivePayExportFileTypeXML@24();
-    VAR
-      DataExchDef@1000 : Record 1222;
-    BEGIN
-      // [FEATURE] [UT]
-      // [SCENARIO 381084] A newly created Data Exch. Def. with "Type" of "Positive Pay Export" cannot have "File Type" as "XML"
-      // Updated Test Coverage from TFSID 122828 Test that the user can create a "Positive Pay Export" type Data Exchange Definition
-
-      // [GIVEN] Empty Data Exch. Definition
-      // [GIVEN] Validate "Type" as "Positive Pay Export" and "File Type" as "XML"
-      DataExchDef.INIT;
-      DataExchDef.VALIDATE(Code,LibraryUtility.GenerateGUID);
-      DataExchDef.VALIDATE(Type,DataExchDef.Type::"Positive Pay Export");
-      DataExchDef.VALIDATE("File Type",DataExchDef."File Type"::Xml);
-
-      // [WHEN] Insert a record
-      ASSERTERROR DataExchDef.INSERT(TRUE);
-
-      // [THEN] The record with "File Type" as "XML" is not inserted with error: Only Fixed Text or Variable Text are allowed
-      Assert.ExpectedError(PositivePayFileTypeErr);
-      Assert.IsFalse(DataExchDef.FIND,AssertIsNotFalseOnInsertFailedErr);
     END;
 
     [Test]
@@ -582,7 +484,10 @@ OBJECT Codeunit 132543 Data Exch. Def UT
       ExportFile.CLOSE;
 
       // Verify that element in XML file with <LineType> tag of Header.
-      LibraryXMLRead.Initialize(ServerFileName);
+      IF FileManagement.ClientFileExists(ServerFileName) THEN
+        LibraryXMLRead.Initialize(ServerFileName)
+      ELSE
+        LibraryXMLRead.Initialize(FileManagement.DownloadTempFile(ServerFileName));
       LibraryXMLRead.VerifyAttributeValueInSubtree('DataExchDef','DataExchLineDef','LineType',FORMAT(OptionNumber));
     END;
 

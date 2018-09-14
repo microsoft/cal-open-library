@@ -23,10 +23,16 @@ OBJECT Codeunit 3019 DotNet_ALPacDeploymentSchedule
       DotNetALPackageDeploymentSchedule := DotNetALPackageDeploymentSchedule.Immediate
     END;
 
-    PROCEDURE StageForNextUpdate@6();
+    PROCEDURE StageForNextMajorUpdate@6();
     BEGIN
       // do not make external
       DotNetALPackageDeploymentSchedule := DotNetALPackageDeploymentSchedule.StageForNextUpdate
+    END;
+
+    PROCEDURE StageForNextMinorUpdate@4();
+    BEGIN
+      // do not make external
+      DotNetALPackageDeploymentSchedule := DotNetALPackageDeploymentSchedule.StageForNextMinorUpdate
     END;
 
     PROCEDURE GetALPackageDeploymentSchedule@2(VAR DotNetALPackageDeploymentSchedule2@1001 : DotNet "'Microsoft.Dynamics.Nav.Ncl, Version=13.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.Microsoft.Dynamics.Nav.Runtime.Apps.ALPackageDeploymentSchedule");

@@ -8,6 +8,7 @@ OBJECT Table 1236 JSON Buffer
   }
   PROPERTIES
   {
+    ReplicateData=No;
   }
   FIELDS
   {
@@ -116,6 +117,15 @@ OBJECT Table 1236 JSON Buffer
     BEGIN
       IF GetPropertyValue(PropertyValue,PropertyName) THEN
         EXIT(EVALUATE(BooleanValue,PropertyValue));
+    END;
+
+    [External]
+    PROCEDURE GetIntegerPropertyValue@8(VAR IntegerValue@1002 : Integer;PropertyName@1000 : Text) : Boolean;
+    VAR
+      PropertyValue@1003 : Text;
+    BEGIN
+      IF GetPropertyValue(PropertyValue,PropertyName) THEN
+        EXIT(EVALUATE(IntegerValue,PropertyValue));
     END;
 
     [External]

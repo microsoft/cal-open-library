@@ -155,8 +155,13 @@ OBJECT Codeunit 6100 Data Migration Facade
     END;
 
     [Integration]
+    PROCEDURE OnMigrationCompleted@13(DataMigrationStatus@1000 : Record 1799);
+    BEGIN
+    END;
+
+    [Integration]
     [External]
-    PROCEDURE OnInitDataMigrationError@10(MigrationType@1000 : Text[250];VAR ShowBulkFixErrorsButton@1002 : Boolean);
+    PROCEDURE OnInitDataMigrationError@10(MigrationType@1000 : Text[250];VAR BulkFixErrorsButtonEnabled@1002 : Boolean);
     BEGIN
     END;
 
