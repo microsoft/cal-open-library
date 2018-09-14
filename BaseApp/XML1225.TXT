@@ -1,0 +1,614 @@
+OBJECT XMLport 1225 Imp / Exp Data Exch Def & Map
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    Encoding=UTF-8;
+    Format/Evaluate=XML Format/Evaluate;
+  }
+  ELEMENTS
+  {
+    { [{0538A0EB-2372-43D4-B37C-BFDEA0F605CE}];  ;root                ;Element ;Text     }
+
+    { [{A75DC6DE-02B6-4719-B43E-3C90D19B3BE5}];1 ;DataExchDef         ;Element ;Table   ;
+                                                  SourceTable=Table1222;
+                                                  MinOccurs=Zero;
+                                                  Import::OnBeforeInsertRecord=BEGIN
+                                                                                 "Data Exch. Def".VALIDATE(Type);
+                                                                                 "Data Exch. Def".VALIDATE("File Type");
+                                                                                 "Data Exch. Def".VALIDATE("Reading/Writing XMLport");
+                                                                               END;
+                                                                                }
+
+    { [{DAE9B066-1422-4AE9-945C-77B8CC451316}];2 ;Code                ;Attribute;Field  ;
+                                                  DataType=Code;
+                                                  SourceField=Data Exch. Def::Code }
+
+    { [{7CF8DF04-94D5-4C34-B4A3-D7EC243A1385}];2 ;Name                ;Attribute;Field  ;
+                                                  DataType=Text;
+                                                  SourceField=Data Exch. Def::Name }
+
+    { [{A7808A81-69AD-400A-8A85-7831106C2C94}];2 ;Type                ;Attribute;Field  ;
+                                                  DataType=Option;
+                                                  FieldValidate=No;
+                                                  SourceField=Data Exch. Def::Type }
+
+    { [{61366FA2-027C-4C22-9C16-5140C2D4FE89}];2 ;ReadingWritingXMLport;Attribute;Field ;
+                                                  DataType=Integer;
+                                                  FieldValidate=No;
+                                                  SourceField=Data Exch. Def::Reading/Writing XMLport;
+                                                  Occurrence=Optional;
+                                                  Export::OnBeforePassField=BEGIN
+                                                                              IF "Data Exch. Def"."Reading/Writing XMLport" = 0 THEN
+                                                                                currXMLport.SKIP;
+                                                                            END;
+                                                                             }
+
+    { [{59B4CFD1-9BA3-4885-ACBD-0585B5D30D54}];2 ;ExternalDataHandlingCodeunit;Attribute;Field;
+                                                  DataType=Integer;
+                                                  SourceField=Data Exch. Def::Ext. Data Handling Codeunit;
+                                                  Occurrence=Optional;
+                                                  Export::OnBeforePassField=BEGIN
+                                                                              IF "Data Exch. Def"."Ext. Data Handling Codeunit" = 0 THEN
+                                                                                currXMLport.SKIP;
+                                                                            END;
+                                                                             }
+
+    { [{78CCD703-2B2E-4BB1-84F8-94F79E34494F}];2 ;HeaderLines         ;Attribute;Field  ;
+                                                  DataType=Integer;
+                                                  SourceField=Data Exch. Def::Header Lines;
+                                                  Occurrence=Optional;
+                                                  Export::OnBeforePassField=BEGIN
+                                                                              IF "Data Exch. Def"."Header Lines" = 0 THEN
+                                                                                currXMLport.SKIP;
+                                                                            END;
+                                                                             }
+
+    { [{C46D78B4-12CD-45D9-AA1B-BA92FD355E08}];2 ;HeaderTag           ;Attribute;Field  ;
+                                                  DataType=Text;
+                                                  SourceField=Data Exch. Def::Header Tag;
+                                                  Occurrence=Optional }
+
+    { [{6E084263-38D6-4FF3-837A-F7EE814394C4}];2 ;FooterTag           ;Attribute;Field  ;
+                                                  DataType=Text;
+                                                  SourceField=Data Exch. Def::Footer Tag;
+                                                  Occurrence=Optional }
+
+    { [{FBF33921-062F-4B0F-9BDE-5EB97A851934}];2 ;ColumnSeparator     ;Attribute;Field  ;
+                                                  DataType=Option;
+                                                  SourceField=Data Exch. Def::Column Separator;
+                                                  Occurrence=Optional;
+                                                  Export::OnBeforePassField=BEGIN
+                                                                              IF "Data Exch. Def"."Column Separator" = "Data Exch. Def"."Column Separator"::Comma THEN
+                                                                                currXMLport.SKIP;
+                                                                            END;
+                                                                             }
+
+    { [{80870A1B-48C1-4367-94AC-B416E4245312}];2 ;FileEncoding        ;Attribute;Field  ;
+                                                  DataType=Option;
+                                                  SourceField=Data Exch. Def::File Encoding;
+                                                  Occurrence=Optional;
+                                                  Export::OnBeforePassField=BEGIN
+                                                                              IF "Data Exch. Def"."File Encoding" = "Data Exch. Def"."File Encoding"::WINDOWS THEN
+                                                                                currXMLport.SKIP;
+                                                                            END;
+                                                                             }
+
+    { [{562ACC34-695F-4F1D-8C3E-096D7525F32A}];2 ;FileType            ;Attribute;Field  ;
+                                                  DataType=Option;
+                                                  FieldValidate=No;
+                                                  SourceField=Data Exch. Def::File Type;
+                                                  Occurrence=Optional }
+
+    { [{F8A77C26-7366-4654-9C49-655C2990F259}];2 ;ReadingWritingCodeunit;Attribute;Field;
+                                                  DataType=Integer;
+                                                  SourceField=Data Exch. Def::Reading/Writing Codeunit;
+                                                  Occurrence=Optional;
+                                                  Export::OnBeforePassField=BEGIN
+                                                                              IF "Data Exch. Def"."Reading/Writing Codeunit" = 0 THEN
+                                                                                currXMLport.SKIP;
+                                                                            END;
+                                                                             }
+
+    { [{A52C2672-6780-4351-88D1-FCED5D341BE1}];2 ;ValidationCodeunit  ;Attribute;Field  ;
+                                                  DataType=Integer;
+                                                  SourceField=Data Exch. Def::Validation Codeunit;
+                                                  Occurrence=Optional;
+                                                  Export::OnBeforePassField=BEGIN
+                                                                              IF "Data Exch. Def"."Validation Codeunit" = 0 THEN
+                                                                                currXMLport.SKIP;
+                                                                            END;
+                                                                             }
+
+    { [{89795397-52C8-425E-AB31-A3A129AAC7AE}];2 ;DataHandlingCodeunit;Attribute;Field  ;
+                                                  DataType=Integer;
+                                                  SourceField=Data Exch. Def::Data Handling Codeunit;
+                                                  Occurrence=Optional;
+                                                  Export::OnBeforePassField=BEGIN
+                                                                              IF "Data Exch. Def"."Data Handling Codeunit" = 0 THEN
+                                                                                currXMLport.SKIP;
+                                                                            END;
+                                                                             }
+
+    { [{014F7E69-F97A-4630-922B-142B23B4C374}];2 ;UserFeedbackCodeunit;Attribute;Field  ;
+                                                  DataType=Integer;
+                                                  SourceField=Data Exch. Def::User Feedback Codeunit;
+                                                  Occurrence=Optional;
+                                                  Export::OnBeforePassField=BEGIN
+                                                                              IF "Data Exch. Def"."User Feedback Codeunit" = 0 THEN
+                                                                                currXMLport.SKIP;
+                                                                            END;
+                                                                             }
+
+    { [{C84C1DAC-0114-4B77-A77A-D3671A321E4D}];2 ;DataExchLineDef     ;Element ;Table   ;
+                                                  SourceTable=Table1227;
+                                                  SourceTableView=SORTING(Field1,Field10);
+                                                  LinkFields=Field1=FIELD(Field1);
+                                                  LinkTable=Data Exch. Def;
+                                                  MinOccurs=Zero }
+
+    { [{B226B9F5-8FB6-4BEC-A82B-36B53A09321A}];3 ;LineType            ;Attribute;Field  ;
+                                                  DataType=Option;
+                                                  SourceField=Data Exch. Line Def::Line Type;
+                                                  Occurrence=Optional }
+
+    { [{D347367E-5E93-4695-AFA5-1784D4818E18}];3 ;Code                ;Attribute;Field  ;
+                                                  DataType=Code;
+                                                  SourceField=Data Exch. Line Def::Code;
+                                                  Occurrence=Optional }
+
+    { [{B7630BC7-0408-4523-88FB-AB6B896B7A97}];3 ;Name                ;Attribute;Field  ;
+                                                  DataType=Text;
+                                                  SourceField=Data Exch. Line Def::Name;
+                                                  Occurrence=Optional }
+
+    { [{A4831A50-84F6-415E-9FC8-5EB12CE1FECE}];3 ;ColumnCount         ;Attribute;Field  ;
+                                                  DataType=Integer;
+                                                  SourceField=Data Exch. Line Def::Column Count;
+                                                  Occurrence=Optional }
+
+    { [{FB6F61C5-35DD-4D79-B350-16A320F5FD34}];3 ;DataLineTag         ;Attribute;Field  ;
+                                                  DataType=Text;
+                                                  SourceField=Data Exch. Line Def::Data Line Tag;
+                                                  Occurrence=Optional }
+
+    { [{4EB0E77D-D057-48C7-9C32-F8EE0411502B}];3 ;Namespace           ;Attribute;Field  ;
+                                                  DataType=Text;
+                                                  SourceField=Data Exch. Line Def::Namespace;
+                                                  Occurrence=Optional;
+                                                  Export::OnBeforePassField=BEGIN
+                                                                              IF "Data Exch. Line Def".Namespace = '' THEN
+                                                                                currXMLport.SKIP;
+                                                                            END;
+                                                                             }
+
+    { [{47129F0A-CB1B-4FCF-98BA-5FE6B9155505}];3 ;ParentCode          ;Attribute;Field  ;
+                                                  DataType=Code;
+                                                  SourceField=Data Exch. Line Def::Parent Code;
+                                                  Occurrence=Optional }
+
+    { [{CA5A4317-A701-4FEC-B787-E7B0F2A438F6}];3 ;DataExchColumnDef   ;Element ;Table   ;
+                                                  SourceTable=Table1223;
+                                                  LinkFields=Field1=FIELD(Field1),
+                                                             Field10=FIELD(Field2);
+                                                  LinkTable=Data Exch. Line Def;
+                                                  MinOccurs=Zero }
+
+    { [{83E5830F-3DF5-44AA-9EAE-F09C0EBBF2FF}];4 ;ColumnNo            ;Attribute;Field  ;
+                                                  DataType=Integer;
+                                                  SourceField=Data Exch. Column Def::Column No. }
+
+    { [{A132706A-44CE-4967-981D-7F7D49D3AC28}];4 ;Name                ;Attribute;Field  ;
+                                                  DataType=Text;
+                                                  SourceField=Data Exch. Column Def::Name }
+
+    { [{D2F87BD5-583D-405E-8ABE-31C9CB3388F2}];4 ;Show                ;Attribute;Field  ;
+                                                  DataType=Boolean;
+                                                  SourceField=Data Exch. Column Def::Show }
+
+    { [{E624F838-2787-40FD-8DA3-7AFE6428CAF6}];4 ;DataType            ;Attribute;Field  ;
+                                                  DataType=Option;
+                                                  SourceField=Data Exch. Column Def::Data Type }
+
+    { [{E6ABB585-DC80-49A3-9B3F-5E8FF3B6B110}];4 ;DataFormat          ;Attribute;Field  ;
+                                                  DataType=Text;
+                                                  SourceField=Data Exch. Column Def::Data Format;
+                                                  Occurrence=Optional;
+                                                  Export::OnBeforePassField=BEGIN
+                                                                              IF "Data Exch. Column Def"."Data Format" = '' THEN
+                                                                                currXMLport.SKIP;
+                                                                            END;
+                                                                             }
+
+    { [{E54F8716-0E4A-4EE2-BA6A-424024508D94}];4 ;DataFormattingCulture;Attribute;Field ;
+                                                  DataType=Text;
+                                                  SourceField=Data Exch. Column Def::Data Formatting Culture;
+                                                  Occurrence=Optional;
+                                                  Export::OnBeforePassField=BEGIN
+                                                                              IF "Data Exch. Column Def"."Data Formatting Culture" = '' THEN
+                                                                                currXMLport.SKIP;
+                                                                            END;
+                                                                             }
+
+    { [{978087B0-196F-407C-9761-84749B9C13FF}];4 ;Description         ;Attribute;Field  ;
+                                                  DataType=Text;
+                                                  SourceField=Data Exch. Column Def::Description;
+                                                  Occurrence=Optional;
+                                                  Export::OnBeforePassField=BEGIN
+                                                                              IF "Data Exch. Column Def".Description = '' THEN
+                                                                                currXMLport.SKIP;
+                                                                            END;
+                                                                             }
+
+    { [{DCD8FEF2-3976-496A-9EA5-613A0846D876}];4 ;Length              ;Attribute;Field  ;
+                                                  DataType=Integer;
+                                                  SourceField=Data Exch. Column Def::Length;
+                                                  Occurrence=Optional;
+                                                  Export::OnBeforePassField=BEGIN
+                                                                              IF "Data Exch. Column Def".Length = 0 THEN
+                                                                                currXMLport.SKIP;
+                                                                            END;
+                                                                             }
+
+    { [{B105E979-EA1D-4A66-82A1-AC93C00B0B4C}];4 ;Constant            ;Attribute;Field  ;
+                                                  DataType=Text;
+                                                  SourceField=Data Exch. Column Def::Constant;
+                                                  Occurrence=Optional;
+                                                  Export::OnBeforePassField=BEGIN
+                                                                              IF "Data Exch. Column Def".Constant = '' THEN
+                                                                                currXMLport.SKIP;
+                                                                            END;
+                                                                             }
+
+    { [{A89AFE3D-DBA7-44F3-8451-C6CBC2E72EDB}];4 ;Path                ;Attribute;Field  ;
+                                                  DataType=Text;
+                                                  SourceField=Data Exch. Column Def::Path;
+                                                  Occurrence=Optional }
+
+    { [{E72F3070-F986-4EEB-AC19-31A00A5EF0BA}];4 ;NegativeSignIdentifier;Attribute;Field;
+                                                  DataType=Text;
+                                                  SourceField=Data Exch. Column Def::Negative-Sign Identifier;
+                                                  Occurrence=Optional }
+
+    { [{EDD79AF5-6402-48AD-AFA1-4A9D6F0487DD}];4 ;TextPaddingRequired ;Attribute;Field  ;
+                                                  DataType=Boolean;
+                                                  SourceField=Data Exch. Column Def::Text Padding Required;
+                                                  Occurrence=Optional }
+
+    { [{02AF3824-494D-4AF8-AA3A-A08DCB3229A9}];4 ;PadCharacter        ;Attribute;Field  ;
+                                                  DataType=Text;
+                                                  SourceField=Data Exch. Column Def::Pad Character;
+                                                  Occurrence=Optional }
+
+    { [{C573D44C-8C62-4879-AEB6-C4738F547087}];4 ;Justification       ;Attribute;Field  ;
+                                                  DataType=Option;
+                                                  SourceField=Data Exch. Column Def::Justification;
+                                                  Occurrence=Optional }
+
+    { [{C158D38E-6B23-488B-8B41-3642AAA1CB7E}];4 ;UseNodeNameAsValue  ;Attribute;Field  ;
+                                                  DataType=Boolean;
+                                                  SourceField=Data Exch. Column Def::Use Node Name as Value;
+                                                  Occurrence=Optional }
+
+    { [{0FE1DDC2-10CA-4742-A643-FAD91987CB44}];3 ;DataExchMapping     ;Element ;Table   ;
+                                                  SourceTable=Table1224;
+                                                  LinkFields=Field1=FIELD(Field1),
+                                                             Field8=FIELD(Field2);
+                                                  LinkTable=Data Exch. Line Def;
+                                                  MinOccurs=Zero;
+                                                  Export::OnAfterGetRecord=BEGIN
+                                                                             "Data Exch. Field Mapping".INIT;
+                                                                             "Data Exch. Field Mapping"."Column No." := 0;
+                                                                           END;
+                                                                            }
+
+    { [{68DBC931-9FB0-49B2-89AF-A4D43EF80A17}];4 ;TableId             ;Attribute;Field  ;
+                                                  DataType=Integer;
+                                                  SourceField=Data Exch. Mapping::Table ID }
+
+    { [{57E87E0B-3F23-4C71-AF86-C801AC792A1C}];4 ;UseAsIntermediateTable;Attribute;Field;
+                                                  DataType=Boolean;
+                                                  SourceField=Data Exch. Mapping::Use as Intermediate Table;
+                                                  Occurrence=Optional;
+                                                  Export::OnBeforePassField=BEGIN
+                                                                              IF NOT "Data Exch. Mapping"."Use as Intermediate Table" THEN
+                                                                                currXMLport.SKIP;
+                                                                            END;
+                                                                             }
+
+    { [{6E2A40CE-16B9-4E87-A42D-08E1014E1D8C}];4 ;Name                ;Attribute;Field  ;
+                                                  DataType=Text;
+                                                  SourceField=Data Exch. Mapping::Name }
+
+    { [{D9EC9550-F083-4C97-99FF-CBE01B17220E}];4 ;MappingCodeunit     ;Attribute;Field  ;
+                                                  DataType=Integer;
+                                                  SourceField=Data Exch. Mapping::Mapping Codeunit;
+                                                  Occurrence=Optional;
+                                                  Export::OnBeforePassField=BEGIN
+                                                                              IF "Data Exch. Mapping"."Mapping Codeunit" = 0 THEN
+                                                                                currXMLport.SKIP;
+                                                                            END;
+                                                                             }
+
+    { [{C0876E76-BB84-4AB5-A853-4D678AF1B008}];4 ;DataExchNoFieldID   ;Attribute;Field  ;
+                                                  DataType=Integer;
+                                                  SourceField=Data Exch. Mapping::Data Exch. No. Field ID;
+                                                  Occurrence=Optional;
+                                                  Export::OnBeforePassField=BEGIN
+                                                                              IF "Data Exch. Mapping"."Data Exch. No. Field ID" = 0 THEN
+                                                                                currXMLport.SKIP;
+                                                                            END;
+                                                                             }
+
+    { [{C60ED0B9-6E30-411E-A71D-14CD90E3B524}];4 ;DataExchLineFieldID ;Attribute;Field  ;
+                                                  DataType=Integer;
+                                                  SourceField=Data Exch. Mapping::Data Exch. Line Field ID;
+                                                  Occurrence=Optional;
+                                                  Export::OnBeforePassField=BEGIN
+                                                                              IF "Data Exch. Mapping"."Data Exch. Line Field ID" = 0 THEN
+                                                                                currXMLport.SKIP;
+                                                                            END;
+                                                                             }
+
+    { [{FCF9A885-7D88-4493-9D5C-91E1AE2AA25B}];4 ;PreMappingCodeunit  ;Attribute;Field  ;
+                                                  DataType=Integer;
+                                                  SourceField=Data Exch. Mapping::Pre-Mapping Codeunit;
+                                                  Occurrence=Optional;
+                                                  Export::OnBeforePassField=BEGIN
+                                                                              IF "Data Exch. Mapping"."Pre-Mapping Codeunit" = 0 THEN
+                                                                                currXMLport.SKIP;
+                                                                            END;
+                                                                             }
+
+    { [{824A6315-3ECA-4422-9A34-C1D836A02DE9}];4 ;PostMappingCodeunit ;Attribute;Field  ;
+                                                  DataType=Integer;
+                                                  SourceField=Data Exch. Mapping::Post-Mapping Codeunit;
+                                                  Occurrence=Optional;
+                                                  Export::OnBeforePassField=BEGIN
+                                                                              IF "Data Exch. Mapping"."Post-Mapping Codeunit" = 0 THEN
+                                                                                currXMLport.SKIP;
+                                                                            END;
+                                                                             }
+
+    { [{F488CDFC-F872-4062-8B8C-88F83A8D0D0F}];4 ;DataExchFieldMapping;Element ;Table   ;
+                                                  SourceTable=Table1225;
+                                                  LinkFields=Field1=FIELD(Field1),
+                                                             Field8=FIELD(Field8),
+                                                             Field2=FIELD(Field2);
+                                                  LinkTable=Data Exch. Mapping;
+                                                  MinOccurs=Zero }
+
+    { [{227FAB70-967B-4F24-84FE-76A326B48F4A}];5 ;ColumnNo            ;Attribute;Field  ;
+                                                  DataType=Integer;
+                                                  SourceField=Data Exch. Field Mapping::Column No.;
+                                                  Occurrence=Optional;
+                                                  Export::OnBeforePassField=BEGIN
+                                                                              IF "Data Exch. Field Mapping"."Column No." = 0 THEN
+                                                                                currXMLport.SKIP;
+                                                                            END;
+                                                                             }
+
+    { [{E9FC6A19-DA6B-4528-AD18-2E34757B3043}];5 ;FieldID             ;Attribute;Field  ;
+                                                  DataType=Integer;
+                                                  SourceField=Data Exch. Field Mapping::Field ID;
+                                                  Occurrence=Optional;
+                                                  Export::OnBeforePassField=BEGIN
+                                                                              IF "Data Exch. Field Mapping"."Field ID" = 0 THEN
+                                                                                currXMLport.SKIP;
+                                                                            END;
+                                                                             }
+
+    { [{6A3F0883-4BFB-4D74-A5F3-3B1459A3500E}];5 ;Optional            ;Attribute;Field  ;
+                                                  DataType=Boolean;
+                                                  SourceField=Data Exch. Field Mapping::Optional;
+                                                  Occurrence=Optional;
+                                                  Export::OnBeforePassField=BEGIN
+                                                                              IF NOT "Data Exch. Field Mapping".Optional THEN
+                                                                                currXMLport.SKIP;
+                                                                            END;
+                                                                             }
+
+    { [{9A4D4353-D371-4999-988C-CF53BB994365}];5 ;UseDefaultValue     ;Attribute;Field  ;
+                                                  DataType=Boolean;
+                                                  SourceField=Data Exch. Field Mapping::Use Default Value;
+                                                  Occurrence=Optional;
+                                                  Export::OnBeforePassField=BEGIN
+                                                                              IF NOT "Data Exch. Field Mapping"."Use Default Value" THEN
+                                                                                currXMLport.SKIP;
+                                                                            END;
+                                                                             }
+
+    { [{C7CBF0C4-0197-4D63-8CA2-62E1775C0D07}];5 ;DefaultValue        ;Attribute;Field  ;
+                                                  DataType=Text;
+                                                  SourceField=Data Exch. Field Mapping::Default Value;
+                                                  Occurrence=Optional;
+                                                  Export::OnBeforePassField=BEGIN
+                                                                              IF "Data Exch. Field Mapping"."Default Value" = '' THEN
+                                                                                currXMLport.SKIP;
+                                                                            END;
+                                                                             }
+
+    { [{C69889F5-BCB2-4F2C-B284-CF8DADC84BBE}];5 ;Multiplier          ;Attribute;Field  ;
+                                                  DataType=Decimal;
+                                                  SourceField=Data Exch. Field Mapping::Multiplier;
+                                                  Occurrence=Optional;
+                                                  Export::OnBeforePassField=BEGIN
+                                                                              IF "Data Exch. Field Mapping".Multiplier = 1 THEN
+                                                                                currXMLport.SKIP;
+                                                                            END;
+                                                                             }
+
+    { [{2AB91E8A-A9BC-4882-9E9A-92276155BAF0}];5 ;TargetTableID       ;Attribute;Field  ;
+                                                  DataType=Integer;
+                                                  SourceField=Data Exch. Field Mapping::Target Table ID;
+                                                  Occurrence=Optional;
+                                                  Export::OnBeforePassField=BEGIN
+                                                                              IF "Data Exch. Field Mapping"."Target Table ID" = 0 THEN
+                                                                                currXMLport.SKIP;
+                                                                            END;
+                                                                             }
+
+    { [{6749F3CB-E6A4-4AA2-83FA-CB2ACD61F92B}];5 ;TargetFieldID       ;Attribute;Field  ;
+                                                  DataType=Integer;
+                                                  SourceField=Data Exch. Field Mapping::Target Field ID;
+                                                  Occurrence=Optional;
+                                                  Export::OnBeforePassField=BEGIN
+                                                                              IF "Data Exch. Field Mapping"."Target Table ID" = 0 THEN
+                                                                                currXMLport.SKIP;
+                                                                            END;
+                                                                             }
+
+    { [{323308A9-427D-44A4-BBC1-7FAE4E840C8E}];5 ;TransformationRule  ;Attribute;Text   ;
+                                                  DataType=Code;
+                                                  Occurrence=Optional;
+                                                  Import::OnAfterAssignVariable=VAR
+                                                                                  TransformationRuleRec@1000 : Record 1237;
+                                                                                BEGIN
+                                                                                  CASE TransformationRule OF
+                                                                                    'UPPERCASE':
+                                                                                      "Data Exch. Field Mapping".VALIDATE("Transformation Rule",TransformationRuleRec.GetUppercaseCode);
+                                                                                    'LOWERCASE':
+                                                                                      "Data Exch. Field Mapping".VALIDATE("Transformation Rule",TransformationRuleRec.GetLowercaseCode);
+                                                                                    'TITLECASE':
+                                                                                      "Data Exch. Field Mapping".VALIDATE("Transformation Rule",TransformationRuleRec.GetTitlecaseCode);
+                                                                                    'TRIM':
+                                                                                      "Data Exch. Field Mapping".VALIDATE("Transformation Rule",TransformationRuleRec.GetTrimCode);
+                                                                                    'FOURTH_TO_SIXTH_CHAR':
+                                                                                      "Data Exch. Field Mapping".VALIDATE("Transformation Rule",TransformationRuleRec.GetFourthToSixthSubstringCode);
+                                                                                    'YYYYMMDD_DATE':
+                                                                                      "Data Exch. Field Mapping".VALIDATE("Transformation Rule",TransformationRuleRec.GetYYYYMMDDCode);
+                                                                                    'YYYYMMDDHHMMSS_FMT':
+                                                                                      "Data Exch. Field Mapping".VALIDATE("Transformation Rule",TransformationRuleRec.GetYYYYMMDDHHMMSSCode);
+                                                                                    'ALPHANUMERIC_ONLY':
+                                                                                      "Data Exch. Field Mapping".VALIDATE("Transformation Rule",TransformationRuleRec.GetAlphanumericCode);
+                                                                                    'DK_DECIMAL_FORMAT':
+                                                                                      "Data Exch. Field Mapping".VALIDATE("Transformation Rule",TransformationRuleRec.GetDanishDecimalFormatCode);
+                                                                                    'US_DATE_FORMAT':
+                                                                                      "Data Exch. Field Mapping".VALIDATE("Transformation Rule",TransformationRuleRec.GetUSDateFormatCode);
+                                                                                    'US_DATETIME_FORMAT':
+                                                                                      "Data Exch. Field Mapping".VALIDATE("Transformation Rule",TransformationRuleRec.GetUSDateTimeFormatCode);
+                                                                                    'DELETE_NOTPROVIDED':
+                                                                                      "Data Exch. Field Mapping".VALIDATE("Transformation Rule",TransformationRuleRec.GetDeleteNOTPROVIDEDCode);
+                                                                                    ELSE
+                                                                                      "Data Exch. Field Mapping"."Transformation Rule" := TransformationRule;
+                                                                                  END;
+                                                                                END;
+
+                                                  Export::OnBeforePassVariable=VAR
+                                                                                 TransformationRuleRec@1000 : Record 1237;
+                                                                               BEGIN
+                                                                                 CASE "Data Exch. Field Mapping"."Transformation Rule" OF
+                                                                                   TransformationRuleRec.GetUppercaseCode:
+                                                                                     TransformationRule := 'UPPERCASE';
+                                                                                   TransformationRuleRec.GetLowercaseCode:
+                                                                                     TransformationRule := 'LOWERCASE';
+                                                                                   TransformationRuleRec.GetTitlecaseCode:
+                                                                                     TransformationRule := 'TITLECASE';
+                                                                                   TransformationRuleRec.GetTrimCode:
+                                                                                     TransformationRule := 'TRIM';
+                                                                                   TransformationRuleRec.GetFourthToSixthSubstringCode:
+                                                                                     TransformationRule := 'FOURTH_TO_SIXTH_CHAR';
+                                                                                   TransformationRuleRec.GetYYYYMMDDCode:
+                                                                                     TransformationRule := 'YYYYMMDD_DATE';
+                                                                                   TransformationRuleRec.GetYYYYMMDDHHMMSSCode:
+                                                                                     TransformationRule := 'YYYYMMDDHHMMSS_FMT';
+                                                                                   TransformationRuleRec.GetAlphanumericCode:
+                                                                                     TransformationRule := 'ALPHANUMERIC_ONLY';
+                                                                                   TransformationRuleRec.GetDanishDecimalFormatCode:
+                                                                                     TransformationRule := 'DK_DECIMAL_FORMAT';
+                                                                                   TransformationRuleRec.GetUSDateFormatCode:
+                                                                                     TransformationRule := 'US_DATE_FORMAT';
+                                                                                   TransformationRuleRec.GetUSDateTimeFormatCode:
+                                                                                     TransformationRule := 'US_DATETIME_FORMAT';
+                                                                                   TransformationRuleRec.GetDeleteNOTPROVIDEDCode:
+                                                                                     TransformationRule := 'DELETE_NOTPROVIDED';
+                                                                                   ELSE BEGIN
+                                                                                     TransformationRule := "Data Exch. Field Mapping"."Transformation Rule";
+                                                                                     IF (TransformationRule <> '') AND NOT TempTransformationRuleRec.GET(TransformationRule) THEN BEGIN
+                                                                                       TransformationRuleRec.GET(TransformationRule);
+                                                                                       TempTransformationRuleRec := TransformationRuleRec;
+                                                                                       TempTransformationRuleRec.INSERT;
+                                                                                     END;
+                                                                                   END;
+                                                                                 END;
+                                                                               END;
+                                                                                }
+
+    { [{8B81BD34-9936-4F95-9883-A91F58341E6F}];5 ;TransformationRules ;Element ;Table   ;
+                                                  VariableName=TempTransformationRuleRec;
+                                                  SourceTable=Table1237;
+                                                  Temporary=Yes;
+                                                  AutoReplace=Yes;
+                                                  MinOccurs=Zero;
+                                                  Import::OnAfterInsertRecord=VAR
+                                                                                TransformationRuleRec@10000200 : Record 1237;
+                                                                              BEGIN
+                                                                                IF NOT TransformationRuleRec.GET(TempTransformationRuleRec.Code) THEN BEGIN
+                                                                                  TransformationRuleRec := TempTransformationRuleRec;
+                                                                                  TransformationRuleRec.INSERT;
+                                                                                END;
+                                                                              END;
+                                                                               }
+
+    { [{80008ED2-013D-4265-88E6-2070FAFE2A96}];6 ;Code                ;Element ;Field   ;
+                                                  DataType=Code;
+                                                  SourceField=TempTransformationRuleRec::Code }
+
+    { [{BEB9ED1E-FA3C-4197-9C0D-42BD77FBA424}];6 ;Description         ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=TempTransformationRuleRec::Description }
+
+    { [{C15D65D8-3131-4E0D-8259-6BBBAFE78C77}];6 ;TransformationType  ;Element ;Field   ;
+                                                  DataType=Option;
+                                                  SourceField=TempTransformationRuleRec::Transformation Type }
+
+    { [{5A4A7F56-8B2D-4E89-80D3-C8291E6DF278}];6 ;FindValue           ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=TempTransformationRuleRec::Find Value }
+
+    { [{3E4619BD-1A1A-4A67-9193-F1FAAE75E9E9}];6 ;ReplaceValue        ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=TempTransformationRuleRec::Replace Value }
+
+    { [{5293E82E-6FA9-4596-8654-A17FD8B515A5}];6 ;StartPosition       ;Element ;Field   ;
+                                                  DataType=Integer;
+                                                  SourceField=TempTransformationRuleRec::Start Position }
+
+    { [{7B252EFB-E5DF-4A62-8D30-47017CB8530A}];6 ;Length              ;Element ;Field   ;
+                                                  DataType=Integer;
+                                                  SourceField=TempTransformationRuleRec::Length }
+
+    { [{CD03E36F-6617-419F-B23B-4B23B9F94451}];6 ;DataFormat          ;Element ;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=TempTransformationRuleRec::Data Format }
+
+    { [{79B1A722-9688-480F-B245-69D252965ED7}];6 ;DataFormattingCulture;Element;Field   ;
+                                                  DataType=Text;
+                                                  SourceField=TempTransformationRuleRec::Data Formatting Culture }
+
+  }
+  EVENTS
+  {
+  }
+  REQUESTPAGE
+  {
+    PROPERTIES
+    {
+    }
+    CONTROLS
+    {
+    }
+  }
+  CODE
+  {
+
+    BEGIN
+    END.
+  }
+}
+

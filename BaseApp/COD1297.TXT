@@ -24,7 +24,6 @@ OBJECT Codeunit 1297 Http Web Request Mgt.
       InternalErr@1001 : TextConst 'ENU=The remote service has returned the following error message:\\';
       NoCookieForYouErr@1040 : TextConst 'ENU=The web request has no cookies.';
 
-    [Internal]
     PROCEDURE GetResponse@6(VAR ResponseInStream@1005 : InStream;VAR HttpStatusCode@1000 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Net.HttpStatusCode";VAR ResponseHeaders@1003 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Collections.Specialized.NameValueCollection") : Boolean;
     VAR
       WebRequestHelper@1001 : Codeunit 1299;
@@ -34,7 +33,6 @@ OBJECT Codeunit 1297 Http Web Request Mgt.
           ResponseHeaders,GlobalProgressDialogEnabled));
     END;
 
-    [Internal]
     PROCEDURE GetResponseStream@23(VAR ResponseInStream@1005 : InStream) : Boolean;
     VAR
       WebRequestHelper@1001 : Codeunit 1299;
@@ -47,14 +45,12 @@ OBJECT Codeunit 1297 Http Web Request Mgt.
     END;
 
     [TryFunction]
-    [Internal]
     PROCEDURE ProcessFaultResponse@14(SupportInfo@1001 : Text);
     BEGIN
       ProcessFaultXMLResponse(SupportInfo,'','','');
     END;
 
     [TryFunction]
-    [Internal]
     PROCEDURE ProcessFaultXMLResponse@16(SupportInfo@1001 : Text;NodePath@1011 : Text;Prefix@1008 : Text;NameSpace@1007 : Text);
     VAR
       TempReturnTempBlob@1004 : TEMPORARY Record 99008535;
@@ -150,7 +146,6 @@ OBJECT Codeunit 1297 Http Web Request Mgt.
       GlobalProgressDialogEnabled := FALSE;
     END;
 
-    [Internal]
     PROCEDURE Initialize@11(URL@1000 : Text);
     VAR
       PermissionManager@1002 : Codeunit 9002;
@@ -181,7 +176,6 @@ OBJECT Codeunit 1297 Http Web Request Mgt.
       TraceLogEnabled := TRUE;
     END;
 
-    [Internal]
     PROCEDURE AddBodyAsText@26(BodyText@1001 : Text);
     VAR
       Encoding@1002 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.Encoding";
@@ -190,7 +184,6 @@ OBJECT Codeunit 1297 Http Web Request Mgt.
       AddBodyAsTextWithEncoding(BodyText,Encoding.UTF8);
     END;
 
-    [Internal]
     PROCEDURE AddBodyAsAsciiText@21(BodyText@1001 : Text);
     VAR
       Encoding@1002 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.Encoding";
@@ -211,37 +204,31 @@ OBJECT Codeunit 1297 Http Web Request Mgt.
       StreamWriter.Dispose;
     END;
 
-    [Internal]
     PROCEDURE SetTimeout@7(NewTimeout@1000 : Integer);
     BEGIN
       HttpWebRequest.Timeout := NewTimeout;
     END;
 
-    [Internal]
     PROCEDURE SetMethod@4(Method@1000 : Text);
     BEGIN
       HttpWebRequest.Method := Method;
     END;
 
-    [Internal]
     PROCEDURE SetDecompresionMethod@9(DecompressionMethod@1000 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Net.DecompressionMethods");
     BEGIN
       HttpWebRequest.AutomaticDecompression := DecompressionMethod;
     END;
 
-    [Internal]
     PROCEDURE SetContentType@5(ContentType@1000 : Text);
     BEGIN
       HttpWebRequest.ContentType := ContentType;
     END;
 
-    [Internal]
     PROCEDURE SetReturnType@2(ReturnType@1000 : Text);
     BEGIN
       HttpWebRequest.Accept := ReturnType;
     END;
 
-    [Internal]
     PROCEDURE SetProxy@22(ProxyUrl@1000 : Text);
     VAR
       WebProxy@1001 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Net.WebProxy";
@@ -260,13 +247,11 @@ OBJECT Codeunit 1297 Http Web Request Mgt.
       HttpWebRequest.ServicePoint.Expect100Continue := expectValue;
     END;
 
-    [Internal]
     PROCEDURE SetContentLength@29(ContentLength@1000 : BigInteger);
     BEGIN
       HttpWebRequest.ContentLength := ContentLength;
     END;
 
-    [Internal]
     PROCEDURE AddSecurityProtocolTls12@30();
     VAR
       Convert@1000 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Convert";
@@ -289,26 +274,26 @@ OBJECT Codeunit 1297 Http Web Request Mgt.
         ServicePointManager.SecurityProtocol := TypeHelper.BitwiseOr(CurrentSecurityProtocol,SecurityProtocol);
     END;
 
-    [Internal]
     PROCEDURE AddHeader@10(Key@1000 : Text;Value@1001 : Text);
     BEGIN
       HttpWebRequest.Headers.Add(Key,Value);
     END;
 
-    [Internal]
     PROCEDURE AddBody@3(BodyFilePath@1000 : Text);
     VAR
+      FileManagement@1001 : Codeunit 419;
       FileStream@1003 : DotNet "'mscorlib'.System.IO.FileStream";
       FileMode@1004 : DotNet "'mscorlib'.System.IO.FileMode";
     BEGIN
       IF BodyFilePath = '' THEN
         EXIT;
 
+      FileManagement.IsAllowedPath(BodyFilePath,FALSE);
+
       FileStream := FileStream.FileStream(BodyFilePath,FileMode.Open);
       FileStream.CopyTo(HttpWebRequest.GetRequestStream);
     END;
 
-    [Internal]
     PROCEDURE AddBodyBlob@19(VAR TempBlob@1000 : Record 99008535);
     VAR
       RequestStr@1002 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.IO.Stream";
@@ -337,19 +322,16 @@ OBJECT Codeunit 1297 Http Web Request Mgt.
       HttpWebRequest.Credentials := Credential;
     END;
 
-    [Internal]
     PROCEDURE SetUserAgent@8(UserAgent@1000 : Text);
     BEGIN
       HttpWebRequest.UserAgent := UserAgent;
     END;
 
-    [Internal]
     PROCEDURE SetCookie@53(VAR Cookie@1000 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Net.Cookie");
     BEGIN
       HttpWebRequest.CookieContainer.Add(Cookie);
     END;
 
-    [Internal]
     PROCEDURE GetCookie@13(VAR Cookie@1000 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Net.Cookie");
     VAR
       CookieCollection@1001 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Net.CookieCollection";
@@ -360,7 +342,6 @@ OBJECT Codeunit 1297 Http Web Request Mgt.
       Cookie := CookieCollection.Item(0);
     END;
 
-    [Internal]
     PROCEDURE HasCookie@34() : Boolean;
     BEGIN
       EXIT(HttpWebRequest.CookieContainer.Count > 0);

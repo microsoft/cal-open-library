@@ -1,0 +1,149 @@
+OBJECT Codeunit 1214 Map DataExch To Intermediate
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    TableNo=1220;
+    OnRun=BEGIN
+            ProcessAllLinesColumnMapping(Rec);
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      TempNameValueBuffer@1000 : TEMPORARY Record 823;
+      TargetTableFieldDefinitionMustBeSpecifiedErr@1001 : TextConst 'ENU=You must specify a target table for the column definition.';
+
+    PROCEDURE ProcessAllLinesColumnMapping@12(DataExch@1001 : Record 1220);
+    VAR
+      DataExchLineDef@1000 : Record 1227;
+    BEGIN
+      // TempNameValueBuffer - used to "keep track" of node id - record No. relation for determining parent/child relation
+      TempNameValueBuffer.RESET;
+      TempNameValueBuffer.DELETEALL;
+
+      DataExchLineDef.SETRANGE("Data Exch. Def Code",DataExch."Data Exch. Def Code");
+      DataExchLineDef.SETRANGE("Parent Code",'');
+      IF DataExchLineDef.FINDSET THEN
+        REPEAT
+          ProcessColumnMapping(DataExch,DataExchLineDef);
+        UNTIL DataExchLineDef.NEXT = 0;
+    END;
+
+    LOCAL PROCEDURE ProcessColumnMapping@13(DataExch@1004 : Record 1220;DataExchLineDef@1001 : Record 1227);
+    VAR
+      DataExchField@1009 : Record 1221;
+      ChildDataExchLineDef@1012 : Record 1227;
+      CurrentLineNo@1011 : Integer;
+    BEGIN
+      DataExchField.SETRANGE("Data Exch. No.",DataExch."Entry No.");
+      DataExchField.SETRANGE("Data Exch. Line Def Code",DataExchLineDef.Code);
+
+      IF NOT DataExchField.FINDSET THEN
+        EXIT;
+
+      CurrentLineNo := -1;
+
+      REPEAT
+        InsertRecordDefinition(DataExchField,DataExchLineDef,CurrentLineNo);
+        InsertDataValues(DataExchField,DataExchLineDef,CurrentLineNo);
+      UNTIL DataExchField.NEXT = 0;
+
+      // Process Child Line Definitions
+      ChildDataExchLineDef.SETRANGE("Data Exch. Def Code",DataExchLineDef."Data Exch. Def Code");
+      ChildDataExchLineDef.SETRANGE("Parent Code",DataExchLineDef.Code);
+
+      IF NOT ChildDataExchLineDef.FINDSET THEN
+        EXIT;
+
+      REPEAT
+        ProcessColumnMapping(DataExch,ChildDataExchLineDef);
+      UNTIL ChildDataExchLineDef.NEXT = 0;
+    END;
+
+    LOCAL PROCEDURE InsertRecordDefinition@3(DataExchField@1000 : Record 1221;DataExchLineDef@1003 : Record 1227;VAR CurrentLineNo@1002 : Integer);
+    VAR
+      DataExchFieldMapping@1001 : Record 1225;
+    BEGIN
+      // Check if definition is already inserted
+      IF CurrentLineNo = DataExchField."Line No." THEN
+        EXIT;
+
+      // Find the table definition we need to write to.
+      DataExchFieldMapping.SETRANGE("Data Exch. Def Code",DataExchLineDef."Data Exch. Def Code");
+      DataExchFieldMapping.SETRANGE("Data Exch. Line Def Code",DataExchLineDef.Code);
+      DataExchFieldMapping.SETRANGE("Table ID",DATABASE::"Intermediate Data Import");
+      DataExchFieldMapping.SETFILTER("Column No.",'>0');
+      IF DataExchFieldMapping.ISEMPTY THEN
+        ERROR(TargetTableFieldDefinitionMustBeSpecifiedErr);
+
+      CurrentLineNo := DataExchField."Line No.";
+
+      // Save Node ID / Line No relation
+      AddNodeIDLineNoPair(DataExchField."Node ID",CurrentLineNo);
+    END;
+
+    LOCAL PROCEDURE InsertDataValues@6(DataExchField@1003 : Record 1221;DataExchLineDef@1002 : Record 1227;LineNo@1005 : Integer);
+    VAR
+      DataExchFieldMapping@1000 : Record 1225;
+      IntermediateDataImport@1001 : Record 1214;
+      TransformationRule@1006 : Record 1237;
+      ParentLineNo@1004 : Integer;
+    BEGIN
+      IF DataExchField."Column No." < 1 THEN
+        EXIT;
+
+      // Skip if no mapping
+      IF NOT DataExchFieldMapping.GET(
+           DataExchLineDef."Data Exch. Def Code",DataExchLineDef.Code,
+           DATABASE::"Intermediate Data Import",DataExchField."Column No.")
+      THEN
+        EXIT;
+
+      IntermediateDataImport.INIT;
+      IntermediateDataImport.VALIDATE("Data Exch. No.",DataExchField."Data Exch. No.");
+      IntermediateDataImport.VALIDATE("Table ID",DataExchFieldMapping."Target Table ID");
+      IntermediateDataImport.VALIDATE("Record No.",LineNo);
+      IntermediateDataImport.VALIDATE("Field ID",DataExchFieldMapping."Target Field ID");
+      IF TransformationRule.GET(DataExchFieldMapping."Transformation Rule") THEN
+        IntermediateDataImport.SetValueWithoutModifying(TransformationRule.TransformText(DataExchField.GetValue))
+      ELSE
+        IntermediateDataImport.SetValueWithoutModifying(DataExchField.GetValue);
+      IntermediateDataImport.VALIDATE("Validate Only",DataExchFieldMapping.Optional);
+      IF DataExchField."Parent Node ID" <> '' THEN BEGIN
+        TempNameValueBuffer.SETRANGE(Name,DataExchField."Parent Node ID");
+        TempNameValueBuffer.FINDFIRST;
+        EVALUATE(ParentLineNo,TempNameValueBuffer.Value);
+        IntermediateDataImport.VALIDATE("Parent Record No.",ParentLineNo);
+      END;
+
+      IntermediateDataImport.INSERT(TRUE);
+    END;
+
+    LOCAL PROCEDURE AddNodeIDLineNoPair@7(NodeID@1000 : Text[250];LineNo@1001 : Integer);
+    VAR
+      ID@1002 : Integer;
+    BEGIN
+      TempNameValueBuffer.RESET;
+      ID := 1;
+      IF TempNameValueBuffer.FINDLAST THEN
+        ID := TempNameValueBuffer.ID + 1;
+
+      CLEAR(TempNameValueBuffer);
+      TempNameValueBuffer.ID := ID;
+      TempNameValueBuffer.Name := NodeID;
+      TempNameValueBuffer.Value := FORMAT(LineNo);
+      TempNameValueBuffer.INSERT(TRUE);
+    END;
+
+    BEGIN
+    END.
+  }
+}
+

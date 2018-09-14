@@ -50,14 +50,16 @@ OBJECT Codeunit 419 File Management
       ZipArchive@1029 : DotNet "'System.IO.Compression, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.IO.Compression.ZipArchive";
       ZipArchiveMode@1033 : DotNet "'System.IO.Compression, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.IO.Compression.ZipArchiveMode";
       DownloadImageTxt@1034 : TextConst 'ENU=Download image';
+      CanNotRunDotNetOnClientErr@1035 : TextConst 'ENU=Sorry, this action is not available for the web-based versions of the app. You must use the Windows client.';
+      ChooseFileTitleMsg@1036 : TextConst 'ENU=Choose the file to upload.';
+      NotAllowedPathErr@1037 : TextConst '@@@="%1=the full path to a file. ex: C:\Windows\TextFile.txt ";ENU=Files outside of the current user''s folder cannot be accessed. Access is denied to file %1.';
 
-    [Internal]
     PROCEDURE BLOBImport@3(VAR BLOBRef@1000 : TEMPORARY Record 99008535;Name@1002 : Text) : Text;
     BEGIN
       EXIT(BLOBImportWithFilter(BLOBRef,Text007,Name,AllFilesDescriptionTxt,AllFilesFilterTxt));
     END;
 
-    [Internal]
+    [External]
     PROCEDURE BLOBImportWithFilter@27(VAR TempBlob@1000 : Record 99008535;DialogCaption@1005 : Text;Name@1002 : Text;FileFilter@1003 : Text;ExtFilter@1008 : Text) : Text;
     VAR
       NVInStream@1001 : InStream;
@@ -111,7 +113,6 @@ OBJECT Codeunit 419 File Management
       EXIT('');
     END;
 
-    [Internal]
     PROCEDURE BLOBExportWithEncoding@67(VAR TempBlob@1002 : TEMPORARY Record 99008535;Name@1001 : Text;CommonDialog@1000 : Boolean;Encoding@1004 : TextEncoding) : Text;
     VAR
       NVInStream@1003 : InStream;
@@ -120,7 +121,7 @@ OBJECT Codeunit 419 File Management
       EXIT(BLOBExportLocal(NVInStream,Name,CommonDialog));
     END;
 
-    [Internal]
+    [External]
     PROCEDURE BLOBExport@4(VAR TempBlob@1002 : TEMPORARY Record 99008535;Name@1001 : Text;CommonDialog@1000 : Boolean) : Text;
     VAR
       NVInStream@1003 : InStream;
@@ -129,7 +130,6 @@ OBJECT Codeunit 419 File Management
       EXIT(BLOBExportLocal(NVInStream,Name,CommonDialog));
     END;
 
-    [Internal]
     PROCEDURE ServerTempFileName@5(FileExtension@1002 : Text) FileName : Text;
     VAR
       TempFile@1000 : File;
@@ -139,7 +139,6 @@ OBJECT Codeunit 419 File Management
       TempFile.CLOSE;
     END;
 
-    [Internal]
     PROCEDURE ClientTempFileName@6(FileExtension@1002 : Text) ClientFileName : Text;
     VAR
       TempFile@1004 : File;
@@ -157,7 +156,6 @@ OBJECT Codeunit 419 File Management
       ClientFileName := CreateFileNameWithExtension(ClientTempPath + '\' + FORMAT(CREATEGUID),FileExtension);
     END;
 
-    [Internal]
     PROCEDURE CreateClientTempSubDirectory@54() ClientDirectory : Text;
     VAR
       ServerFile@1000 : File;
@@ -174,7 +172,6 @@ OBJECT Codeunit 419 File Management
       CreateClientDirectory(ClientDirectory);
     END;
 
-    [External]
     PROCEDURE DownloadTempFile@7(ServerFileName@1001 : Text) : Text;
     VAR
       FileName@1568 : Text;
@@ -186,14 +183,12 @@ OBJECT Codeunit 419 File Management
       EXIT(FileName);
     END;
 
-    [External]
     PROCEDURE UploadFileSilent@10(ClientFilePath@1001 : Text) : Text;
     BEGIN
       EXIT(
         UploadFileSilentToServerPath(ClientFilePath,''));
     END;
 
-    [Internal]
     PROCEDURE UploadFileSilentToServerPath@73(ClientFilePath@1001 : Text;ServerFilePath@1005 : Text) : Text;
     VAR
       ClientFileAttributes@1004 : DotNet "'mscorlib'.System.IO.FileAttributes";
@@ -202,6 +197,9 @@ OBJECT Codeunit 419 File Management
       FileName@1002 : Text;
       FileExtension@1003 : Text;
     BEGIN
+      IF NOT CanRunDotNetOnClient THEN
+        ERROR(CanNotRunDotNetOnClientErr);
+
       IF NOT ClientFileHelper.Exists(ClientFilePath) THEN
         ERROR(FileDoesNotExistErr,ClientFilePath);
       FileName := GetFileName(ClientFilePath);
@@ -223,7 +221,14 @@ OBJECT Codeunit 419 File Management
       EXIT(ServerFileName);
     END;
 
-    [Internal]
+    PROCEDURE UploadFileToServer@78(ClientFilePath@1001 : Text) : Text;
+    BEGIN
+      IF CanRunDotNetOnClient THEN
+        EXIT(UploadFileSilentToServerPath(ClientFilePath,''));
+
+      EXIT(UploadFile(ChooseFileTitleMsg,''));
+    END;
+
     PROCEDURE UploadFile@21(WindowTitle@1003 : Text[50];ClientFileName@1001 : Text) ServerFileName : Text;
     VAR
       Filter@1005 : Text;
@@ -236,7 +241,6 @@ OBJECT Codeunit 419 File Management
       ServerFileName := UploadFileWithFilter(WindowTitle,ClientFileName,Filter,AllFilesFilterTxt);
     END;
 
-    [Internal]
     PROCEDURE UploadFileWithFilter@25(WindowTitle@1003 : Text[50];ClientFileName@1001 : Text;FileFilter@1000 : Text;ExtFilter@1004 : Text) ServerFileName : Text;
     VAR
       Uploaded@1002 : Boolean;
@@ -264,11 +268,12 @@ OBJECT Codeunit 419 File Management
       EXIT('<TEMP>');   // MAGIC PATH makes sure we don't get a prompt
     END;
 
-    [Internal]
     PROCEDURE DownloadHandler@2(FromFile@1000 : Text;DialogTitle@1001 : Text;ToFolder@1002 : Text;ToFilter@1003 : Text;ToFile@1004 : Text) : Boolean;
     VAR
       Downloaded@1005 : Boolean;
     BEGIN
+      OnBeforeDownloadHandler(ToFolder,ToFile);
+
       CLEARLASTERROR;
       Downloaded := DOWNLOAD(FromFile,DialogTitle,ToFolder,ToFilter,ToFile);
       IF NOT Downloaded THEN
@@ -277,24 +282,25 @@ OBJECT Codeunit 419 File Management
       EXIT(Downloaded);
     END;
 
-    [Internal]
     PROCEDURE DownloadToFile@13(ServerFileName@1002 : Text;ClientFileName@1000 : Text);
     VAR
       TempClientFileName@1001 : Text;
     BEGIN
-      ValidateFileNames(ServerFileName,ClientFileName);
-      TempClientFileName := DownloadTempFile(ServerFileName);
-      MoveFile(TempClientFileName,ClientFileName);
+      IF CanRunDotNetOnClient THEN BEGIN
+        ValidateFileNames(ServerFileName,ClientFileName);
+        TempClientFileName := DownloadTempFile(ServerFileName);
+        MoveFile(TempClientFileName,ClientFileName);
+      END ELSE
+        DownloadHandler(ServerFileName,'','','',ClientFileName);
     END;
 
-    [Internal]
     PROCEDURE AppendAllTextToClientFile@44(ServerFileName@1001 : Text;ClientFileName@1000 : Text);
     BEGIN
       ValidateFileNames(ServerFileName,ClientFileName);
+      IsAllowedPath(ServerFileName,FALSE);
       ClientFileHelper.AppendAllText(ClientFileName,ServerFileHelper.ReadAllText(ServerFileName));
     END;
 
-    [Internal]
     PROCEDURE MoveAndRenameClientFile@11(OldFilePath@1001 : Text;NewFileName@1004 : Text;NewSubDirectoryName@1002 : Text) NewFilePath : Text;
     VAR
       directory@1003 : Text;
@@ -323,7 +329,6 @@ OBJECT Codeunit 419 File Management
       EXIT(NewFilePath);
     END;
 
-    [Internal]
     PROCEDURE CreateClientFile@81(FilePathName@1000 : Text);
     VAR
       StreamWriter@1001 : DotNet "'mscorlib'.System.IO.StreamWriter" RUNONCLIENT;
@@ -334,7 +339,6 @@ OBJECT Codeunit 419 File Management
       END;
     END;
 
-    [Internal]
     PROCEDURE DeleteClientFile@12(FilePath@1001 : Text) : Boolean;
     BEGIN
       IF NOT ClientFileHelper.Exists(FilePath) THEN
@@ -344,13 +348,11 @@ OBJECT Codeunit 419 File Management
       EXIT(TRUE);
     END;
 
-    [Internal]
     PROCEDURE CopyClientFile@43(SourceFileName@1000 : Text;DestFileName@1001 : Text;OverWrite@1002 : Boolean);
     BEGIN
       ClientFileHelper.Copy(SourceFileName,DestFileName,OverWrite);
     END;
 
-    [External]
     PROCEDURE ClientFileExists@14(FilePath@1001 : Text) : Boolean;
     BEGIN
       IF NOT CanRunDotNetOnClient THEN
@@ -358,7 +360,6 @@ OBJECT Codeunit 419 File Management
       EXIT(ClientFileHelper.Exists(FilePath));
     END;
 
-    [External]
     PROCEDURE ClientDirectoryExists@42(DirectoryPath@1001 : Text) : Boolean;
     BEGIN
       IF NOT CanRunDotNetOnClient THEN
@@ -366,21 +367,18 @@ OBJECT Codeunit 419 File Management
       EXIT(DirectoryHelper.Exists(DirectoryPath));
     END;
 
-    [Internal]
     PROCEDURE CreateClientDirectory@49(DirectoryPath@1000 : Text);
     BEGIN
       IF NOT ClientDirectoryExists(DirectoryPath) THEN
         DirectoryHelper.CreateDirectory(DirectoryPath);
     END;
 
-    [Internal]
     PROCEDURE DeleteClientDirectory@82(DirectoryPath@1000 : Text);
     BEGIN
       IF ClientDirectoryExists(DirectoryPath) THEN
         DirectoryHelper.Delete(DirectoryPath,TRUE);
     END;
 
-    [Internal]
     PROCEDURE UploadClientDirectorySilent@57(DirectoryPath@1000 : Text;FileExtensionFilter@1002 : Text;IncludeSubDirectories@1003 : Boolean) ServerDirectoryPath : Text;
     VAR
       SearchOption@1004 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.IO.SearchOption" RUNONCLIENT;
@@ -408,14 +406,15 @@ OBJECT Codeunit 419 File Management
 
       FOR i := 1 TO ArrayLength DO BEGIN
         ClientFilePath := ArrayHelper.GetValue(i - 1);
-        RelativeServerPath := COPYSTR(ClientFilePath.Replace(DirectoryPath,''),2); // COPYSTR to remove leading \
+        RelativeServerPath := ClientFilePath.Replace(DirectoryPath,'');
+        IF PathHelper.IsPathRooted(RelativeServerPath) THEN
+          RelativeServerPath := DELCHR(RelativeServerPath,'<','\');
         ServerFilePath := CombinePath(ServerDirectoryPath,RelativeServerPath);
         ServerCreateDirectory(GetDirectoryName(ServerFilePath));
         UploadFileSilentToServerPath(ClientFilePath,ServerFilePath);
       END;
     END;
 
-    [Internal]
     PROCEDURE MoveFile@15(SourceFileName@1001 : Text;TargetFileName@1002 : Text);
     BEGIN
       // System.IO.File.Move is not used due to a known issue in KB310316
@@ -432,21 +431,21 @@ OBJECT Codeunit 419 File Management
       ClientFileHelper.Delete(SourceFileName);
     END;
 
-    [Internal]
     PROCEDURE CopyServerFile@32(SourceFileName@1001 : Text;TargetFileName@1002 : Text;Overwrite@1000 : Boolean);
     BEGIN
+      IsAllowedPath(SourceFileName,FALSE);
+      IsAllowedPath(TargetFileName,FALSE);
       ServerFileHelper.Copy(SourceFileName,TargetFileName,Overwrite);
     END;
 
-    [External]
     PROCEDURE ServerFileExists@33(FilePath@1001 : Text) : Boolean;
     BEGIN
       EXIT(EXISTS(FilePath));
     END;
 
-    [Internal]
     PROCEDURE DeleteServerFile@34(FilePath@1001 : Text) : Boolean;
     BEGIN
+      IsAllowedPath(FilePath,FALSE);
       IF NOT EXISTS(FilePath) THEN
         EXIT(FALSE);
 
@@ -454,20 +453,17 @@ OBJECT Codeunit 419 File Management
       EXIT(TRUE);
     END;
 
-    [Internal]
     PROCEDURE ServerDirectoryExists@48(DirectoryPath@1000 : Text) : Boolean;
     BEGIN
       EXIT(ServerDirectoryHelper.Exists(DirectoryPath));
     END;
 
-    [Internal]
     PROCEDURE ServerCreateDirectory@47(DirectoryPath@1000 : Text);
     BEGIN
       IF NOT ServerDirectoryExists(DirectoryPath) THEN
         ServerDirectoryHelper.CreateDirectory(DirectoryPath);
     END;
 
-    [Internal]
     PROCEDURE ServerCreateTempSubDirectory@59() DirectoryPath : Text;
     VAR
       ServerTempFile@1001 : Text;
@@ -478,7 +474,6 @@ OBJECT Codeunit 419 File Management
       DeleteServerFile(ServerTempFile);
     END;
 
-    [Internal]
     PROCEDURE ServerRemoveDirectory@55(DirectoryPath@1000 : Text;Recursive@1001 : Boolean);
     BEGIN
       IF ServerDirectoryExists(DirectoryPath) THEN
@@ -516,7 +511,6 @@ OBJECT Codeunit 419 File Management
       EXIT(PathHelper.HasExtension(FilePath));
     END;
 
-    [External]
     PROCEDURE GetFileNameMimeType@77(FileName@1000 : Text) : Text;
     VAR
       MimeMapping@1001 : DotNet "'System.Web, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a'.System.Web.MimeMapping";
@@ -534,7 +528,6 @@ OBJECT Codeunit 419 File Management
       EXIT(PathHelper.GetDirectoryName(FileName));
     END;
 
-    [Internal]
     PROCEDURE GetClientDirectoryFilesList@51(VAR NameValueBuffer@1002 : Record 823;DirectoryPath@1000 : Text);
     VAR
       ArrayHelper@1001 : DotNet "'mscorlib'.System.Array" RUNONCLIENT;
@@ -551,7 +544,6 @@ OBJECT Codeunit 419 File Management
       END;
     END;
 
-    [Internal]
     PROCEDURE GetServerDirectoryFilesList@64(VAR NameValueBuffer@1000 : Record 823;DirectoryPath@1001 : Text);
     VAR
       ArrayHelper@1002 : DotNet "'mscorlib'.System.Array";
@@ -569,7 +561,6 @@ OBJECT Codeunit 419 File Management
       END;
     END;
 
-    [Internal]
     PROCEDURE GetServerDirectoryFilesListInclSubDirs@72(VAR TempNameValueBuffer@1000 : TEMPORARY Record 823;DirectoryPath@1001 : Text);
     BEGIN
       TempNameValueBuffer.RESET;
@@ -601,7 +592,7 @@ OBJECT Codeunit 419 File Management
       END;
     END;
 
-    [Internal]
+    [TryFunction]
     PROCEDURE GetClientFileProperties@53(FullFileName@1000 : Text;VAR ModifyDate@1001 : Date;VAR ModifyTime@1002 : Time;VAR Size@1003 : Integer);
     VAR
       FileInfo@1004 : DotNet "'mscorlib'.System.IO.FileInfo" RUNONCLIENT;
@@ -613,19 +604,31 @@ OBJECT Codeunit 419 File Management
       Size := FileInfo.FileInfo(FullFileName).Length;
     END;
 
-    [Internal]
+    [TryFunction]
+    PROCEDURE GetServerFileProperties@76(FullFileName@1000 : Text;VAR ModifyDate@1001 : Date;VAR ModifyTime@1002 : Time;VAR Size@1003 : Integer);
+    VAR
+      FileInfo@1004 : DotNet "'mscorlib'.System.IO.FileInfo";
+      ModifyDateTime@1005 : DateTime;
+    BEGIN
+      ModifyDateTime := ServerDirectoryHelper.GetLastWriteTime(FullFileName);
+      ModifyDate := DT2DATE(ModifyDateTime);
+      ModifyTime := DT2TIME(ModifyDateTime);
+      Size := FileInfo.FileInfo(FullFileName).Length;
+    END;
+
     PROCEDURE CombinePath@50(BasePath@1000 : Text;Suffix@1001 : Text) : Text;
     BEGIN
       EXIT(PathHelper.Combine(BasePath,Suffix));
     END;
 
-    [Internal]
     PROCEDURE BLOBImportFromServerFile@17(VAR TempBlob@1001 : Record 99008535;FilePath@1000 : Text);
     VAR
       OutStream@1004 : OutStream;
       InStream@1003 : InStream;
       InputFile@1002 : File;
     BEGIN
+      IsAllowedPath(FilePath,FALSE);
+
       IF NOT FILE.EXISTS(FilePath) THEN
         ERROR(FileDoesNotExistErr,FilePath);
 
@@ -636,7 +639,6 @@ OBJECT Codeunit 419 File Management
       InputFile.CLOSE;
     END;
 
-    [Internal]
     PROCEDURE BLOBExportToServerFile@18(VAR TempBlob@1001 : Record 99008535;FilePath@1000 : Text);
     VAR
       OutStream@1004 : OutStream;
@@ -654,7 +656,32 @@ OBJECT Codeunit 419 File Management
       OutputFile.CLOSE;
     END;
 
-    [Internal]
+    PROCEDURE InstreamExportToServerFile@75(Instream@1001 : InStream;FileExt@1000 : Text) FileName : Text;
+    VAR
+      OutStream@1004 : OutStream;
+      OutputFile@1002 : File;
+    BEGIN
+      FileName := COPYSTR(ServerTempFileName(FileExt),1,250);
+      OutputFile.WRITEMODE(TRUE);
+      OutputFile.CREATE(FileName);
+      OutputFile.CREATEOUTSTREAM(OutStream);
+      COPYSTREAM(OutStream,Instream);
+      OutputFile.CLOSE;
+    END;
+
+    PROCEDURE CreateAndWriteToServerFile@79(FileContent@1001 : Text;FileExt@1000 : Text) FileName : Text;
+    VAR
+      File@1002 : File;
+      OutStream@1003 : OutStream;
+    BEGIN
+      FileName := COPYSTR(ServerTempFileName(FileExt),1,250);
+      File.CREATE(FileName);
+      File.CREATEOUTSTREAM(OutStream);
+      OutStream.WRITETEXT(FileContent);
+      File.CLOSE;
+    END;
+
+    [External]
     PROCEDURE GetToFilterText@19(FilterString@1002 : Text;FileName@1000 : Text) : Text;
     VAR
       OutExt@1001 : Text;
@@ -686,6 +713,9 @@ OBJECT Codeunit 419 File Management
         'RDLC':
           OutExt := RDLFileTypeTok;
       END;
+
+      OnAfterGetToFilterTextSetOutExt(FileName,OutExt);
+
       IF OutExt = '' THEN
         EXIT(AllFilesDescriptionTxt);
       EXIT(OutExt + '|' + AllFilesDescriptionTxt);  // Also give the option of the general selection
@@ -708,8 +738,11 @@ OBJECT Codeunit 419 File Management
     PROCEDURE OpenFileDialog@1(WindowTitle@1000 : Text[50];DefaultFileName@1001 : Text;FilterString@1002 : Text) : Text;
     VAR
       OpenFileDialog@1006 : DotNet "'System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Windows.Forms.OpenFileDialog" RUNONCLIENT;
-      DialagResult@1003 : DotNet "'System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Windows.Forms.DialogResult" RUNONCLIENT;
+      DialogResult@1003 : DotNet "'System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Windows.Forms.DialogResult" RUNONCLIENT;
     BEGIN
+      IF IsWebClient THEN
+        EXIT(UploadFile(WindowTitle,DefaultFileName));
+
       OpenFileDialog := OpenFileDialog.OpenFileDialog;
       OpenFileDialog.ShowReadOnly := FALSE;
       OpenFileDialog.FileName := GetFileName(DefaultFileName);
@@ -717,8 +750,8 @@ OBJECT Codeunit 419 File Management
       OpenFileDialog.Filter := GetToFilterText(FilterString,DefaultFileName);
       OpenFileDialog.InitialDirectory := GetDirectoryName(DefaultFileName);
 
-      DialagResult := OpenFileDialog.ShowDialog;
-      IF DialagResult.CompareTo(DialagResult.OK) = 0 THEN
+      DialogResult := OpenFileDialog.ShowDialog;
+      IF DialogResult.CompareTo(DialogResult.OK) = 0 THEN
         EXIT(OpenFileDialog.FileName);
       EXIT('');
     END;
@@ -726,8 +759,10 @@ OBJECT Codeunit 419 File Management
     PROCEDURE SaveFileDialog@23(WindowTitle@1000 : Text[50];DefaultFileName@1001 : Text;FilterString@1002 : Text) : Text;
     VAR
       SaveFileDialog@1008 : DotNet "'System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Windows.Forms.SaveFileDialog" RUNONCLIENT;
-      DialagResult@1003 : DotNet "'System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Windows.Forms.DialogResult" RUNONCLIENT;
+      DialogResult@1003 : DotNet "'System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Windows.Forms.DialogResult" RUNONCLIENT;
     BEGIN
+      IF IsWebClient THEN
+        EXIT('');
       SaveFileDialog := SaveFileDialog.SaveFileDialog;
       SaveFileDialog.CheckPathExists := TRUE;
       SaveFileDialog.OverwritePrompt := TRUE;
@@ -736,8 +771,8 @@ OBJECT Codeunit 419 File Management
       SaveFileDialog.Filter := GetToFilterText(FilterString,DefaultFileName);
       SaveFileDialog.InitialDirectory := GetDirectoryName(DefaultFileName);
 
-      DialagResult := SaveFileDialog.ShowDialog;
-      IF DialagResult.CompareTo(DialagResult.OK) = 0 THEN
+      DialogResult := SaveFileDialog.ShowDialog;
+      IF DialogResult.CompareTo(DialogResult.OK) = 0 THEN
         EXIT(SaveFileDialog.FileName);
       EXIT('');
     END;
@@ -783,7 +818,6 @@ OBJECT Codeunit 419 File Management
       EXIT(ClientTypeManagement.IsWindowsClientType);
     END;
 
-    [Internal]
     PROCEDURE IsValidFileName@22(FileName@1000 : Text) : Boolean;
     VAR
       String@1001 : DotNet "'mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.String";
@@ -811,7 +845,7 @@ OBJECT Codeunit 419 File Management
         ERROR(Text012);
     END;
 
-    [Internal]
+    [External]
     PROCEDURE ValidateFileExtension@26(FilePath@1000 : Text;ValidExtensions@1001 : Text);
     VAR
       FileExt@1003 : Text;
@@ -824,7 +858,7 @@ OBJECT Codeunit 419 File Management
       LowerValidExts := LOWERCASE(ValidExtensions);
 
       IF STRPOS(LowerValidExts,FileExt) = 0 THEN
-        ERROR(STRSUBSTNO(UnsupportedFileExtErr,FileExt,LowerValidExts));
+        ERROR(UnsupportedFileExtErr,FileExt,LowerValidExts);
     END;
 
     LOCAL PROCEDURE ValidateClientPath@45(FilePath@1000 : Text);
@@ -850,7 +884,6 @@ OBJECT Codeunit 419 File Management
       END
     END;
 
-    [Internal]
     PROCEDURE Ansi2SystemEncoding@28(Destination@1000 : OutStream;Source@1001 : InStream);
     VAR
       StreamReader@1004 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.IO.StreamReader";
@@ -862,7 +895,6 @@ OBJECT Codeunit 419 File Management
       Destination.WRITETEXT(EncodedTxt);
     END;
 
-    [Internal]
     PROCEDURE Ansi2SystemEncodingTxt@29(Destination@1001 : OutStream;Source@1000 : Text);
     VAR
       StreamWriter@1004 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.IO.StreamWriter";
@@ -896,44 +928,43 @@ OBJECT Codeunit 419 File Management
       EXIT(DELCHR(InText,'=',InvalidWindowsChrStringTxt));
     END;
 
-    [Internal]
     PROCEDURE CreateZipArchiveObject@36() FilePath : Text;
     BEGIN
       FilePath := ServerTempFileName('zip');
       OpenZipFile(FilePath);
     END;
 
-    [Internal]
     PROCEDURE OpenZipFile@62(ServerZipFilePath@1035 : Text);
     VAR
       Zipfile@1001 : DotNet "'System.IO.Compression.FileSystem, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.IO.Compression.ZipFile";
       ZipAchiveMode@1000 : DotNet "'System.IO.Compression, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.IO.Compression.ZipArchiveMode";
     BEGIN
+      IsAllowedPath(ServerZipFilePath,FALSE);
       ZipArchive := Zipfile.Open(ServerZipFilePath,ZipAchiveMode.Create);
     END;
 
-    [Internal]
     PROCEDURE AddFileToZipArchive@37(SourceFileFullPath@1000 : Text;PathInZipFile@1001 : Text);
     VAR
       Zip@1002 : DotNet "'System.IO.Compression.FileSystem, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.IO.Compression.ZipFileExtensions";
     BEGIN
+      IsAllowedPath(SourceFileFullPath,FALSE);
       Zip.CreateEntryFromFile(ZipArchive,SourceFileFullPath,PathInZipFile);
     END;
 
-    [Internal]
     PROCEDURE CloseZipArchive@38();
     BEGIN
       IF NOT ISNULL(ZipArchive) THEN
         ZipArchive.Dispose;
     END;
 
-    [Internal]
     PROCEDURE IsGZip@40(ServerSideFileName@1000 : Text) : Boolean;
     VAR
       FileStream@1005 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.IO.FileStream";
       FileMode@1006 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.IO.FileMode";
       ID@1007 : ARRAY [2] OF Integer;
     BEGIN
+      IsAllowedPath(ServerSideFileName,FALSE);
+
       FileStream := FileStream.FileStream(ServerSideFileName,FileMode.Open);
       ID[1] := FileStream.ReadByte;
       ID[2] := FileStream.ReadByte;
@@ -949,12 +980,13 @@ OBJECT Codeunit 419 File Management
     END;
 
     [TryFunction]
-    [Internal]
     PROCEDURE ExtractZipFile@56(ZipFilePath@1001 : Text;DestinationFolder@1006 : Text);
     VAR
       Zip@1004 : DotNet "'System.IO.Compression.FileSystem, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.IO.Compression.ZipFileExtensions";
       ZipFile@1000 : DotNet "'System.IO.Compression.FileSystem, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.IO.Compression.ZipFile";
     BEGIN
+      IsAllowedPath(ZipFilePath,FALSE);
+
       IF NOT ServerFileHelper.Exists(ZipFilePath) THEN
         ERROR(FileDoesNotExistErr,ZipFilePath);
 
@@ -966,7 +998,6 @@ OBJECT Codeunit 419 File Management
       CloseZipArchive;
     END;
 
-    [Internal]
     PROCEDURE ExtractZipFileAndGetFileList@63(ServerZipFilePath@1000 : Text;VAR NameValueBuffer@1001 : Record 823);
     VAR
       ServerDestinationFolder@1002 : Text;
@@ -991,7 +1022,6 @@ OBJECT Codeunit 419 File Management
       IF FileManagement.DeleteServerFile(TempNameValueBuffer.Name) THEN;
     END;
 
-    [Internal]
     PROCEDURE IsClientDirectoryEmpty@60(Path@1000 : Text) : Boolean;
     BEGIN
       IF DirectoryHelper.Exists(Path) THEN
@@ -999,7 +1029,6 @@ OBJECT Codeunit 419 File Management
       EXIT(FALSE);
     END;
 
-    [Internal]
     PROCEDURE IsServerDirectoryEmpty@61(Path@1000 : Text) : Boolean;
     BEGIN
       IF ServerDirectoryHelper.Exists(Path) THEN
@@ -1009,18 +1038,10 @@ OBJECT Codeunit 419 File Management
 
     [External]
     PROCEDURE IsWebOrDeviceClient@65() : Boolean;
-    VAR
-      ActiveSession@1000 : Record 2000000110;
     BEGIN
-      IF ActiveSession.GET(SERVICEINSTANCEID,SESSIONID) THEN
-        EXIT(ActiveSession."Client Type" IN [ActiveSession."Client Type"::"Web Client",
-                                             ActiveSession."Client Type"::Phone,
-                                             ActiveSession."Client Type"::Tablet]);
-
-      EXIT(FALSE);
+      EXIT(CURRENTCLIENTTYPE IN [CLIENTTYPE::Web,CLIENTTYPE::Phone,CLIENTTYPE::Tablet,CLIENTTYPE::Desktop]);
     END;
 
-    [Internal]
     PROCEDURE GetFileContent@66(FilePath@1000 : Text) Result : Text;
     VAR
       FileHandle@1001 : File;
@@ -1040,16 +1061,43 @@ OBJECT Codeunit 419 File Management
     VAR
       ZipArchiveLocal@1004 : DotNet "'System.IO.Compression, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.IO.Compression.ZipArchive";
       ZipArchiveEntry@1003 : DotNet "'System.IO.Compression, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.IO.Compression.ZipArchiveEntry";
-      StreamReader@1005 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.IO.StreamReader";
-      StreamWriter@1006 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.IO.StreamWriter";
+      StreamReader@1005 : DotNet "'mscorlib'.System.IO.StreamReader";
+      StreamWriter@1006 : DotNet "'mscorlib'.System.IO.StreamWriter";
+      Encoding@1007 : DotNet "'mscorlib'.System.Text.Encoding";
     BEGIN
       ZipArchiveLocal := ZipArchiveLocal.ZipArchive(ZipStream,ZipArchiveMode.Update,TRUE);
       ZipArchiveEntry := ZipArchiveLocal.CreateEntry(PathInArchive);
-      StreamReader := StreamReader.StreamReader(StreamToAdd);
-      StreamWriter := StreamWriter.StreamWriter(ZipArchiveEntry.Open);
+      StreamReader := StreamReader.StreamReader(StreamToAdd,Encoding.Default);
+      StreamWriter := StreamWriter.StreamWriter(ZipArchiveEntry.Open,StreamReader.CurrentEncoding);
       StreamWriter.Write(StreamReader.ReadToEnd);
       StreamWriter.Close;
       StreamReader.Close;
+    END;
+
+    [External]
+    PROCEDURE IsAllowedPath@84(Path@1000 : Text;SkipError@1001 : Boolean) : Boolean;
+    VAR
+      MembershipEntitlement@1002 : Record 2000000195;
+      WebRequestHelper@1003 : Codeunit 1299;
+    BEGIN
+      IF NOT MembershipEntitlement.ISEMPTY THEN
+        IF NOT WebRequestHelper.IsHttpUrl(Path) THEN
+          IF NOT FILE.ISPATHTEMPORARY(Path) THEN BEGIN
+            IF SkipError THEN
+              EXIT(FALSE);
+            ERROR(NotAllowedPathErr,Path);
+          END;
+      EXIT(TRUE);
+    END;
+
+    [Integration]
+    LOCAL PROCEDURE OnAfterGetToFilterTextSetOutExt@83(FileName@1000 : Text;VAR OutExt@1001 : Text);
+    BEGIN
+    END;
+
+    [Integration]
+    LOCAL PROCEDURE OnBeforeDownloadHandler@85(VAR ToFolder@1000 : Text;ToFileName@1001 : Text);
+    BEGIN
     END;
 
     BEGIN

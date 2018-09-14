@@ -8,23 +8,33 @@ OBJECT Table 1799 Data Migration Status
   }
   PROPERTIES
   {
-    OnModify=BEGIN
+    ReplicateData=No;
+    OnModify=VAR
+               DataMigrationMgt@1000 : Codeunit 1798;
+             BEGIN
                IF ("Total Number" <> 0) AND ("Migrated Number" <= "Total Number") THEN
                  "Progress Percent" := "Migrated Number" / "Total Number" * 10000; // 10000 = 100%
+
+               IF Status IN [Status::Completed,
+                             Status::Failed,
+                             Status::Stopped]
+               THEN
+                 DataMigrationMgt.CheckIfMigrationIsCompleted(Rec);
              END;
 
   }
   FIELDS
   {
     { 1   ;   ;Migration Type      ;Text250        }
-    { 2   ;   ;Destination Table ID;Integer        }
+    { 2   ;   ;Destination Table ID;Integer       ;DataClassification=SystemMetadata }
     { 3   ;   ;Total Number        ;Integer        }
     { 4   ;   ;Migrated Number     ;Integer        }
-    { 5   ;   ;Progress Percent    ;Decimal       ;ExtendedDatatype=Ratio }
+    { 5   ;   ;Progress Percent    ;Decimal       ;DataClassification=SystemMetadata;
+                                                   ExtendedDatatype=Ratio }
     { 6   ;   ;Status              ;Option        ;OptionCaptionML=ENU=Pending,In Progress,Completed,Completed with Errors,Stopped,Failed;
                                                    OptionString=Pending,In Progress,Completed,Completed with Errors,Stopped,Failed }
-    { 7   ;   ;Source Staging Table ID;Integer     }
-    { 8   ;   ;Migration Codeunit To Run;Integer   }
+    { 7   ;   ;Source Staging Table ID;Integer    ;DataClassification=SystemMetadata }
+    { 8   ;   ;Migration Codeunit To Run;Integer  ;DataClassification=SystemMetadata }
     { 9   ;   ;Error Count         ;Integer       ;FieldClass=FlowField;
                                                    CalcFormula=Count("Data Migration Error" WHERE (Migration Type=FIELD(Migration Type),
                                                                                                    Destination Table ID=FIELD(Destination Table ID))) }

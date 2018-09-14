@@ -1,0 +1,100 @@
+OBJECT Codeunit 1200 Import Bank Statement
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    TableNo=1220;
+    Permissions=TableData 1221=rimd;
+    OnRun=VAR
+            DataExchLineDef@1003 : Record 1227;
+            XMLDOMManagement@1000 : Codeunit 6224;
+            XmlNode@1005 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlNode";
+            XMLStream@1001 : InStream;
+            LineNo@1002 : Integer;
+          BEGIN
+            "File Content".CREATEINSTREAM(XMLStream);
+            XMLDOMManagement.LoadXMLNodeFromInStream(XMLStream,XmlNode);
+
+            DataExchLineDef.GET("Data Exch. Def Code","Data Exch. Line Def Code");
+
+            ProgressWindow.OPEN(ProgressMsg);
+            Parse(DataExchLineDef,"Entry No.",XmlNode,'','',LineNo,LineNo);
+            ProgressWindow.CLOSE;
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      ProgressMsg@1000 : TextConst 'ENU=Preparing line number #1#######';
+      ProgressWindow@1001 : Dialog;
+
+    LOCAL PROCEDURE Parse@1(DataExchLineDef@1009 : Record 1227;EntryNo@1008 : Integer;XMLNode@1003 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlNode";ParentPath@1002 : Text;NodeId@1001 : Text[250];VAR LastGivenLineNo@1000 : Integer;CurrentLineNo@1011 : Integer);
+    VAR
+      CurrentDataExchLineDef@1010 : Record 1227;
+      XMLAttributeCollection@1007 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlAttributeCollection";
+      XMLNodeList@1005 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlNodeList";
+      XMLNodeType@1004 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlNodeType";
+      i@1006 : Integer;
+    BEGIN
+      CurrentDataExchLineDef.SETRANGE("Data Line Tag",ParentPath + '/' + XMLNode.LocalName);
+      CurrentDataExchLineDef.SETRANGE("Data Exch. Def Code",DataExchLineDef."Data Exch. Def Code");
+      IF CurrentDataExchLineDef.FINDFIRST THEN BEGIN
+        DataExchLineDef := CurrentDataExchLineDef;
+        LastGivenLineNo += 1;
+        CurrentLineNo := LastGivenLineNo;
+        DataExchLineDef.ValidateNamespace(XMLNode);
+      END;
+
+      IF XMLNode.NodeType.Equals(XMLNodeType.Text) OR XMLNode.NodeType.Equals(XMLNodeType.CDATA) THEN
+        InsertColumn(ParentPath,
+          CurrentLineNo,NodeId,XMLNode.Value,XMLNode.ParentNode.Name,
+          DataExchLineDef,EntryNo);
+
+      IF NOT ISNULL(XMLNode.Attributes) THEN BEGIN
+        XMLAttributeCollection := XMLNode.Attributes;
+        FOR i := 1 TO XMLAttributeCollection.Count DO
+          InsertColumn(ParentPath + '/' + XMLNode.LocalName + '[@' + XMLAttributeCollection.Item(i - 1).Name + ']',
+            CurrentLineNo,NodeId,XMLAttributeCollection.Item(i - 1).Value,XMLAttributeCollection.Item(i - 1).Name,
+            DataExchLineDef,EntryNo);
+      END;
+
+      IF XMLNode.HasChildNodes THEN BEGIN
+        XMLNodeList := XMLNode.ChildNodes;
+        FOR i := 1 TO XMLNodeList.Count DO
+          Parse(DataExchLineDef,EntryNo,XMLNodeList.Item(i - 1),ParentPath + '/' + XMLNode.LocalName,
+            NodeId + FORMAT(i,0,'<Integer,4><Filler Char,0>'),LastGivenLineNo,CurrentLineNo);
+      END;
+    END;
+
+    LOCAL PROCEDURE InsertColumn@2(Path@1000 : Text;LineNo@1001 : Integer;NodeId@1006 : Text[250];Value@1002 : Text;Name@1008 : Text;VAR DataExchLineDef@1003 : Record 1227;EntryNo@1007 : Integer);
+    VAR
+      DataExchColumnDef@1004 : Record 1223;
+      DataExchField@1005 : Record 1221;
+    BEGIN
+      // Note: The Data Exch. variable is passed by reference only to improve performance.
+      DataExchColumnDef.SETRANGE("Data Exch. Def Code",DataExchLineDef."Data Exch. Def Code");
+      DataExchColumnDef.SETRANGE("Data Exch. Line Def Code",DataExchLineDef.Code);
+      DataExchColumnDef.SETRANGE(Path,Path);
+
+      IF DataExchColumnDef.FINDFIRST THEN BEGIN
+        ProgressWindow.UPDATE(1,LineNo);
+        IF DataExchColumnDef."Use Node Name as Value" THEN
+          DataExchField.InsertRecXMLField(EntryNo,LineNo,DataExchColumnDef."Column No.",NodeId,Name,
+            DataExchLineDef.Code)
+        ELSE
+          DataExchField.InsertRecXMLField(EntryNo,LineNo,DataExchColumnDef."Column No.",NodeId,Value,
+            DataExchLineDef.Code);
+      END;
+    END;
+
+    BEGIN
+    END.
+  }
+}
+

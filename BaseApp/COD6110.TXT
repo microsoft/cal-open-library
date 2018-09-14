@@ -15,6 +15,7 @@ OBJECT Codeunit 6110 GL Acc. Data Migration Facade
               OnMigrateGlAccount("Staging Table RecId To Process");
               OnCreateOpeningBalanceTrx("Staging Table RecId To Process");
               OnMigratePostingGroups("Staging Table RecId To Process");
+              OnMigrateAccountTransactions("Staging Table RecId To Process");
               GLAccountIsSet := FALSE;
             UNTIL NEXT = 0;
           END;
@@ -42,6 +43,11 @@ OBJECT Codeunit 6110 GL Acc. Data Migration Facade
 
     [Integration(TRUE)]
     LOCAL PROCEDURE OnMigratePostingGroups@9(RecordIdToMigrate@1000 : RecordID);
+    BEGIN
+    END;
+
+    [Integration(TRUE)]
+    LOCAL PROCEDURE OnMigrateAccountTransactions@33(RecordIdToMigrate@1000 : RecordID);
     BEGIN
     END;
 

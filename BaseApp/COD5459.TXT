@@ -80,6 +80,18 @@ OBJECT Codeunit 5459 JSON Management
       JArray := JsonArray;
     END;
 
+    [External]
+    PROCEDURE GetObjectFromCollectionByIndex@43(VAR Object@1001 : Text;Index@1002 : Integer) : Boolean;
+    VAR
+      JObject@1000 : DotNet "'Newtonsoft.Json'.Newtonsoft.Json.Linq.JObject";
+    BEGIN
+      IF NOT GetJObjectFromCollectionByIndex(JObject,Index) THEN
+        EXIT(FALSE);
+
+      Object := JObject.ToString();
+      EXIT(TRUE);
+    END;
+
     PROCEDURE GetJObjectFromCollectionByIndex@13(VAR JObject@1001 : DotNet "'Newtonsoft.Json'.Newtonsoft.Json.Linq.JObject";Index@1002 : Integer) : Boolean;
     BEGIN
       IF (GetCollectionCount = 0) OR (GetCollectionCount <= Index) THEN
@@ -115,6 +127,11 @@ OBJECT Codeunit 5459 JSON Management
         value := JProperty.Value;
         EXIT(TRUE);
       END;
+    END;
+
+    PROCEDURE GetPropertyValueByName@45(propertyName@1000 : Text;VAR value@1003 : Variant) : Boolean;
+    BEGIN
+      EXIT(GetPropertyValueFromJObjectByName(JsonObject,propertyName,value));
     END;
 
     PROCEDURE GetPropertyValueFromJObjectByPathSetToFieldRef@28(JObject@1002 : DotNet "'Newtonsoft.Json'.Newtonsoft.Json.Linq.JObject";propertyPath@1001 : Text;VAR FieldRef@1000 : FieldRef) : Boolean;
@@ -210,6 +227,12 @@ OBJECT Codeunit 5459 JSON Management
       EXIT(FALSE);
     END;
 
+    [External]
+    PROCEDURE GetStringPropertyValueByName@42(propertyName@1000 : Text;VAR value@1003 : Text) : Boolean;
+    BEGIN
+      EXIT(GetStringPropertyValueFromJObjectByName(JsonObject,propertyName,value));
+    END;
+
     PROCEDURE GetStringPropertyValueFromJObjectByPath@10(JObject@1002 : DotNet "'Newtonsoft.Json'.Newtonsoft.Json.Linq.JObject";fullyQualifiedPropertyName@1000 : Text;VAR value@1003 : Text) : Boolean;
     VAR
       VariantValue@1001 : Variant;
@@ -253,6 +276,18 @@ OBJECT Codeunit 5459 JSON Management
         EXIT(TRUE);
       END;
       EXIT(FALSE);
+    END;
+
+    [External]
+    PROCEDURE GetArrayPropertyValueAsStringByName@46(propertyName@1001 : Text;VAR value@1005 : Text) : Boolean;
+    VAR
+      JArray@1000 : DotNet "'Newtonsoft.Json'.Newtonsoft.Json.Linq.JArray";
+    BEGIN
+      IF NOT GetArrayPropertyValueFromJObjectByName(JsonObject,propertyName,JArray) THEN
+        EXIT(FALSE);
+
+      value := JArray.ToString();
+      EXIT(TRUE);
     END;
 
     PROCEDURE GetObjectPropertyValueFromJObjectByName@30(JObject@1002 : DotNet "'Newtonsoft.Json'.Newtonsoft.Json.Linq.JObject";propertyName@1001 : Text;VAR JSubObject@1000 : DotNet "'Newtonsoft.Json'.Newtonsoft.Json.Linq.JObject") : Boolean;

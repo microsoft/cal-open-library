@@ -8,12 +8,13 @@ OBJECT Table 1797 Data Migration Error
   }
   PROPERTIES
   {
+    ReplicateData=No;
   }
   FIELDS
   {
     { 1   ;   ;Id                  ;Integer       ;AutoIncrement=Yes }
     { 2   ;   ;Migration Type      ;Text250        }
-    { 3   ;   ;Destination Table ID;Integer        }
+    { 3   ;   ;Destination Table ID;Integer       ;DataClassification=SystemMetadata }
     { 4   ;   ;Source Staging Table Record ID;RecordID;
                                                    DataClassification=SystemMetadata }
     { 5   ;   ;Error Message       ;Text250        }

@@ -1,0 +1,135 @@
+OBJECT Table 1221 Data Exch. Field
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=;
+  }
+  PROPERTIES
+  {
+  }
+  FIELDS
+  {
+    { 1   ;   ;Data Exch. No.      ;Integer       ;TableRelation="Data Exch.";
+                                                   NotBlank=Yes }
+    { 2   ;   ;Line No.            ;Integer       ;NotBlank=Yes }
+    { 3   ;   ;Column No.          ;Integer       ;NotBlank=Yes }
+    { 4   ;   ;Value               ;Text250        }
+    { 5   ;   ;Node ID             ;Text250        }
+    { 6   ;   ;Data Exch. Line Def Code;Code20    ;TableRelation="Data Exch. Line Def".Code }
+    { 10  ;   ;Parent Node ID      ;Text250        }
+    { 11  ;   ;Data Exch. Def Code ;Code20        ;FieldClass=FlowField;
+                                                   CalcFormula=Lookup("Data Exch."."Data Exch. Def Code" WHERE (Entry No.=FIELD(Data Exch. No.))) }
+    { 16  ;   ;Value BLOB          ;BLOB           }
+  }
+  KEYS
+  {
+    {    ;Data Exch. No.,Line No.,Column No.,Node ID;
+                                                   Clustered=Yes }
+  }
+  FIELDGROUPS
+  {
+  }
+  CODE
+  {
+
+    [External]
+    PROCEDURE InsertRec@2(DataExchNo@1000 : Integer;LineNo@1001 : Integer;ColumnNo@1002 : Integer;NewValue@1003 : Text;DataExchLineDefCode@1004 : Code[20]);
+    BEGIN
+      INIT;
+      VALIDATE("Data Exch. No.",DataExchNo);
+      VALIDATE("Line No.",LineNo);
+      VALIDATE("Column No.",ColumnNo);
+      SetValueWithoutModifying(NewValue);
+      VALIDATE("Data Exch. Line Def Code",DataExchLineDefCode);
+      INSERT;
+    END;
+
+    [External]
+    PROCEDURE InsertRecXMLField@1(DataExchNo@1000 : Integer;LineNo@1001 : Integer;ColumnNo@1002 : Integer;NodeId@1004 : Text[250];NodeValue@1003 : Text;DataExchLineDefCode@1005 : Code[20]);
+    BEGIN
+      InsertRecXMLFieldWithParentNodeID(DataExchNo,LineNo,ColumnNo,NodeId,'',NodeValue,DataExchLineDefCode)
+    END;
+
+    [External]
+    PROCEDURE InsertRecXMLFieldWithParentNodeID@4(DataExchNo@1000 : Integer;LineNo@1001 : Integer;ColumnNo@1002 : Integer;NodeId@1004 : Text[250];ParentNodeId@1006 : Text[250];NodeValue@1003 : Text;DataExchLineDefCode@1005 : Code[20]);
+    BEGIN
+      INIT;
+      VALIDATE("Data Exch. No.",DataExchNo);
+      VALIDATE("Line No.",LineNo);
+      VALIDATE("Column No.",ColumnNo);
+      VALIDATE("Node ID",NodeId);
+      SetValueWithoutModifying(NodeValue);
+      VALIDATE("Parent Node ID",ParentNodeId);
+      VALIDATE("Data Exch. Line Def Code",DataExchLineDefCode);
+      INSERT;
+    END;
+
+    [External]
+    PROCEDURE InsertRecXMLFieldDefinition@5(DataExchNo@1000 : Integer;LineNo@1001 : Integer;NodeId@1004 : Text[250];ParentNodeId@1006 : Text[250];NewValue@1003 : Text[250];DataExchLineDefCode@1005 : Code[20]);
+    BEGIN
+      // this record represents the line definition and it has ColumnNo set to -1
+      // even if we are not extracting anything from the line, we need to insert the definition
+      // so that the child nodes can hook up to their parent.
+      InsertRecXMLFieldWithParentNodeID(DataExchNo,LineNo,-1,NodeId,ParentNodeId,NewValue,DataExchLineDefCode)
+    END;
+
+    [External]
+    PROCEDURE GetFieldName@1060() : Text;
+    VAR
+      DataExchColumnDef@1060 : Record 1223;
+      DataExch@1061 : Record 1220;
+    BEGIN
+      DataExch.GET("Data Exch. No.");
+      IF DataExchColumnDef.GET(DataExch."Data Exch. Def Code",DataExch."Data Exch. Line Def Code","Column No.") THEN
+        EXIT(DataExchColumnDef.Name);
+      EXIT('');
+    END;
+
+    [External]
+    PROCEDURE DeleteRelatedRecords@3(DataExchNo@1000 : Integer;LineNo@1001 : Integer);
+    BEGIN
+      SETRANGE("Data Exch. No.",DataExchNo);
+      SETRANGE("Line No.",LineNo);
+      DELETEALL(TRUE);
+    END;
+
+    PROCEDURE GetValue@16() : Text;
+    VAR
+      TempBlob@1000 : Record 99008535;
+      CR@1001 : Text[1];
+    BEGIN
+      IF NOT "Value BLOB".HASVALUE THEN
+        EXIT(Value);
+      CR[1] := 10;
+      CALCFIELDS("Value BLOB");
+      TempBlob.Blob := "Value BLOB";
+      EXIT(TempBlob.ReadAsText(CR,TEXTENCODING::Windows));
+    END;
+
+    PROCEDURE SetValue@17(NewValue@1001 : Text);
+    BEGIN
+      SetValueWithoutModifying(NewValue);
+      MODIFY;
+    END;
+
+    PROCEDURE SetValueWithoutModifying@12(NewValue@1001 : Text);
+    VAR
+      TempBlob@1000 : Record 99008535;
+    BEGIN
+      CLEAR("Value BLOB");
+      Value := COPYSTR(NewValue,1,MAXSTRLEN(Value));
+      IF STRLEN(NewValue) <= MAXSTRLEN(Value) THEN
+        EXIT; // No need to store anything in the blob
+      IF NewValue = '' THEN
+        EXIT;
+      TempBlob.WriteAsText(NewValue,TEXTENCODING::Windows);
+      "Value BLOB" := TempBlob.Blob;
+    END;
+
+    BEGIN
+    END.
+  }
+}
+
