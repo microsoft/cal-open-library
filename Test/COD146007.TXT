@@ -62,7 +62,6 @@ OBJECT Codeunit 146007 Test_DotNet_String
     PROCEDURE TestDotNetStringEndsWith@2();
     VAR
       DotNet_String@1000 : Codeunit 3007;
-      Result@1001 : Boolean;
     BEGIN
       // [SCENARIO] Verify the end of a string
 
@@ -78,7 +77,6 @@ OBJECT Codeunit 146007 Test_DotNet_String
     PROCEDURE TestDotNetStringBeginsWith@3();
     VAR
       DotNet_String@1000 : Codeunit 3007;
-      Result@1001 : Boolean;
     BEGIN
       // [SCENARIO] Verify the start of a string
 

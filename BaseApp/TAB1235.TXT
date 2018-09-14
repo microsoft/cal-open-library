@@ -8,11 +8,12 @@ OBJECT Table 1235 XML Buffer
   }
   PROPERTIES
   {
+    ReplicateData=No;
   }
   FIELDS
   {
     { 1   ;   ;Entry No.           ;Integer       ;AutoIncrement=Yes;
-                                                     DataClassification=SystemMetadata }
+                                                   DataClassification=SystemMetadata }
     { 2   ;   ;Type                ;Option        ;DataClassification=SystemMetadata;
                                                    OptionString=[ ,Element,Attribute,Processing Instruction] }
     { 3   ;   ;Name                ;Text250       ;DataClassification=SystemMetadata }
@@ -20,13 +21,26 @@ OBJECT Table 1235 XML Buffer
     { 5   ;   ;Value               ;Text250       ;DataClassification=SystemMetadata }
     { 6   ;   ;Depth               ;Integer       ;DataClassification=SystemMetadata }
     { 7   ;   ;Parent Entry No.    ;Integer       ;DataClassification=SystemMetadata }
+    { 8   ;   ;Is Parent           ;Boolean       ;ObsoleteState=Pending;
+                                                   ObsoleteReason=Is not used anomore;
+                                                   DataClassification=SystemMetadata }
     { 9   ;   ;Data Type           ;Option        ;DataClassification=SystemMetadata;
                                                    OptionString=Text,Date,Decimal,DateTime }
+    { 10  ;   ;Code                ;Code20        ;ObsoleteState=Pending;
+                                                   ObsoleteReason=Is not used anymore;
+                                                   DataClassification=SystemMetadata }
+    { 11  ;   ;Node Name           ;Text250       ;ObsoleteState=Pending;
+                                                   ObsoleteReason=Is not used anymore;
+                                                   DataClassification=SystemMetadata }
+    { 12  ;   ;Has Attributes      ;Boolean       ;ObsoleteState=Pending;
+                                                   ObsoleteReason=Is not used anymore;
+                                                   DataClassification=SystemMetadata;
+                                                   Editable=No }
     { 13  ;   ;Node Number         ;Integer       ;DataClassification=SystemMetadata }
     { 14  ;   ;Namespace           ;Text250       ;DataClassification=SystemMetadata }
     { 15  ;   ;Import ID           ;GUID          ;DataClassification=SystemMetadata }
     { 16  ;   ;Value BLOB          ;BLOB          ;DataClassification=SystemMetadata }
-}
+  }
   KEYS
   {
     {    ;Entry No.                               ;Clustered=Yes }
@@ -60,7 +74,6 @@ OBJECT Table 1235 XML Buffer
       XMLBufferWriter.InitializeXMLBufferFromText(Rec,XmlText);
     END;
 
-    [Internal]
     PROCEDURE Upload@12() : Boolean;
     VAR
       FileManagement@1000 : Codeunit 419;
@@ -74,7 +87,6 @@ OBJECT Table 1235 XML Buffer
       EXIT(TRUE);
     END;
 
-    [Internal]
     PROCEDURE Save@38(ServerFilePath@1000 : Text) : Boolean;
     VAR
       XMLBufferReader@1002 : Codeunit 1239;
@@ -82,7 +94,6 @@ OBJECT Table 1235 XML Buffer
       EXIT(XMLBufferReader.SaveToFile(ServerFilePath,Rec));
     END;
 
-    [Internal]
     PROCEDURE Download@13() Success : Boolean;
     VAR
       FileManagement@1000 : Codeunit 419;

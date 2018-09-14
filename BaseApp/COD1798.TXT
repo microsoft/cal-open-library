@@ -603,7 +603,6 @@ OBJECT Codeunit 1798 Data Migration Mgt.
       UNTIL DataMigrationStatus.NEXT = 0;
     END;
 
-    [Internal]
     PROCEDURE DestTableHasAnyTransactions@40(VAR DataMigrationStatus@1000 : Record 1799;VAR JournalBatchName@1004 : Code[10]) : Boolean;
     VAR
       GenJournalLine@1002 : Record 81;
@@ -713,6 +712,23 @@ OBJECT Codeunit 1798 Data Migration Mgt.
         DataMigrationStatus.VALIDATE(Status,DataMigrationStatus.Status::Failed);
         DataMigrationStatus.MODIFY(TRUE);
       END;
+    END;
+
+    PROCEDURE CheckIfMigrationIsCompleted@21(CurrentDataMigrationStatus@1000 : Record 1799);
+    VAR
+      DataMigrationStatus@1001 : Record 1799;
+      DataMigrationFacade@1003 : Codeunit 6100;
+    BEGIN
+      DataMigrationStatus.SETRANGE("Migration Type",CurrentDataMigrationStatus."Migration Type");
+      DataMigrationStatus.SETFILTER("Destination Table ID",'<>%1',CurrentDataMigrationStatus."Destination Table ID");
+      DataMigrationStatus.SETFILTER(
+        Status,
+        '%1|%2|%3',
+        DataMigrationStatus.Status::"In Progress",
+        DataMigrationStatus.Status::Pending,
+        DataMigrationStatus.Status::"Completed with Errors");
+      IF DataMigrationStatus.ISEMPTY THEN
+        DataMigrationFacade.OnMigrationCompleted(CurrentDataMigrationStatus);
     END;
 
     BEGIN

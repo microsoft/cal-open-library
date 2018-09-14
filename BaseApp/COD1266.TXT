@@ -51,7 +51,6 @@ OBJECT Codeunit 1266 Encryption Management
       EXIT(DECRYPT(Text))
     END;
 
-    [Internal]
     PROCEDURE ExportKey@4();
     VAR
       StdPasswordDialog@1000 : Page 9815;
@@ -67,7 +66,6 @@ OBJECT Codeunit 1266 Encryption Management
       END;
     END;
 
-    [Internal]
     PROCEDURE ImportKey@3();
     VAR
       FileManagement@1003 : Codeunit 419;
@@ -94,7 +92,6 @@ OBJECT Codeunit 1266 Encryption Management
       FileManagement.DeleteServerFile(TempKeyFilePath);
     END;
 
-    [Internal]
     PROCEDURE ChangeKey@15();
     VAR
       FileManagement@1000 : Codeunit 419;
@@ -122,14 +119,12 @@ OBJECT Codeunit 1266 Encryption Management
       FileManagement.DeleteServerFile(TempKeyFilePath);
     END;
 
-    [Internal]
     PROCEDURE EnableEncryption@2();
     BEGIN
       IF CONFIRM(EnableEncryptionConfirmTxt,TRUE) THEN
         EnableEncryptionSilently;
     END;
 
-    [Internal]
     PROCEDURE EnableEncryptionSilently@28();
     BEGIN
       // no user interaction on webservices
@@ -138,7 +133,6 @@ OBJECT Codeunit 1266 Encryption Management
       EncryptDataInAllCompanies;
     END;
 
-    [Internal]
     PROCEDURE DisableEncryption@7(Silent@1000 : Boolean);
     BEGIN
       // Silent is FALSE when we want the user to take action on if the encryption should be disabled or not. In cases like import key
@@ -188,7 +182,6 @@ OBJECT Codeunit 1266 Encryption Management
       ERROR(EncryptionCheckFailErr);
     END;
 
-    [Internal]
     PROCEDURE EncryptDataInAllCompanies@11();
     VAR
       Company@1000 : Record 2000000006;
@@ -317,7 +310,7 @@ OBJECT Codeunit 1266 Encryption Management
       IF GlblSilentFileUploadDownload THEN BEGIN
         IF GlblTempClientFileName = '' THEN
           ERROR(FileNameNotSetForSilentUploadErr);
-        EXIT(FileManagement.UploadFileSilent(GlblTempClientFileName));
+        EXIT(FileManagement.UploadFileToServer(GlblTempClientFileName));
       END;
 
       EXIT(FileManagement.UploadFileWithFilter(FileImportCaptionMsg,
@@ -411,8 +404,9 @@ OBJECT Codeunit 1266 Encryption Management
     PROCEDURE GenerateKeyedHash@30(InputString@1000 : Text;Key@1005 : Text;HashAlgorithmType@1001 : 'HMACMD5,HMACSHA1,HMACSHA256,HMACSHA384,HMACSHA512') : Text;
     VAR
       HashBytes@1004 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Array";
+      Encoding@1002 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.Encoding";
     BEGIN
-      IF NOT GenerateKeyedHashBytes(HashBytes,InputString,Key,HashAlgorithmType) THEN
+      IF NOT GenerateKeyedHashBytes(HashBytes,InputString,Encoding.UTF8.GetBytes(Key),HashAlgorithmType) THEN
         EXIT('');
       EXIT(ConvertByteHashToString(HashBytes));
     END;
@@ -421,15 +415,27 @@ OBJECT Codeunit 1266 Encryption Management
     PROCEDURE GenerateKeyedHashAsBase64String@43(InputString@1000 : Text;Key@1005 : Text;HashAlgorithmType@1001 : 'HMACMD5,HMACSHA1,HMACSHA256,HMACSHA384,HMACSHA512') : Text;
     VAR
       HashBytes@1004 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Array";
+      Encoding@1002 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.Encoding";
     BEGIN
-      IF NOT GenerateKeyedHashBytes(HashBytes,InputString,Key,HashAlgorithmType) THEN
+      IF NOT GenerateKeyedHashBytes(HashBytes,InputString,Encoding.UTF8.GetBytes(Key),HashAlgorithmType) THEN
         EXIT('');
       EXIT(ConvertByteHashToBase64String(HashBytes));
     END;
 
-    LOCAL PROCEDURE GenerateKeyedHashBytes@44(VAR HashBytes@1002 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Array";InputString@1000 : Text;Key@1005 : Text;HashAlgorithmType@1001 : 'HMACMD5,HMACSHA1,HMACSHA256,HMACSHA384,HMACSHA512') : Boolean;
+    [External]
+    PROCEDURE GenerateBase64KeyedHashAsBase64String@36(InputString@1000 : Text;Key@1005 : Text;HashAlgorithmType@1001 : 'HMACMD5,HMACSHA1,HMACSHA256,HMACSHA384,HMACSHA512') : Text;
+    VAR
+      HashBytes@1004 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Array";
+      Convert@1003 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Convert";
     BEGIN
-      IF (InputString = '') OR (Key = '') THEN
+      IF NOT GenerateKeyedHashBytes(HashBytes,InputString,Convert.FromBase64String(Key),HashAlgorithmType) THEN
+        EXIT('');
+      EXIT(ConvertByteHashToBase64String(HashBytes));
+    END;
+
+    LOCAL PROCEDURE GenerateKeyedHashBytes@44(VAR HashBytes@1002 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Array";InputString@1000 : Text;Key@1005 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Array";HashAlgorithmType@1001 : 'HMACMD5,HMACSHA1,HMACSHA256,HMACSHA384,HMACSHA512') : Boolean;
+    BEGIN
+      IF (InputString = '') OR (Key.Length = 0) THEN
         EXIT(FALSE);
       IF NOT TryGenerateKeyedHash(HashBytes,InputString,Key,FORMAT(HashAlgorithmType)) THEN
         ERROR(GETLASTERRORTEXT);
@@ -437,13 +443,13 @@ OBJECT Codeunit 1266 Encryption Management
     END;
 
     [TryFunction]
-    LOCAL PROCEDURE TryGenerateKeyedHash@35(VAR HashBytes@1000 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Array";InputString@1001 : Text;Key@1005 : Text;Algorithm@1002 : Text);
+    LOCAL PROCEDURE TryGenerateKeyedHash@35(VAR HashBytes@1000 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Array";InputString@1001 : Text;Key@1005 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Array";Algorithm@1002 : Text);
     VAR
       KeyedHashAlgorithm@1006 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Security.Cryptography.KeyedHashAlgorithm";
       Encoding@1004 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.Encoding";
     BEGIN
       KeyedHashAlgorithm := KeyedHashAlgorithm.Create(Algorithm);
-      KeyedHashAlgorithm.Key(Encoding.UTF8.GetBytes(Key));
+      KeyedHashAlgorithm.Key(Key);
       HashBytes := KeyedHashAlgorithm.ComputeHash(Encoding.UTF8.GetBytes(InputString));
       KeyedHashAlgorithm.Dispose;
     END;

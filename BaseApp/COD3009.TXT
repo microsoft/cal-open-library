@@ -51,7 +51,7 @@ OBJECT Codeunit 3009 DotNet_MemoryStream
     END;
 
     [External]
-    PROCEDURE CopyToInStream@6(VAR InStream@1000 : InStream);
+    PROCEDURE CopyFromInStream@6(VAR InStream@1000 : InStream);
     BEGIN
       COPYSTREAM(DotNetMemoryStream,InStream)
     END;

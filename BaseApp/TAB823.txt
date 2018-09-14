@@ -8,6 +8,7 @@ OBJECT Table 823 Name/Value Buffer
   }
   PROPERTIES
   {
+    ReplicateData=No;
   }
   FIELDS
   {
