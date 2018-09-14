@@ -290,6 +290,11 @@ OBJECT XMLport 1225 Imp / Exp Data Exch Def & Map
                                                   SourceField=Data Exch. Column Def::Justification;
                                                   Occurrence=Optional }
 
+    { [{C158D38E-6B23-488B-8B41-3642AAA1CB7E}];4 ;UseNodeNameAsValue  ;Attribute;Field  ;
+                                                  DataType=Boolean;
+                                                  SourceField=Data Exch. Column Def::Use Node Name as Value;
+                                                  Occurrence=Optional }
+
     { [{0FE1DDC2-10CA-4742-A643-FAD91987CB44}];3 ;DataExchMapping     ;Element ;Table   ;
                                                   SourceTable=Table1224;
                                                   LinkFields=Field1=FIELD(Field1),
@@ -537,8 +542,8 @@ OBJECT XMLport 1225 Imp / Exp Data Exch Def & Map
     { [{8B81BD34-9936-4F95-9883-A91F58341E6F}];5 ;TransformationRules ;Element ;Table   ;
                                                   VariableName=TempTransformationRuleRec;
                                                   SourceTable=Table1237;
-                                                  AutoReplace=Yes;
                                                   Temporary=Yes;
+                                                  AutoReplace=Yes;
                                                   MinOccurs=Zero;
                                                   Import::OnAfterInsertRecord=VAR
                                                                                 TransformationRuleRec@10000200 : Record 1237;

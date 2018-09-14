@@ -1,0 +1,75 @@
+OBJECT Codeunit 3027 DotNet_StreamReader
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      DotNetStreamReader@1000 : DotNet "'mscorlib'.System.IO.StreamReader";
+
+    [External]
+    PROCEDURE StreamReader@1(VAR InputStream@1000 : InStream;DotNet_Encoding@1001 : Codeunit 3026);
+    VAR
+      DotNetEncoding@1002 : DotNet "'mscorlib'.System.Text.Encoding";
+    BEGIN
+      DotNet_Encoding.GetEncoding(DotNetEncoding);
+      DotNetStreamReader := DotNetStreamReader.StreamReader(InputStream,DotNetEncoding);
+    END;
+
+    [External]
+    PROCEDURE StreamReaderDetectEncoding@2(VAR InputStream@1000 : InStream;DetectEncodingFromByteOrderMarks@1001 : Boolean);
+    BEGIN
+      DotNetStreamReader := DotNetStreamReader.StreamReader(InputStream,DetectEncodingFromByteOrderMarks);
+    END;
+
+    [External]
+    PROCEDURE Close@3();
+    BEGIN
+      DotNetStreamReader.Close;
+    END;
+
+    [External]
+    PROCEDURE Dispose@4();
+    BEGIN
+      DotNetStreamReader.Dispose;
+    END;
+
+    [External]
+    PROCEDURE EndOfStream@6() : Boolean;
+    BEGIN
+      EXIT(DotNetStreamReader.EndOfStream);
+    END;
+
+    [External]
+    PROCEDURE CurrentEncoding@7(VAR DotNet_Encoding@1000 : Codeunit 3026);
+    BEGIN
+      DotNet_Encoding.SetEncoding(DotNetStreamReader.CurrentEncoding);
+    END;
+
+    [External]
+    PROCEDURE ReadLine@8() : Text;
+    BEGIN
+      EXIT(DotNetStreamReader.ReadLine);
+    END;
+
+    [External]
+    PROCEDURE ReadToEnd@9() : Text;
+    BEGIN
+      EXIT(DotNetStreamReader.ReadToEnd);
+    END;
+
+    BEGIN
+    END.
+  }
+}
+

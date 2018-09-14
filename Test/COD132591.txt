@@ -11,6 +11,7 @@ OBJECT Codeunit 132591 MemoryStream Wrapper Tests
     Subtype=Test;
     TestPermissions=Disabled;
     OnRun=BEGIN
+            // [FEATURE] [MemoryStream] [UT]
           END;
 
   }
@@ -116,20 +117,20 @@ OBJECT Codeunit 132591 MemoryStream Wrapper Tests
       InStream@1002 : InStream;
       OutStream@1003 : OutStream;
     BEGIN
-      // Pre-Setup: store picture in MemoryStream
+      // [GIVEN] store picture in MemoryStream
       CompanyInformation.GET;
       CompanyInformation.CALCFIELDS(Picture);
       CompanyInformation.Picture.CREATEINSTREAM(InStream);
       MemoryStreamWrapper.Create(1000);
       MemoryStreamWrapper.ReadFrom(InStream);
 
-      // Setup: delete picture
+      // [GIVEN] delete picture
       CLEAR(CompanyInformation.Picture);
       CompanyInformation.MODIFY;
       CompanyInformation.CALCFIELDS(Picture);
       Assert.IsFalse(CompanyInformation.Picture.HASVALUE,'Precondition failed');
 
-      // Excercise: copy picture from memory stream
+      // [WHEN] copy picture from memory stream
       CompanyInformation.Picture.CREATEOUTSTREAM(OutStream);
       MemoryStreamWrapper.SetPosition(0);
       MemoryStreamWrapper.CopyTo(OutStream);

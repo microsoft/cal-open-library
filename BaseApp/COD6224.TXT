@@ -293,7 +293,7 @@ OBJECT Codeunit 6224 XML DOM Management
         EXIT(FALSE);
 
       // NameStartChar ::= ":" | [A-Z] | "_" | [a-z] | [#xC0-#xD6] | [#xD8-#xF6] | [#xF8-#x2FF] | [#x370-#x37D] | [#x37F-#x1FFF] | [#x200C-#x200D] | [#x2070-#x218F] | [#x2C00-#x2FEF] | [#x3001-#xD7FF] | [#xF900-#xFDCF] | [#xFDF0-#xFFFD] | [#x10000-#xEFFF
-      IF InputChar IN [':','_','A'..'Z','a'..'z'] THEN
+      IF InputChar IN [':','_','A'..'Z','a'..'z','€'..'Ÿ',' '..'ï'] THEN
         EXIT(TRUE);
 
       CharCode := InputChar;
@@ -378,8 +378,10 @@ OBJECT Codeunit 6224 XML DOM Management
 
     PROCEDURE LoadXMLDocumentFromFile@28(FileName@1000 : Text;VAR XmlDocument@1001 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlDocument");
     VAR
+      FileManagement@1003 : Codeunit 419;
       File@1002 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.IO.File";
     BEGIN
+      FileManagement.IsAllowedPath(FileName,FALSE);
       LoadXMLDocumentFromText(File.ReadAllText(FileName),XmlDocument);
     END;
 

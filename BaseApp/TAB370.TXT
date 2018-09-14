@@ -8,6 +8,7 @@ OBJECT Table 370 Excel Buffer
   }
   PROPERTIES
   {
+    ReplicateData=No;
   }
   FIELDS
   {
@@ -90,10 +91,12 @@ OBJECT Table 370 Excel Buffer
       Text021@1021 : TextConst 'ENU=Budget';
       TempInfoExcelBuf@1036 : TEMPORARY Record 370;
       FileManagement@1045 : Codeunit 419;
-      XlWrkBkWriter@1022 : DotNet "'Microsoft.Dynamics.Nav.OpenXml, Version=11.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.Microsoft.Dynamics.Nav.OpenXml.Spreadsheet.WorkbookWriter";
-      XlWrkBkReader@1023 : DotNet "'Microsoft.Dynamics.Nav.OpenXml, Version=11.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.Microsoft.Dynamics.Nav.OpenXml.Spreadsheet.WorkbookReader";
-      XlWrkShtWriter@1024 : DotNet "'Microsoft.Dynamics.Nav.OpenXml, Version=11.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.Microsoft.Dynamics.Nav.OpenXml.Spreadsheet.WorksheetWriter";
-      XlWrkShtReader@1043 : DotNet "'Microsoft.Dynamics.Nav.OpenXml, Version=11.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.Microsoft.Dynamics.Nav.OpenXml.Spreadsheet.WorksheetReader";
+      OpenXMLManagement@1000 : Codeunit 6223;
+      XlWrkBkWriter@1022 : DotNet "'Microsoft.Dynamics.Nav.OpenXml, Version=13.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.Microsoft.Dynamics.Nav.OpenXml.Spreadsheet.WorkbookWriter";
+      XlWrkBkReader@1023 : DotNet "'Microsoft.Dynamics.Nav.OpenXml, Version=13.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.Microsoft.Dynamics.Nav.OpenXml.Spreadsheet.WorkbookReader";
+      XlWrkShtWriter@1024 : DotNet "'Microsoft.Dynamics.Nav.OpenXml, Version=13.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.Microsoft.Dynamics.Nav.OpenXml.Spreadsheet.WorksheetWriter";
+      XlWrkShtReader@1043 : DotNet "'Microsoft.Dynamics.Nav.OpenXml, Version=13.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.Microsoft.Dynamics.Nav.OpenXml.Spreadsheet.WorksheetReader";
+      StringBld@1011 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.StringBuilder";
       RangeStartXlRow@1034 : Text[30];
       RangeStartXlCol@1033 : Text[30];
       RangeEndXlRow@1032 : Text[30];
@@ -112,6 +115,10 @@ OBJECT Table 370 Excel Buffer
       Text039@1050 : TextConst 'ENU=Cell type has not been set.';
       SavingDocumentMsg@1010 : TextConst 'ENU=Saving the following document: %1.';
       ExcelFileExtensionTok@1012 : TextConst '@@@={Locked};ENU=.xlsx';
+      VmlDrawingXmlTxt@1093 : TextConst '@@@={Locked};ENU="<xml xmlns:v=""urn:schemas-microsoft-com:vml"" xmlns:o=""urn:schemas-microsoft-com:office:office"" xmlns:x=""urn:schemas-microsoft-com:office:excel""><o:shapelayout v:ext=""edit""><o:idmap v:ext=""edit"" data=""1""/></o:shapelayout><v:shapetype id=""_x0000_t202"" coordsize=""21600,21600"" o:spt=""202""  path=""m,l,21600r21600,l21600,xe""><v:stroke joinstyle=""miter""/><v:path gradientshapeok=""t"" o:connecttype=""rect""/></v:shapetype>"';
+      EndXmlTokenTxt@1098 : TextConst '@@@={Locked};ENU=</xml>';
+      VmlShapeAnchorTxt@1095 : TextConst '@@@={Locked};ENU=%1,15,%2,10,%3,31,8,9';
+      CommentVmlShapeXmlTxt@1094 : TextConst '@@@={Locked};ENU="<v:shape id=""%1"" type=""#_x0000_t202"" style=''position:absolute;  margin-left:59.25pt;margin-top:1.5pt;width:96pt;height:55.5pt;z-index:1;  visibility:hidden'' fillcolor=""#ffffe1"" o:insetmode=""auto""><v:fill color2=""#ffffe1""/><v:shadow color=""black"" obscured=""t""/><v:path o:connecttype=""none""/><v:textbox style=''mso-direction-alt:auto''><div style=''text-align:left''/></v:textbox><x:ClientData ObjectType=""Note""><x:MoveWithCells/><x:SizeWithCells/><x:Anchor>%2</x:Anchor><x:AutoFill>False</x:AutoFill><x:Row>%3</x:Row><x:Column>%4</x:Column></x:ClientData></v:shape>"';
       ErrorMessage@1026 : Text;
 
     [External]
@@ -120,7 +127,6 @@ OBJECT Table 370 Excel Buffer
       CreateBook('',SheetName);
     END;
 
-    [Internal]
     PROCEDURE CreateBook@1(FileName@1001 : Text;SheetName@1000 : Text);
     BEGIN
       IF SheetName = '' THEN
@@ -141,6 +147,8 @@ OBJECT Table 370 Excel Buffer
       XlWrkShtWriter := XlWrkBkWriter.FirstWorksheet;
       IF SheetName <> '' THEN
         XlWrkShtWriter.Name := SheetName;
+
+      OpenXMLManagement.SetupWorksheetHelper(XlWrkBkWriter);
     END;
 
     PROCEDURE OpenBook@2(FileName@1000 : Text;SheetName@1001 : Text);
@@ -154,6 +162,7 @@ OBJECT Table 370 Excel Buffer
       IF SheetName = 'G/L Account' THEN
         SheetName := 'GL Account';
 
+      FileManagement.IsAllowedPath(FileName,FALSE);
       XlWrkBkReader := XlWrkBkReader.Open(FileName);
       IF XlWrkBkReader.HasWorksheet(SheetName) THEN BEGIN
         XlWrkShtReader := XlWrkBkReader.GetWorksheetByName(SheetName);
@@ -182,13 +191,11 @@ OBJECT Table 370 Excel Buffer
       END;
     END;
 
-    [Internal]
     PROCEDURE UpdateBook@5(FileName@1000 : Text;SheetName@1001 : Text);
     BEGIN
       UpdateBookExcel(FileName,SheetName,TRUE);
     END;
 
-    [Internal]
     PROCEDURE UpdateBookExcel@48(FileName@1001 : Text;SheetName@1000 : Text;PreserveDataOnUpdate@1002 : Boolean);
     BEGIN
       IF FileName = '' THEN
@@ -198,6 +205,7 @@ OBJECT Table 370 Excel Buffer
         ERROR(Text002);
 
       FileNameServer := FileName;
+      FileManagement.IsAllowedPath(FileName,FALSE);
       XlWrkBkWriter := XlWrkBkWriter.Open(FileNameServer);
       IF XlWrkBkWriter.HasWorksheet(SheetName) THEN BEGIN
         XlWrkShtWriter := XlWrkBkWriter.GetWorksheetByName(SheetName);
@@ -205,6 +213,8 @@ OBJECT Table 370 Excel Buffer
         // in which NAV does not have new data. Notice that the sheet writer will only clear Excel
         // cells that are addressed by the writer. All other cells will be left unmodified.
         XlWrkShtWriter.PreserveDataOnUpdate := PreserveDataOnUpdate;
+
+        OpenXMLManagement.SetupWorksheetHelper(XlWrkBkWriter);
       END ELSE BEGIN
         CloseBook;
         ERROR(Text004,SheetName);
@@ -228,10 +238,13 @@ OBJECT Table 370 Excel Buffer
       END;
     END;
 
+    [External]
     PROCEDURE SelectOrAddSheet@47(NewSheetName@1000 : Text);
     BEGIN
       IF NewSheetName = '' THEN
         EXIT;
+      IF ISNULL(XlWrkBkWriter) THEN
+        ERROR(Text037);
       IF XlWrkBkWriter.HasWorksheet(NewSheetName) THEN
         XlWrkShtWriter := XlWrkBkWriter.GetWorksheetByName(NewSheetName)
       ELSE
@@ -242,14 +255,15 @@ OBJECT Table 370 Excel Buffer
     PROCEDURE WriteSheet@37(ReportHeader@1001 : Text;CompanyName2@1002 : Text;UserID2@1003 : Text);
     VAR
       OrientationValues@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.5.5631.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Spreadsheet.OrientationValues";
+      XmlTextWriter@1013 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlTextWriter";
+      FileMode@1007 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.IO.FileMode";
+      Encoding@1006 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.Encoding";
+      VmlDrawingPart@1004 : DotNet "'DocumentFormat.OpenXml, Version=2.5.5631.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Packaging.VmlDrawingPart";
       CRLF@1008 : Char;
     BEGIN
       CRLF := 10;
 
       XlWrkShtWriter.AddPageSetup(OrientationValues.Landscape,9); // 9 - default value for Paper Size - A4
-
-      WriteAllToCurrentSheet(Rec);
-
       IF ReportHeader <> '' THEN
         XlWrkShtWriter.AddHeader(
           TRUE,
@@ -258,6 +272,20 @@ OBJECT Table 370 Excel Buffer
       XlWrkShtWriter.AddHeader(
         FALSE,
         STRSUBSTNO('%1%3%4%3%5 %2',GetExcelReference(2),GetExcelReference(3),CRLF,UserID2,PageTxt));
+
+      OpenXMLManagement.AddAndInitializeCommentsPart(XlWrkShtWriter,VmlDrawingPart);
+
+      StringBld := StringBld.StringBuilder;
+      StringBld.Append(VmlDrawingXmlTxt);
+
+      WriteAllToCurrentSheet(Rec);
+
+      StringBld.Append(EndXmlTokenTxt);
+
+      XmlTextWriter := XmlTextWriter.XmlTextWriter(VmlDrawingPart.GetStream(FileMode.Create),Encoding.UTF8);
+      XmlTextWriter.WriteRaw(StringBld.ToString);
+      XmlTextWriter.Flush;
+      XmlTextWriter.Close;
 
       IF UseInfoSheet THEN
         IF NOT TempInfoExcelBuf.ISEMPTY THEN BEGIN
@@ -294,9 +322,10 @@ OBJECT Table 370 Excel Buffer
       ExcelBufferDialogMgt.Close;
     END;
 
-    LOCAL PROCEDURE WriteCellValue@28(ExcelBuffer@1000 : Record 370);
+    [External]
+    PROCEDURE WriteCellValue@28(ExcelBuffer@1000 : Record 370);
     VAR
-      Decorator@1001 : DotNet "'Microsoft.Dynamics.Nav.OpenXml, Version=11.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.Microsoft.Dynamics.Nav.OpenXml.Spreadsheet.CellDecorator";
+      Decorator@1001 : DotNet "'Microsoft.Dynamics.Nav.OpenXml, Version=13.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.Microsoft.Dynamics.Nav.OpenXml.Spreadsheet.CellDecorator";
     BEGIN
       WITH ExcelBuffer DO BEGIN
         GetCellDecorator(Bold,Italic,Underline,"Double Underline",Decorator);
@@ -313,12 +342,18 @@ OBJECT Table 370 Excel Buffer
           ELSE
             ERROR(Text039)
         END;
+
+        IF Comment <> '' THEN BEGIN
+          OpenXMLManagement.SetCellComment(XlWrkShtWriter,STRSUBSTNO('%1%2',xlColID,"Row No."),Comment);
+          CreateCommentVmlShapeXml("Column No.","Row No.");
+        END;
       END;
     END;
 
-    LOCAL PROCEDURE WriteCellFormula@38(ExcelBuffer@1000 : Record 370);
+    [External]
+    PROCEDURE WriteCellFormula@38(ExcelBuffer@1000 : Record 370);
     VAR
-      Decorator@1001 : DotNet "'Microsoft.Dynamics.Nav.OpenXml, Version=11.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.Microsoft.Dynamics.Nav.OpenXml.Spreadsheet.CellDecorator";
+      Decorator@1001 : DotNet "'Microsoft.Dynamics.Nav.OpenXml, Version=13.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.Microsoft.Dynamics.Nav.OpenXml.Spreadsheet.CellDecorator";
     BEGIN
       WITH ExcelBuffer DO BEGIN
         GetCellDecorator(Bold,Italic,Underline,"Double Underline",Decorator);
@@ -327,7 +362,27 @@ OBJECT Table 370 Excel Buffer
       END;
     END;
 
-    LOCAL PROCEDURE GetCellDecorator@33(IsBold@1000 : Boolean;IsItalic@1001 : Boolean;IsUnderlined@1002 : Boolean;IsDoubleUnderlined@1004 : Boolean;VAR Decorator@1003 : DotNet "'Microsoft.Dynamics.Nav.OpenXml, Version=11.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.Microsoft.Dynamics.Nav.OpenXml.Spreadsheet.CellDecorator");
+    LOCAL PROCEDURE CreateCommentVmlShapeXml@57(ColId@1000 : Integer;RowId@1001 : Integer);
+    VAR
+      Guid@1002 : GUID;
+      Anchor@1003 : Text;
+      CommentShape@1004 : Text;
+    BEGIN
+      Guid := CREATEGUID;
+
+      Anchor := CreateCommentVmlAnchor(ColId,RowId);
+
+      CommentShape := STRSUBSTNO(CommentVmlShapeXmlTxt,Guid,Anchor,RowId - 1,ColId - 1);
+
+      StringBld.Append(CommentShape);
+    END;
+
+    LOCAL PROCEDURE CreateCommentVmlAnchor@20(ColId@1000 : Integer;RowId@1001 : Integer) : Text;
+    BEGIN
+      EXIT(STRSUBSTNO(VmlShapeAnchorTxt,ColId,RowId - 2,ColId + 2));
+    END;
+
+    LOCAL PROCEDURE GetCellDecorator@33(IsBold@1000 : Boolean;IsItalic@1001 : Boolean;IsUnderlined@1002 : Boolean;IsDoubleUnderlined@1004 : Boolean;VAR Decorator@1003 : DotNet "'Microsoft.Dynamics.Nav.OpenXml, Version=13.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.Microsoft.Dynamics.Nav.OpenXml.Spreadsheet.CellDecorator");
     BEGIN
       IF IsBold AND IsItalic THEN BEGIN
         IF IsDoubleUnderlined THEN BEGIN
@@ -394,7 +449,6 @@ OBJECT Table 370 Excel Buffer
         XlWrkShtWriter.SetColumnWidth(ColName,NewColWidth);
     END;
 
-    [Internal]
     PROCEDURE CreateRangeName@9(RangeName@1000 : Text[30];FromColumnNo@1001 : Integer;FromRowNo@1002 : Integer);
     VAR
       TempExcelBuf@1005 : TEMPORARY Record 370;
@@ -417,7 +471,7 @@ OBJECT Table 370 Excel Buffer
     PROCEDURE ReadSheet@4();
     VAR
       ExcelBufferDialogMgt@1003 : Codeunit 5370;
-      CellData@1002 : DotNet "'Microsoft.Dynamics.Nav.OpenXml, Version=11.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.Microsoft.Dynamics.Nav.OpenXml.Spreadsheet.CellData";
+      CellData@1002 : DotNet "'Microsoft.Dynamics.Nav.OpenXml, Version=13.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.Microsoft.Dynamics.Nav.OpenXml.Spreadsheet.CellData";
       Enumerator@1001 : DotNet "'mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Collections.IEnumerator";
       RowCount@1009 : Integer;
       LastUpdate@1004 : DateTime;
@@ -489,7 +543,6 @@ OBJECT Table 370 Excel Buffer
       "Cell Value as Text" := FORMAT(ROUND(Decimal,0.000001),0,1);
     END;
 
-    [External]
     PROCEDURE SelectSheetsName@6(FileName@1000 : Text) : Text[250];
     VAR
       TempBlob@1001 : Record 99008535;
@@ -849,7 +902,6 @@ OBJECT Table 370 Excel Buffer
       CurrentCol := NewCurrentCol;
     END;
 
-    [Internal]
     PROCEDURE CreateValidationRule@17(Range@1000 : Code[20]);
     BEGIN
       XlWrkShtWriter.AddRangeDataValidation(
@@ -874,13 +926,11 @@ OBJECT Table 370 Excel Buffer
       FileManagement.DownloadHandler(FileNameServer,'','',Text034,GetFriendlyFilename);
     END;
 
-    [Internal]
     PROCEDURE DownloadAndOpenExcel@34();
     BEGIN
       OpenExcelWithName(GetFriendlyFilename);
     END;
 
-    [Internal]
     PROCEDURE OpenExcelWithName@15(FileName@1000 : Text);
     BEGIN
       IF FileName = '' THEN
@@ -925,7 +975,6 @@ OBJECT Table 370 Excel Buffer
       EXIT(FALSE);
     END;
 
-    [Internal]
     PROCEDURE CreateBookAndOpenExcel@32(FileName@1004 : Text;SheetName@1000 : Text[250];ReportHeader@1003 : Text;CompanyName2@1002 : Text;UserID2@1001 : Text);
     BEGIN
       CreateBook(FileName,SheetName);

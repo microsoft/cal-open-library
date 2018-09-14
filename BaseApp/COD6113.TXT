@@ -473,6 +473,25 @@ OBJECT Codeunit 6113 Item Data Migration Facade
     END;
 
     [External]
+    PROCEDURE SetPurchUnitOfMeasure@59(PurchUnitOfMeasureToSet@1002 : Code[10]);
+    VAR
+      ItemUnitOfMeasure@1000 : Record 5404;
+    BEGIN
+      IF NOT ItemIsSet THEN
+        ERROR(InternalItemNotSetErr);
+
+      IF NOT ItemUnitOfMeasure.GET(GlobalItem."No.",PurchUnitOfMeasureToSet) THEN BEGIN
+        ItemUnitOfMeasure.INIT;
+        ItemUnitOfMeasure.VALIDATE("Item No.",GlobalItem."No.");
+        ItemUnitOfMeasure.VALIDATE(Code,PurchUnitOfMeasureToSet);
+        ItemUnitOfMeasure.VALIDATE("Qty. per Unit of Measure",1);
+        ItemUnitOfMeasure.INSERT;
+      END;
+
+      GlobalItem.VALIDATE("Purch. Unit of Measure",PurchUnitOfMeasureToSet);
+    END;
+
+    [External]
     PROCEDURE SetItemDiscGroup@35(ItemDiscGroupToSet@1002 : Code[20]);
     BEGIN
       IF NOT ItemIsSet THEN
@@ -621,6 +640,15 @@ OBJECT Codeunit 6113 Item Data Migration Facade
     END;
 
     [External]
+    PROCEDURE SetUnitListPrice@22(UnitListPriceToSet@1000 : Decimal);
+    BEGIN
+      IF NOT ItemIsSet THEN
+        ERROR(InternalItemNotSetErr);
+
+      GlobalItem.VALIDATE("Unit List Price",UnitListPriceToSet);
+    END;
+
+    [External]
     PROCEDURE SetLastDateModified@42(LastDateModifiedToSet@1000 : Date);
     BEGIN
       IF NOT ItemIsSet THEN
@@ -694,6 +722,15 @@ OBJECT Codeunit 6113 Item Data Migration Facade
       GlobalItem.VALIDATE("Gen. Prod. Posting Group",GenProductPostingGroupCode);
 
       EXIT(TRUE);
+    END;
+
+    [External]
+    PROCEDURE SetSearchDescription@58(SearchDescriptionToSet@1000 : Code[50]);
+    BEGIN
+      IF NOT ItemIsSet THEN
+        ERROR(InternalItemNotSetErr);
+
+      GlobalItem.VALIDATE("Search Description",SearchDescriptionToSet);
     END;
 
     [Integration(TRUE)]

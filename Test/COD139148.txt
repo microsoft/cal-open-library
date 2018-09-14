@@ -11,6 +11,7 @@ OBJECT Codeunit 139148 UT REST
     Subtype=Test;
     TestPermissions=Disabled;
     OnRun=BEGIN
+            // [FEATURE] [UT] [REST]
           END;
 
   }
@@ -356,10 +357,6 @@ OBJECT Codeunit 139148 UT REST
     END;
 
     BEGIN
-    {
-      // [FEATURE] [UT] [REST]
-      // Unit tests for REST handling related functions
-    }
     END.
   }
 }

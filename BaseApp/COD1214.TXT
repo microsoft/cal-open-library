@@ -112,9 +112,9 @@ OBJECT Codeunit 1214 Map DataExch To Intermediate
       IntermediateDataImport.VALIDATE("Record No.",LineNo);
       IntermediateDataImport.VALIDATE("Field ID",DataExchFieldMapping."Target Field ID");
       IF TransformationRule.GET(DataExchFieldMapping."Transformation Rule") THEN
-        IntermediateDataImport.VALIDATE(Value,TransformationRule.TransformText(DataExchField.Value))
+        IntermediateDataImport.SetValueWithoutModifying(TransformationRule.TransformText(DataExchField.GetValue))
       ELSE
-        IntermediateDataImport.VALIDATE(Value,DataExchField.Value);
+        IntermediateDataImport.SetValueWithoutModifying(DataExchField.GetValue);
       IntermediateDataImport.VALIDATE("Validate Only",DataExchFieldMapping.Optional);
       IF DataExchField."Parent Node ID" <> '' THEN BEGIN
         TempNameValueBuffer.SETRANGE(Name,DataExchField."Parent Node ID");
