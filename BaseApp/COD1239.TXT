@@ -18,7 +18,6 @@ OBJECT Codeunit 1239 XML Buffer Reader
       DefaultNamespace@1000 : Text;
 
     [TryFunction]
-    [Internal]
     PROCEDURE SaveToFile@7(FilePath@1000 : Text;VAR XMLBuffer@1001 : Record 1235);
     VAR
       TempBlob@1003 : Record 99008535;
