@@ -16,24 +16,26 @@ OBJECT Codeunit 50068 OpenXml WordProcessing Helper
   {
 
     [External]
-    PROCEDURE CloneStyleRunProperties@17024400(VAR OriginalWordStyleRunProperties@17024400 : Codeunit 50037;VAR ClonedWordStyleRunProperties@17024401 : Codeunit 50037);
+    PROCEDURE CloneStyleRunProperties@1(VAR OriginalWordStyleRunProperties@1000 : Codeunit 50037;VAR ClonedWordStyleRunProperties@1001 : Codeunit 50037);
     BEGIN
       ClonedWordStyleRunProperties.CreateFromOuterXml(OriginalWordStyleRunProperties.GetOuterXml);
     END;
 
     [External]
-    PROCEDURE CloneParagraphProperties@17024403(VAR OriginalWordParagraphProperties@17024400 : Codeunit 50026;VAR ClonedWordParagraphProperties@17024401 : Codeunit 50026);
+    PROCEDURE CloneParagraphProperties@2(VAR OriginalWordParagraphProperties@1000 : Codeunit 50026;VAR ClonedWordParagraphProperties@1001 : Codeunit 50026);
     BEGIN
       ClonedWordParagraphProperties.CreateFromOuterXml(OriginalWordParagraphProperties.GetOuterXml);
     END;
 
     [External]
-    PROCEDURE CreateEmptyDocument@17024402(DocumentType@17024401 : 'Document,Template,MacroEnabledDocument,MacroEnabledTemplate';VAR CreatedWordprocessingDocument@17024400 : Codeunit 50018;VAR MainDocumentPart@17024402 : Codeunit 50019;VAR WordBody@17024404 : Codeunit 50021);
+    PROCEDURE CreateEmptyDocument@3(DocumentType@1000 : 'Document,Template,MacroEnabledDocument,MacroEnabledTemplate';VAR CreatedWordprocessingDocument@1001 : Codeunit 50018;VAR MainDocumentPart@1002 : Codeunit 50019;VAR WordBody@1003 : Codeunit 50021);
     VAR
-      WordDocument@17024403 : Codeunit 50020;
+      WordDocument@1004 : Codeunit 50020;
+      WordProcessingDocumentType@1005 : Codeunit 50077;
     BEGIN
       //Helper for creating an empty document and initiating required parts
-      CreatedWordprocessingDocument.Create(DocumentType, TRUE);
+      WordProcessingDocumentType.Create(DocumentType);
+      CreatedWordprocessingDocument.Create(WordProcessingDocumentType, TRUE);
       CreatedWordprocessingDocument.AddMainDocumentPart(MainDocumentPart);
       WordDocument.Create;
       MainDocumentPart.SetDocument(WordDocument);
@@ -42,15 +44,15 @@ OBJECT Codeunit 50068 OpenXml WordProcessing Helper
     END;
 
     [External]
-    PROCEDURE CreateHyperLink@17024401(Url@17024400 : Text;TextValue@17024401 : Text;VAR MainDocumentPart@17024402 : Codeunit 50019;VAR CreatedWordHyperlink@17024403 : Codeunit 50035) : Text;
+    PROCEDURE CreateHyperLink@4(Url@1000 : Text;TextValue@1001 : Text;VAR MainDocumentPart@1002 : Codeunit 50019;VAR CreatedWordHyperlink@1003 : Codeunit 50035) : Text;
     VAR
-      HyperlinkRelationship@17024404 : Codeunit 50034;
-      HrContactId@17024405 : Text;
-      WordProofError@17024406 : Codeunit 50033;
-      WordRunProperties@17024407 : Codeunit 50025;
-      WordColor@17024408 : Codeunit 50036;
-      WordText@17024409 : Codeunit 50024;
-      WordRun@17024410 : Codeunit 50023;
+      HyperlinkRelationship@1004 : Codeunit 50034;
+      HrContactId@1005 : Text;
+      WordProofError@1006 : Codeunit 50033;
+      WordRunProperties@1007 : Codeunit 50025;
+      WordColor@1008 : Codeunit 50036;
+      WordText@1009 : Codeunit 50024;
+      WordRun@1010 : Codeunit 50023;
     BEGIN
       //Helper for creating new hyperlink element
       MainDocumentPart.AddHyperlinkRelationship(Url, TRUE, HyperlinkRelationship);
@@ -77,11 +79,11 @@ OBJECT Codeunit 50068 OpenXml WordProcessing Helper
     END;
 
     [External]
-    PROCEDURE AddParagraphStyleToDocument@17024409(VAR MainDocumentPart@17024403 : Codeunit 50019;StyleId@17024402 : Text;StyleName@17024401 : Text;VAR WordStyleRunProperties@17024400 : Codeunit 50037) ActualStyleId : Text;
+    PROCEDURE AddParagraphStyleToDocument@5(VAR MainDocumentPart@1000 : Codeunit 50019;StyleId@1001 : Text;StyleName@1002 : Text;VAR WordStyleRunProperties@1003 : Codeunit 50037) ActualStyleId : Text;
     VAR
-      WordStyleDefinitionPart@17024405 : Codeunit 50041;
-      StyleIdFromName@17024404 : Text;
-      WordStyles@17024406 : Codeunit 50039;
+      WordStyleDefinitionPart@1004 : Codeunit 50041;
+      StyleIdFromName@1005 : Text;
+      WordStyles@1006 : Codeunit 50039;
     BEGIN
       //Helper for adding new paragraph style
       //Based on: https://msdn.microsoft.com/en-us/library/cc850838.aspx
@@ -107,10 +109,10 @@ OBJECT Codeunit 50068 OpenXml WordProcessing Helper
     END;
 
     [External]
-    PROCEDURE AddNumberingTypeToDocument@17024407(VAR MainDocumentPart@17024403 : Codeunit 50019;NumberingId@17024402 : Integer;FormatType@17024401 : Integer;FormatText@17024400 : Text);
+    PROCEDURE AddNumberingTypeToDocument@6(VAR MainDocumentPart@1000 : Codeunit 50019;NumberingId@1001 : Integer;FormatType@1002 : Integer;FormatText@1003 : Text);
     VAR
-      WordNumberingDefinitionsPart@17024405 : Codeunit 50070;
-      WordNumbering@17024406 : Codeunit 50071;
+      WordNumberingDefinitionsPart@1004 : Codeunit 50070;
+      WordNumbering@1005 : Codeunit 50071;
     BEGIN
       //Helper for adding new numbering type
       IF NOT MainDocumentPart.HasNumberingDefinitionsPart THEN
@@ -128,7 +130,7 @@ OBJECT Codeunit 50068 OpenXml WordProcessing Helper
     END;
 
     [External]
-    PROCEDURE CreateBulletListProperties@17024408(VAR MainDocumentPart@17024400 : Codeunit 50019;VAR WordParagraphProperties@17024403 : Codeunit 50026;LeftIndentation@17024402 : Text);
+    PROCEDURE CreateBulletListProperties@7(VAR MainDocumentPart@1000 : Codeunit 50019;VAR WordParagraphProperties@1001 : Codeunit 50026;LeftIndentation@1002 : Text);
     BEGIN
       //Helper for creating bullet list paragraph properties
       AddNumberingTypeToDocument(MainDocumentPart, 0, 23, 'o');
@@ -136,7 +138,7 @@ OBJECT Codeunit 50068 OpenXml WordProcessing Helper
     END;
 
     [External]
-    PROCEDURE CreateOrderedListProperties@17024411(VAR MainDocumentPart@17024400 : Codeunit 50019;VAR WordParagraphProperties@17024403 : Codeunit 50026;LeftIndentation@17024402 : Text);
+    PROCEDURE CreateOrderedListProperties@8(VAR MainDocumentPart@1000 : Codeunit 50019;VAR WordParagraphProperties@1001 : Codeunit 50026;LeftIndentation@1002 : Text);
     BEGIN
       //Helper for creating ordered list paragraph properties
       AddNumberingTypeToDocument(MainDocumentPart, 1, 0, '%1.');
@@ -144,10 +146,10 @@ OBJECT Codeunit 50068 OpenXml WordProcessing Helper
     END;
 
     [External]
-    PROCEDURE CreateDrawingFromStream@17024425(VAR MainDocumentPart@17024400 : Codeunit 50019;ImagePartType@17024405 : 'Bmp,Gif,Png,Tiff,Icon,Pcx,Jpeg,Emf,Wmf';ImageStream@17024401 : InStream;Name@17024402 : Text;Width@17024403 : Integer;Height@17024404 : Integer;VAR CreatedWordDrawing@17024408 : Codeunit 50043) : Text;
+    PROCEDURE CreateDrawingFromStream@9(VAR MainDocumentPart@1000 : Codeunit 50019;ImagePartType@1001 : 'Bmp,Gif,Png,Tiff,Icon,Pcx,Jpeg,Emf,Wmf';ImageStream@1002 : InStream;Name@1003 : Text;Width@1004 : Integer;Height@1005 : Integer;VAR CreatedWordDrawing@1006 : Codeunit 50043) : Text;
     VAR
-      WordImagePart@17024406 : Codeunit 50042;
-      RelationshipId@17024407 : Text;
+      WordImagePart@1007 : Codeunit 50042;
+      RelationshipId@1008 : Text;
     BEGIN
       //Helper for adding picture from stream to document
       //Based on: https://msdn.microsoft.com/en-us/library/office/bb497430.aspx
@@ -158,17 +160,17 @@ OBJECT Codeunit 50068 OpenXml WordProcessing Helper
       EXIT(RelationshipId);
     END;
 
-    LOCAL PROCEDURE CreateDrawing@17024414(RelationshipId@17024400 : Text;Name@17024401 : Text;Cx@17024402 : Integer;Cy@17024403 : Integer;Position@17024404 : Text;VAR CreatedWordDrawing@17024405 : Codeunit 50043);
+    LOCAL PROCEDURE CreateDrawing@10(RelationshipId@1000 : Text;Name@1001 : Text;Cx@1002 : Integer;Cy@1003 : Integer;Position@1004 : Text;VAR CreatedWordDrawing@1005 : Codeunit 50043);
     VAR
-      WordAnchor@17024406 : Codeunit 50044;
-      ActualPosition@17024407 : Text;
-      WordHorizontalPosition@17024408 : Codeunit 50046;
-      WordVerticalPosition@17024409 : Codeunit 50045;
-      WordWrapSquare@17024410 : Codeunit 50047;
-      WordWrapTopBottom@17024411 : Codeunit 50048;
-      WordDocProperties@17024412 : Codeunit 50049;
-      WordGraphicFrameLocks@17024413 : Codeunit 50050;
-      WordPicture@17024414 : Codeunit 50051;
+      WordAnchor@1006 : Codeunit 50044;
+      ActualPosition@1007 : Text;
+      WordHorizontalPosition@1008 : Codeunit 50046;
+      WordVerticalPosition@1009 : Codeunit 50045;
+      WordWrapSquare@1010 : Codeunit 50047;
+      WordWrapTopBottom@1011 : Codeunit 50048;
+      WordDocProperties@1012 : Codeunit 50049;
+      WordGraphicFrameLocks@1013 : Codeunit 50050;
+      WordPicture@1014 : Codeunit 50051;
     BEGIN
       ActualPosition := Position;
       IF ActualPosition = '' THEN
@@ -221,18 +223,18 @@ OBJECT Codeunit 50068 OpenXml WordProcessing Helper
       CreatedWordDrawing.AppendAnchor(WordAnchor);
     END;
 
-    LOCAL PROCEDURE CreatePicture@17024418(RelationshipId@17024413 : Text;Name@17024409 : Text;Cx@17024406 : Integer;Cy@17024407 : Integer;VAR WordPicture@17024400 : Codeunit 50051);
+    LOCAL PROCEDURE CreatePicture@11(RelationshipId@1000 : Text;Name@1001 : Text;Cx@1002 : Integer;Cy@1003 : Integer;VAR WordPicture@1004 : Codeunit 50051);
     VAR
-      WordBlipFill@17024401 : Codeunit 50054;
-      WordShapeProperties@17024402 : Codeunit 50053;
-      WordNonVisualPictureProperties@17024403 : Codeunit 50052;
-      WordPresetGeometry@17024404 : Codeunit 50061;
-      WordTransform2D@17024405 : Codeunit 50060;
-      WordNonVisualDrawingProperties@17024408 : Codeunit 50055;
-      WordNonVisualPictureDrawingProperties@17024410 : Codeunit 50056;
-      WordBlip@17024411 : Codeunit 50057;
-      WordStretch@17024412 : Codeunit 50058;
-      WordBlipExtensionList@17024414 : Codeunit 50059;
+      WordBlipFill@1005 : Codeunit 50054;
+      WordShapeProperties@1006 : Codeunit 50053;
+      WordNonVisualPictureProperties@1007 : Codeunit 50052;
+      WordPresetGeometry@1008 : Codeunit 50061;
+      WordTransform2D@1009 : Codeunit 50060;
+      WordNonVisualDrawingProperties@1010 : Codeunit 50055;
+      WordNonVisualPictureDrawingProperties@1011 : Codeunit 50056;
+      WordBlip@1012 : Codeunit 50057;
+      WordStretch@1013 : Codeunit 50058;
+      WordBlipExtensionList@1014 : Codeunit 50059;
     BEGIN
       WordPicture.Create;
       WordBlipFill.Create;
@@ -267,11 +269,11 @@ OBJECT Codeunit 50068 OpenXml WordProcessing Helper
       WordPicture.SetShapeProperties(WordShapeProperties);
     END;
 
-    LOCAL PROCEDURE AddNewParagraphStyle@17024404(VAR WordStyleDefinitionPart@17024400 : Codeunit 50041;StyleId@17024401 : Text;StyleName@17024402 : Text;VAR WordStyleRunProperties@17024403 : Codeunit 50037);
+    LOCAL PROCEDURE AddNewParagraphStyle@12(VAR WordStyleDefinitionPart@1000 : Codeunit 50041;StyleId@1001 : Text;StyleName@1002 : Text;VAR WordStyleRunProperties@1003 : Codeunit 50037);
     VAR
-      WordStyles@17024404 : Codeunit 50039;
-      WordStyle@17024405 : Codeunit 50038;
-      ClonedWordStyleRunProperties@17024406 : Codeunit 50037;
+      WordStyles@1004 : Codeunit 50039;
+      WordStyle@1005 : Codeunit 50038;
+      ClonedWordStyleRunProperties@1006 : Codeunit 50037;
     BEGIN
       WordStyleDefinitionPart.GetStyles(WordStyles);
       WordStyle.Create;
@@ -287,12 +289,12 @@ OBJECT Codeunit 50068 OpenXml WordProcessing Helper
       WordStyles.AppendStyle(WordStyle);
     END;
 
-    LOCAL PROCEDURE AddNewNumberingType@17024412(VAR WordNumberingDefinitionPart@17024400 : Codeunit 50070;Id@17024401 : Integer;Type@17024402 : Integer;Text@17024407 : Text);
+    LOCAL PROCEDURE AddNewNumberingType@13(VAR WordNumberingDefinitionPart@1000 : Codeunit 50070;Id@1001 : Integer;Type@1002 : Integer;Text@1003 : Text);
     VAR
-      WordNumbering@17024404 : Codeunit 50071;
-      WordAbstractNum@17024405 : Codeunit 50072;
-      WordNumberingLevel@17024403 : Codeunit 50073;
-      WordNumberingInstance@17024406 : Codeunit 50074;
+      WordNumbering@1004 : Codeunit 50071;
+      WordAbstractNum@1005 : Codeunit 50072;
+      WordNumberingLevel@1006 : Codeunit 50073;
+      WordNumberingInstance@1007 : Codeunit 50074;
     BEGIN
       WordNumberingDefinitionPart.GetNumbering(WordNumbering);
       WordAbstractNum.Create;
@@ -309,11 +311,11 @@ OBJECT Codeunit 50068 OpenXml WordProcessing Helper
       WordNumbering.AppendNumberingInstance(WordNumberingInstance);
     END;
 
-    LOCAL PROCEDURE CreateParagraphPropertiesForList@17024413(VAR WordParagraphProperties@17024400 : Codeunit 50026;LeftIndentation@17024404 : Text;NumberingLevelReference@17024405 : Integer;NumberingId@17024406 : Integer);
+    LOCAL PROCEDURE CreateParagraphPropertiesForList@14(VAR WordParagraphProperties@1000 : Codeunit 50026;LeftIndentation@1001 : Text;NumberingLevelReference@1002 : Integer;NumberingId@1003 : Integer);
     VAR
-      WordSpacingBetweenLines@17024401 : Codeunit 50030;
-      WordIndentation@17024402 : Codeunit 50031;
-      WordNumberingProperties@17024403 : Codeunit 50032;
+      WordSpacingBetweenLines@1004 : Codeunit 50030;
+      WordIndentation@1005 : Codeunit 50031;
+      WordNumberingProperties@1006 : Codeunit 50032;
     BEGIN
       WordParagraphProperties.Create;
       WordSpacingBetweenLines.Create;
@@ -330,11 +332,11 @@ OBJECT Codeunit 50068 OpenXml WordProcessing Helper
       WordParagraphProperties.SetParagraphStyleId('ListParagraph');
     END;
 
-    LOCAL PROCEDURE IsParagraphStyleIdInDocument@17024405(VAR WordStyleDefinitionPart@17024400 : Codeunit 50041;StyleId@17024401 : Text) : Boolean;
+    LOCAL PROCEDURE IsParagraphStyleIdInDocument@15(VAR WordStyleDefinitionPart@1000 : Codeunit 50041;StyleId@1001 : Text) : Boolean;
     VAR
-      WordStyles@17024403 : Codeunit 50039;
-      WordStyle@17024404 : Codeunit 50038;
-      WordStylesEnumerator@17024405 : Codeunit 50040;
+      WordStyles@1002 : Codeunit 50039;
+      WordStyle@1003 : Codeunit 50038;
+      WordStylesEnumerator@1004 : Codeunit 50040;
     BEGIN
       WordStyleDefinitionPart.GetStyles(WordStyles);
       WordStyles.GetStyleEnumerator(WordStylesEnumerator);
@@ -348,11 +350,11 @@ OBJECT Codeunit 50068 OpenXml WordProcessing Helper
       EXIT(FALSE);
     END;
 
-    LOCAL PROCEDURE GetParagraphStyleIdFromStyleName@17024406(VAR WordStyleDefinitionPart@17024400 : Codeunit 50041;StyleName@17024401 : Text) : Text;
+    LOCAL PROCEDURE GetParagraphStyleIdFromStyleName@16(VAR WordStyleDefinitionPart@1000 : Codeunit 50041;StyleName@1001 : Text) : Text;
     VAR
-      WordStyles@17024404 : Codeunit 50039;
-      WordStyle@17024403 : Codeunit 50038;
-      WordStylesEnumerator@17024402 : Codeunit 50040;
+      WordStyles@1002 : Codeunit 50039;
+      WordStyle@1003 : Codeunit 50038;
+      WordStylesEnumerator@1004 : Codeunit 50040;
     BEGIN
       WordStyleDefinitionPart.GetStyles(WordStyles);
       WordStyles.GetStyleEnumerator(WordStylesEnumerator);
@@ -366,11 +368,11 @@ OBJECT Codeunit 50068 OpenXml WordProcessing Helper
       EXIT('');
     END;
 
-    LOCAL PROCEDURE IsNumberingTypeIdInDocument@17024410(VAR WordNumberingDefinitionPart@17024400 : Codeunit 50070;Id@17024401 : Integer) : Boolean;
+    LOCAL PROCEDURE IsNumberingTypeIdInDocument@17(VAR WordNumberingDefinitionPart@1000 : Codeunit 50070;Id@1001 : Integer) : Boolean;
     VAR
-      WordNumbering@17024403 : Codeunit 50071;
-      WordAbstractNum@17024404 : Codeunit 50072;
-      WordAbstractNumEnumerator@17024405 : Codeunit 50075;
+      WordNumbering@1002 : Codeunit 50071;
+      WordAbstractNum@1003 : Codeunit 50072;
+      WordAbstractNumEnumerator@1004 : Codeunit 50075;
     BEGIN
       WordNumberingDefinitionPart.GetNumbering(WordNumbering);
       WordNumbering.GetAbstractNumEnumerator(WordAbstractNumEnumerator);
