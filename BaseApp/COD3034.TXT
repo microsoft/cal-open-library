@@ -30,7 +30,7 @@ OBJECT Codeunit 3034 DotNet_Stream
     END;
 
     [External]
-    PROCEDURE IsNull@3() : Boolean;
+    PROCEDURE IsDotNetNull@3() : Boolean;
     BEGIN
       EXIT(ISNULL(DotNetStream));
     END;
@@ -66,15 +66,58 @@ OBJECT Codeunit 3034 DotNet_Stream
     END;
 
     [External]
-    PROCEDURE Length@9() : Integer;
+    PROCEDURE Length@9() : BigInteger;
     BEGIN
       EXIT(DotNetStream.Length);
     END;
 
     [External]
-    PROCEDURE Position@10() : Integer;
+    PROCEDURE Position@10() : BigInteger;
     BEGIN
       EXIT(DotNetStream.Position);
+    END;
+
+    [External]
+    PROCEDURE ReadByte@11() : Integer;
+    BEGIN
+      EXIT(DotNetStream.ReadByte());
+    END;
+
+    [External]
+    PROCEDURE WriteByte@12(Value@1000 : Integer);
+    BEGIN
+      DotNetStream.WriteByte(Value);
+    END;
+
+    [External]
+    PROCEDURE Seek@13(Offset@1000 : Integer;Origin@1001 : 'Begin,Current,End') : BigInteger;
+    VAR
+      DotNetSeekOrigin@1002 : DotNet "'mscorlib'.System.IO.SeekOrigin";
+    BEGIN
+      CASE Origin OF
+        Origin::"Begin": DotNetSeekOrigin := DotNetSeekOrigin."Begin";
+        Origin::Current: DotNetSeekOrigin := DotNetSeekOrigin.Current;
+        Origin::"End": DotNetSeekOrigin := DotNetSeekOrigin."End";
+      END;
+      EXIT(DotNetStream.Seek(Offset, DotNetSeekOrigin));
+    END;
+
+    [External]
+    PROCEDURE Read@14(VAR Buffer@1000 : Codeunit 3000;Offset@1001 : Integer;Count@1002 : Integer) : Integer;
+    VAR
+      DotNetArray@1003 : DotNet "'mscorlib'.System.Array";
+    BEGIN
+      Buffer.GetArray(DotNetArray);
+      EXIT(DotNetStream.Read(DotNetArray, Offset, Count));
+    END;
+
+    [External]
+    PROCEDURE Write@15(VAR Buffer@1000 : Codeunit 3000;Offset@1001 : Integer;Count@1002 : Integer);
+    VAR
+      DotNetArray@1003 : DotNet "'mscorlib'.System.Array";
+    BEGIN
+      Buffer.GetArray(DotNetArray);
+      DotNetStream.Write(DotNetArray, Offset, Count);
     END;
 
     PROCEDURE GetStream@1000(VAR CurrentDotNetStream@1000 : DotNet "'mscorlib'.System.IO.Stream");

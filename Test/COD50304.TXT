@@ -20,7 +20,7 @@ OBJECT Codeunit 50304 Test_DotNet_StreamAndBuffer
       LibraryLowerPermissions@1001 : Codeunit 132217;
       DotNet_Buffer@1002 : Codeunit 50123;
       DotNet_BinaryWriter@1003 : Codeunit 50121;
-      DotNet_Stream@1004 : Codeunit 50122;
+      DotNet_Stream@1004 : Codeunit 3034;
       DotNet_MemoryStream@1005 : Codeunit 3009;
       DotNet_ByteArray@1007 : Codeunit 3000;
       DotNet_ExpectedByteArray@1008 : Codeunit 3000;

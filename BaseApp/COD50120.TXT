@@ -18,7 +18,7 @@ OBJECT Codeunit 50120 DotNet_BinaryReader
       DotNetBinaryReader@1000 : DotNet "'mscorlib'.System.IO.BinaryReader";
 
     [External]
-    PROCEDURE BinaryReader@1(VAR Stream@1000 : Codeunit 50122);
+    PROCEDURE BinaryReader@1(VAR Stream@1000 : Codeunit 3034);
     VAR
       DotNetStream@1001 : DotNet "'mscorlib'.System.IO.Stream";
     BEGIN
@@ -27,7 +27,7 @@ OBJECT Codeunit 50120 DotNet_BinaryReader
     END;
 
     [External]
-    PROCEDURE BinaryReaderWithEncoding@2(VAR Stream@1000 : Codeunit 50122;VAR DotNet_Encoding@1001 : Codeunit 3026);
+    PROCEDURE BinaryReaderWithEncoding@2(VAR Stream@1000 : Codeunit 3034;VAR DotNet_Encoding@1001 : Codeunit 3026);
     VAR
       DotNetEncoding@1002 : DotNet "'mscorlib'.System.Text.Encoding";
       DotNetStream@1003 : DotNet "'mscorlib'.System.IO.Stream";
@@ -98,7 +98,7 @@ OBJECT Codeunit 50120 DotNet_BinaryReader
     END;
 
     [External]
-    PROCEDURE BaseStream@13(VAR Result@1000 : Codeunit 50122);
+    PROCEDURE BaseStream@13(VAR Result@1000 : Codeunit 3034);
     BEGIN
       Result.SetStream(DotNetBinaryReader.BaseStream);
     END;

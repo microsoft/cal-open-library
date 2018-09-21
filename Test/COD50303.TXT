@@ -20,7 +20,7 @@ OBJECT Codeunit 50303 Test_DotNet_BinaryReaderWriter
       LibraryLowerPermissions@1001 : Codeunit 132217;
       DotNet_BinaryReader@1002 : Codeunit 50120;
       DotNet_BinaryWriter@1003 : Codeunit 50121;
-      DotNet_Stream@1004 : Codeunit 50122;
+      DotNet_Stream@1004 : Codeunit 3034;
       DotNet_MemoryStream@1005 : Codeunit 3009;
       DotNet_Encoding@1006 : Codeunit 3026;
       DotNet_ByteArray@1007 : Codeunit 3000;
@@ -89,7 +89,7 @@ OBJECT Codeunit 50303 Test_DotNet_BinaryReaderWriter
     BEGIN
       //Based on https://github.com/dotnet/corefx/ BinaryWriter.WriteTests.cs BinaryWriter_WriteBoolTest
       DotNet_MemoryStream.InitMemoryStream;
-      DotNet_MemoryStream.CastToStream(DotNet_Stream);
+      DotNet_MemoryStream.GetDotNetStream(DotNet_Stream);
       DotNet_BinaryWriter.BinaryWriter(DotNet_Stream);
       DotNet_BinaryReader.BinaryReader(DotNet_Stream);
       DotNet_BinaryWriter.WriteBoolean(FALSE);
