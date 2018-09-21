@@ -1,0 +1,129 @@
+OBJECT Codeunit 146038 Test_DotNet_XslTransform
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    Subtype=Test;
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      Assert@1000 : Codeunit 130000;
+      LibraryLowerPermissions@1001 : Codeunit 132217;
+      DotNet_XslCompiledTransform@1002 : Codeunit 3038;
+      DotNet_XmlDocument@1003 : Codeunit 3013;
+      XMLDOMManagement@1004 : Codeunit 6224;
+
+    PROCEDURE TransformXmlHelper@1(XsltTransformationText@1000 : Text;XmlData@1001 : Text) : Text;
+    VAR
+      TempBlob@1002 : TEMPORARY Record 99008535;
+      ResultStream@1003 : OutStream;
+    BEGIN
+      TempBlob.WriteAsText(XsltTransformationText,TEXTENCODING::UTF8);
+      CLEAR(DotNet_XslCompiledTransform);
+      XMLDOMManagement.CreateXslTransformFromBlob(TempBlob,DotNet_XslCompiledTransform);
+      LoadXmlDocumentHelper(XmlData);
+      CLEAR(TempBlob);
+      TempBlob.Blob.CREATEOUTSTREAM(ResultStream);
+      DotNet_XslCompiledTransform.Transform(DotNet_XmlDocument,ResultStream);
+      EXIT(TempBlob.ReadAsTextWithCRLFLineSeparator);
+    END;
+
+    PROCEDURE LoadXmlDocumentHelper@2(XmlAsText@1000 : Text);
+    VAR
+      TempBlob@1001 : TEMPORARY Record 99008535;
+      InputStream@1002 : InStream;
+    BEGIN
+      CLEAR(TempBlob);
+      TempBlob.WriteAsText(XmlAsText,TEXTENCODING::UTF8);
+      TempBlob.Blob.CREATEINSTREAM(InputStream);
+      DotNet_XmlDocument.InitXmlDocument;
+      DotNet_XmlDocument.Load(InputStream);
+    END;
+
+    [Test]
+    PROCEDURE XmlSimpleTransformationToText@3();
+    VAR
+      XmlData@1000 : Text;
+      Xslt@1001 : Text;
+      ExpectedResult@1002 : Text;
+      Result@1003 : Text;
+    BEGIN
+      LibraryLowerPermissions.SetO365Basic;
+
+      // [Given] Xslt tranformation:
+      Xslt :=
+        '<?xml version="1.0" encoding="UTF-8"?>' +
+        '<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">' +
+        '<xsl:output method="text" encoding="UTF-8" omit-xml-declaration="yes"/>' +
+        '<xsl:template match="/">' +
+        '  <xsl:value-of select="catalog/cd/title"/> - <xsl:value-of select="catalog/cd/artist"/>' +
+        '</xsl:template>' +
+        '</xsl:stylesheet>';
+
+      // [WHEN] The following xml data is provided:
+      XmlData :=
+        '<?xml version="1.0" encoding="UTF-8"?>' +
+        '<catalog>' +
+        '  <cd>' +
+        '    <title>Empire Burlesque</title>' +
+        '    <artist>Bob Dylan</artist>' +
+        '  </cd>' +
+        '</catalog>';
+
+      // [THEN] expected result is:
+      ExpectedResult := 'Empire Burlesque - Bob Dylan';
+      Result := TransformXmlHelper(Xslt,XmlData);
+      Assert.AreEqual(ExpectedResult,Result,'Simple Xml transformation fails');
+    END;
+
+    [Test]
+    PROCEDURE XmlSimpleTransformationToXml@4();
+    VAR
+      XmlData@1000 : Text;
+      Xslt@1001 : Text;
+      ExpectedResult@1002 : Text;
+      Result@1003 : Text;
+    BEGIN
+      LibraryLowerPermissions.SetO365Basic;
+
+      // [Given] Xslt tranformation:
+      Xslt :=
+        '<?xml version="1.0" encoding="UTF-8"?>' +
+        '<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">' +
+        '<xsl:output method="xml" encoding="UTF-8" omit-xml-declaration="yes"/>' +
+        '<xsl:template match="/">' +
+        '<test><title><xsl:value-of select="catalog/cd/title"/></title></test>' +
+        '</xsl:template>' +
+        '</xsl:stylesheet>';
+
+      // [WHEN] The following xml data is provided:
+      XmlData := '<?xml version="1.0" encoding="UTF-8"?>' +
+        '<catalog>' +
+        '  <cd>' +
+        '    <title>Empire Burlesque</title>' +
+        '    <artist>Bob Dylan</artist>' +
+        '  </cd>' +
+        '</catalog>';
+
+      // [THEN] expected result is:
+      ExpectedResult := '<test><title>Empire Burlesque</title></test>';
+      Result := TransformXmlHelper(Xslt,XmlData);
+      LoadXmlDocumentHelper(Result);
+      Result := DotNet_XmlDocument.OuterXml;
+      Assert.AreEqual(ExpectedResult,Result,'Simple Xml transformation fails');
+    END;
+
+    BEGIN
+    END.
+  }
+}
+
