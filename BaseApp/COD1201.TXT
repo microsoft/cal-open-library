@@ -1,0 +1,286 @@
+OBJECT Codeunit 1201 Process Data Exch.
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      DataTypeNotSupportedErr@1002 : TextConst '@@@="%1=Field Value;%2=Field Value;%3=Filed Type";ENU=The %1 column is mapped in the %2 format to a %3 field, which is not supported.';
+      IncorrectFormatOrTypeErr@1001 : TextConst '@@@="%1=File Name;%2=Data Exch.Def Type;%3=Data Exch. Def Code;%4=Line No;%5=Column No;%6=Data Type;%7=Data Type Format;%8=Local;%9=Actual Value";ENU=The file that you are trying to import, %1, is different from the specified %2, %3.\\The value in line %4, column %5 has incorrect format or type.\Expected format: %6, according to the %7 and %8 of the %9.\Actual value: "%10".';
+      MissingValueErr@1000 : TextConst '@@@="%1=File Name;%2=Data Exch.Def Type;%3=Data Exch. Def Code;%4=Line No;%5=Column No";ENU=The file that you are trying to import, %1, is different from the specified %2, %3.\\The value in line %4, column %5 is missing.';
+
+    PROCEDURE ProcessColumnMapping@2(DataExch@1004 : Record 1220;DataExchLineDef@1001 : Record 1227;RecRefTemplate@1013 : RecordRef);
+    VAR
+      DataExchField@1009 : Record 1221;
+      DataExchFieldGroupByLineNo@1003 : Record 1221;
+      DataExchMapping@1060 : Record 1224;
+      DataExchFieldMapping@1010 : Record 1225;
+      TempFieldIdsToNegate@1011 : TEMPORARY Record 2000000026;
+      RecRef@1005 : RecordRef;
+      LastKeyFieldId@1015 : Integer;
+      LineNoOffset@1002 : Integer;
+      CurrLineNo@1000 : Integer;
+    BEGIN
+      LastKeyFieldId := GetLastIntegerKeyField(RecRefTemplate);
+      LineNoOffset := GetLastKeyValueInRange(RecRefTemplate,LastKeyFieldId);
+
+      DataExchMapping.GET(DataExch."Data Exch. Def Code",DataExchLineDef.Code,RecRefTemplate.NUMBER);
+
+      DataExchFieldMapping.SETRANGE("Data Exch. Def Code",DataExch."Data Exch. Def Code");
+      DataExchFieldMapping.SETRANGE("Data Exch. Line Def Code",DataExchLineDef.Code);
+      DataExchFieldMapping.SETRANGE("Table ID",RecRefTemplate.NUMBER);
+
+      DataExchField.SETRANGE("Data Exch. No.",DataExch."Entry No.");
+      DataExchField.SETRANGE("Data Exch. Line Def Code",DataExchLineDef.Code);
+
+      DataExchFieldGroupByLineNo.SETRANGE("Data Exch. No.",DataExch."Entry No.");
+      DataExchFieldGroupByLineNo.SETRANGE("Data Exch. Line Def Code",DataExchLineDef.Code);
+      DataExchFieldGroupByLineNo.ASCENDING(TRUE);
+      IF NOT DataExchFieldGroupByLineNo.FINDSET THEN
+        EXIT;
+
+      REPEAT
+        IF DataExchFieldGroupByLineNo."Line No." <> CurrLineNo THEN BEGIN
+          CurrLineNo := DataExchFieldGroupByLineNo."Line No.";
+
+          RecRef := RecRefTemplate.DUPLICATE;
+          IF (DataExchMapping."Data Exch. No. Field ID" <> 0) AND (DataExchMapping."Data Exch. Line Field ID" <> 0) THEN BEGIN
+            SetFieldValue(RecRef,DataExchMapping."Data Exch. No. Field ID",DataExch."Entry No.");
+            SetFieldValue(RecRef,DataExchMapping."Data Exch. Line Field ID",CurrLineNo);
+          END;
+          SetFieldValue(RecRef,LastKeyFieldId,CurrLineNo * 10000 + LineNoOffset);
+          DataExchFieldMapping.FINDSET;
+          REPEAT
+            DataExchField.SETRANGE("Line No.",CurrLineNo);
+            DataExchField.SETRANGE("Column No.",DataExchFieldMapping."Column No.");
+            IF DataExchField.FINDSET THEN
+              REPEAT
+                SetField(RecRef,DataExchFieldMapping,DataExchField,TempFieldIdsToNegate)
+              UNTIL DataExchField.NEXT = 0
+            ELSE
+              IF NOT DataExchFieldMapping.Optional THEN
+                ERROR(
+                  MissingValueErr,DataExch."File Name",GetType(DataExch."Data Exch. Def Code"),
+                  DataExch."Data Exch. Def Code",CurrLineNo,DataExchFieldMapping."Column No.");
+          UNTIL DataExchFieldMapping.NEXT = 0;
+
+          NegateAmounts(RecRef,TempFieldIdsToNegate);
+
+          RecRef.INSERT;
+        END;
+      UNTIL DataExchFieldGroupByLineNo.NEXT = 0;
+    END;
+
+    [External]
+    PROCEDURE ProcessAllLinesColumnMapping@8(DataExch@1001 : Record 1220;RecRef@1003 : RecordRef);
+    VAR
+      DataExchLineDef@1000 : Record 1227;
+    BEGIN
+      DataExchLineDef.SETRANGE("Data Exch. Def Code",DataExch."Data Exch. Def Code");
+      IF DataExchLineDef.FINDSET THEN
+        REPEAT
+          ProcessColumnMapping(DataExch,DataExchLineDef,RecRef);
+        UNTIL DataExchLineDef.NEXT = 0;
+    END;
+
+    PROCEDURE SetField@1(RecRef@1015 : RecordRef;DataExchFieldMapping@1002 : Record 1225;VAR DataExchField@1017 : Record 1221;VAR TempFieldIdsToNegate@1004 : TEMPORARY Record 2000000026);
+    VAR
+      DataExchColumnDef@1000 : Record 1223;
+      TransformationRule@1001 : Record 1237;
+      TempBlob@1005 : Record 99008535;
+      FieldRef@1008 : FieldRef;
+      TransformedValue@1003 : Text;
+    BEGIN
+      DataExchColumnDef.GET(
+        DataExchFieldMapping."Data Exch. Def Code",
+        DataExchFieldMapping."Data Exch. Line Def Code",
+        DataExchField."Column No.");
+
+      FieldRef := RecRef.FIELD(DataExchFieldMapping."Field ID");
+
+      TransformedValue := DELCHR(DataExchField.GetValue,'>'); // We shoud use the trim transformation rule instead of this
+      IF TransformationRule.GET(DataExchFieldMapping."Transformation Rule") THEN
+        TransformedValue := TransformationRule.TransformText(DataExchField.Value);
+
+      CASE FORMAT(FieldRef.TYPE) OF
+        'Text',
+        'Code':
+          SetAndMergeTextCodeField(TransformedValue,FieldRef,DataExchFieldMapping."Overwrite Value");
+        'Date':
+          SetDateDecimalField(TransformedValue,DataExchField,FieldRef,DataExchColumnDef);
+        'Decimal':
+          IF DataExchColumnDef."Negative-Sign Identifier" = '' THEN BEGIN
+            SetDateDecimalField(TransformedValue,DataExchField,FieldRef,DataExchColumnDef);
+            AdjustDecimalWithMultiplier(FieldRef,DataExchFieldMapping.Multiplier,FieldRef.VALUE);
+          END ELSE
+            IF DataExchColumnDef."Negative-Sign Identifier" = DataExchField.Value THEN
+              SaveNegativeSignForField(DataExchFieldMapping."Field ID",TempFieldIdsToNegate);
+        'Option':
+          SetOptionField(TransformedValue,FieldRef);
+        'BLOB':
+          BEGIN
+            TempBlob.WriteAsText(TransformedValue,TEXTENCODING::Windows);
+            FieldRef.VALUE := TempBlob.Blob;
+          END;
+        ELSE
+          ERROR(DataTypeNotSupportedErr,DataExchColumnDef.Description,DataExchFieldMapping."Data Exch. Def Code",FieldRef.TYPE);
+      END;
+      FieldRef.VALIDATE;
+    END;
+
+    LOCAL PROCEDURE SetOptionField@13(ValueText@1000 : Text;FieldRef@1001 : FieldRef);
+    VAR
+      OptionValue@1002 : Integer;
+    BEGIN
+      WHILE TRUE DO BEGIN
+        OptionValue += 1;
+        IF UPPERCASE(ValueText) = UPPERCASE(SELECTSTR(OptionValue,FieldRef.OPTIONCAPTION)) THEN BEGIN
+          FieldRef.VALUE := OptionValue - 1;
+          EXIT;
+        END;
+      END;
+    END;
+
+    LOCAL PROCEDURE SetAndMergeTextCodeField@10(Value@1000 : Text;VAR FieldRef@1001 : FieldRef;OverwriteValue@1003 : Boolean);
+    VAR
+      CurrentLength@1002 : Integer;
+    BEGIN
+      CurrentLength := STRLEN(FORMAT(FieldRef.VALUE));
+      IF (FieldRef.LENGTH = CurrentLength) AND NOT OverwriteValue THEN
+        EXIT;
+      IF (CurrentLength = 0) OR OverwriteValue THEN
+        FieldRef.VALUE := COPYSTR(Value,1,FieldRef.LENGTH)
+      ELSE
+        FieldRef.VALUE := STRSUBSTNO('%1 %2',FORMAT(FieldRef.VALUE),COPYSTR(Value,1,FieldRef.LENGTH - CurrentLength - 1));
+    END;
+
+    LOCAL PROCEDURE SetDateDecimalField@18(ValueText@1002 : Text;VAR DataExchField@1000 : Record 1221;VAR FieldRef@1001 : FieldRef;VAR DataExchColumnDef@1003 : Record 1223);
+    VAR
+      TypeHelper@1006 : Codeunit 10;
+      Value@1005 : Variant;
+    BEGIN
+      Value := FieldRef.VALUE;
+
+      IF NOT TypeHelper.Evaluate(
+           Value,ValueText,DataExchColumnDef."Data Format",DataExchColumnDef."Data Formatting Culture")
+      THEN
+        ERROR(IncorrectFormatOrTypeErr,
+          GetFileName(DataExchField."Data Exch. No."),GetType(DataExchColumnDef."Data Exch. Def Code"),
+          DataExchColumnDef."Data Exch. Def Code",DataExchField."Line No.",DataExchField."Column No.",FORMAT(FieldRef.TYPE),
+          DataExchColumnDef.FIELDCAPTION("Data Format"),DataExchColumnDef.FIELDCAPTION("Data Formatting Culture"),
+          DataExchColumnDef.TABLECAPTION,DataExchField.Value);
+
+      FieldRef.VALUE := Value;
+    END;
+
+    LOCAL PROCEDURE AdjustDecimalWithMultiplier@5(VAR FieldRef@1004 : FieldRef;Multiplier@1000 : Decimal;DecimalAsVariant@1001 : Variant);
+    VAR
+      DecimalValue@1003 : Decimal;
+    BEGIN
+      DecimalValue := DecimalAsVariant;
+      FieldRef.VALUE := Multiplier * DecimalValue;
+    END;
+
+    LOCAL PROCEDURE GetLastIntegerKeyField@7(RecRef@1000 : RecordRef) : Integer;
+    VAR
+      KeyRef@1001 : KeyRef;
+      FieldRef@1002 : FieldRef;
+    BEGIN
+      KeyRef := RecRef.KEYINDEX(1);
+      FieldRef := KeyRef.FIELDINDEX(KeyRef.FIELDCOUNT);
+      IF FORMAT(FieldRef.TYPE) <> 'Integer' THEN
+        EXIT(0);
+
+      EXIT(FieldRef.NUMBER);
+    END;
+
+    LOCAL PROCEDURE GetLastKeyValueInRange@4(RecRefTemplate@1000 : RecordRef;FieldId@1002 : Integer) : Integer;
+    VAR
+      RecRef@1003 : RecordRef;
+      FieldRef@1001 : FieldRef;
+    BEGIN
+      RecRef := RecRefTemplate.DUPLICATE;
+      SetKeyAsFilter(RecRef);
+      FieldRef := RecRef.FIELD(FieldId);
+      FieldRef.SETRANGE;
+      IF RecRef.FINDLAST THEN
+        EXIT(RecRef.FIELD(FieldId).VALUE);
+      EXIT(0);
+    END;
+
+    LOCAL PROCEDURE SetFieldValue@11(RecRef@1000 : RecordRef;FieldID@1001 : Integer;Value@1002 : Variant);
+    VAR
+      FieldRef@1003 : FieldRef;
+    BEGIN
+      IF FieldID = 0 THEN
+        EXIT;
+      FieldRef := RecRef.FIELD(FieldID);
+      FieldRef.VALIDATE(Value);
+    END;
+
+    LOCAL PROCEDURE SetKeyAsFilter@3(VAR RecRef@1000 : RecordRef);
+    VAR
+      KeyRef@1001 : KeyRef;
+      FieldRef@1003 : FieldRef;
+      i@1002 : Integer;
+    BEGIN
+      KeyRef := RecRef.KEYINDEX(1);
+      FOR i := 1 TO KeyRef.FIELDCOUNT DO BEGIN
+        FieldRef := RecRef.FIELD(KeyRef.FIELDINDEX(i).NUMBER);
+        FieldRef.SETRANGE(FieldRef.VALUE);
+      END
+    END;
+
+    LOCAL PROCEDURE GetType@6(DataExchDefCode@1000 : Code[20]) : Text;
+    VAR
+      DataExchDef@1001 : Record 1222;
+    BEGIN
+      DataExchDef.GET(DataExchDefCode);
+      EXIT(FORMAT(DataExchDef.Type));
+    END;
+
+    LOCAL PROCEDURE GetFileName@9(DataExchEntryNo@1000 : Integer) : Text;
+    VAR
+      DataExch@1001 : Record 1220;
+    BEGIN
+      DataExch.GET(DataExchEntryNo);
+      EXIT(DataExch."File Name");
+    END;
+
+    LOCAL PROCEDURE SaveNegativeSignForField@12(FieldId@1000 : Integer;VAR TempFieldIdsToNegate@1001 : TEMPORARY Record 2000000026);
+    BEGIN
+      TempFieldIdsToNegate.Number := FieldId;
+      TempFieldIdsToNegate.INSERT;
+    END;
+
+    PROCEDURE NegateAmounts@15(RecRef@1000 : RecordRef;VAR TempFieldIdsToNegate@1001 : TEMPORARY Record 2000000026);
+    VAR
+      FieldRef@1002 : FieldRef;
+      Amount@1003 : Decimal;
+    BEGIN
+      IF TempFieldIdsToNegate.FINDSET THEN BEGIN
+        REPEAT
+          FieldRef := RecRef.FIELD(TempFieldIdsToNegate.Number);
+          Amount := FieldRef.VALUE;
+          FieldRef.VALUE := -Amount;
+          FieldRef.VALIDATE;
+        UNTIL TempFieldIdsToNegate.NEXT = 0;
+        TempFieldIdsToNegate.DELETEALL;
+      END;
+    END;
+
+    BEGIN
+    END.
+  }
+}
+
