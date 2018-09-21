@@ -57,13 +57,13 @@ OBJECT Codeunit 3009 DotNet_MemoryStream
     END;
 
     [External]
-    PROCEDURE CastToStream@10(VAR DotNet_Stream@17024400 : Codeunit 50122);
+    PROCEDURE GetDotNetStream@10(VAR DotNet_Stream@1000 : Codeunit 3034);
     BEGIN
       DotNet_Stream.SetStream(DotNetMemoryStream);
     END;
 
     [External]
-    PROCEDURE SetPosition@11(NewPosition@17024400 : Integer);
+    PROCEDURE SetPosition@11(NewPosition@1000 : Integer);
     BEGIN
       DotNetMemoryStream.Position := NewPosition;
     END;
