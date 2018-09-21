@@ -1,1 +1,46 @@
- 
+OBJECT Codeunit 3037 DotNet_CompressionMode
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      DotNetCompressionMode@1000 : DotNet "'System,Version=4.0.0.0,Culture=neutral,PublicKeyToken=b77a5c561934e089'.System.IO.Compression.CompressionMode";
+
+    [External]
+    PROCEDURE Compress@3();
+    BEGIN
+      DotNetCompressionMode := DotNetCompressionMode.Compress
+    END;
+
+    [External]
+    PROCEDURE Decompress@4();
+    BEGIN
+      DotNetCompressionMode := DotNetCompressionMode.Decompress
+    END;
+
+    PROCEDURE GetCompressionMode@7(VAR DotNetCompressionMode2@1000 : DotNet "'System,Version=4.0.0.0,Culture=neutral,PublicKeyToken=b77a5c561934e089'.System.IO.Compression.CompressionMode");
+    BEGIN
+      DotNetCompressionMode2 := DotNetCompressionMode
+    END;
+
+    PROCEDURE SetCompressionMode@8(VAR DotNetCompressionMode2@1000 : DotNet "'System,Version=4.0.0.0,Culture=neutral,PublicKeyToken=b77a5c561934e089'.System.IO.Compression.CompressionMode");
+    BEGIN
+      DotNetCompressionMode := DotNetCompressionMode2
+    END;
+
+    BEGIN
+    END.
+  }
+}
+
