@@ -37,9 +37,9 @@ OBJECT Codeunit 50068 OpenXml WordProcessing Helper
       WordProcessingDocumentType.Create(DocumentType);
       CreatedWordprocessingDocument.Create(WordProcessingDocumentType, TRUE);
       CreatedWordprocessingDocument.AddMainDocumentPart(MainDocumentPart);
-      WordDocument.Create;
+      WordDocument.Document;
       MainDocumentPart.SetDocument(WordDocument);
-      WordBody.Create;
+      WordBody.Body;
       WordDocument.SetBody(WordBody);
     END;
 
@@ -53,9 +53,12 @@ OBJECT Codeunit 50068 OpenXml WordProcessing Helper
       WordColor@1008 : Codeunit 50036;
       WordText@1009 : Codeunit 50024;
       WordRun@1010 : Codeunit 50023;
+      DotNet_Uri@1011 : Codeunit 3024;
+      DotNet_OpenXmlSpaceProcessing@1012 : Codeunit 50079;
     BEGIN
       //Helper for creating new hyperlink element
-      MainDocumentPart.AddHyperlinkRelationship(Url, TRUE, HyperlinkRelationship);
+      DotNet_Uri.Init(Url);
+      MainDocumentPart.AddHyperlinkRelationship(DotNet_Uri, TRUE, HyperlinkRelationship);
       HrContactId := HyperlinkRelationship.GetId;
       WordProofError.Create;
       WordProofError.SetType(2); //Type = GrammarStart
@@ -64,10 +67,11 @@ OBJECT Codeunit 50068 OpenXml WordProcessing Helper
       WordColor.Create;
       WordColor.SetColorTheme(10); //Theme = Hyperlink
       WordRunProperties.SetColor(WordColor);
-      WordText.Create;
+      WordText.TextConstructor;
       WordText.SetText(TextValue);
-      WordText.SetSpacePreserveOption(TRUE);
-      WordRun.Create;
+      DotNet_OpenXmlSpaceProcessing.Create(1); //Preserve
+      WordText.SetSpacePreserveOption(DotNet_OpenXmlSpaceProcessing);
+      WordRun.Run;
       WordRun.AppendProperties(WordRunProperties);
       WordRun.AppendText(WordText);
       CreatedWordHyperlink.Create;
@@ -87,14 +91,14 @@ OBJECT Codeunit 50068 OpenXml WordProcessing Helper
     BEGIN
       //Helper for adding new paragraph style
       //Based on: https://msdn.microsoft.com/en-us/library/cc850838.aspx
-      IF NOT MainDocumentPart.HasStyleDefinitionsPart THEN
+      IF NOT MainDocumentPartHasStyleDefinitionsPart(MainDocumentPart) THEN
         BEGIN
           MainDocumentPart.AddStyleDefinitionsPart(WordStyleDefinitionPart);
           WordStyles.Create;
           WordStyleDefinitionPart.SetStyles(WordStyles);
         END
       ELSE
-        MainDocumentPart.GetStyleDefinitionsPart(WordStyleDefinitionPart);
+        MainDocumentPart.StyleDefinitionsPart(WordStyleDefinitionPart);
 
       IF NOT IsParagraphStyleIdInDocument(WordStyleDefinitionPart, StyleId) THEN
         BEGIN
@@ -115,14 +119,14 @@ OBJECT Codeunit 50068 OpenXml WordProcessing Helper
       WordNumbering@1005 : Codeunit 50071;
     BEGIN
       //Helper for adding new numbering type
-      IF NOT MainDocumentPart.HasNumberingDefinitionsPart THEN
+      IF NOT MainDocumentPartHasNumberingDefinitionsPart(MainDocumentPart) THEN
         BEGIN
           MainDocumentPart.AddNumberingDefinitionsPart(WordNumberingDefinitionsPart);
           WordNumbering.Create;
           WordNumberingDefinitionsPart.SetNumbering(WordNumbering);
         END
       ELSE
-        MainDocumentPart.GetNumberingDefinitionsPart(WordNumberingDefinitionsPart);
+        MainDocumentPart.NumberingDefinitionsPart(WordNumberingDefinitionsPart);
 
 
       IF NOT IsNumberingTypeIdInDocument(WordNumberingDefinitionsPart, NumberingId) THEN
@@ -150,10 +154,12 @@ OBJECT Codeunit 50068 OpenXml WordProcessing Helper
     VAR
       WordImagePart@1007 : Codeunit 50042;
       RelationshipId@1008 : Text;
+      DotNet_ImagePartType@1009 : Codeunit 50078;
     BEGIN
       //Helper for adding picture from stream to document
       //Based on: https://msdn.microsoft.com/en-us/library/office/bb497430.aspx
-      MainDocumentPart.AddImagePart(ImagePartType, WordImagePart);
+      DotNet_ImagePartType.Create(ImagePartType);
+      MainDocumentPart.AddImagePart(DotNet_ImagePartType, WordImagePart);
       WordImagePart.FeedData(ImageStream);
       RelationshipId := MainDocumentPart.GetIdOfImagePart(WordImagePart);
       CreateDrawing(RelationshipId, Name + '.' + FORMAT(ImagePartType), Width, Height, '', CreatedWordDrawing);
@@ -378,12 +384,30 @@ OBJECT Codeunit 50068 OpenXml WordProcessing Helper
       WordNumbering.GetAbstractNumEnumerator(WordAbstractNumEnumerator);
       WHILE WordAbstractNumEnumerator.MoveNext DO
         BEGIN
-          WordAbstractNumEnumerator.GetCurrent(WordAbstractNum);
+          WordAbstractNumEnumerator.Current(WordAbstractNum);
           IF WordAbstractNum.GetAbstractNumberId = Id THEN
             EXIT(TRUE);
         END;
 
       EXIT(FALSE);
+    END;
+
+    [External]
+    PROCEDURE MainDocumentPartHasNumberingDefinitionsPart@18(VAR DotNet_WordMainDocumentPart@17024400 : Codeunit 50019) : Boolean;
+    VAR
+      DotNet_WordNumberingDefinitionPart@17024401 : Codeunit 50070;
+    BEGIN
+      DotNet_WordMainDocumentPart.NumberingDefinitionsPart(DotNet_WordNumberingDefinitionPart);
+      EXIT(NOT DotNet_WordNumberingDefinitionPart.IsDotNetNull);
+    END;
+
+    [External]
+    PROCEDURE MainDocumentPartHasStyleDefinitionsPart@19(VAR DotNet_WordMainDocumentPart@1000 : Codeunit 50019) : Boolean;
+    VAR
+      DotNet_WordStyleDefinitionPart@1001 : Codeunit 50041;
+    BEGIN
+      DotNet_WordMainDocumentPart.StyleDefinitionsPart(DotNet_WordStyleDefinitionPart);
+      EXIT(NOT DotNet_WordStyleDefinitionPart.IsDotNetNull);
     END;
 
     BEGIN

@@ -15,15 +15,15 @@ OBJECT Codeunit 50024 DotNet_Word.Text
   CODE
   {
     VAR
-      DotNetText@17024400 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.Text";
+      DotNetText@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.Text";
 
     [External]
-    PROCEDURE Create@17024403();
+    PROCEDURE TextConstructor@1();
     VAR
-      DotNetType@17024401 : DotNet "'mscorlib'.System.Type";
-      DotNetObject@17024404 : DotNet "'mscorlib'.System.Object";
-      DotNetTypeArray@17024402 : DotNet "'mscorlib'.System.Array";
-      DotNetParamsArray@17024403 : DotNet "'mscorlib'.System.Array";
+      DotNetType@1001 : DotNet "'mscorlib'.System.Type";
+      DotNetObject@1004 : DotNet "'mscorlib'.System.Object";
+      DotNetTypeArray@1002 : DotNet "'mscorlib'.System.Array";
+      DotNetParamsArray@1003 : DotNet "'mscorlib'.System.Array";
     BEGIN
       //So normally it should be a simple call like that:
       //DotNetText := DotNetText.Text();
@@ -37,49 +37,46 @@ OBJECT Codeunit 50024 DotNet_Word.Text
     END;
 
     [External]
-    PROCEDURE GetOuterXml@17024404() : Text;
+    PROCEDURE OuterXml@2() : Text;
     BEGIN
       EXIT(DotNetText.OuterXml);
     END;
 
     [External]
-    PROCEDURE GetInnerText@17024401() : Text;
+    PROCEDURE InnerText@3() : Text;
     BEGIN
       EXIT(DotNetText.InnerText);
     END;
 
     [External]
-    PROCEDURE SetText@17024405(NewText@17024400 : Text);
+    PROCEDURE SetText@4(NewText@1000 : Text);
     BEGIN
       DotNetText.Text := NewText;
     END;
 
     [External]
-    PROCEDURE GetText@17024406() : Text;
+    PROCEDURE Text@5() : Text;
     BEGIN
       EXIT(DotNetText.Text);
     END;
 
     [External]
-    PROCEDURE SetSpacePreserveOption@17024402(PreserveSpace@17024400 : Boolean);
+    PROCEDURE SetSpacePreserveOption@6(VAR PreserveSpace@1000 : Codeunit 50079);
     VAR
-      DotNetSpaceProcessingModeValues@17024401 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.SpaceProcessingModeValues";
-      OpenXmlDotNetHelper@17024402 : Codeunit 50067;
-      DotNetEnumValue@17024403 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.EnumValue`1";
+      DotNet_OpenXmlEnumValue@1001 : Codeunit 50080;
+      DotNetEnumValue@1002 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.EnumValue`1";
     BEGIN
-      IF PreserveSpace THEN
-        OpenXmlDotNetHelper.CreateEnumValueGeneric(GETDOTNETTYPE(DotNetSpaceProcessingModeValues), 1, DotNetEnumValue)
-      ELSE
-        OpenXmlDotNetHelper.CreateEnumValueGeneric(GETDOTNETTYPE(DotNetSpaceProcessingModeValues), 0, DotNetEnumValue);
+      PreserveSpace.ToOpenXmlEnumValue(DotNet_OpenXmlEnumValue);
+      DotNet_OpenXmlEnumValue.GetEnumValue(DotNetEnumValue);
       DotNetText.Space := DotNetEnumValue;
     END;
 
-    PROCEDURE SetTextObject@17024411(NewDotNetText@17024400 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.Text");
+    PROCEDURE SetTextObject@7(VAR NewDotNetText@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.Text");
     BEGIN
       DotNetText := NewDotNetText;
     END;
 
-    PROCEDURE GetTextObject@17024400(VAR CurrentDotNetText@17024400 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.Text");
+    PROCEDURE GetTextObject@8(VAR CurrentDotNetText@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.Text");
     BEGIN
       CurrentDotNetText := DotNetText;
     END;

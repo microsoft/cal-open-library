@@ -15,34 +15,37 @@ OBJECT Codeunit 50064 DotNet_Word.TableEnumerator
   CODE
   {
     VAR
-      DotNetEnumerator@17024400 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Collections.IEnumerator";
+      DotNetEnumerator@1000 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Collections.IEnumerator";
 
-    PROCEDURE SetEnumerator@17024415(NewEnumerator@17024400 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Collections.IEnumerator");
+    PROCEDURE SetEnumerator@1(VAR NewEnumerator@1000 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Collections.IEnumerator");
     BEGIN
       DotNetEnumerator := NewEnumerator;
     END;
 
-    PROCEDURE GetEnumerator@17024414(VAR CurrentEnumerator@17024400 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Collections.IEnumerator");
+    PROCEDURE GetEnumerator@2(VAR CurrentEnumerator@1000 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Collections.IEnumerator");
     BEGIN
       CurrentEnumerator := DotNetEnumerator;
     END;
 
     [External]
-    PROCEDURE Reset@17024401();
+    PROCEDURE Reset@3();
     BEGIN
       DotNetEnumerator.Reset;
     END;
 
     [External]
-    PROCEDURE MoveNext@17024402() : Boolean;
+    PROCEDURE MoveNext@4() : Boolean;
     BEGIN
       EXIT(DotNetEnumerator.MoveNext);
     END;
 
     [External]
-    PROCEDURE GetCurrent@17024403(VAR CurrentTable@17024400 : Codeunit 50027);
+    PROCEDURE Current@5(VAR CurrentTable@1000 : Codeunit 50027);
+    VAR
+      DotNetTable@1001 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.Table";
     BEGIN
-      CurrentTable.SetTable(DotNetEnumerator.Current);
+      DotNetTable := DotNetEnumerator.Current;
+      CurrentTable.SetTable(DotNetTable);
     END;
 
     BEGIN

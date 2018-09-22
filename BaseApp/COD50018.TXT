@@ -51,14 +51,20 @@ OBJECT Codeunit 50018 DotNet_WordprocessingDocument
 
     [External]
     PROCEDURE AddMainDocumentPart@5(VAR MainDocumentPart@1000 : Codeunit 50019);
+    VAR
+      DotNetMainDocumentPart@1001 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Packaging.MainDocumentPart";
     BEGIN
-      MainDocumentPart.SetMainDocumentPart(DotNetWordprocessingDocument.AddMainDocumentPart);
+      DotNetMainDocumentPart := DotNetWordprocessingDocument.AddMainDocumentPart;
+      MainDocumentPart.SetMainDocumentPart(DotNetMainDocumentPart);
     END;
 
     [External]
-    PROCEDURE GetMainDocumentPart@6(VAR MainDocumentPart@1000 : Codeunit 50019);
+    PROCEDURE MainDocumentPart@6(VAR MainDocumentPart@1000 : Codeunit 50019);
+    VAR
+      DotNetMainDocumentPart@1001 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Packaging.MainDocumentPart";
     BEGIN
-      MainDocumentPart.SetMainDocumentPart(DotNetWordprocessingDocument.MainDocumentPart);
+      DotNetMainDocumentPart := DotNetWordprocessingDocument.MainDocumentPart;
+      MainDocumentPart.SetMainDocumentPart(DotNetMainDocumentPart);
     END;
 
     PROCEDURE SetWordProcessingDocument@7(VAR NewWordprocessingDocument@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Packaging.WordprocessingDocument");

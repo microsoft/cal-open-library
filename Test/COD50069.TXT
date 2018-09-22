@@ -144,8 +144,8 @@ OBJECT Codeunit 50069 Text_OpenXml.WordProcessing
         + 'pPr><w:r><w:t xml:space="preserve">Second Heading</w:t></w:r></w:p></w:body></w:document>';
       Assert.AreEqual(Expected, Actual, 'Headings creation failed');
       //[THEN] Styles definition part must be not empty
-      Assert.AreEqual(TRUE, MainDocumentPart.HasStyleDefinitionsPart, 'Style definitions check failed');
-      MainDocumentPart.GetStyleDefinitionsPart(WordStyleDefinitionPart);
+      Assert.AreEqual(TRUE, OpenXmlWordProcessingHelper.MainDocumentPartHasStyleDefinitionsPart(MainDocumentPart), 'Style definitions check failed');
+      MainDocumentPart.StyleDefinitionsPart(WordStyleDefinitionPart);
       WordStyleDefinitionPart.GetStyles(WordStyles);
       Actual := WordStyles.GetOuterXml;
       //[THEN] and expected styles outer xml is:
@@ -303,10 +303,10 @@ OBJECT Codeunit 50069 Text_OpenXml.WordProcessing
       //[WHEN] and then reopened again
       TempBlob.Blob.CREATEINSTREAM(ExistingFileStream);
       WordprocessingDocument.Open(ExistingFileStream, FALSE);
-      WordprocessingDocument.GetMainDocumentPart(MainDocumentPart);
-      MainDocumentPart.GetDocument(WordDocument);
+      WordprocessingDocument.MainDocumentPart(MainDocumentPart);
+      MainDocumentPart.Document(WordDocument);
       //[THEN] document outer XML must not be empty
-      Assert.AreNotEqual('', WordDocument.GetOuterXml, 'Reopen check failed');
+      Assert.AreNotEqual('', WordDocument.OuterXml, 'Reopen check failed');
     END;
 
     [Test]
@@ -332,10 +332,10 @@ OBJECT Codeunit 50069 Text_OpenXml.WordProcessing
       WordprocessingDocument.Save(SaveStream);
       TempBlob.Blob.CREATEINSTREAM(ExistingFileStream);
       WordprocessingDocument.Open(ExistingFileStream, FALSE);
-      WordprocessingDocument.GetMainDocumentPart(MainDocumentPart);
-      MainDocumentPart.GetDocument(WordDocument);
+      WordprocessingDocument.MainDocumentPart(MainDocumentPart);
+      MainDocumentPart.Document(WordDocument);
       //[THEN] reopened stream document outer XML must be the same as original
-      Assert.AreEqual(Expected, WordDocument.GetOuterXml, 'Reopen check failed');
+      Assert.AreEqual(Expected, WordDocument.OuterXml, 'Reopen check failed');
     END;
 
     [Test]
@@ -354,8 +354,8 @@ OBJECT Codeunit 50069 Text_OpenXml.WordProcessing
       TempBlob.FromBase64String(DocumentBase64);
       TempBlob.Blob.CREATEINSTREAM(ExistingFileStream);
       WordprocessingDocument.Open(ExistingFileStream, FALSE);
-      WordprocessingDocument.GetMainDocumentPart(MainDocumentPart);
-      MainDocumentPart.GetDocument(WordDocument);
+      WordprocessingDocument.MainDocumentPart(MainDocumentPart);
+      MainDocumentPart.Document(WordDocument);
       //[THEN] Expected document outer XML is:
       Expected :=
           '<w:document xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing" xmlns'
@@ -416,7 +416,7 @@ OBJECT Codeunit 50069 Text_OpenXml.WordProcessing
         + '<w:proofErr w:type="gramStart" /><w:r><w:rPr><w:rStyle w:val="Hyperlink" /><w:color w:themeColor="h'
         + 'yperlink" /></w:rPr><w:t xml:space="preserve">My awesome link</w:t></w:r></w:hyperlink></w:p></w:bo'
         + 'dy></w:document>';
-      Assert.AreEqual(Expected, WordDocument.GetOuterXml, 'Existing file open check failed');
+      Assert.AreEqual(Expected, WordDocument.OuterXml, 'Existing file open check failed');
     END;
 
     [Test]
@@ -439,26 +439,26 @@ OBJECT Codeunit 50069 Text_OpenXml.WordProcessing
       TempBlob.FromBase64String(DocumentBase64);
       TempBlob.Blob.CREATEINSTREAM(ExistingFileStream);
       WordprocessingDocument.Open(ExistingFileStream, FALSE);
-      WordprocessingDocument.GetMainDocumentPart(MainDocumentPart);
-      MainDocumentPart.GetDocument(WordDocument);
-      WordDocument.GetBody(WordBody);
+      WordprocessingDocument.MainDocumentPart(MainDocumentPart);
+      MainDocumentPart.Document(WordDocument);
+      WordDocument.Body(WordBody);
       //[WHEN] and iteration through all elements is performed
       WordBody.GetParagraphEnumerator(WordParagraphEnumerator);
       WHILE WordParagraphEnumerator.MoveNext DO
         BEGIN
           ParagraphCount += 1;
-          WordParagraphEnumerator.GetCurrent(WordParagraph);
+          WordParagraphEnumerator.Current(WordParagraph);
           WordParagraph.GetRunEnumerator(WordRunEnumerator);
           WHILE WordRunEnumerator.MoveNext DO
             BEGIN
               RunCount += 1;
-              WordRunEnumerator.GetCurrent(WordRun);
+              WordRunEnumerator.Current(WordRun);
               WordRun.GetTextEnumerator(WordTextEnumerator);
               WHILE WordTextEnumerator.MoveNext DO
                 BEGIN
                   TextCount += 1;
-                  WordTextEnumerator.GetCurrent(WordText);
-                  FullText += WordText.GetInnerText;
+                  WordTextEnumerator.Current(WordText);
+                  FullText += WordText.InnerText;
                 END;
             END;
         END;
@@ -497,23 +497,23 @@ OBJECT Codeunit 50069 Text_OpenXml.WordProcessing
       TempBlob.FromBase64String(DocumentBase64);
       TempBlob.Blob.CREATEINSTREAM(ExistingFileStream);
       WordprocessingDocument.Open(ExistingFileStream, TRUE);
-      WordprocessingDocument.GetMainDocumentPart(MainDocumentPart);
-      MainDocumentPart.GetDocument(WordDocument);
-      WordDocument.GetBody(WordBody);
+      WordprocessingDocument.MainDocumentPart(MainDocumentPart);
+      MainDocumentPart.Document(WordDocument);
+      WordDocument.Body(WordBody);
       //[WHEN] and '|>><<|' is added to every text element value
       WordBody.GetParagraphEnumerator(WordParagraphEnumerator);
       WHILE WordParagraphEnumerator.MoveNext DO
         BEGIN
-          WordParagraphEnumerator.GetCurrent(WordParagraph);
+          WordParagraphEnumerator.Current(WordParagraph);
           WordParagraph.GetRunEnumerator(WordRunEnumerator);
           WHILE WordRunEnumerator.MoveNext DO
             BEGIN
-              WordRunEnumerator.GetCurrent(WordRun);
+              WordRunEnumerator.Current(WordRun);
               WordRun.GetTextEnumerator(WordTextEnumerator);
               WHILE WordTextEnumerator.MoveNext DO
                 BEGIN
-                  WordTextEnumerator.GetCurrent(WordText);
-                  WordText.SetText(WordText.GetText + '|>><<|');
+                  WordTextEnumerator.Current(WordText);
+                  WordText.SetText(WordText.Text + '|>><<|');
                 END;
             END;
         END;
@@ -589,100 +589,111 @@ OBJECT Codeunit 50069 Text_OpenXml.WordProcessing
     LOCAL PROCEDURE CreateSampleDocument@17024447();
     BEGIN
       OpenXmlWordProcessingHelper.CreateEmptyDocument(0, WordprocessingDocument, MainDocumentPart, WordBody);
-      MainDocumentPart.GetDocument(WordDocument);
+      MainDocumentPart.Document(WordDocument);
     END;
 
     LOCAL PROCEDURE CreateSampleParagraph@17024421();
     BEGIN
-      WordText.Create;
+      WordText.TextConstructor;
       WordText.SetText('Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent quam augue, tempus id metus in, laoreet viverra quam. Sed vulputate risus lacus, et dapibus orci porttitor non.');
-      WordRun.Create;
+      WordRun.Run;
       WordRun.AppendText(WordText);
-      WordParagraph.Create;
+      WordParagraph.Paragraph;
       WordParagraph.AppendRun(WordRun);
       WordBody.AppendParagraph(WordParagraph);
     END;
 
     LOCAL PROCEDURE CreateSampleParagraphWithFormating@17024423();
+    VAR
+      DotNet_OpenXmlSpaceProcessing@1000 : Codeunit 50079;
     BEGIN
-      WordParagraph.Create;
+      WordParagraph.Paragraph;
 
-      WordRun.Create;
-      WordText.Create;
+      WordRun.Run;
+      WordText.TextConstructor;
       WordText.SetText('Pellentesque ');
-      WordText.SetSpacePreserveOption(TRUE);
+      DotNet_OpenXmlSpaceProcessing.Create(1); //Preserve
+      WordText.SetSpacePreserveOption(DotNet_OpenXmlSpaceProcessing);
       WordRun.AppendText(WordText);
       WordParagraph.AppendRun(WordRun);
 
-      WordRun.Create;
+      WordRun.Run;
       WordRunProperties.Create;
       WordRunProperties.SetBold(TRUE);
       WordRun.AppendProperties(WordRunProperties);
-      WordText.Create;
+      WordText.TextConstructor;
       WordText.SetText('commodo ');
-      WordText.SetSpacePreserveOption(TRUE);
+      DotNet_OpenXmlSpaceProcessing.Create(1); //Preserve
+      WordText.SetSpacePreserveOption(DotNet_OpenXmlSpaceProcessing);
       WordRun.AppendText(WordText);
       WordParagraph.AppendRun(WordRun);
 
-      WordRun.Create;
-      WordText.Create;
+      WordRun.Run;
+      WordText.TextConstructor;
       WordText.SetText('rhoncus ');
-      WordText.SetSpacePreserveOption(TRUE);
+      DotNet_OpenXmlSpaceProcessing.Create(1); //Preserve
+      WordText.SetSpacePreserveOption(DotNet_OpenXmlSpaceProcessing);
       WordRun.AppendText(WordText);
       WordParagraph.AppendRun(WordRun);
 
-      WordRun.Create;
+      WordRun.Run;
       WordRunProperties.Create;
       WordRunProperties.SetItalic(TRUE);
       WordRun.AppendProperties(WordRunProperties);
-      WordText.Create;
+      WordText.TextConstructor;
       WordText.SetText('mauris');
-      WordText.SetSpacePreserveOption(TRUE);
+      DotNet_OpenXmlSpaceProcessing.Create(1); //Preserve
+      WordText.SetSpacePreserveOption(DotNet_OpenXmlSpaceProcessing);
       WordRun.AppendText(WordText);
       WordParagraph.AppendRun(WordRun);
 
-      WordRun.Create;
-      WordText.Create;
+      WordRun.Run;
+      WordText.TextConstructor;
       WordText.SetText(', sit ');
-      WordText.SetSpacePreserveOption(TRUE);
+      DotNet_OpenXmlSpaceProcessing.Create(1); //Preserve
+      WordText.SetSpacePreserveOption(DotNet_OpenXmlSpaceProcessing);
       WordRun.AppendText(WordText);
       WordParagraph.AppendRun(WordRun);
 
-      WordRun.Create;
+      WordRun.Run;
       WordRunProperties.Create;
       WordRunProperties.SetBold(TRUE);
       WordRunProperties.SetItalic(TRUE);
       WordRunProperties.SetUnderline(TRUE);
       WordRun.AppendProperties(WordRunProperties);
-      WordText.Create;
+      WordText.TextConstructor;
       WordText.SetText('amet ');
-      WordText.SetSpacePreserveOption(TRUE);
+      DotNet_OpenXmlSpaceProcessing.Create(1); //Preserve
+      WordText.SetSpacePreserveOption(DotNet_OpenXmlSpaceProcessing);
       WordRun.AppendText(WordText);
       WordParagraph.AppendRun(WordRun);
 
-      WordRun.Create;
-      WordText.Create;
+      WordRun.Run;
+      WordText.TextConstructor;
       WordText.SetText('faucibus arcu ');
-      WordText.SetSpacePreserveOption(TRUE);
+      DotNet_OpenXmlSpaceProcessing.Create(1); //Preserve
+      WordText.SetSpacePreserveOption(DotNet_OpenXmlSpaceProcessing);
       WordRun.AppendText(WordText);
       WordParagraph.AppendRun(WordRun);
 
-      WordRun.Create;
+      WordRun.Run;
       WordRunProperties.Create;
       WordColor.Create;
       WordColor.SetColorValue('FF0000');
       WordRunProperties.SetColor(WordColor);
       WordRun.AppendProperties(WordRunProperties);
-      WordText.Create;
+      WordText.TextConstructor;
       WordText.SetText('porttitor ');
-      WordText.SetSpacePreserveOption(TRUE);
+      DotNet_OpenXmlSpaceProcessing.Create(1); //Preserve
+      WordText.SetSpacePreserveOption(DotNet_OpenXmlSpaceProcessing);
       WordRun.AppendText(WordText);
       WordParagraph.AppendRun(WordRun);
 
-      WordRun.Create;
-      WordText.Create;
+      WordRun.Run;
+      WordText.TextConstructor;
       WordText.SetText('pharetra. Maecenas quis erat quis eros iaculis placerat ut at mauris.');
-      WordText.SetSpacePreserveOption(TRUE);
+      DotNet_OpenXmlSpaceProcessing.Create(1); //Preserve
+      WordText.SetSpacePreserveOption(DotNet_OpenXmlSpaceProcessing);
       WordRun.AppendText(WordText);
       WordParagraph.AppendRun(WordRun);
 
@@ -690,14 +701,17 @@ OBJECT Codeunit 50069 Text_OpenXml.WordProcessing
     END;
 
     LOCAL PROCEDURE CreateSampleParagraphJustified@17024425();
+    VAR
+      DotNet_OpenXmlSpaceProcessing@1000 : Codeunit 50079;
     BEGIN
-      WordParagraph.Create;
+      WordParagraph.Paragraph;
       WordParagraphProperties.Create;
       WordParagraphProperties.SetJustification(2); //Type = Center
       WordParagraph.AppendProperties(WordParagraphProperties);
-      WordRun.Create;
-      WordText.Create;
-      WordText.SetSpacePreserveOption(TRUE);
+      WordRun.Run;
+      WordText.TextConstructor;
+      DotNet_OpenXmlSpaceProcessing.Create(1); //Preserve
+      WordText.SetSpacePreserveOption(DotNet_OpenXmlSpaceProcessing);
       WordText.SetText('Nam eu tortor ut mi euismod eleifend in ut ante. Donec a ligula ante. Sed rutrum ex quam. Nunc id mi ultricies, vestibulum sapien vel, posuere dui.');
       WordRun.AppendText(WordText);
       WordParagraph.AppendRun(WordRun);
@@ -705,6 +719,8 @@ OBJECT Codeunit 50069 Text_OpenXml.WordProcessing
     END;
 
     LOCAL PROCEDURE CreateSampleHeadings@17024428();
+    VAR
+      DotNet_OpenXmlSpaceProcessing@1000 : Codeunit 50079;
     BEGIN
       WordStyleRunProperties.Create;
       WordColor.Create;
@@ -720,31 +736,33 @@ OBJECT Codeunit 50069 Text_OpenXml.WordProcessing
       WordStyleRunProperties.SetFontSize('26');
       OpenXmlWordProcessingHelper.AddParagraphStyleToDocument(MainDocumentPart, 'heading2', 'heading 2', WordStyleRunProperties);
 
-      WordParagraph.Create;
+      WordParagraph.Paragraph;
       WordParagraphProperties.Create;
       WordParagraphProperties.SetParagraphStyleId('heading1');
       WordSpacingBetweenLines.Create;
       WordSpacingBetweenLines.SetAfter('0');
       WordParagraphProperties.SetSpacingBetweenLines(WordSpacingBetweenLines);
       WordParagraph.AppendProperties(WordParagraphProperties);
-      WordRun.Create;
-      WordText.Create;
-      WordText.SetSpacePreserveOption(TRUE);
+      WordRun.Run;
+      WordText.TextConstructor;
+      DotNet_OpenXmlSpaceProcessing.Create(1); //Preserve
+      WordText.SetSpacePreserveOption(DotNet_OpenXmlSpaceProcessing);
       WordText.SetText('First Heading');
       WordRun.AppendText(WordText);
       WordParagraph.AppendRun(WordRun);
       WordBody.AppendParagraph(WordParagraph);
 
-      WordParagraph.Create;
+      WordParagraph.Paragraph;
       WordParagraphProperties.Create;
       WordParagraphProperties.SetParagraphStyleId('heading2');
       WordSpacingBetweenLines.Create;
       WordSpacingBetweenLines.SetAfter('0');
       WordParagraphProperties.SetSpacingBetweenLines(WordSpacingBetweenLines);
       WordParagraph.AppendProperties(WordParagraphProperties);
-      WordRun.Create;
-      WordText.Create;
-      WordText.SetSpacePreserveOption(TRUE);
+      WordRun.Run;
+      WordText.TextConstructor;
+      DotNet_OpenXmlSpaceProcessing.Create(1); //Preserve
+      WordText.SetSpacePreserveOption(DotNet_OpenXmlSpaceProcessing);
       WordText.SetText('Second Heading');
       WordRun.AppendText(WordText);
       WordParagraph.AppendRun(WordRun);
@@ -756,9 +774,9 @@ OBJECT Codeunit 50069 Text_OpenXml.WordProcessing
       WordTable.Create;
       WordTableRow.Create;
       WordTableCell.Create;
-      WordParagraph.Create;
-      WordRun.Create;
-      WordText.Create;
+      WordParagraph.Paragraph;
+      WordRun.Run;
+      WordText.TextConstructor;
       WordText.SetText('A');
       WordRun.AppendText(WordText);
       WordParagraph.AppendRun(WordRun);
@@ -766,12 +784,12 @@ OBJECT Codeunit 50069 Text_OpenXml.WordProcessing
       WordTableRow.AppendCell(WordTableCell);
 
       WordTableCell.Create;
-      WordParagraph.Create;
-      WordRun.Create;
+      WordParagraph.Paragraph;
+      WordRun.Run;
       WordRunProperties.Create;
       WordRunProperties.SetBold(TRUE);
       WordRun.AppendProperties(WordRunProperties);
-      WordText.Create;
+      WordText.TextConstructor;
       WordText.SetText('Nice');
       WordRun.AppendText(WordText);
       WordParagraph.AppendRun(WordRun);
@@ -782,9 +800,9 @@ OBJECT Codeunit 50069 Text_OpenXml.WordProcessing
 
       WordTableRow.Create;
       WordTableCell.Create;
-      WordParagraph.Create;
-      WordRun.Create;
-      WordText.Create;
+      WordParagraph.Paragraph;
+      WordRun.Run;
+      WordText.TextConstructor;
       WordText.SetText('Little');
       WordRun.AppendText(WordText);
       WordParagraph.AppendRun(WordRun);
@@ -792,12 +810,12 @@ OBJECT Codeunit 50069 Text_OpenXml.WordProcessing
       WordTableRow.AppendCell(WordTableCell);
 
       WordTableCell.Create;
-      WordParagraph.Create;
+      WordParagraph.Paragraph;
       WordParagraphProperties.Create;
       WordParagraphProperties.SetJustification(2);
       WordParagraph.AppendProperties(WordParagraphProperties);
-      WordRun.Create;
-      WordText.Create;
+      WordRun.Run;
+      WordText.TextConstructor;
       WordText.SetText('Table');
       WordRun.AppendText(WordText);
       WordParagraph.AppendRun(WordRun);
@@ -811,59 +829,59 @@ OBJECT Codeunit 50069 Text_OpenXml.WordProcessing
     LOCAL PROCEDURE CreateSampleLists@17024433();
     BEGIN
       OpenXmlWordProcessingHelper.CreateBulletListProperties(MainDocumentPart, WordParagraphProperties, '5');
-      WordParagraph.Create;
+      WordParagraph.Paragraph;
       WordParagraphProperties.CreateFromOuterXml(WordParagraphProperties.GetOuterXml);
       WordParagraph.AppendProperties(WordParagraphProperties);
-      WordRun.Create;
-      WordText.Create;
+      WordRun.Run;
+      WordText.TextConstructor;
       WordText.SetText('A');
       WordRun.AppendText(WordText);
       WordParagraph.AppendRun(WordRun);
       WordBody.AppendParagraph(WordParagraph);
-      WordParagraph.Create;
+      WordParagraph.Paragraph;
       WordParagraphProperties.CreateFromOuterXml(WordParagraphProperties.GetOuterXml);
       WordParagraph.AppendProperties(WordParagraphProperties);
-      WordRun.Create;
-      WordText.Create;
+      WordRun.Run;
+      WordText.TextConstructor;
       WordText.SetText('Unordered');
       WordRun.AppendText(WordText);
       WordParagraph.AppendRun(WordRun);
       WordBody.AppendParagraph(WordParagraph);
-      WordParagraph.Create;
+      WordParagraph.Paragraph;
       WordParagraphProperties.CreateFromOuterXml(WordParagraphProperties.GetOuterXml);
       WordParagraph.AppendProperties(WordParagraphProperties);
-      WordRun.Create;
-      WordText.Create;
+      WordRun.Run;
+      WordText.TextConstructor;
       WordText.SetText('List');
       WordRun.AppendText(WordText);
       WordParagraph.AppendRun(WordRun);
       WordBody.AppendParagraph(WordParagraph);
-      WordParagraph.Create;
+      WordParagraph.Paragraph;
       WordBody.AppendParagraph(WordParagraph);
       OpenXmlWordProcessingHelper.CreateOrderedListProperties(MainDocumentPart, WordParagraphProperties, '10');
-      WordParagraph.Create;
+      WordParagraph.Paragraph;
       WordParagraphProperties.CreateFromOuterXml(WordParagraphProperties.GetOuterXml);
       WordParagraph.AppendProperties(WordParagraphProperties);
-      WordRun.Create;
-      WordText.Create;
+      WordRun.Run;
+      WordText.TextConstructor;
       WordText.SetText('A');
       WordRun.AppendText(WordText);
       WordParagraph.AppendRun(WordRun);
       WordBody.AppendParagraph(WordParagraph);
-      WordParagraph.Create;
+      WordParagraph.Paragraph;
       WordParagraphProperties.CreateFromOuterXml(WordParagraphProperties.GetOuterXml);
       WordParagraph.AppendProperties(WordParagraphProperties);
-      WordRun.Create;
-      WordText.Create;
+      WordRun.Run;
+      WordText.TextConstructor;
       WordText.SetText('Ordered');
       WordRun.AppendText(WordText);
       WordParagraph.AppendRun(WordRun);
       WordBody.AppendParagraph(WordParagraph);
-      WordParagraph.Create;
+      WordParagraph.Paragraph;
       WordParagraphProperties.CreateFromOuterXml(WordParagraphProperties.GetOuterXml);
       WordParagraph.AppendProperties(WordParagraphProperties);
-      WordRun.Create;
-      WordText.Create;
+      WordRun.Run;
+      WordText.TextConstructor;
       WordText.SetText('List');
       WordRun.AppendText(WordText);
       WordParagraph.AppendRun(WordRun);
@@ -906,8 +924,8 @@ OBJECT Codeunit 50069 Text_OpenXml.WordProcessing
       TempBlob.FromBase64String(PictureBase64);
       TempBlob.Blob.CREATEINSTREAM(ImageStream);
       PartId := OpenXmlWordProcessingHelper.CreateDrawingFromStream(MainDocumentPart, 6, ImageStream, 'someimage', 209550, 209550, WordDrawing);
-      WordParagraph.Create;
-      WordRun.Create;
+      WordParagraph.Paragraph;
+      WordRun.Run;
       WordRun.AppendDrawing(WordDrawing);
       WordParagraph.AppendRun(WordRun);
       WordBody.AppendParagraph(WordParagraph);
@@ -919,7 +937,7 @@ OBJECT Codeunit 50069 Text_OpenXml.WordProcessing
       PartId@17024403 : Text;
     BEGIN
       PartId := OpenXmlWordProcessingHelper.CreateHyperLink('http://microsoft.com', 'My awesome link', MainDocumentPart, WordHyperlink);
-      WordParagraph.Create;
+      WordParagraph.Paragraph;
       WordParagraph.AppendHyperlink(WordHyperlink);
       WordBody.AppendParagraph(WordParagraph);
       EXIT(PartId);
@@ -927,9 +945,9 @@ OBJECT Codeunit 50069 Text_OpenXml.WordProcessing
 
     LOCAL PROCEDURE FinalizeAndGetDocumentOuterXml@17024451() : Text;
     BEGIN
-      MainDocumentPart.GetDocument(WordDocument);
+      MainDocumentPart.Document(WordDocument);
       WordprocessingDocument.Close;
-      EXIT(WordDocument.GetOuterXml);
+      EXIT(WordDocument.OuterXml);
     END;
 
     LOCAL PROCEDURE GetExampleDocxFileContentAsBase64@17024465() : Text;
