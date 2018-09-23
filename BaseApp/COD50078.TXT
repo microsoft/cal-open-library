@@ -18,7 +18,7 @@ OBJECT Codeunit 50078 DotNet_OpenXml.ImagePartType
       DotNetImagePartType@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Packaging.ImagePartType";
 
     [External]
-    PROCEDURE Create@1(ImagePartType@1000 : 'Bmp,Gif,Png,Tiff,Icon,Pcx,Jpeg,Emf,Wmf');
+    PROCEDURE ImagePartType@1(ImagePartType@1000 : 'Bmp,Gif,Png,Tiff,Icon,Pcx,Jpeg,Emf,Wmf');
     BEGIN
       CASE ImagePartType OF
         ImagePartType::Bmp: DotNetImagePartType := DotNetImagePartType.Bmp;

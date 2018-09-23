@@ -18,7 +18,7 @@ OBJECT Codeunit 50034 DotNet_Word.HyperlinkRelations
       DotNetHyperlinkRelationship@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Packaging.HyperlinkRelationship";
 
     [External]
-    PROCEDURE GetId@1() : Text;
+    PROCEDURE Id@1() : Text;
     BEGIN
       EXIT(DotNetHyperlinkRelationship.Id);
     END;

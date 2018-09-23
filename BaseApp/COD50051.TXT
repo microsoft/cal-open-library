@@ -18,25 +18,25 @@ OBJECT Codeunit 50051 DotNet_Word.Picture
       DotNetPicture@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Drawing.Pictures.Picture";
 
     [External]
-    PROCEDURE Create@1();
+    PROCEDURE Picture@1();
     BEGIN
       DotNetPicture := DotNetPicture.Picture;
     END;
 
     [External]
-    PROCEDURE CreateFromOuterXml@2(OuterXml@1000 : Text);
+    PROCEDURE PictureFromOuterXml@2(OuterXml@1000 : Text);
     BEGIN
       DotNetPicture := DotNetPicture.Picture(OuterXml);
     END;
 
     [External]
-    PROCEDURE GetOuterXml@3() : Text;
+    PROCEDURE OuterXml@3() : Text;
     BEGIN
       EXIT(DotNetPicture.OuterXml);
     END;
 
     [External]
-    PROCEDURE GetInnerText@4() : Text;
+    PROCEDURE InnerText@4() : Text;
     BEGIN
       EXIT(DotNetPicture.InnerText);
     END;

@@ -18,25 +18,25 @@ OBJECT Codeunit 50057 DotNet_Word.Blip
       DotNetBlip@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Drawing.Blip";
 
     [External]
-    PROCEDURE Create@1();
+    PROCEDURE Blip@1();
     BEGIN
       DotNetBlip := DotNetBlip.Blip;
     END;
 
     [External]
-    PROCEDURE CreateFromOuterXml@2(OuterXml@1000 : Text);
+    PROCEDURE BlipFromOuterXml@2(OuterXml@1000 : Text);
     BEGIN
       DotNetBlip := DotNetBlip.Blip(OuterXml);
     END;
 
     [External]
-    PROCEDURE GetOuterXml@3() : Text;
+    PROCEDURE OuterXml@3() : Text;
     BEGIN
       EXIT(DotNetBlip.OuterXml);
     END;
 
     [External]
-    PROCEDURE GetInnerText@4() : Text;
+    PROCEDURE InnerText@4() : Text;
     BEGIN
       EXIT(DotNetBlip.InnerText);
     END;

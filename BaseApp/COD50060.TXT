@@ -19,25 +19,25 @@ OBJECT Codeunit 50060 DotNet_Word.Transform2D
       OpenXmlDotNetHelper@1001 : Codeunit 50067;
 
     [External]
-    PROCEDURE Create@1();
+    PROCEDURE Transform2D@1();
     BEGIN
       DotNetTransform2D := DotNetTransform2D.Transform2D;
     END;
 
     [External]
-    PROCEDURE CreateFromOuterXml@2(OuterXml@1000 : Text);
+    PROCEDURE Transform2DFromOuterXml@2(OuterXml@1000 : Text);
     BEGIN
       DotNetTransform2D := DotNetTransform2D.Transform2D;
     END;
 
     [External]
-    PROCEDURE GetOuterXml@3() : Text;
+    PROCEDURE OuterXml@3() : Text;
     BEGIN
       EXIT(DotNetTransform2D.OuterXml);
     END;
 
     [External]
-    PROCEDURE GetInnerText@4() : Text;
+    PROCEDURE InnerText@4() : Text;
     BEGIN
       EXIT(DotNetTransform2D.InnerText);
     END;

@@ -18,25 +18,25 @@ OBJECT Codeunit 50058 DotNet_Word.Stretch
       DotNetStretch@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Drawing.Stretch";
 
     [External]
-    PROCEDURE Create@1();
+    PROCEDURE Stretch@1();
     BEGIN
       DotNetStretch := DotNetStretch.Stretch;
     END;
 
     [External]
-    PROCEDURE CreateFromOuterXml@2(OuterXml@1000 : Text);
+    PROCEDURE StretchFromOuterXml@2(OuterXml@1000 : Text);
     BEGIN
       DotNetStretch := DotNetStretch.Stretch(OuterXml);
     END;
 
     [External]
-    PROCEDURE GetOuterXml@3() : Text;
+    PROCEDURE OuterXml@3() : Text;
     BEGIN
       EXIT(DotNetStretch.OuterXml);
     END;
 
     [External]
-    PROCEDURE GetInnerText@4() : Text;
+    PROCEDURE InnerText@4() : Text;
     BEGIN
       EXIT(DotNetStretch.InnerText);
     END;

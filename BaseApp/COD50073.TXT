@@ -18,25 +18,25 @@ OBJECT Codeunit 50073 DotNet_Word.NumberingLevel
       DotNetLevel@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.Level";
 
     [External]
-    PROCEDURE Create@1();
+    PROCEDURE Level@1();
     BEGIN
       DotNetLevel := DotNetLevel.Level;
     END;
 
     [External]
-    PROCEDURE CreateFromOuterXml@2(OuterXml@1000 : Text);
+    PROCEDURE LevelFromOuterXml@2(OuterXml@1000 : Text);
     BEGIN
       DotNetLevel := DotNetLevel.Level(OuterXml);
     END;
 
     [External]
-    PROCEDURE GetOuterXml@3() : Text;
+    PROCEDURE OuterXml@3() : Text;
     BEGIN
       EXIT(DotNetLevel.OuterXml);
     END;
 
     [External]
-    PROCEDURE GetInnerText@4() : Text;
+    PROCEDURE InnerText@4() : Text;
     BEGIN
       EXIT(DotNetLevel.InnerText);
     END;
@@ -76,7 +76,7 @@ OBJECT Codeunit 50073 DotNet_Word.NumberingLevel
     END;
 
     [External]
-    PROCEDURE GetNumberingFormatType@8() : Integer;
+    PROCEDURE NumberingFormatType@8() : Integer;
     VAR
       DotNetNumberFormatValues@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.NumberFormatValues";
       DotNetEnumValue@1001 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.EnumValue`1";

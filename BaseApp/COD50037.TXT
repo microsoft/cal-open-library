@@ -18,25 +18,25 @@ OBJECT Codeunit 50037 DotNet_Word.StyleRunProperties
       DotNetStyleRunProperties@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.StyleRunProperties";
 
     [External]
-    PROCEDURE Create@1();
+    PROCEDURE StyleRunProperties@1();
     BEGIN
       DotNetStyleRunProperties := DotNetStyleRunProperties.StyleRunProperties;
     END;
 
     [External]
-    PROCEDURE CreateFromOuterXml@2(OuterXml@1000 : Text);
+    PROCEDURE StyleRunPropertiesFromOuterXml@2(OuterXml@1000 : Text);
     BEGIN
       DotNetStyleRunProperties := DotNetStyleRunProperties.StyleRunProperties(OuterXml);
     END;
 
     [External]
-    PROCEDURE GetOuterXml@3() : Text;
+    PROCEDURE OuterXml@3() : Text;
     BEGIN
       EXIT(DotNetStyleRunProperties.OuterXml);
     END;
 
     [External]
-    PROCEDURE GetInnerText@4() : Text;
+    PROCEDURE InnerText@4() : Text;
     BEGIN
       EXIT(DotNetStyleRunProperties.InnerText);
     END;

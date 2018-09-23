@@ -18,25 +18,25 @@ OBJECT Codeunit 50038 DotNet_Word.Style
       DotNetStyle@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.Style";
 
     [External]
-    PROCEDURE Create@1();
+    PROCEDURE Style@1();
     BEGIN
       DotNetStyle := DotNetStyle.Style;
     END;
 
     [External]
-    PROCEDURE CreateFromOuterXml@2(OuterXml@1000 : Text);
+    PROCEDURE StyleFromOuterXml@2(OuterXml@1000 : Text);
     BEGIN
       DotNetStyle := DotNetStyle.Style(OuterXml);
     END;
 
     [External]
-    PROCEDURE GetOuterXml@3() : Text;
+    PROCEDURE OuterXml@3() : Text;
     BEGIN
       EXIT(DotNetStyle.OuterXml);
     END;
 
     [External]
-    PROCEDURE GetInnerText@4() : Text;
+    PROCEDURE InnerText@4() : Text;
     BEGIN
       EXIT(DotNetStyle.InnerText);
     END;
@@ -53,7 +53,7 @@ OBJECT Codeunit 50038 DotNet_Word.Style
     END;
 
     [External]
-    PROCEDURE GetStyleName@6() : Text;
+    PROCEDURE StyleName@6() : Text;
     BEGIN
       EXIT(DotNetStyle.StyleName.Val.Value);
     END;
@@ -100,7 +100,7 @@ OBJECT Codeunit 50038 DotNet_Word.Style
     END;
 
     [External]
-    PROCEDURE GetStyleId@11() : Text;
+    PROCEDURE StyleId@11() : Text;
     BEGIN
       EXIT(DotNetStyle.StyleId.Value);
     END;
@@ -126,7 +126,7 @@ OBJECT Codeunit 50038 DotNet_Word.Style
     END;
 
     [External]
-    PROCEDURE GetStyleType@14() : Integer;
+    PROCEDURE StyleType@14() : Integer;
     VAR
       DotNetStyleValues@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.StyleValues";
       DotNetEnumValue@1001 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.EnumValue`1";

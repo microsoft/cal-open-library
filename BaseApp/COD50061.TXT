@@ -19,25 +19,25 @@ OBJECT Codeunit 50061 DotNet_Word.PresetGeometry
       OpenXmlDotNetHelper@1001 : Codeunit 50067;
 
     [External]
-    PROCEDURE Create@1();
+    PROCEDURE PresetGeometry@1();
     BEGIN
       DotNetPresetGeometry := DotNetPresetGeometry.PresetGeometry;
     END;
 
     [External]
-    PROCEDURE CreateFromOuterXml@2(OuterXml@1000 : Text);
+    PROCEDURE PresetGeometryFromOuterXml@2(OuterXml@1000 : Text);
     BEGIN
       DotNetPresetGeometry := DotNetPresetGeometry.PresetGeometry(OuterXml);
     END;
 
     [External]
-    PROCEDURE GetOuterXml@3() : Text;
+    PROCEDURE OuterXml@3() : Text;
     BEGIN
       EXIT(DotNetPresetGeometry.OuterXml);
     END;
 
     [External]
-    PROCEDURE GetInnerText@4() : Text;
+    PROCEDURE InnerText@4() : Text;
     BEGIN
       EXIT(DotNetPresetGeometry.InnerText);
     END;

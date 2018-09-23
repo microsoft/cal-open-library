@@ -18,25 +18,25 @@ OBJECT Codeunit 50072 DotNet_Word.AbstractNum
       DotNetAbstractNum@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.AbstractNum";
 
     [External]
-    PROCEDURE Create@1();
+    PROCEDURE AbstractNum@1();
     BEGIN
       DotNetAbstractNum := DotNetAbstractNum.AbstractNum;
     END;
 
     [External]
-    PROCEDURE CreateFromOuterXml@2(OuterXml@1000 : Text);
+    PROCEDURE AbstractNumFromOuterXml@2(OuterXml@1000 : Text);
     BEGIN
       DotNetAbstractNum := DotNetAbstractNum.AbstractNum(OuterXml);
     END;
 
     [External]
-    PROCEDURE GetOuterXml@3() : Text;
+    PROCEDURE OuterXml@3() : Text;
     BEGIN
       EXIT(DotNetAbstractNum.OuterXml);
     END;
 
     [External]
-    PROCEDURE GetInnerText@4() : Text;
+    PROCEDURE InnerText@4() : Text;
     BEGIN
       EXIT(DotNetAbstractNum.InnerText);
     END;
@@ -50,7 +50,7 @@ OBJECT Codeunit 50072 DotNet_Word.AbstractNum
     END;
 
     [External]
-    PROCEDURE GetAbstractNumberId@6() : Integer;
+    PROCEDURE AbstractNumberId@6() : Integer;
     BEGIN
       EXIT(DotNetAbstractNum.AbstractNumberId.Value);
     END;

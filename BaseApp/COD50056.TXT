@@ -18,25 +18,25 @@ OBJECT Codeunit 50056 DotNet_Word.NonVisualPictureDr
       DotNetNonVisualPictureDrawingProperties@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Drawing.Pictures.NonVisualPictureDrawingProperties";
 
     [External]
-    PROCEDURE Create@1();
+    PROCEDURE NonVisualPictureDrawingProperties@1();
     BEGIN
       DotNetNonVisualPictureDrawingProperties := DotNetNonVisualPictureDrawingProperties.NonVisualPictureDrawingProperties;
     END;
 
     [External]
-    PROCEDURE CreateFromOuterXml@2(OuterXml@1000 : Text);
+    PROCEDURE NonVisualPictureDrawingPropertiesFromOuterXml@2(OuterXml@1000 : Text);
     BEGIN
       DotNetNonVisualPictureDrawingProperties := DotNetNonVisualPictureDrawingProperties.NonVisualPictureDrawingProperties(OuterXml);
     END;
 
     [External]
-    PROCEDURE GetOuterXml@3() : Text;
+    PROCEDURE OuterXml@3() : Text;
     BEGIN
       EXIT(DotNetNonVisualPictureDrawingProperties.OuterXml);
     END;
 
     [External]
-    PROCEDURE GetInnerText@4() : Text;
+    PROCEDURE InnerText@4() : Text;
     BEGIN
       EXIT(DotNetNonVisualPictureDrawingProperties.InnerText);
     END;

@@ -18,19 +18,19 @@ OBJECT Codeunit 50033 DotNet_Word.ProofError
       DotNetProofError@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.ProofError";
 
     [External]
-    PROCEDURE Create@1();
+    PROCEDURE ProofError@1();
     BEGIN
       DotNetProofError := DotNetProofError.ProofError;
     END;
 
     [External]
-    PROCEDURE GetOuterXml@2() : Text;
+    PROCEDURE OuterXml@2() : Text;
     BEGIN
       EXIT(DotNetProofError.OuterXml);
     END;
 
     [External]
-    PROCEDURE GetInnerText@3() : Text;
+    PROCEDURE InnerText@3() : Text;
     BEGIN
       EXIT(DotNetProofError.InnerText);
     END;

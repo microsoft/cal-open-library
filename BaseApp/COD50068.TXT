@@ -18,13 +18,13 @@ OBJECT Codeunit 50068 OpenXml WordProcessing Helper
     [External]
     PROCEDURE CloneStyleRunProperties@1(VAR OriginalWordStyleRunProperties@1000 : Codeunit 50037;VAR ClonedWordStyleRunProperties@1001 : Codeunit 50037);
     BEGIN
-      ClonedWordStyleRunProperties.CreateFromOuterXml(OriginalWordStyleRunProperties.GetOuterXml);
+      ClonedWordStyleRunProperties.StyleRunPropertiesFromOuterXml(OriginalWordStyleRunProperties.OuterXml);
     END;
 
     [External]
     PROCEDURE CloneParagraphProperties@2(VAR OriginalWordParagraphProperties@1000 : Codeunit 50026;VAR ClonedWordParagraphProperties@1001 : Codeunit 50026);
     BEGIN
-      ClonedWordParagraphProperties.CreateFromOuterXml(OriginalWordParagraphProperties.GetOuterXml);
+      ClonedWordParagraphProperties.ParagraphPropertiesFromOuterXml(OriginalWordParagraphProperties.OuterXml);
     END;
 
     [External]
@@ -34,7 +34,7 @@ OBJECT Codeunit 50068 OpenXml WordProcessing Helper
       WordProcessingDocumentType@1005 : Codeunit 50077;
     BEGIN
       //Helper for creating an empty document and initiating required parts
-      WordProcessingDocumentType.Create(DocumentType);
+      WordProcessingDocumentType.WordprocessingDocumentType(DocumentType);
       CreatedWordprocessingDocument.Create(WordProcessingDocumentType, TRUE);
       CreatedWordprocessingDocument.AddMainDocumentPart(MainDocumentPart);
       WordDocument.Document;
@@ -59,22 +59,22 @@ OBJECT Codeunit 50068 OpenXml WordProcessing Helper
       //Helper for creating new hyperlink element
       DotNet_Uri.Init(Url);
       MainDocumentPart.AddHyperlinkRelationship(DotNet_Uri, TRUE, HyperlinkRelationship);
-      HrContactId := HyperlinkRelationship.GetId;
-      WordProofError.Create;
+      HrContactId := HyperlinkRelationship.Id;
+      WordProofError.ProofError;
       WordProofError.SetType(2); //Type = GrammarStart
-      WordRunProperties.Create;
+      WordRunProperties.RunProperties;
       WordRunProperties.SetRunStyle('Hyperlink');
-      WordColor.Create;
+      WordColor.Color;
       WordColor.SetColorTheme(10); //Theme = Hyperlink
       WordRunProperties.SetColor(WordColor);
       WordText.TextConstructor;
       WordText.SetText(TextValue);
-      DotNet_OpenXmlSpaceProcessing.Create(1); //Preserve
+      DotNet_OpenXmlSpaceProcessing.SpaceProcessingModeValues(1); //Preserve
       WordText.SetSpacePreserveOption(DotNet_OpenXmlSpaceProcessing);
       WordRun.Run;
       WordRun.AppendProperties(WordRunProperties);
       WordRun.AppendText(WordText);
-      CreatedWordHyperlink.Create;
+      CreatedWordHyperlink.Hyperlink;
       CreatedWordHyperlink.SetId(HrContactId);
       CreatedWordHyperlink.SetHistory(TRUE);
       CreatedWordHyperlink.AppendProofError(WordProofError);
@@ -94,7 +94,7 @@ OBJECT Codeunit 50068 OpenXml WordProcessing Helper
       IF NOT MainDocumentPartHasStyleDefinitionsPart(MainDocumentPart) THEN
         BEGIN
           MainDocumentPart.AddStyleDefinitionsPart(WordStyleDefinitionPart);
-          WordStyles.Create;
+          WordStyles.Styles;
           WordStyleDefinitionPart.SetStyles(WordStyles);
         END
       ELSE
@@ -122,7 +122,7 @@ OBJECT Codeunit 50068 OpenXml WordProcessing Helper
       IF NOT MainDocumentPartHasNumberingDefinitionsPart(MainDocumentPart) THEN
         BEGIN
           MainDocumentPart.AddNumberingDefinitionsPart(WordNumberingDefinitionsPart);
-          WordNumbering.Create;
+          WordNumbering.Numbering;
           WordNumberingDefinitionsPart.SetNumbering(WordNumbering);
         END
       ELSE
@@ -158,7 +158,7 @@ OBJECT Codeunit 50068 OpenXml WordProcessing Helper
     BEGIN
       //Helper for adding picture from stream to document
       //Based on: https://msdn.microsoft.com/en-us/library/office/bb497430.aspx
-      DotNet_ImagePartType.Create(ImagePartType);
+      DotNet_ImagePartType.ImagePartType(ImagePartType);
       MainDocumentPart.AddImagePart(DotNet_ImagePartType, WordImagePart);
       WordImagePart.FeedData(ImageStream);
       RelationshipId := MainDocumentPart.GetIdOfImagePart(WordImagePart);
@@ -182,13 +182,13 @@ OBJECT Codeunit 50068 OpenXml WordProcessing Helper
       IF ActualPosition = '' THEN
         ActualPosition := 'left';
 
-      WordAnchor.Create;
+      WordAnchor.Anchor;
       WordAnchor.AppendSimplePosition(0, 0);
-      WordHorizontalPosition.Create;
+      WordHorizontalPosition.HorizontalPosition;
       WordHorizontalPosition.SetRelativeFrom(0); //Type = Margin
       WordHorizontalPosition.SetHorizontalAlignment(ActualPosition);
       WordAnchor.AppendHorizontalPosition(WordHorizontalPosition);
-      WordVerticalPosition.Create;
+      WordVerticalPosition.VerticalPosition;
       WordVerticalPosition.SetPositionOffset('0');
       WordVerticalPosition.SetRelativeFrom(2); // Type = Paragraph
       WordAnchor.AppendVerticalPosition(WordVerticalPosition);
@@ -196,21 +196,21 @@ OBJECT Codeunit 50068 OpenXml WordProcessing Helper
       WordAnchor.AppendEffectExtent(0, 0, 0, 0);
       IF Position <> '' THEN
         BEGIN
-          WordWrapSquare.Create;
+          WordWrapSquare.WrapSquare;
           WordWrapSquare.SetWrapText(0); // Type = BothSides
           WordAnchor.AppendWrapSquare(WordWrapSquare);
         END
       ELSE
         BEGIN
-          WordWrapTopBottom.Create;
+          WordWrapTopBottom.WrapTopBottom;
           WordAnchor.AppendWrapTopBottom(WordWrapTopBottom);
         END;
 
-      WordDocProperties.Create;
+      WordDocProperties.DocProperties;
       WordDocProperties.SetId(1);
       WordDocProperties.SetName(Name);
       WordAnchor.AppendDocProperties(WordDocProperties);
-      WordGraphicFrameLocks.Create;
+      WordGraphicFrameLocks.GraphicFrameLocks;
       WordGraphicFrameLocks.SetNoChangeAspect(TRUE);
       WordAnchor.AppendGraphicFrameLocks(WordGraphicFrameLocks);
       CreatePicture(RelationshipId, Name, Cx, Cy, WordPicture);
@@ -225,7 +225,7 @@ OBJECT Codeunit 50068 OpenXml WordProcessing Helper
       WordAnchor.SetLocked(FALSE);
       WordAnchor.SetLayoutInCell(TRUE);
       WordAnchor.SetAllowOverlap(TRUE);
-      CreatedWordDrawing.Create;
+      CreatedWordDrawing.Drawing;
       CreatedWordDrawing.AppendAnchor(WordAnchor);
     END;
 
@@ -242,33 +242,33 @@ OBJECT Codeunit 50068 OpenXml WordProcessing Helper
       WordStretch@1013 : Codeunit 50058;
       WordBlipExtensionList@1014 : Codeunit 50059;
     BEGIN
-      WordPicture.Create;
-      WordBlipFill.Create;
-      WordBlip.Create;
+      WordPicture.Picture;
+      WordBlipFill.BlipFill;
+      WordBlip.Blip;
       WordBlip.SetEmbed(RelationshipId);
       WordBlip.SetCompressionState(2); //Type = Print
-      WordBlipExtensionList.Create;
+      WordBlipExtensionList.BlipExtensionList;
       WordBlipExtensionList.AppendBlipExtension('{28A0092B-C50C-407E-A947-70E740481C1C}');
       WordBlip.AppendBlipExtensionList(WordBlipExtensionList);
       WordBlipFill.SetBlip(WordBlip);
-      WordStretch.Create;
+      WordStretch.Stretch;
       WordStretch.AppendFillRectangle;
       WordBlipFill.AppendStretch(WordStretch);
       WordPicture.SetBlipFill(WordBlipFill);
-      WordNonVisualPictureProperties.Create;
-      WordNonVisualDrawingProperties.Create;
+      WordNonVisualPictureProperties.NonVisualPictureProperties;
+      WordNonVisualDrawingProperties.NonVisualDrawingProperties;
       WordNonVisualDrawingProperties.SetId(0);
       WordNonVisualDrawingProperties.SetName(Name);
       WordNonVisualPictureProperties.SetNonVisualDrawingProperties(WordNonVisualDrawingProperties);
-      WordNonVisualPictureDrawingProperties.Create;
+      WordNonVisualPictureDrawingProperties.NonVisualPictureDrawingProperties;
       WordNonVisualPictureProperties.SetNonVisualPictureDrawingProperties(WordNonVisualPictureDrawingProperties);
       WordPicture.SetNonVisualPictureProperties(WordNonVisualPictureProperties);
-      WordShapeProperties.Create;
-      WordPresetGeometry.Create;
+      WordShapeProperties.ShapeProperties;
+      WordPresetGeometry.PresetGeometry;
       WordPresetGeometry.AppendAdjustValueList;
       WordPresetGeometry.SetPreset(4); //Type = Rectangle
       WordShapeProperties.AppendPresetGeometry(WordPresetGeometry);
-      WordTransform2D.Create;
+      WordTransform2D.Transform2D;
       WordTransform2D.AppendOffset(0, 0);
       WordTransform2D.AppendExtent(Cx, Cy);
       WordShapeProperties.SetTransform2D(WordTransform2D);
@@ -281,8 +281,8 @@ OBJECT Codeunit 50068 OpenXml WordProcessing Helper
       WordStyle@1005 : Codeunit 50038;
       ClonedWordStyleRunProperties@1006 : Codeunit 50037;
     BEGIN
-      WordStyleDefinitionPart.GetStyles(WordStyles);
-      WordStyle.Create;
+      WordStyleDefinitionPart.Styles(WordStyles);
+      WordStyle.Style;
       WordStyle.SetStyleType(0); //Type = Paragraph
       WordStyle.SetStyleId(StyleId);
       WordStyle.SetCustomStyle(TRUE);
@@ -302,16 +302,16 @@ OBJECT Codeunit 50068 OpenXml WordProcessing Helper
       WordNumberingLevel@1006 : Codeunit 50073;
       WordNumberingInstance@1007 : Codeunit 50074;
     BEGIN
-      WordNumberingDefinitionPart.GetNumbering(WordNumbering);
-      WordAbstractNum.Create;
+      WordNumberingDefinitionPart.Numbering(WordNumbering);
+      WordAbstractNum.AbstractNum;
       WordAbstractNum.SetAbstractNumberId(Id);
-      WordNumberingLevel.Create;
+      WordNumberingLevel.Level;
       WordNumberingLevel.SetLevelIndex(0);
       WordNumberingLevel.SetNumberingFormatType(Type);
       WordNumberingLevel.SetLevelText(Text);
       WordAbstractNum.AppendLevel(WordNumberingLevel);
       WordNumbering.AppendAbstractNum(WordAbstractNum);
-      WordNumberingInstance.Create;
+      WordNumberingInstance.NumberingInstance;
       WordNumberingInstance.SetAbstractNumId(Id);
       WordNumberingInstance.SetNumberID(Id + 1);
       WordNumbering.AppendNumberingInstance(WordNumberingInstance);
@@ -323,15 +323,15 @@ OBJECT Codeunit 50068 OpenXml WordProcessing Helper
       WordIndentation@1005 : Codeunit 50031;
       WordNumberingProperties@1006 : Codeunit 50032;
     BEGIN
-      WordParagraphProperties.Create;
-      WordSpacingBetweenLines.Create;
+      WordParagraphProperties.ParagraphProperties;
+      WordSpacingBetweenLines.SpacingBetweenLines;
       WordSpacingBetweenLines.SetAfter('0');
       WordParagraphProperties.SetSpacingBetweenLines(WordSpacingBetweenLines);
-      WordIndentation.Create;
+      WordIndentation.Indentation;
       WordIndentation.SetLeft(LeftIndentation);
       WordIndentation.SetHanging('360');
       WordParagraphProperties.SetIndentation(WordIndentation);
-      WordNumberingProperties.Create;
+      WordNumberingProperties.NumberingProperties;
       WordNumberingProperties.SetNumberingId(NumberingId);
       WordNumberingProperties.SetNumberingLevelReference(NumberingLevelReference);
       WordParagraphProperties.SetNumberingProperties(WordNumberingProperties);
@@ -344,12 +344,12 @@ OBJECT Codeunit 50068 OpenXml WordProcessing Helper
       WordStyle@1003 : Codeunit 50038;
       WordStylesEnumerator@1004 : Codeunit 50040;
     BEGIN
-      WordStyleDefinitionPart.GetStyles(WordStyles);
+      WordStyleDefinitionPart.Styles(WordStyles);
       WordStyles.GetStyleEnumerator(WordStylesEnumerator);
       WHILE WordStylesEnumerator.MoveNext DO
         BEGIN
           WordStylesEnumerator.Current(WordStyle);
-          IF (WordStyle.GetStyleId = StyleId) AND (WordStyle.GetStyleType = 0) THEN //Type = Paragraph
+          IF (WordStyle.StyleId = StyleId) AND (WordStyle.StyleType = 0) THEN //Type = Paragraph
             EXIT(TRUE);
         END;
 
@@ -362,13 +362,13 @@ OBJECT Codeunit 50068 OpenXml WordProcessing Helper
       WordStyle@1003 : Codeunit 50038;
       WordStylesEnumerator@1004 : Codeunit 50040;
     BEGIN
-      WordStyleDefinitionPart.GetStyles(WordStyles);
+      WordStyleDefinitionPart.Styles(WordStyles);
       WordStyles.GetStyleEnumerator(WordStylesEnumerator);
       WHILE WordStylesEnumerator.MoveNext DO
         BEGIN
           WordStylesEnumerator.Current(WordStyle);
-          IF (WordStyle.GetStyleName = StyleName) AND (WordStyle.GetStyleType = 0) THEN //Type = Paragraph
-            EXIT(WordStyle.GetStyleId);
+          IF (WordStyle.StyleName = StyleName) AND (WordStyle.StyleType = 0) THEN //Type = Paragraph
+            EXIT(WordStyle.StyleId);
         END;
 
       EXIT('');
@@ -380,12 +380,12 @@ OBJECT Codeunit 50068 OpenXml WordProcessing Helper
       WordAbstractNum@1003 : Codeunit 50072;
       WordAbstractNumEnumerator@1004 : Codeunit 50075;
     BEGIN
-      WordNumberingDefinitionPart.GetNumbering(WordNumbering);
+      WordNumberingDefinitionPart.Numbering(WordNumbering);
       WordNumbering.GetAbstractNumEnumerator(WordAbstractNumEnumerator);
       WHILE WordAbstractNumEnumerator.MoveNext DO
         BEGIN
           WordAbstractNumEnumerator.Current(WordAbstractNum);
-          IF WordAbstractNum.GetAbstractNumberId = Id THEN
+          IF WordAbstractNum.AbstractNumberId = Id THEN
             EXIT(TRUE);
         END;
 

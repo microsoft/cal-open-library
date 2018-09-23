@@ -18,7 +18,7 @@ OBJECT Codeunit 50077 DotNet_WordProcDocumentType
       DotNetWordprocessingDocumentType@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.WordprocessingDocumentType";
 
     [External]
-    PROCEDURE Create@1(DocumentType@1000 : 'Document,Template,MacroEnabledDocument,MacroEnabledTemplate');
+    PROCEDURE WordprocessingDocumentType@1(DocumentType@1000 : 'Document,Template,MacroEnabledDocument,MacroEnabledTemplate');
     BEGIN
       CASE DocumentType OF
         DocumentType::Document: DotNetWordprocessingDocumentType := DotNetWordprocessingDocumentType.Document;

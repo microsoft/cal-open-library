@@ -18,25 +18,25 @@ OBJECT Codeunit 50049 DotNet_Word.DocProperties
       DotNetDocProperties@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Drawing.Wordprocessing.DocProperties";
 
     [External]
-    PROCEDURE Create@1();
+    PROCEDURE DocProperties@1();
     BEGIN
       DotNetDocProperties := DotNetDocProperties.DocProperties;
     END;
 
     [External]
-    PROCEDURE CreateFromOuterXml@2(OuterXml@1000 : Text);
+    PROCEDURE DocPropertiesFromOuterXml@2(OuterXml@1000 : Text);
     BEGIN
       DotNetDocProperties := DotNetDocProperties.DocProperties(OuterXml);
     END;
 
     [External]
-    PROCEDURE GetOuterXml@3() : Text;
+    PROCEDURE OuterXml@3() : Text;
     BEGIN
       EXIT(DotNetDocProperties.OuterXml);
     END;
 
     [External]
-    PROCEDURE GetInnerText@4() : Text;
+    PROCEDURE InnerText@4() : Text;
     BEGIN
       EXIT(DotNetDocProperties.InnerText);
     END;

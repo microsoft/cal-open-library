@@ -19,25 +19,25 @@ OBJECT Codeunit 50044 DotNet_Word.Anchor
       OpenXmlDotNetHelper@1001 : Codeunit 50067;
 
     [External]
-    PROCEDURE Create@1();
+    PROCEDURE Anchor@1();
     BEGIN
       DotNetAnchor := DotNetAnchor.Anchor;
     END;
 
     [External]
-    PROCEDURE CreateFromOuterXml@2(OuterXml@1000 : Text);
+    PROCEDURE AnchorFromOuterXml@2(OuterXml@1000 : Text);
     BEGIN
       DotNetAnchor := DotNetAnchor.Anchor(OuterXml);
     END;
 
     [External]
-    PROCEDURE GetOuterXml@3() : Text;
+    PROCEDURE OuterXml@3() : Text;
     BEGIN
       EXIT(DotNetAnchor.OuterXml);
     END;
 
     [External]
-    PROCEDURE GetInnerText@4() : Text;
+    PROCEDURE InnerText@4() : Text;
     BEGIN
       EXIT(DotNetAnchor.InnerText);
     END;

@@ -18,25 +18,25 @@ OBJECT Codeunit 50050 DotNet_Word.GraphicFrameLocks
       DotNetGraphicFrameLocks@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Drawing.GraphicFrameLocks";
 
     [External]
-    PROCEDURE Create@1();
+    PROCEDURE GraphicFrameLocks@1();
     BEGIN
       DotNetGraphicFrameLocks := DotNetGraphicFrameLocks.GraphicFrameLocks;
     END;
 
     [External]
-    PROCEDURE CreateFromOuterXml@2(OuterXml@1000 : Text);
+    PROCEDURE GraphicFrameLocksFromOuterXml@2(OuterXml@1000 : Text);
     BEGIN
       DotNetGraphicFrameLocks := DotNetGraphicFrameLocks.GraphicFrameLocks(OuterXml);
     END;
 
     [External]
-    PROCEDURE GetOuterXml@3() : Text;
+    PROCEDURE OuterXml@3() : Text;
     BEGIN
       EXIT(DotNetGraphicFrameLocks.OuterXml);
     END;
 
     [External]
-    PROCEDURE GetInnerText@4() : Text;
+    PROCEDURE InnerText@4() : Text;
     BEGIN
       EXIT(DotNetGraphicFrameLocks.InnerText);
     END;

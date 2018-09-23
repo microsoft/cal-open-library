@@ -18,25 +18,25 @@ OBJECT Codeunit 50053 DotNet_Word.ShapeProperties
       DotNetShapeProperties@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Drawing.Pictures.ShapeProperties";
 
     [External]
-    PROCEDURE Create@1();
+    PROCEDURE ShapeProperties@1();
     BEGIN
       DotNetShapeProperties := DotNetShapeProperties.ShapeProperties;
     END;
 
     [External]
-    PROCEDURE CreateFromOuterXml@2(OuterXml@1000 : Text);
+    PROCEDURE ShapePropertiesFromOuterXml@2(OuterXml@1000 : Text);
     BEGIN
       DotNetShapeProperties := DotNetShapeProperties.ShapeProperties(OuterXml);
     END;
 
     [External]
-    PROCEDURE GetOuterXml@3() : Text;
+    PROCEDURE OuterXml@3() : Text;
     BEGIN
       EXIT(DotNetShapeProperties.OuterXml);
     END;
 
     [External]
-    PROCEDURE GetInnerText@4() : Text;
+    PROCEDURE InnerText@4() : Text;
     BEGIN
       EXIT(DotNetShapeProperties.InnerText);
     END;
