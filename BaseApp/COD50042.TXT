@@ -15,20 +15,20 @@ OBJECT Codeunit 50042 DotNet_Word.ImagePart
   CODE
   {
     VAR
-      DotNetImagePart@17024400 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Packaging.ImagePart";
+      DotNetImagePart@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Packaging.ImagePart";
 
     [External]
-    PROCEDURE FeedData@17024401(ImageStream@17024400 : InStream);
+    PROCEDURE FeedData@1(ImageStream@1000 : InStream);
     BEGIN
       DotNetImagePart.FeedData(ImageStream);
     END;
 
-    PROCEDURE SetImagePart@17024411(NewDotNetImagePart@17024400 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Packaging.ImagePart");
+    PROCEDURE SetImagePart@2(NewDotNetImagePart@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Packaging.ImagePart");
     BEGIN
       DotNetImagePart := NewDotNetImagePart;
     END;
 
-    PROCEDURE GetImagePart@17024400(VAR CurrentDotNetImagePart@17024400 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Packaging.ImagePart");
+    PROCEDURE GetImagePart@3(VAR CurrentDotNetImagePart@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Packaging.ImagePart");
     BEGIN
       CurrentDotNetImagePart := DotNetImagePart;
     END;

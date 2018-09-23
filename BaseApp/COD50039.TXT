@@ -15,37 +15,37 @@ OBJECT Codeunit 50039 DotNet_Word.Styles
   CODE
   {
     VAR
-      DotNetStyles@17024400 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.Styles";
+      DotNetStyles@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.Styles";
 
     [External]
-    PROCEDURE Create@17024403();
+    PROCEDURE Create@1();
     BEGIN
       DotNetStyles := DotNetStyles.Styles;
     END;
 
     [External]
-    PROCEDURE CreateFromOuterXml@17024408(OuterXml@17024400 : Text);
+    PROCEDURE CreateFromOuterXml@2(OuterXml@1000 : Text);
     BEGIN
       DotNetStyles := DotNetStyles.Styles(OuterXml);
     END;
 
     [External]
-    PROCEDURE GetOuterXml@17024402() : Text;
+    PROCEDURE GetOuterXml@3() : Text;
     BEGIN
       EXIT(DotNetStyles.OuterXml);
     END;
 
     [External]
-    PROCEDURE GetInnerText@17024410() : Text;
+    PROCEDURE GetInnerText@4() : Text;
     BEGIN
       EXIT(DotNetStyles.InnerText);
     END;
 
     [External]
-    PROCEDURE AppendStyle@17024405(VAR WordStyle@17024401 : Codeunit 50038);
+    PROCEDURE AppendStyle@5(VAR WordStyle@1000 : Codeunit 50038);
     VAR
-      DotNetStyle@17024400 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.Style";
-      OpenXmlDotNetHelper@17024402 : Codeunit 50067;
+      DotNetStyle@1001 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.Style";
+      OpenXmlDotNetHelper@1002 : Codeunit 50067;
     BEGIN
       WordStyle.GetStyle(DotNetStyle);
       //We need this to deal with .NET Generics:
@@ -53,32 +53,32 @@ OBJECT Codeunit 50039 DotNet_Word.Styles
     END;
 
     [External]
-    PROCEDURE Save@17024401(VAR WordStyleDefinitionPart@17024401 : Codeunit 50041);
+    PROCEDURE Save@6(VAR WordStyleDefinitionPart@1000 : Codeunit 50041);
     VAR
-      DotNetStyleDefinitionsPart@17024402 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Packaging.StyleDefinitionsPart";
+      DotNetStyleDefinitionsPart@1001 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Packaging.StyleDefinitionsPart";
     BEGIN
       WordStyleDefinitionPart.GetStyleDefinitionsPart(DotNetStyleDefinitionsPart);
       DotNetStyles.Save(DotNetStyleDefinitionsPart);
     END;
 
     [External]
-    PROCEDURE GetStyleEnumerator@17024413(VAR WordStylesEnumerator@17024400 : Codeunit 50040);
+    PROCEDURE GetStyleEnumerator@7(VAR WordStylesEnumerator@1000 : Codeunit 50040);
     VAR
-      DotNetStyle@17024402 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.Style";
-      DotNetEnumerator@17024403 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Collections.IEnumerator";
-      OpenXmlDotNetHelper@17024401 : Codeunit 50067;
+      DotNetStyle@1001 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.Style";
+      DotNetEnumerator@1002 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Collections.IEnumerator";
+      OpenXmlDotNetHelper@1003 : Codeunit 50067;
     BEGIN
       //We need this to deal with .NET Generics:
       OpenXmlDotNetHelper.GetEnumeratorOfTypeGeneric(DotNetStyles.Elements, GETDOTNETTYPE(DotNetStyle), DotNetEnumerator);
       WordStylesEnumerator.SetEnumerator(DotNetEnumerator);
     END;
 
-    PROCEDURE SetStyles@17024411(NewDotNetStyles@17024400 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.Styles");
+    PROCEDURE SetStyles@8(NewDotNetStyles@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.Styles");
     BEGIN
       DotNetStyles := NewDotNetStyles;
     END;
 
-    PROCEDURE GetStyles@17024400(VAR CurrentDotNetStyles@17024400 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.Styles");
+    PROCEDURE GetStyles@9(VAR CurrentDotNetStyles@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.Styles");
     BEGIN
       CurrentDotNetStyles := DotNetStyles;
     END;

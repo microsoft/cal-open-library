@@ -15,35 +15,35 @@ OBJECT Codeunit 50070 DotNet_Word.NumberingDefinitio
   CODE
   {
     VAR
-      DotNetNumberingDefinitionsPart@17024400 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Packaging.NumberingDefinitionsPart";
+      DotNetNumberingDefinitionsPart@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Packaging.NumberingDefinitionsPart";
 
     [External]
-    PROCEDURE SetNumbering@17024403(VAR WordNumbering@17024400 : Codeunit 50071);
+    PROCEDURE SetNumbering@1(VAR WordNumbering@1000 : Codeunit 50071);
     VAR
-      DotNetNumbering@17024401 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.Numbering";
+      DotNetNumbering@1001 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.Numbering";
     BEGIN
       WordNumbering.GetNumbering(DotNetNumbering);
       DotNetNumberingDefinitionsPart.Numbering := DotNetNumbering;
     END;
 
     [External]
-    PROCEDURE GetNumbering@17024401(VAR WordNumbering@17024400 : Codeunit 50071);
+    PROCEDURE GetNumbering@2(VAR WordNumbering@1000 : Codeunit 50071);
     BEGIN
       WordNumbering.SetNumbering(DotNetNumberingDefinitionsPart.Numbering);
     END;
 
     [External]
-    PROCEDURE IsDotNetNull@17024402() : Boolean;
+    PROCEDURE IsDotNetNull@3() : Boolean;
     BEGIN
       EXIT(ISNULL(DotNetNumberingDefinitionsPart));
     END;
 
-    PROCEDURE SetNumberingDefinitionsPart@17024411(NewDotNetNumberingDefinitionsPart@17024400 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Packaging.NumberingDefinitionsPart");
+    PROCEDURE SetNumberingDefinitionsPart@4(NewDotNetNumberingDefinitionsPart@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Packaging.NumberingDefinitionsPart");
     BEGIN
       DotNetNumberingDefinitionsPart := NewDotNetNumberingDefinitionsPart;
     END;
 
-    PROCEDURE GetNumberingDefinitionsPart@17024400(VAR CurrentDotNetNumberingDefinitionsPart@17024400 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Packaging.NumberingDefinitionsPart");
+    PROCEDURE GetNumberingDefinitionsPart@5(VAR CurrentDotNetNumberingDefinitionsPart@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Packaging.NumberingDefinitionsPart");
     BEGIN
       CurrentDotNetNumberingDefinitionsPart := DotNetNumberingDefinitionsPart;
     END;

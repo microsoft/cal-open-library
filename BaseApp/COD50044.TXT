@@ -15,118 +15,118 @@ OBJECT Codeunit 50044 DotNet_Word.Anchor
   CODE
   {
     VAR
-      DotNetAnchor@17024400 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Drawing.Wordprocessing.Anchor";
-      OpenXmlDotNetHelper@17024401 : Codeunit 50067;
+      DotNetAnchor@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Drawing.Wordprocessing.Anchor";
+      OpenXmlDotNetHelper@1001 : Codeunit 50067;
 
     [External]
-    PROCEDURE Create@17024403();
+    PROCEDURE Create@1();
     BEGIN
       DotNetAnchor := DotNetAnchor.Anchor;
     END;
 
     [External]
-    PROCEDURE CreateFromOuterXml@17024425(OuterXml@17024400 : Text);
+    PROCEDURE CreateFromOuterXml@2(OuterXml@1000 : Text);
     BEGIN
       DotNetAnchor := DotNetAnchor.Anchor(OuterXml);
     END;
 
     [External]
-    PROCEDURE GetOuterXml@17024424() : Text;
+    PROCEDURE GetOuterXml@3() : Text;
     BEGIN
       EXIT(DotNetAnchor.OuterXml);
     END;
 
     [External]
-    PROCEDURE GetInnerText@17024423() : Text;
+    PROCEDURE GetInnerText@4() : Text;
     BEGIN
       EXIT(DotNetAnchor.InnerText);
     END;
 
     [External]
-    PROCEDURE SetAllowOverlap@17024405(NewAllowOverlap@17024401 : Boolean);
+    PROCEDURE SetAllowOverlap@5(NewAllowOverlap@1000 : Boolean);
     VAR
-      DotNetBooleanValue@17024400 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.BooleanValue";
+      DotNetBooleanValue@1001 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.BooleanValue";
     BEGIN
       DotNetAnchor.AllowOverlap := DotNetBooleanValue.BooleanValue(NewAllowOverlap);
     END;
 
     [External]
-    PROCEDURE SetLayoutInCell@17024402(NewLayoutInCell@17024401 : Boolean);
+    PROCEDURE SetLayoutInCell@6(NewLayoutInCell@1000 : Boolean);
     VAR
-      DotNetBooleanValue@17024400 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.BooleanValue";
+      DotNetBooleanValue@1001 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.BooleanValue";
     BEGIN
       DotNetAnchor.LayoutInCell := DotNetBooleanValue.BooleanValue(NewLayoutInCell);
     END;
 
     [External]
-    PROCEDURE SetLocked@17024406(NewLocked@17024401 : Boolean);
+    PROCEDURE SetLocked@7(NewLocked@1000 : Boolean);
     VAR
-      DotNetBooleanValue@17024400 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.BooleanValue";
+      DotNetBooleanValue@1001 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.BooleanValue";
     BEGIN
       DotNetAnchor.Locked := DotNetBooleanValue.BooleanValue(NewLocked);
     END;
 
     [External]
-    PROCEDURE SetBehindDoc@17024408(NewBehindDoc@17024401 : Boolean);
+    PROCEDURE SetBehindDoc@8(NewBehindDoc@1000 : Boolean);
     VAR
-      DotNetBooleanValue@17024400 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.BooleanValue";
+      DotNetBooleanValue@1001 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.BooleanValue";
     BEGIN
       DotNetAnchor.BehindDoc := DotNetBooleanValue.BooleanValue(NewBehindDoc);
     END;
 
     [External]
-    PROCEDURE SetSimplePos@17024409(NewSimplePos@17024401 : Boolean);
+    PROCEDURE SetSimplePos@9(NewSimplePos@1000 : Boolean);
     VAR
-      DotNetBooleanValue@17024400 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.BooleanValue";
+      DotNetBooleanValue@1001 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.BooleanValue";
     BEGIN
       DotNetAnchor.SimplePos := DotNetBooleanValue.BooleanValue(NewSimplePos);
     END;
 
     [External]
-    PROCEDURE SetRelativeHeight@17024412(NewRelativeHeight@17024401 : Integer);
+    PROCEDURE SetRelativeHeight@10(NewRelativeHeight@1000 : Integer);
     VAR
-      DotNetUInt32Value@17024400 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.UInt32Value";
+      DotNetUInt32Value@1001 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.UInt32Value";
     BEGIN
       DotNetAnchor.RelativeHeight := DotNetUInt32Value.FromUInt32(NewRelativeHeight);
     END;
 
     [External]
-    PROCEDURE SetDistanceFromRight@17024414(NewDistance@17024401 : Integer);
+    PROCEDURE SetDistanceFromRight@11(NewDistance@1000 : Integer);
     VAR
-      DotNetUInt32Value@17024400 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.UInt32Value";
+      DotNetUInt32Value@1001 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.UInt32Value";
     BEGIN
       DotNetAnchor.DistanceFromRight := DotNetUInt32Value.FromUInt32(NewDistance);
     END;
 
     [External]
-    PROCEDURE SetDistanceFromLeft@17024415(NewDistance@17024401 : Integer);
+    PROCEDURE SetDistanceFromLeft@12(NewDistance@1000 : Integer);
     VAR
-      DotNetUInt32Value@17024400 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.UInt32Value";
+      DotNetUInt32Value@1001 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.UInt32Value";
     BEGIN
       DotNetAnchor.DistanceFromLeft := DotNetUInt32Value.FromUInt32(NewDistance);
     END;
 
     [External]
-    PROCEDURE SetDistanceFromTop@17024416(NewDistance@17024401 : Integer);
+    PROCEDURE SetDistanceFromTop@13(NewDistance@1000 : Integer);
     VAR
-      DotNetUInt32Value@17024400 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.UInt32Value";
+      DotNetUInt32Value@1001 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.UInt32Value";
     BEGIN
       DotNetAnchor.DistanceFromTop := DotNetUInt32Value.FromUInt32(NewDistance);
     END;
 
     [External]
-    PROCEDURE SetDistanceFromBottom@17024417(NewDistance@17024401 : Integer);
+    PROCEDURE SetDistanceFromBottom@14(NewDistance@1000 : Integer);
     VAR
-      DotNetUInt32Value@17024400 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.UInt32Value";
+      DotNetUInt32Value@1001 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.UInt32Value";
     BEGIN
       DotNetAnchor.DistanceFromBottom := DotNetUInt32Value.FromUInt32(NewDistance);
     END;
 
     [External]
-    PROCEDURE AppendSimplePosition@17024401(X@17024401 : Integer;Y@17024402 : Integer);
+    PROCEDURE AppendSimplePosition@15(X@1000 : Integer;Y@1001 : Integer);
     VAR
-      DotNetInt64Value@17024400 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Int64Value";
-      DotNetSimplePosition@17024403 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Drawing.Wordprocessing.SimplePosition";
+      DotNetInt64Value@1002 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Int64Value";
+      DotNetSimplePosition@1003 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Drawing.Wordprocessing.SimplePosition";
     BEGIN
       DotNetSimplePosition := DotNetSimplePosition.SimplePosition;
       DotNetSimplePosition.X := DotNetInt64Value.FromInt64(X);
@@ -136,10 +136,10 @@ OBJECT Codeunit 50044 DotNet_Word.Anchor
     END;
 
     [External]
-    PROCEDURE AppendExtent@17024410(Cx@17024401 : Integer;Cy@17024402 : Integer);
+    PROCEDURE AppendExtent@16(Cx@1000 : Integer;Cy@1001 : Integer);
     VAR
-      DotNetInt64Value@17024400 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Int64Value";
-      DotNetExtent@17024403 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Drawing.Wordprocessing.Extent";
+      DotNetInt64Value@1002 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Int64Value";
+      DotNetExtent@1003 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Drawing.Wordprocessing.Extent";
     BEGIN
       DotNetExtent := DotNetExtent.Extent;
       DotNetExtent.Cx := DotNetInt64Value.FromInt64(Cx);
@@ -149,10 +149,10 @@ OBJECT Codeunit 50044 DotNet_Word.Anchor
     END;
 
     [External]
-    PROCEDURE AppendEffectExtent@17024418(LeftEdge@17024401 : Integer;TopEdge@17024402 : Integer;RightEdge@17024404 : Integer;BottomEdge@17024405 : Integer);
+    PROCEDURE AppendEffectExtent@17(LeftEdge@1000 : Integer;TopEdge@1001 : Integer;RightEdge@1002 : Integer;BottomEdge@1003 : Integer);
     VAR
-      DotNetInt64Value@17024400 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Int64Value";
-      DotNetEffectExtent@17024403 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Drawing.Wordprocessing.EffectExtent";
+      DotNetInt64Value@1004 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Int64Value";
+      DotNetEffectExtent@1005 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Drawing.Wordprocessing.EffectExtent";
     BEGIN
       DotNetEffectExtent := DotNetEffectExtent.EffectExtent;
       DotNetEffectExtent.LeftEdge := DotNetInt64Value.FromInt64(LeftEdge);
@@ -164,9 +164,9 @@ OBJECT Codeunit 50044 DotNet_Word.Anchor
     END;
 
     [External]
-    PROCEDURE AppendVerticalPosition@17024404(VAR WordVerticalPosition@17024401 : Codeunit 50045);
+    PROCEDURE AppendVerticalPosition@18(VAR WordVerticalPosition@1000 : Codeunit 50045);
     VAR
-      DotNetVerticalPosition@17024403 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Drawing.Wordprocessing.VerticalPosition";
+      DotNetVerticalPosition@1001 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Drawing.Wordprocessing.VerticalPosition";
     BEGIN
       WordVerticalPosition.GetVerticalPosition(DotNetVerticalPosition);
       //We need this to deal with .NET Generics:
@@ -174,9 +174,9 @@ OBJECT Codeunit 50044 DotNet_Word.Anchor
     END;
 
     [External]
-    PROCEDURE AppendHorizontalPosition@17024413(VAR WordHorizontalPosition@17024401 : Codeunit 50046);
+    PROCEDURE AppendHorizontalPosition@19(VAR WordHorizontalPosition@1000 : Codeunit 50046);
     VAR
-      DotNetHorizontalPosition@17024403 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Drawing.Wordprocessing.HorizontalPosition";
+      DotNetHorizontalPosition@1001 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Drawing.Wordprocessing.HorizontalPosition";
     BEGIN
       WordHorizontalPosition.GetHorizontalPosition(DotNetHorizontalPosition);
       //We need this to deal with .NET Generics:
@@ -184,9 +184,9 @@ OBJECT Codeunit 50044 DotNet_Word.Anchor
     END;
 
     [External]
-    PROCEDURE AppendWrapSquare@17024407(VAR WordWrapSquare@17024401 : Codeunit 50047);
+    PROCEDURE AppendWrapSquare@20(VAR WordWrapSquare@1000 : Codeunit 50047);
     VAR
-      DotNetWrapSquare@17024403 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Drawing.Wordprocessing.WrapSquare";
+      DotNetWrapSquare@1001 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Drawing.Wordprocessing.WrapSquare";
     BEGIN
       WordWrapSquare.GetWrapSquare(DotNetWrapSquare);
       //We need this to deal with .NET Generics:
@@ -194,9 +194,9 @@ OBJECT Codeunit 50044 DotNet_Word.Anchor
     END;
 
     [External]
-    PROCEDURE AppendWrapTopBottom@17024419(VAR WordWrapTopBottom@17024401 : Codeunit 50048);
+    PROCEDURE AppendWrapTopBottom@21(VAR WordWrapTopBottom@1000 : Codeunit 50048);
     VAR
-      DotNetWrapTopBottom@17024403 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Drawing.Wordprocessing.WrapTopBottom";
+      DotNetWrapTopBottom@1001 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Drawing.Wordprocessing.WrapTopBottom";
     BEGIN
       WordWrapTopBottom.GetWrapTopBottom(DotNetWrapTopBottom);
       //We need this to deal with .NET Generics:
@@ -204,9 +204,9 @@ OBJECT Codeunit 50044 DotNet_Word.Anchor
     END;
 
     [External]
-    PROCEDURE AppendDocProperties@17024420(VAR WordDocProperties@17024401 : Codeunit 50049);
+    PROCEDURE AppendDocProperties@22(VAR WordDocProperties@1000 : Codeunit 50049);
     VAR
-      DotNetDocProperties@17024403 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Drawing.Wordprocessing.DocProperties";
+      DotNetDocProperties@1001 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Drawing.Wordprocessing.DocProperties";
     BEGIN
       WordDocProperties.GetDocProperties(DotNetDocProperties);
       //We need this to deal with .NET Generics:
@@ -214,10 +214,10 @@ OBJECT Codeunit 50044 DotNet_Word.Anchor
     END;
 
     [External]
-    PROCEDURE AppendGraphicFrameLocks@17024421(VAR WordGraphicFrameLocks@17024401 : Codeunit 50050);
+    PROCEDURE AppendGraphicFrameLocks@23(VAR WordGraphicFrameLocks@1000 : Codeunit 50050);
     VAR
-      DotNetGraphicFrameLocks@17024403 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Drawing.GraphicFrameLocks";
-      DotNetNonVisualGraphicFrameDrawingProperties@17024400 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Drawing.Wordprocessing.NonVisualGraphicFrameDrawingProperties";
+      DotNetGraphicFrameLocks@1001 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Drawing.GraphicFrameLocks";
+      DotNetNonVisualGraphicFrameDrawingProperties@1002 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Drawing.Wordprocessing.NonVisualGraphicFrameDrawingProperties";
     BEGIN
       WordGraphicFrameLocks.GetGraphicFrameLocks(DotNetGraphicFrameLocks);
       DotNetNonVisualGraphicFrameDrawingProperties := DotNetNonVisualGraphicFrameDrawingProperties.NonVisualGraphicFrameDrawingProperties;
@@ -227,12 +227,12 @@ OBJECT Codeunit 50044 DotNet_Word.Anchor
     END;
 
     [External]
-    PROCEDURE AppendPicture@17024422(VAR WordPicture@17024401 : Codeunit 50051);
+    PROCEDURE AppendPicture@24(VAR WordPicture@1000 : Codeunit 50051);
     VAR
-      DotNetPicture@17024403 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Drawing.Pictures.Picture";
-      DotNetGraphicData@17024402 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Drawing.GraphicData";
-      DotNetGraphic@17024404 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Drawing.Graphic";
-      DotNetStringValue@17024400 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.StringValue";
+      DotNetPicture@1001 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Drawing.Pictures.Picture";
+      DotNetGraphicData@1002 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Drawing.GraphicData";
+      DotNetGraphic@1003 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Drawing.Graphic";
+      DotNetStringValue@1004 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.StringValue";
     BEGIN
       WordPicture.GetPicture(DotNetPicture);
       DotNetGraphic := DotNetGraphic.Graphic;
@@ -244,12 +244,12 @@ OBJECT Codeunit 50044 DotNet_Word.Anchor
       OpenXmlDotNetHelper.AppendGeneric(DotNetAnchor, DotNetGraphic);
     END;
 
-    PROCEDURE SetAnchor@17024411(NewDotNetAnchor@17024400 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Drawing.Wordprocessing.Anchor");
+    PROCEDURE SetAnchor@25(NewDotNetAnchor@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Drawing.Wordprocessing.Anchor");
     BEGIN
       DotNetAnchor := NewDotNetAnchor;
     END;
 
-    PROCEDURE GetAnchor@17024400(VAR CurrentDotNetAnchor@17024400 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Drawing.Wordprocessing.Anchor");
+    PROCEDURE GetAnchor@26(VAR CurrentDotNetAnchor@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Drawing.Wordprocessing.Anchor");
     BEGIN
       CurrentDotNetAnchor := DotNetAnchor;
     END;

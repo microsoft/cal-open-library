@@ -15,70 +15,70 @@ OBJECT Codeunit 50049 DotNet_Word.DocProperties
   CODE
   {
     VAR
-      DotNetDocProperties@17024400 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Drawing.Wordprocessing.DocProperties";
+      DotNetDocProperties@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Drawing.Wordprocessing.DocProperties";
 
     [External]
-    PROCEDURE Create@17024403();
+    PROCEDURE Create@1();
     BEGIN
       DotNetDocProperties := DotNetDocProperties.DocProperties;
     END;
 
     [External]
-    PROCEDURE CreateFromOuterXml@17024408(OuterXml@17024400 : Text);
+    PROCEDURE CreateFromOuterXml@2(OuterXml@1000 : Text);
     BEGIN
       DotNetDocProperties := DotNetDocProperties.DocProperties(OuterXml);
     END;
 
     [External]
-    PROCEDURE GetOuterXml@17024402() : Text;
+    PROCEDURE GetOuterXml@3() : Text;
     BEGIN
       EXIT(DotNetDocProperties.OuterXml);
     END;
 
     [External]
-    PROCEDURE GetInnerText@17024410() : Text;
+    PROCEDURE GetInnerText@4() : Text;
     BEGIN
       EXIT(DotNetDocProperties.InnerText);
     END;
 
     [External]
-    PROCEDURE SetId@17024416(NewId@17024401 : Integer);
+    PROCEDURE SetId@5(NewId@1000 : Integer);
     VAR
-      DotNetUInt32Value@17024400 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.UInt32Value";
+      DotNetUInt32Value@1001 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.UInt32Value";
     BEGIN
       DotNetDocProperties.Id := DotNetUInt32Value.FromUInt32(NewId);
     END;
 
     [External]
-    PROCEDURE SetName@17024417(NewName@17024401 : Text);
+    PROCEDURE SetName@6(NewName@1000 : Text);
     VAR
-      DotNetStringValue@17024400 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.StringValue";
+      DotNetStringValue@1001 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.StringValue";
     BEGIN
       DotNetDocProperties.Name := DotNetStringValue.FromString(NewName);
     END;
 
     [External]
-    PROCEDURE SetDescription@17024406(NewDescription@17024401 : Text);
+    PROCEDURE SetDescription@7(NewDescription@1000 : Text);
     VAR
-      DotNetStringValue@17024400 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.StringValue";
+      DotNetStringValue@1001 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.StringValue";
     BEGIN
       DotNetDocProperties.Description := DotNetStringValue.FromString(NewDescription);
     END;
 
     [External]
-    PROCEDURE SetTitle@17024407(NewTitle@17024401 : Text);
+    PROCEDURE SetTitle@8(NewTitle@1000 : Text);
     VAR
-      DotNetStringValue@17024400 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.StringValue";
+      DotNetStringValue@1001 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.StringValue";
     BEGIN
       DotNetDocProperties.Title := DotNetStringValue.FromString(NewTitle);
     END;
 
-    PROCEDURE SetDocProperties@17024411(NewDotNetDocProperties@17024400 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Drawing.Wordprocessing.DocProperties");
+    PROCEDURE SetDocProperties@9(NewDotNetDocProperties@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Drawing.Wordprocessing.DocProperties");
     BEGIN
       DotNetDocProperties := NewDotNetDocProperties;
     END;
 
-    PROCEDURE GetDocProperties@17024400(VAR CurrentDotNetDocProperties@17024400 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Drawing.Wordprocessing.DocProperties");
+    PROCEDURE GetDocProperties@10(VAR CurrentDotNetDocProperties@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Drawing.Wordprocessing.DocProperties");
     BEGIN
       CurrentDotNetDocProperties := DotNetDocProperties;
     END;

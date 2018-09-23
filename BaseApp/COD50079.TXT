@@ -27,21 +27,21 @@ OBJECT Codeunit 50079 DotNet_OpenXml.SpaceProcessing
     END;
 
     [External]
-    PROCEDURE ToOpenXmlEnumValue@17024400(VAR DotNet_OpenXmlEnumValue@17024400 : Codeunit 50080);
+    PROCEDURE ToOpenXmlEnumValue@2(VAR DotNet_OpenXmlEnumValue@1000 : Codeunit 50080);
     VAR
-      OpenXmlDotNetHelper@17024401 : Codeunit 50067;
-      DotNetEnumValue@17024402 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.EnumValue`1";
+      OpenXmlDotNetHelper@1001 : Codeunit 50067;
+      DotNetEnumValue@1002 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.EnumValue`1";
     BEGIN
       OpenXmlDotNetHelper.CreateEnumValueGeneric(GETDOTNETTYPE(DotNetSpaceProcessingModeValues), DotNetSpaceProcessingModeValues, DotNetEnumValue);
       DotNet_OpenXmlEnumValue.SetEnumValue(DotNetEnumValue);
     END;
 
-    PROCEDURE SetSpaceProcessingModeValues@2(VAR NewDotNetSpaceProcessingModeValues@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.SpaceProcessingModeValues");
+    PROCEDURE SetSpaceProcessingModeValues@3(VAR NewDotNetSpaceProcessingModeValues@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.SpaceProcessingModeValues");
     BEGIN
       DotNetSpaceProcessingModeValues := NewDotNetSpaceProcessingModeValues;
     END;
 
-    PROCEDURE GetSpaceProcessingModeValues@3(VAR CurrentDotNetSpaceProcessingModeValues@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.SpaceProcessingModeValues");
+    PROCEDURE GetSpaceProcessingModeValues@4(VAR CurrentDotNetSpaceProcessingModeValues@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.SpaceProcessingModeValues");
     BEGIN
       CurrentDotNetSpaceProcessingModeValues := DotNetSpaceProcessingModeValues;
     END;

@@ -15,58 +15,58 @@ OBJECT Codeunit 50054 DotNet_Word.BlipFill
   CODE
   {
     VAR
-      DotNetBlipFill@17024400 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Drawing.Pictures.BlipFill";
+      DotNetBlipFill@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Drawing.Pictures.BlipFill";
 
     [External]
-    PROCEDURE Create@17024403();
+    PROCEDURE Create@1();
     BEGIN
       DotNetBlipFill := DotNetBlipFill.BlipFill;
     END;
 
     [External]
-    PROCEDURE CreateFromOuterXml@17024408(OuterXml@17024400 : Text);
+    PROCEDURE CreateFromOuterXml@2(OuterXml@1000 : Text);
     BEGIN
       DotNetBlipFill := DotNetBlipFill.BlipFill(OuterXml);
     END;
 
     [External]
-    PROCEDURE GetOuterXml@17024402() : Text;
+    PROCEDURE GetOuterXml@3() : Text;
     BEGIN
       EXIT(DotNetBlipFill.OuterXml);
     END;
 
     [External]
-    PROCEDURE GetInnerText@17024410() : Text;
+    PROCEDURE GetInnerText@4() : Text;
     BEGIN
       EXIT(DotNetBlipFill.InnerText);
     END;
 
     [External]
-    PROCEDURE SetBlip@17024416(VAR WordBlip@17024401 : Codeunit 50057);
+    PROCEDURE SetBlip@5(VAR WordBlip@1000 : Codeunit 50057);
     VAR
-      DotNetBlip@17024400 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Drawing.Blip";
+      DotNetBlip@1001 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Drawing.Blip";
     BEGIN
       WordBlip.GetBlip(DotNetBlip);
       DotNetBlipFill.Blip := DotNetBlip;
     END;
 
     [External]
-    PROCEDURE AppendStretch@17024404(VAR WordStretch@17024401 : Codeunit 50058);
+    PROCEDURE AppendStretch@6(VAR WordStretch@1000 : Codeunit 50058);
     VAR
-      DotNetStretch@17024400 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Drawing.Stretch";
-      OpenXmlDotNetHelper@17024402 : Codeunit 50067;
+      DotNetStretch@1001 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Drawing.Stretch";
+      OpenXmlDotNetHelper@1002 : Codeunit 50067;
     BEGIN
       WordStretch.GetStretch(DotNetStretch);
       //We need this to deal with .NET Generics:
       OpenXmlDotNetHelper.AppendGeneric(DotNetBlipFill, DotNetStretch);
     END;
 
-    PROCEDURE SetBlipFill@17024411(NewDotNetBlipFill@17024401 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Drawing.Pictures.BlipFill");
+    PROCEDURE SetBlipFill@7(NewDotNetBlipFill@1001 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Drawing.Pictures.BlipFill");
     BEGIN
       DotNetBlipFill := NewDotNetBlipFill;
     END;
 
-    PROCEDURE GetBlipFill@17024400(VAR CurrentDotNetBlipFill@17024400 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Drawing.Pictures.BlipFill");
+    PROCEDURE GetBlipFill@8(VAR CurrentDotNetBlipFill@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Drawing.Pictures.BlipFill");
     BEGIN
       CurrentDotNetBlipFill := DotNetBlipFill;
     END;

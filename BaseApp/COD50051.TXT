@@ -15,65 +15,65 @@ OBJECT Codeunit 50051 DotNet_Word.Picture
   CODE
   {
     VAR
-      DotNetPicture@17024400 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Drawing.Pictures.Picture";
+      DotNetPicture@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Drawing.Pictures.Picture";
 
     [External]
-    PROCEDURE Create@17024403();
+    PROCEDURE Create@1();
     BEGIN
       DotNetPicture := DotNetPicture.Picture;
     END;
 
     [External]
-    PROCEDURE CreateFromOuterXml@17024408(OuterXml@17024400 : Text);
+    PROCEDURE CreateFromOuterXml@2(OuterXml@1000 : Text);
     BEGIN
       DotNetPicture := DotNetPicture.Picture(OuterXml);
     END;
 
     [External]
-    PROCEDURE GetOuterXml@17024402() : Text;
+    PROCEDURE GetOuterXml@3() : Text;
     BEGIN
       EXIT(DotNetPicture.OuterXml);
     END;
 
     [External]
-    PROCEDURE GetInnerText@17024410() : Text;
+    PROCEDURE GetInnerText@4() : Text;
     BEGIN
       EXIT(DotNetPicture.InnerText);
     END;
 
     [External]
-    PROCEDURE SetNonVisualPictureProperties@17024416(VAR WordNonVisualPictureProperties@17024401 : Codeunit 50052);
+    PROCEDURE SetNonVisualPictureProperties@5(VAR WordNonVisualPictureProperties@1000 : Codeunit 50052);
     VAR
-      DotNetNonVisualPictureProperties@17024400 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Drawing.Pictures.NonVisualPictureProperties";
+      DotNetNonVisualPictureProperties@1001 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Drawing.Pictures.NonVisualPictureProperties";
     BEGIN
       WordNonVisualPictureProperties.GetNonVisualPictureProperties(DotNetNonVisualPictureProperties);
       DotNetPicture.NonVisualPictureProperties := DotNetNonVisualPictureProperties;
     END;
 
     [External]
-    PROCEDURE SetShapeProperties@17024405(VAR WordShapeProperties@17024401 : Codeunit 50053);
+    PROCEDURE SetShapeProperties@6(VAR WordShapeProperties@1000 : Codeunit 50053);
     VAR
-      DotNetShapeProperties@17024400 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Drawing.Pictures.ShapeProperties";
+      DotNetShapeProperties@1001 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Drawing.Pictures.ShapeProperties";
     BEGIN
       WordShapeProperties.GetShapeProperties(DotNetShapeProperties);
       DotNetPicture.ShapeProperties := DotNetShapeProperties;
     END;
 
     [External]
-    PROCEDURE SetBlipFill@17024407(VAR WordBlipFill@17024401 : Codeunit 50054);
+    PROCEDURE SetBlipFill@7(VAR WordBlipFill@1000 : Codeunit 50054);
     VAR
-      DotNetBlipFill@17024400 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Drawing.Pictures.BlipFill";
+      DotNetBlipFill@1001 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Drawing.Pictures.BlipFill";
     BEGIN
       WordBlipFill.GetBlipFill(DotNetBlipFill);
       DotNetPicture.BlipFill := DotNetBlipFill;
     END;
 
-    PROCEDURE SetPicture@17024411(NewDotNetPicture@17024400 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Drawing.Pictures.Picture");
+    PROCEDURE SetPicture@8(NewDotNetPicture@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Drawing.Pictures.Picture");
     BEGIN
       DotNetPicture := NewDotNetPicture;
     END;
 
-    PROCEDURE GetPicture@17024400(VAR CurrentDotNetPicture@17024400 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Drawing.Pictures.Picture");
+    PROCEDURE GetPicture@9(VAR CurrentDotNetPicture@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Drawing.Pictures.Picture");
     BEGIN
       CurrentDotNetPicture := DotNetPicture;
     END;

@@ -15,70 +15,70 @@ OBJECT Codeunit 50055 DotNet_Word.NonVisualDrawingPr
   CODE
   {
     VAR
-      DotNetNonVisualDrawingProperties@17024400 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Drawing.Pictures.NonVisualDrawingProperties";
+      DotNetNonVisualDrawingProperties@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Drawing.Pictures.NonVisualDrawingProperties";
 
     [External]
-    PROCEDURE Create@17024403();
+    PROCEDURE Create@1();
     BEGIN
       DotNetNonVisualDrawingProperties := DotNetNonVisualDrawingProperties.NonVisualDrawingProperties;
     END;
 
     [External]
-    PROCEDURE CreateFromOuterXml@17024408(OuterXml@17024400 : Text);
+    PROCEDURE CreateFromOuterXml@2(OuterXml@1000 : Text);
     BEGIN
       DotNetNonVisualDrawingProperties := DotNetNonVisualDrawingProperties.NonVisualDrawingProperties(OuterXml);
     END;
 
     [External]
-    PROCEDURE GetOuterXml@17024401() : Text;
+    PROCEDURE GetOuterXml@3() : Text;
     BEGIN
       EXIT(DotNetNonVisualDrawingProperties.OuterXml);
     END;
 
     [External]
-    PROCEDURE GetInnerText@17024410() : Text;
+    PROCEDURE GetInnerText@4() : Text;
     BEGIN
       EXIT(DotNetNonVisualDrawingProperties.InnerText);
     END;
 
     [External]
-    PROCEDURE SetName@17024416(NewName@17024401 : Text);
+    PROCEDURE SetName@5(NewName@1000 : Text);
     VAR
-      DotNetStringValue@17024400 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.StringValue";
+      DotNetStringValue@1001 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.StringValue";
     BEGIN
       DotNetNonVisualDrawingProperties.Name := DotNetStringValue.FromString(NewName);
     END;
 
     [External]
-    PROCEDURE SetDescription@17024402(NewDescription@17024401 : Text);
+    PROCEDURE SetDescription@6(NewDescription@1000 : Text);
     VAR
-      DotNetStringValue@17024400 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.StringValue";
+      DotNetStringValue@1001 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.StringValue";
     BEGIN
       DotNetNonVisualDrawingProperties.Description := DotNetStringValue.FromString(NewDescription);
     END;
 
     [External]
-    PROCEDURE SetTitle@17024404(NewTitle@17024401 : Text);
+    PROCEDURE SetTitle@7(NewTitle@1000 : Text);
     VAR
-      DotNetStringValue@17024400 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.StringValue";
+      DotNetStringValue@1001 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.StringValue";
     BEGIN
       DotNetNonVisualDrawingProperties.Title := DotNetStringValue.FromString(NewTitle);
     END;
 
     [External]
-    PROCEDURE SetId@17024406(NewId@17024401 : Integer);
+    PROCEDURE SetId@8(NewId@1000 : Integer);
     VAR
-      DotNetUInt32Value@17024400 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.UInt32Value";
+      DotNetUInt32Value@1001 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.UInt32Value";
     BEGIN
       DotNetNonVisualDrawingProperties.Id := DotNetUInt32Value.FromUInt32(NewId);
     END;
 
-    PROCEDURE SetNonVisualDrawingProperties@17024411(NewDotNetNonVisualDrawingProperties@17024400 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Drawing.Pictures.NonVisualDrawingProperties");
+    PROCEDURE SetNonVisualDrawingProperties@9(NewDotNetNonVisualDrawingProperties@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Drawing.Pictures.NonVisualDrawingProperties");
     BEGIN
       DotNetNonVisualDrawingProperties := NewDotNetNonVisualDrawingProperties;
     END;
 
-    PROCEDURE GetNonVisualDrawingProperties@17024400(VAR CurrentDotNetNonVisualDrawingProperties@17024400 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Drawing.Pictures.NonVisualDrawingProperties");
+    PROCEDURE GetNonVisualDrawingProperties@10(VAR CurrentDotNetNonVisualDrawingProperties@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Drawing.Pictures.NonVisualDrawingProperties");
     BEGIN
       CurrentDotNetNonVisualDrawingProperties := DotNetNonVisualDrawingProperties;
     END;

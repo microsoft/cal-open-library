@@ -15,39 +15,37 @@ OBJECT Codeunit 50028 DotNet_Word.TableRow
   CODE
   {
     VAR
-      DotNetTableRow@17024400 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.TableRow";
+      DotNetTableRow@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.TableRow";
 
     [External]
-    PROCEDURE Create@17024403();
+    PROCEDURE Create@1();
     BEGIN
       DotNetTableRow := DotNetTableRow.TableRow;
     END;
 
     [External]
-    PROCEDURE CreateFromOuterXml@17024408(OuterXml@17024401 : Text);
-    VAR
-      DotNetXmlElem@17024400 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.Underline";
+    PROCEDURE CreateFromOuterXml@2(OuterXml@1000 : Text);
     BEGIN
       DotNetTableRow := DotNetTableRow.TableRow(OuterXml);
     END;
 
     [External]
-    PROCEDURE GetOuterXml@17024402() : Text;
+    PROCEDURE GetOuterXml@3() : Text;
     BEGIN
       EXIT(DotNetTableRow.OuterXml);
     END;
 
     [External]
-    PROCEDURE GetInnerText@17024410() : Text;
+    PROCEDURE GetInnerText@4() : Text;
     BEGIN
       EXIT(DotNetTableRow.InnerText);
     END;
 
     [External]
-    PROCEDURE AppendCell@17024401(WordTableCell@17024400 : Codeunit 50029);
+    PROCEDURE AppendCell@5(WordTableCell@1000 : Codeunit 50029);
     VAR
-      DotNetTableCell@17024401 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.TableCell";
-      OpenXmlDotNetHelper@17024402 : Codeunit 50067;
+      DotNetTableCell@1001 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.TableCell";
+      OpenXmlDotNetHelper@1002 : Codeunit 50067;
     BEGIN
       WordTableCell.GetTableCell(DotNetTableCell);
       //We need this to deal with .NET Generics:
@@ -55,23 +53,23 @@ OBJECT Codeunit 50028 DotNet_Word.TableRow
     END;
 
     [External]
-    PROCEDURE GetTableCellEnumerator@17024404(VAR WordTableCellEnumerator@17024400 : Codeunit 50066);
+    PROCEDURE GetTableCellEnumerator@6(VAR WordTableCellEnumerator@1000 : Codeunit 50066);
     VAR
-      EnumeratorHelper@17024401 : Codeunit 50067;
-      DotNetTableCell@17024402 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.TableCell";
-      DotNetEnumerator@17024403 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Collections.IEnumerator";
+      EnumeratorHelper@1001 : Codeunit 50067;
+      DotNetTableCell@1002 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.TableCell";
+      DotNetEnumerator@1003 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Collections.IEnumerator";
     BEGIN
       //We need this to deal with .NET Generics:
       EnumeratorHelper.GetEnumeratorOfTypeGeneric(DotNetTableRow.Elements, GETDOTNETTYPE(DotNetTableCell), DotNetEnumerator);
       WordTableCellEnumerator.SetEnumerator(DotNetEnumerator);
     END;
 
-    PROCEDURE SetTableRow@17024411(NewDotNetTableRow@17024400 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.TableRow");
+    PROCEDURE SetTableRow@7(NewDotNetTableRow@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.TableRow");
     BEGIN
       DotNetTableRow := NewDotNetTableRow;
     END;
 
-    PROCEDURE GetTableRow@17024400(VAR CurrentDotNetTableRow@17024400 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.TableRow");
+    PROCEDURE GetTableRow@8(VAR CurrentDotNetTableRow@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.TableRow");
     BEGIN
       CurrentDotNetTableRow := DotNetTableRow;
     END;

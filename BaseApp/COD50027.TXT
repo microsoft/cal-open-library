@@ -15,39 +15,37 @@ OBJECT Codeunit 50027 DotNet_Word.Table
   CODE
   {
     VAR
-      DotNetTable@17024400 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.Table";
+      DotNetTable@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.Table";
 
     [External]
-    PROCEDURE Create@17024403();
+    PROCEDURE Create@1();
     BEGIN
       DotNetTable := DotNetTable.Table;
     END;
 
     [External]
-    PROCEDURE CreateFromOuterXml@17024408(OuterXml@17024401 : Text);
-    VAR
-      DotNetXmlElem@17024400 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.Underline";
+    PROCEDURE CreateFromOuterXml@2(OuterXml@1000 : Text);
     BEGIN
       DotNetTable := DotNetTable.Table(OuterXml);
     END;
 
     [External]
-    PROCEDURE GetOuterXml@17024402() : Text;
+    PROCEDURE GetOuterXml@3() : Text;
     BEGIN
       EXIT(DotNetTable.OuterXml);
     END;
 
     [External]
-    PROCEDURE GetInnerText@17024410() : Text;
+    PROCEDURE GetInnerText@4() : Text;
     BEGIN
       EXIT(DotNetTable.InnerText);
     END;
 
     [External]
-    PROCEDURE AppendRow@17024401(WordTableRow@17024400 : Codeunit 50028);
+    PROCEDURE AppendRow@5(WordTableRow@1000 : Codeunit 50028);
     VAR
-      DotNetTableRow@17024401 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.TableRow";
-      OpenXmlDotNetHelper@17024402 : Codeunit 50067;
+      DotNetTableRow@1001 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.TableRow";
+      OpenXmlDotNetHelper@1002 : Codeunit 50067;
     BEGIN
       WordTableRow.GetTableRow(DotNetTableRow);
       //We need this to deal with .NET Generics:
@@ -55,23 +53,23 @@ OBJECT Codeunit 50027 DotNet_Word.Table
     END;
 
     [External]
-    PROCEDURE GetTableRowEnumerator@17024404(VAR WordTableRowEnumerator@17024400 : Codeunit 50065);
+    PROCEDURE GetTableRowEnumerator@6(VAR WordTableRowEnumerator@1000 : Codeunit 50065);
     VAR
-      EnumeratorHelper@17024401 : Codeunit 50067;
-      DotNetTableRow@17024402 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.TableRow";
-      DotNetEnumerator@17024403 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Collections.IEnumerator";
+      EnumeratorHelper@1001 : Codeunit 50067;
+      DotNetTableRow@1002 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.TableRow";
+      DotNetEnumerator@1003 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Collections.IEnumerator";
     BEGIN
       //We need this to deal with .NET Generics:
       EnumeratorHelper.GetEnumeratorOfTypeGeneric(DotNetTable.Elements, GETDOTNETTYPE(DotNetTableRow), DotNetEnumerator);
       WordTableRowEnumerator.SetEnumerator(DotNetEnumerator);
     END;
 
-    PROCEDURE SetTable@17024411(NewDotNetTable@17024400 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.Table");
+    PROCEDURE SetTable@7(NewDotNetTable@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.Table");
     BEGIN
       DotNetTable := NewDotNetTable;
     END;
 
-    PROCEDURE GetTable@17024400(VAR CurrentDotNetTable@17024400 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.Table");
+    PROCEDURE GetTable@8(VAR CurrentDotNetTable@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.Table");
     BEGIN
       CurrentDotNetTable := DotNetTable;
     END;

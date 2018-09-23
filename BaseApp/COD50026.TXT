@@ -15,43 +15,39 @@ OBJECT Codeunit 50026 DotNet_Word.ParagraphProp
   CODE
   {
     VAR
-      DotNetParagraphProperties@17024400 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.ParagraphProperties";
+      DotNetParagraphProperties@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.ParagraphProperties";
 
     [External]
-    PROCEDURE Create@17024403();
-    VAR
-      DotNetXmlElem@17024400 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.Underline";
+    PROCEDURE Create@1();
     BEGIN
       DotNetParagraphProperties := DotNetParagraphProperties.ParagraphProperties;
     END;
 
     [External]
-    PROCEDURE CreateFromOuterXml@17024408(OuterXml@17024401 : Text);
-    VAR
-      DotNetXmlElem@17024400 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.Underline";
+    PROCEDURE CreateFromOuterXml@2(OuterXml@1000 : Text);
     BEGIN
       DotNetParagraphProperties := DotNetParagraphProperties.ParagraphProperties(OuterXml);
     END;
 
     [External]
-    PROCEDURE GetOuterXml@17024402() : Text;
+    PROCEDURE GetOuterXml@3() : Text;
     BEGIN
       EXIT(DotNetParagraphProperties.OuterXml);
     END;
 
     [External]
-    PROCEDURE GetInnerText@17024410() : Text;
+    PROCEDURE GetInnerText@4() : Text;
     BEGIN
       EXIT(DotNetParagraphProperties.InnerText);
     END;
 
     [External]
-    PROCEDURE SetJustification@17024404(Justification@17024401 : 'Left,Start,Center,Right,End,Both,MediumKashida,Distribute,NumTab,HighKashida,LowKashida,ThaiDistribute');
+    PROCEDURE SetJustification@5(Justification@1000 : 'Left,Start,Center,Right,End,Both,MediumKashida,Distribute,NumTab,HighKashida,LowKashida,ThaiDistribute');
     VAR
-      DotNetJustification@17024400 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.Justification";
-      DotNetJustificationValues@17024403 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.JustificationValues";
-      DotNetEnumValue@17024404 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.EnumValue`1";
-      OpenXmlDotNetHelper@17024402 : Codeunit 50067;
+      DotNetJustification@1001 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.Justification";
+      DotNetJustificationValues@1002 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.JustificationValues";
+      DotNetEnumValue@1003 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.EnumValue`1";
+      OpenXmlDotNetHelper@1004 : Codeunit 50067;
     BEGIN
       DotNetJustification := DotNetJustification.Justification;
       //We need this to deal with .NET Generics:
@@ -61,49 +57,49 @@ OBJECT Codeunit 50026 DotNet_Word.ParagraphProp
     END;
 
     [External]
-    PROCEDURE SetSpacingBetweenLines@17024401(VAR WordSpacingBetweenLines@17024401 : Codeunit 50030);
+    PROCEDURE SetSpacingBetweenLines@6(VAR WordSpacingBetweenLines@1000 : Codeunit 50030);
     VAR
-      DotNetSpacingBetweenLines@17024400 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.SpacingBetweenLines";
+      DotNetSpacingBetweenLines@1001 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.SpacingBetweenLines";
     BEGIN
       WordSpacingBetweenLines.GetSpacingBetweenLines(DotNetSpacingBetweenLines);
       DotNetParagraphProperties.SpacingBetweenLines := DotNetSpacingBetweenLines;
     END;
 
     [External]
-    PROCEDURE SetIndentation@17024406(VAR WordIndentation@17024401 : Codeunit 50031);
+    PROCEDURE SetIndentation@7(VAR WordIndentation@1000 : Codeunit 50031);
     VAR
-      DotNetIndentation@17024400 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.Indentation";
+      DotNetIndentation@1001 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.Indentation";
     BEGIN
       WordIndentation.GetIndentation(DotNetIndentation);
       DotNetParagraphProperties.Indentation := DotNetIndentation;
     END;
 
     [External]
-    PROCEDURE SetNumberingProperties@17024409(VAR WordNumberingProperties@17024401 : Codeunit 50032);
+    PROCEDURE SetNumberingProperties@8(VAR WordNumberingProperties@1000 : Codeunit 50032);
     VAR
-      DotNetNumberingProperties@17024400 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.NumberingProperties";
+      DotNetNumberingProperties@1001 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.NumberingProperties";
     BEGIN
       WordNumberingProperties.GetNumberingProperties(DotNetNumberingProperties);
       DotNetParagraphProperties.NumberingProperties := DotNetNumberingProperties;
     END;
 
     [External]
-    PROCEDURE SetParagraphStyleId@17024407(NewParagraphStyleId@17024400 : Text);
+    PROCEDURE SetParagraphStyleId@9(NewParagraphStyleId@1000 : Text);
     VAR
-      DotNetParagraphStyleId@17024402 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.ParagraphStyleId";
-      DotNetStringValue@17024401 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.StringValue";
+      DotNetParagraphStyleId@1001 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.ParagraphStyleId";
+      DotNetStringValue@1002 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.StringValue";
     BEGIN
       DotNetParagraphStyleId := DotNetParagraphStyleId.ParagraphStyleId;
       DotNetParagraphStyleId.Val := DotNetStringValue.FromString(NewParagraphStyleId);
       DotNetParagraphProperties.ParagraphStyleId := DotNetParagraphStyleId;
     END;
 
-    PROCEDURE SetParagraphProperties@17024411(NewDotNetParagraphProperties@17024400 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.ParagraphProperties");
+    PROCEDURE SetParagraphProperties@10(NewDotNetParagraphProperties@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.ParagraphProperties");
     BEGIN
       DotNetParagraphProperties := NewDotNetParagraphProperties;
     END;
 
-    PROCEDURE GetParagraphProperties@17024400(VAR CurrentDotNetParagraphProperties@17024400 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.ParagraphProperties");
+    PROCEDURE GetParagraphProperties@11(VAR CurrentDotNetParagraphProperties@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.ParagraphProperties");
     BEGIN
       CurrentDotNetParagraphProperties := DotNetParagraphProperties;
     END;

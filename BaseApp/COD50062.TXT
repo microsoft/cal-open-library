@@ -22,7 +22,7 @@ OBJECT Codeunit 50062 DotNet_Word.ParagraphEnumerato
       DotNetEnumerator := NewEnumerator;
     END;
 
-    PROCEDURE GetEnumerator@1000(VAR CurrentEnumerator@17024400 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Collections.IEnumerator");
+    PROCEDURE GetEnumerator@2(VAR CurrentEnumerator@1000 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Collections.IEnumerator");
     BEGIN
       CurrentEnumerator := DotNetEnumerator;
     END;

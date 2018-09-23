@@ -393,9 +393,9 @@ OBJECT Codeunit 50068 OpenXml WordProcessing Helper
     END;
 
     [External]
-    PROCEDURE MainDocumentPartHasNumberingDefinitionsPart@18(VAR DotNet_WordMainDocumentPart@17024400 : Codeunit 50019) : Boolean;
+    PROCEDURE MainDocumentPartHasNumberingDefinitionsPart@18(VAR DotNet_WordMainDocumentPart@1000 : Codeunit 50019) : Boolean;
     VAR
-      DotNet_WordNumberingDefinitionPart@17024401 : Codeunit 50070;
+      DotNet_WordNumberingDefinitionPart@1001 : Codeunit 50070;
     BEGIN
       DotNet_WordMainDocumentPart.NumberingDefinitionsPart(DotNet_WordNumberingDefinitionPart);
       EXIT(NOT DotNet_WordNumberingDefinitionPart.IsDotNetNull);

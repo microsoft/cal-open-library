@@ -15,38 +15,38 @@ OBJECT Codeunit 50059 DotNet_Word.BlipExtensionList
   CODE
   {
     VAR
-      DotNetBlipExtensionList@17024400 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Drawing.BlipExtensionList";
+      DotNetBlipExtensionList@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Drawing.BlipExtensionList";
 
     [External]
-    PROCEDURE Create@17024403();
+    PROCEDURE Create@1();
     BEGIN
       DotNetBlipExtensionList := DotNetBlipExtensionList.BlipExtensionList;
     END;
 
     [External]
-    PROCEDURE CreateFromOuterXml@17024408(OuterXml@17024400 : Text);
+    PROCEDURE CreateFromOuterXml@2(OuterXml@1000 : Text);
     BEGIN
       DotNetBlipExtensionList := DotNetBlipExtensionList.BlipExtensionList(OuterXml);
     END;
 
     [External]
-    PROCEDURE GetOuterXml@17024402() : Text;
+    PROCEDURE GetOuterXml@3() : Text;
     BEGIN
       EXIT(DotNetBlipExtensionList.OuterXml);
     END;
 
     [External]
-    PROCEDURE GetInnerText@17024410() : Text;
+    PROCEDURE GetInnerText@4() : Text;
     BEGIN
       EXIT(DotNetBlipExtensionList.InnerText);
     END;
 
     [External]
-    PROCEDURE AppendBlipExtension@17024416(Uri@17024401 : Text);
+    PROCEDURE AppendBlipExtension@5(Uri@1000 : Text);
     VAR
-      DotNetStringValue@17024400 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.StringValue";
-      DotNetBlipExtension@17024402 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Drawing.BlipExtension";
-      OpenXmlDotNetHelper@17024403 : Codeunit 50067;
+      DotNetStringValue@1001 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.StringValue";
+      DotNetBlipExtension@1002 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Drawing.BlipExtension";
+      OpenXmlDotNetHelper@1003 : Codeunit 50067;
     BEGIN
       DotNetBlipExtension := DotNetBlipExtension.BlipExtension;
       DotNetBlipExtension.Uri := DotNetStringValue.FromString(Uri);
@@ -54,12 +54,12 @@ OBJECT Codeunit 50059 DotNet_Word.BlipExtensionList
       OpenXmlDotNetHelper.AppendGeneric(DotNetBlipExtensionList, DotNetBlipExtension);
     END;
 
-    PROCEDURE SetBlipExtensionList@17024411(NewDotNetBlipExtensionList@17024400 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Drawing.BlipExtensionList");
+    PROCEDURE SetBlipExtensionList@6(NewDotNetBlipExtensionList@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Drawing.BlipExtensionList");
     BEGIN
       DotNetBlipExtensionList := NewDotNetBlipExtensionList;
     END;
 
-    PROCEDURE GetBlipExtensionList@17024400(VAR CurrentDotNetBlipExtensionList@17024400 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Drawing.BlipExtensionList");
+    PROCEDURE GetBlipExtensionList@7(VAR CurrentDotNetBlipExtensionList@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Drawing.BlipExtensionList");
     BEGIN
       CurrentDotNetBlipExtensionList := DotNetBlipExtensionList;
     END;

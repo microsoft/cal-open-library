@@ -15,35 +15,35 @@ OBJECT Codeunit 50041 DotNet_Word.StyleDefinitionPar
   CODE
   {
     VAR
-      DotNetStyleDefinitionsPart@17024400 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Packaging.StyleDefinitionsPart";
+      DotNetStyleDefinitionsPart@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Packaging.StyleDefinitionsPart";
 
     [External]
-    PROCEDURE SetStyles@17024403(VAR WordStyles@17024400 : Codeunit 50039);
+    PROCEDURE SetStyles@1(VAR WordStyles@1000 : Codeunit 50039);
     VAR
-      DotNetStyles@17024401 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.Styles";
+      DotNetStyles@1001 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.Styles";
     BEGIN
       WordStyles.GetStyles(DotNetStyles);
       DotNetStyleDefinitionsPart.Styles := DotNetStyles;
     END;
 
     [External]
-    PROCEDURE GetStyles@17024401(VAR WordStyles@17024400 : Codeunit 50039);
+    PROCEDURE GetStyles@2(VAR WordStyles@1000 : Codeunit 50039);
     BEGIN
       WordStyles.SetStyles(DotNetStyleDefinitionsPart.Styles);
     END;
 
     [External]
-    PROCEDURE IsDotNetNull@17024402() : Boolean;
+    PROCEDURE IsDotNetNull@3() : Boolean;
     BEGIN
       EXIT(ISNULL(DotNetStyleDefinitionsPart));
     END;
 
-    PROCEDURE SetStyleDefinitionsPart@17024411(NewDotNetStyleDefinitionsPart@17024400 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Packaging.StyleDefinitionsPart");
+    PROCEDURE SetStyleDefinitionsPart@4(NewDotNetStyleDefinitionsPart@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Packaging.StyleDefinitionsPart");
     BEGIN
       DotNetStyleDefinitionsPart := NewDotNetStyleDefinitionsPart;
     END;
 
-    PROCEDURE GetStyleDefinitionsPart@17024400(VAR CurrentDotNetStyleDefinitionsPart@17024400 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Packaging.StyleDefinitionsPart");
+    PROCEDURE GetStyleDefinitionsPart@5(VAR CurrentDotNetStyleDefinitionsPart@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Packaging.StyleDefinitionsPart");
     BEGIN
       CurrentDotNetStyleDefinitionsPart := DotNetStyleDefinitionsPart;
     END;

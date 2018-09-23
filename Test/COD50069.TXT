@@ -16,39 +16,39 @@ OBJECT Codeunit 50069 Text_OpenXml.WordProcessing
   CODE
   {
     VAR
-      Assert@17024401 : Codeunit 130000;
-      LibraryLowerPermissions@17024400 : Codeunit 132217;
-      OpenXmlWordProcessingHelper@17024402 : Codeunit 50068;
-      WordprocessingDocument@17024405 : Codeunit 50018;
-      MainDocumentPart@17024404 : Codeunit 50019;
-      WordDocument@17024406 : Codeunit 50020;
-      WordBody@17024403 : Codeunit 50021;
-      WordParagraph@17024410 : Codeunit 50022;
-      WordRun@17024409 : Codeunit 50023;
-      WordText@17024408 : Codeunit 50024;
-      WordRunProperties@17024407 : Codeunit 50025;
-      WordColor@17024420 : Codeunit 50036;
-      WordParagraphProperties@17024419 : Codeunit 50026;
-      WordStyleRunProperties@17024418 : Codeunit 50037;
-      WordSpacingBetweenLines@17024417 : Codeunit 50030;
-      WordTable@17024416 : Codeunit 50027;
-      WordTableRow@17024415 : Codeunit 50028;
-      WordTableCell@17024414 : Codeunit 50029;
-      WordHyperlink@17024413 : Codeunit 50035;
-      WordStyleDefinitionPart@17024421 : Codeunit 50041;
-      WordStyles@17024422 : Codeunit 50039;
-      WordDrawing@17024423 : Codeunit 50043;
-      WordParagraphEnumerator@17024426 : Codeunit 50062;
-      WordRunEnumerator@17024425 : Codeunit 50063;
-      WordTextEnumerator@17024424 : Codeunit 50076;
-      TestFile@17024411 : File;
-      FileOutStream@17024412 : OutStream;
+      Assert@1001 : Codeunit 130000;
+      LibraryLowerPermissions@1000 : Codeunit 132217;
+      OpenXmlWordProcessingHelper@1002 : Codeunit 50068;
+      WordprocessingDocument@1003 : Codeunit 50018;
+      MainDocumentPart@1004 : Codeunit 50019;
+      WordDocument@1005 : Codeunit 50020;
+      WordBody@1006 : Codeunit 50021;
+      WordParagraph@1007 : Codeunit 50022;
+      WordRun@1008 : Codeunit 50023;
+      WordText@1009 : Codeunit 50024;
+      WordRunProperties@1010 : Codeunit 50025;
+      WordColor@1011 : Codeunit 50036;
+      WordParagraphProperties@1012 : Codeunit 50026;
+      WordStyleRunProperties@1013 : Codeunit 50037;
+      WordSpacingBetweenLines@1014 : Codeunit 50030;
+      WordTable@1015 : Codeunit 50027;
+      WordTableRow@1016 : Codeunit 50028;
+      WordTableCell@1017 : Codeunit 50029;
+      WordHyperlink@1018 : Codeunit 50035;
+      WordStyleDefinitionPart@1019 : Codeunit 50041;
+      WordStyles@1020 : Codeunit 50039;
+      WordDrawing@1021 : Codeunit 50043;
+      WordParagraphEnumerator@1022 : Codeunit 50062;
+      WordRunEnumerator@1023 : Codeunit 50063;
+      WordTextEnumerator@1024 : Codeunit 50076;
+      TestFile@1025 : File;
+      FileOutStream@1026 : OutStream;
 
     [Test]
-    PROCEDURE TestCreateSimpleDocument@17024400();
+    PROCEDURE TestCreateSimpleDocument@1();
     VAR
-      Expected@17024403 : Text;
-      Actual@17024400 : Text;
+      Expected@1000 : Text;
+      Actual@1001 : Text;
     BEGIN
       LibraryLowerPermissions.SetO365Basic;
       //[WHEN] Empty Word document is created
@@ -62,10 +62,10 @@ OBJECT Codeunit 50069 Text_OpenXml.WordProcessing
     END;
 
     [Test]
-    PROCEDURE TestCreateParagraph@17024419();
+    PROCEDURE TestCreateParagraph@2();
     VAR
-      Expected@17024403 : Text;
-      Actual@17024400 : Text;
+      Expected@1000 : Text;
+      Actual@1001 : Text;
     BEGIN
       LibraryLowerPermissions.SetO365Basic;
       //[WHEN] One paragraph is added to an empty document
@@ -82,10 +82,10 @@ OBJECT Codeunit 50069 Text_OpenXml.WordProcessing
     END;
 
     [Test]
-    PROCEDURE TestCreateParagraphWithStyles@17024432();
+    PROCEDURE TestCreateParagraphWithStyles@3();
     VAR
-      Expected@17024403 : Text;
-      Actual@17024400 : Text;
+      Expected@1000 : Text;
+      Actual@1001 : Text;
     BEGIN
       LibraryLowerPermissions.SetO365Basic;
       //[WHEN] One paragraph with formating styles is added to an empty document
@@ -106,10 +106,10 @@ OBJECT Codeunit 50069 Text_OpenXml.WordProcessing
     END;
 
     [Test]
-    PROCEDURE TestCreateParagraphJustification@17024436();
+    PROCEDURE TestCreateParagraphJustification@4();
     VAR
-      Expected@17024403 : Text;
-      Actual@17024400 : Text;
+      Expected@1000 : Text;
+      Actual@1001 : Text;
     BEGIN
       LibraryLowerPermissions.SetO365Basic;
       //[WHEN] One paragraph with justified text is added to an empty document
@@ -126,10 +126,10 @@ OBJECT Codeunit 50069 Text_OpenXml.WordProcessing
     END;
 
     [Test]
-    PROCEDURE TestCreateHeadings@17024439();
+    PROCEDURE TestCreateHeadings@5();
     VAR
-      Expected@17024403 : Text;
-      Actual@17024401 : Text;
+      Expected@1000 : Text;
+      Actual@1001 : Text;
     BEGIN
       LibraryLowerPermissions.SetO365Basic;
       //[WHEN] Heading1 and Heading2 styles are added to an empty document
@@ -162,10 +162,10 @@ OBJECT Codeunit 50069 Text_OpenXml.WordProcessing
     END;
 
     [Test]
-    PROCEDURE TestCreateTable@17024446();
+    PROCEDURE TestCreateTable@6();
     VAR
-      Expected@17024403 : Text;
-      Actual@17024400 : Text;
+      Expected@1000 : Text;
+      Actual@1001 : Text;
     BEGIN
       LibraryLowerPermissions.SetO365Basic;
       //[WHEN] Table is added to an empty document
@@ -183,10 +183,10 @@ OBJECT Codeunit 50069 Text_OpenXml.WordProcessing
     END;
 
     [Test]
-    PROCEDURE TestCreateLists@17024453();
+    PROCEDURE TestCreateLists@7();
     VAR
-      Expected@17024403 : Text;
-      Actual@17024400 : Text;
+      Expected@1000 : Text;
+      Actual@1001 : Text;
     BEGIN
       LibraryLowerPermissions.SetO365Basic;
       //[WHEN] Sample lists are added to an empty document
@@ -218,11 +218,11 @@ OBJECT Codeunit 50069 Text_OpenXml.WordProcessing
     END;
 
     [Test]
-    PROCEDURE TestCreatePicture@17024456();
+    PROCEDURE TestCreatePicture@8();
     VAR
-      Expected@17024403 : Text;
-      PartId@17024405 : Text;
-      Actual@17024400 : Text;
+      Expected@1000 : Text;
+      PartId@1001 : Text;
+      Actual@1002 : Text;
     BEGIN
       LibraryLowerPermissions.SetO365Basic;
       //[WHEN] Picture is added to an empty document
@@ -253,11 +253,11 @@ OBJECT Codeunit 50069 Text_OpenXml.WordProcessing
     END;
 
     [Test]
-    PROCEDURE TestCreateHyperlink@17024402();
+    PROCEDURE TestCreateHyperlink@9();
     VAR
-      Expected@17024403 : Text;
-      PartId@17024400 : Text;
-      Actual@17024402 : Text;
+      Expected@1000 : Text;
+      PartId@1001 : Text;
+      Actual@1002 : Text;
     BEGIN
       LibraryLowerPermissions.SetO365Basic;
       //[WHEN] Hyperlink is added to an empty document
@@ -276,14 +276,14 @@ OBJECT Codeunit 50069 Text_OpenXml.WordProcessing
     END;
 
     [Test]
-    PROCEDURE TestCreateFullDocumentNonEmpty@17024415();
+    PROCEDURE TestCreateFullDocumentNonEmpty@10();
     VAR
-      Expected@17024403 : Text;
-      PictureBase64@17024404 : Text;
-      TempBlob@17024402 : TEMPORARY Record 99008535;
-      ImageStream@17024401 : InStream;
-      ExistingFileStream@17024400 : InStream;
-      SaveStream@17024405 : OutStream;
+      Expected@1000 : Text;
+      PictureBase64@1001 : Text;
+      TempBlob@1002 : TEMPORARY Record 99008535;
+      ImageStream@1003 : InStream;
+      ExistingFileStream@1004 : InStream;
+      SaveStream@1005 : OutStream;
     BEGIN
       LibraryLowerPermissions.SetO365Basic;
       //[WHEN] All elements from previous tests are added to an empty document
@@ -310,12 +310,12 @@ OBJECT Codeunit 50069 Text_OpenXml.WordProcessing
     END;
 
     [Test]
-    PROCEDURE TestFullDocumentIsSameOnReopen@17024404();
+    PROCEDURE TestFullDocumentIsSameOnReopen@11();
     VAR
-      Expected@17024403 : Text;
-      ExistingFileStream@17024400 : InStream;
-      SaveStream@17024405 : OutStream;
-      TempBlob@17024401 : TEMPORARY Record 99008535;
+      Expected@1000 : Text;
+      ExistingFileStream@1001 : InStream;
+      SaveStream@1002 : OutStream;
+      TempBlob@1003 : TEMPORARY Record 99008535;
     BEGIN
       LibraryLowerPermissions.SetO365Basic;
       //[WHEN] All elements from previous tests are added to an empty document
@@ -339,13 +339,13 @@ OBJECT Codeunit 50069 Text_OpenXml.WordProcessing
     END;
 
     [Test]
-    PROCEDURE TestExistingDocumentOpen@17024460();
+    PROCEDURE TestExistingDocumentOpen@12();
     VAR
-      DocumentBase64@17024402 : Text;
-      Expected@17024403 : Text;
-      ExistingFileStream@17024400 : InStream;
-      SaveStream@17024405 : OutStream;
-      TempBlob@17024401 : TEMPORARY Record 99008535;
+      DocumentBase64@1000 : Text;
+      Expected@1001 : Text;
+      ExistingFileStream@1002 : InStream;
+      SaveStream@1003 : OutStream;
+      TempBlob@1004 : TEMPORARY Record 99008535;
     BEGIN
       LibraryLowerPermissions.SetO365Basic;
       //[GIVEN] Sample document stream as base64 text
@@ -420,17 +420,17 @@ OBJECT Codeunit 50069 Text_OpenXml.WordProcessing
     END;
 
     [Test]
-    PROCEDURE TestExistingDocumentInspection@17024468();
+    PROCEDURE TestExistingDocumentInspection@13();
     VAR
-      DocumentBase64@17024402 : Text;
-      Expected@17024403 : Text;
-      ExistingFileStream@17024400 : InStream;
-      SaveStream@17024405 : OutStream;
-      TempBlob@17024401 : TEMPORARY Record 99008535;
-      ParagraphCount@17024404 : Integer;
-      RunCount@17024406 : Integer;
-      TextCount@17024407 : Integer;
-      FullText@17024408 : Text;
+      DocumentBase64@1000 : Text;
+      Expected@1001 : Text;
+      ExistingFileStream@1002 : InStream;
+      SaveStream@1003 : OutStream;
+      TempBlob@1004 : TEMPORARY Record 99008535;
+      ParagraphCount@1005 : Integer;
+      RunCount@1006 : Integer;
+      TextCount@1007 : Integer;
+      FullText@1008 : Text;
     BEGIN
       LibraryLowerPermissions.SetO365Basic;
       //[GIVEN] Sample document stream as base64 text
@@ -481,14 +481,14 @@ OBJECT Codeunit 50069 Text_OpenXml.WordProcessing
     END;
 
     [Test]
-    PROCEDURE TestExistingDocumentModification@17024478();
+    PROCEDURE TestExistingDocumentModification@14();
     VAR
-      DocumentBase64@17024402 : Text;
-      Expected@17024403 : Text;
-      ExistingFileStream@17024400 : InStream;
-      SaveStream@17024405 : OutStream;
-      TempBlob@17024401 : TEMPORARY Record 99008535;
-      Actual@17024408 : Text;
+      DocumentBase64@1000 : Text;
+      Expected@1001 : Text;
+      ExistingFileStream@1002 : InStream;
+      SaveStream@1003 : OutStream;
+      TempBlob@1004 : TEMPORARY Record 99008535;
+      Actual@1005 : Text;
     BEGIN
       LibraryLowerPermissions.SetO365Basic;
       //[GIVEN] Sample document stream as base64 text
@@ -586,13 +586,13 @@ OBJECT Codeunit 50069 Text_OpenXml.WordProcessing
       Assert.AreEqual(Expected, Actual, 'Full document text check failed');
     END;
 
-    LOCAL PROCEDURE CreateSampleDocument@17024447();
+    LOCAL PROCEDURE CreateSampleDocument@15();
     BEGIN
       OpenXmlWordProcessingHelper.CreateEmptyDocument(0, WordprocessingDocument, MainDocumentPart, WordBody);
       MainDocumentPart.Document(WordDocument);
     END;
 
-    LOCAL PROCEDURE CreateSampleParagraph@17024421();
+    LOCAL PROCEDURE CreateSampleParagraph@16();
     BEGIN
       WordText.TextConstructor;
       WordText.SetText('Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent quam augue, tempus id metus in, laoreet viverra quam. Sed vulputate risus lacus, et dapibus orci porttitor non.');
@@ -603,7 +603,7 @@ OBJECT Codeunit 50069 Text_OpenXml.WordProcessing
       WordBody.AppendParagraph(WordParagraph);
     END;
 
-    LOCAL PROCEDURE CreateSampleParagraphWithFormating@17024423();
+    LOCAL PROCEDURE CreateSampleParagraphWithFormating@17();
     VAR
       DotNet_OpenXmlSpaceProcessing@1000 : Codeunit 50079;
     BEGIN
@@ -700,7 +700,7 @@ OBJECT Codeunit 50069 Text_OpenXml.WordProcessing
       WordBody.AppendParagraph(WordParagraph);
     END;
 
-    LOCAL PROCEDURE CreateSampleParagraphJustified@17024425();
+    LOCAL PROCEDURE CreateSampleParagraphJustified@18();
     VAR
       DotNet_OpenXmlSpaceProcessing@1000 : Codeunit 50079;
     BEGIN
@@ -718,7 +718,7 @@ OBJECT Codeunit 50069 Text_OpenXml.WordProcessing
       WordBody.AppendParagraph(WordParagraph);
     END;
 
-    LOCAL PROCEDURE CreateSampleHeadings@17024428();
+    LOCAL PROCEDURE CreateSampleHeadings@19();
     VAR
       DotNet_OpenXmlSpaceProcessing@1000 : Codeunit 50079;
     BEGIN
@@ -769,7 +769,7 @@ OBJECT Codeunit 50069 Text_OpenXml.WordProcessing
       WordBody.AppendParagraph(WordParagraph);
     END;
 
-    LOCAL PROCEDURE CreateSampleTable@17024430();
+    LOCAL PROCEDURE CreateSampleTable@20();
     BEGIN
       WordTable.Create;
       WordTableRow.Create;
@@ -826,7 +826,7 @@ OBJECT Codeunit 50069 Text_OpenXml.WordProcessing
       WordBody.AppendTable(WordTable);
     END;
 
-    LOCAL PROCEDURE CreateSampleLists@17024433();
+    LOCAL PROCEDURE CreateSampleLists@21();
     BEGIN
       OpenXmlWordProcessingHelper.CreateBulletListProperties(MainDocumentPart, WordParagraphProperties, '5');
       WordParagraph.Paragraph;
@@ -888,12 +888,12 @@ OBJECT Codeunit 50069 Text_OpenXml.WordProcessing
       WordBody.AppendParagraph(WordParagraph);
     END;
 
-    LOCAL PROCEDURE CreateSamplePicture@17024435() : Text;
+    LOCAL PROCEDURE CreateSamplePicture@22() : Text;
     VAR
-      PictureBase64@17024402 : Text;
-      TempBlob@17024401 : TEMPORARY Record 99008535;
-      ImageStream@17024400 : InStream;
-      PartId@17024403 : Text;
+      PictureBase64@1000 : Text;
+      TempBlob@1001 : TEMPORARY Record 99008535;
+      ImageStream@1002 : InStream;
+      PartId@1003 : Text;
     BEGIN
       PictureBase64 :=
           '/9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAIBAQIBAQICAgICAgICAwUDAwMDAwYEBAMF'
@@ -932,9 +932,9 @@ OBJECT Codeunit 50069 Text_OpenXml.WordProcessing
       EXIT(PartId);
     END;
 
-    LOCAL PROCEDURE CreateSampleHyperlink@17024440() : Text;
+    LOCAL PROCEDURE CreateSampleHyperlink@23() : Text;
     VAR
-      PartId@17024403 : Text;
+      PartId@1000 : Text;
     BEGIN
       PartId := OpenXmlWordProcessingHelper.CreateHyperLink('http://microsoft.com', 'My awesome link', MainDocumentPart, WordHyperlink);
       WordParagraph.Paragraph;
@@ -943,14 +943,14 @@ OBJECT Codeunit 50069 Text_OpenXml.WordProcessing
       EXIT(PartId);
     END;
 
-    LOCAL PROCEDURE FinalizeAndGetDocumentOuterXml@17024451() : Text;
+    LOCAL PROCEDURE FinalizeAndGetDocumentOuterXml@24() : Text;
     BEGIN
       MainDocumentPart.Document(WordDocument);
       WordprocessingDocument.Close;
       EXIT(WordDocument.OuterXml);
     END;
 
-    LOCAL PROCEDURE GetExampleDocxFileContentAsBase64@17024465() : Text;
+    LOCAL PROCEDURE GetExampleDocxFileContentAsBase64@25() : Text;
     BEGIN
       EXIT(
           'UEsDBBQAAAAIAPtV8kwiRWpBhQUAAB8VAAARABwAd29yZC9kb2N1bWVudC54bWwgohgAKKAUAAAAAAAAAAAAAAAAAAAAAAAAAAA'

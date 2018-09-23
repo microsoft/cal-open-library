@@ -15,32 +15,32 @@ OBJECT Codeunit 50040 DotNet_Word.StylesEnumerator
   CODE
   {
     VAR
-      DotNetEnumerator@17024400 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Collections.IEnumerator";
+      DotNetEnumerator@1000 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Collections.IEnumerator";
 
-    PROCEDURE SetEnumerator@17024415(NewEnumerator@17024400 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Collections.IEnumerator");
+    PROCEDURE SetEnumerator@1(NewEnumerator@1000 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Collections.IEnumerator");
     BEGIN
       DotNetEnumerator := NewEnumerator;
     END;
 
-    PROCEDURE GetEnumerator@17024414(VAR CurrentEnumerator@17024400 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Collections.IEnumerator");
+    PROCEDURE GetEnumerator@2(VAR CurrentEnumerator@1000 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Collections.IEnumerator");
     BEGIN
       CurrentEnumerator := DotNetEnumerator;
     END;
 
     [External]
-    PROCEDURE Reset@17024401();
+    PROCEDURE Reset@3();
     BEGIN
       DotNetEnumerator.Reset;
     END;
 
     [External]
-    PROCEDURE MoveNext@17024402() : Boolean;
+    PROCEDURE MoveNext@4() : Boolean;
     BEGIN
       EXIT(DotNetEnumerator.MoveNext);
     END;
 
     [External]
-    PROCEDURE GetCurrent@17024403(VAR CurrentStyle@17024400 : Codeunit 50038);
+    PROCEDURE GetCurrent@5(VAR CurrentStyle@1000 : Codeunit 50038);
     BEGIN
       CurrentStyle.SetStyle(DotNetEnumerator.Current);
     END;

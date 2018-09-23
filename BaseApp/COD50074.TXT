@@ -15,57 +15,57 @@ OBJECT Codeunit 50074 DotNet_Word.NumberingInstance
   CODE
   {
     VAR
-      DotNetNumberingInstance@17024400 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.NumberingInstance";
+      DotNetNumberingInstance@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.NumberingInstance";
 
     [External]
-    PROCEDURE Create@17024403();
+    PROCEDURE Create@1();
     BEGIN
       DotNetNumberingInstance := DotNetNumberingInstance.NumberingInstance;
     END;
 
     [External]
-    PROCEDURE CreateFromOuterXml@17024408(OuterXml@17024400 : Text);
+    PROCEDURE CreateFromOuterXml@2(OuterXml@1000 : Text);
     BEGIN
       DotNetNumberingInstance := DotNetNumberingInstance.NumberingInstance(OuterXml);
     END;
 
     [External]
-    PROCEDURE GetOuterXml@17024401() : Text;
+    PROCEDURE GetOuterXml@3() : Text;
     BEGIN
       EXIT(DotNetNumberingInstance.OuterXml);
     END;
 
     [External]
-    PROCEDURE GetInnerText@17024410() : Text;
+    PROCEDURE GetInnerText@4() : Text;
     BEGIN
       EXIT(DotNetNumberingInstance.InnerText);
     END;
 
     [External]
-    PROCEDURE SetNumberID@17024406(NewNumberID@17024401 : Integer);
+    PROCEDURE SetNumberID@5(NewNumberID@1000 : Integer);
     VAR
-      DotNetInt32Value@17024402 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Int32Value";
+      DotNetInt32Value@1001 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Int32Value";
     BEGIN
       DotNetNumberingInstance.NumberID := DotNetInt32Value.FromInt32(NewNumberID);
     END;
 
     [External]
-    PROCEDURE SetAbstractNumId@17024402(NewAbstractNumId@17024401 : Integer);
+    PROCEDURE SetAbstractNumId@6(NewAbstractNumId@1000 : Integer);
     VAR
-      DotNetInt32Value@17024402 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Int32Value";
-      DotNetAbstractNumId@17024400 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.AbstractNumId";
+      DotNetInt32Value@1001 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Int32Value";
+      DotNetAbstractNumId@1002 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.AbstractNumId";
     BEGIN
       DotNetAbstractNumId := DotNetAbstractNumId.AbstractNumId;
       DotNetAbstractNumId.Val := DotNetInt32Value.FromInt32(NewAbstractNumId);
       DotNetNumberingInstance.AbstractNumId := DotNetAbstractNumId;
     END;
 
-    PROCEDURE SetNumberingInstance@17024411(NewDotNetNumberingInstance@17024400 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.NumberingInstance");
+    PROCEDURE SetNumberingInstance@7(NewDotNetNumberingInstance@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.NumberingInstance");
     BEGIN
       DotNetNumberingInstance := NewDotNetNumberingInstance;
     END;
 
-    PROCEDURE GetNumberingInstance@17024400(VAR CurrentDotNetNumberingInstance@17024400 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.NumberingInstance");
+    PROCEDURE GetNumberingInstance@8(VAR CurrentDotNetNumberingInstance@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.NumberingInstance");
     BEGIN
       CurrentDotNetNumberingInstance := DotNetNumberingInstance;
     END;
