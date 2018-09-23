@@ -76,7 +76,7 @@ OBJECT Codeunit 50046 DotNet_Word.HorizontalPosition
       DotNetHorizontalPosition.PercentagePositionHeightOffset := DotNetPercentagePositionHeigthOffset.PercentagePositionHeightOffset(NewPercentagePositionHeightOffset);
     END;
 
-    PROCEDURE SetHorizontalPosition@9(NewDotNetHorizontalPosition@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Drawing.Wordprocessing.HorizontalPosition");
+    PROCEDURE SetHorizontalPosition@9(VAR NewDotNetHorizontalPosition@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Drawing.Wordprocessing.HorizontalPosition");
     BEGIN
       DotNetHorizontalPosition := NewDotNetHorizontalPosition;
     END;

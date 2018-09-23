@@ -244,7 +244,7 @@ OBJECT Codeunit 50044 DotNet_Word.Anchor
       OpenXmlDotNetHelper.AppendGeneric(DotNetAnchor, DotNetGraphic);
     END;
 
-    PROCEDURE SetAnchor@25(NewDotNetAnchor@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Drawing.Wordprocessing.Anchor");
+    PROCEDURE SetAnchor@25(VAR NewDotNetAnchor@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Drawing.Wordprocessing.Anchor");
     BEGIN
       DotNetAnchor := NewDotNetAnchor;
     END;

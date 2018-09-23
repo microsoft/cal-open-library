@@ -23,7 +23,7 @@ OBJECT Codeunit 50042 DotNet_Word.ImagePart
       DotNetImagePart.FeedData(ImageStream);
     END;
 
-    PROCEDURE SetImagePart@2(NewDotNetImagePart@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Packaging.ImagePart");
+    PROCEDURE SetImagePart@2(VAR NewDotNetImagePart@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Packaging.ImagePart");
     BEGIN
       DotNetImagePart := NewDotNetImagePart;
     END;

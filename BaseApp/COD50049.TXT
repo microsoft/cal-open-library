@@ -73,7 +73,7 @@ OBJECT Codeunit 50049 DotNet_Word.DocProperties
       DotNetDocProperties.Title := DotNetStringValue.FromString(NewTitle);
     END;
 
-    PROCEDURE SetDocProperties@9(NewDotNetDocProperties@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Drawing.Wordprocessing.DocProperties");
+    PROCEDURE SetDocProperties@9(VAR NewDotNetDocProperties@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Drawing.Wordprocessing.DocProperties");
     BEGIN
       DotNetDocProperties := NewDotNetDocProperties;
     END;

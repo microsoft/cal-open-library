@@ -63,7 +63,7 @@ OBJECT Codeunit 50032 DotNet_Word.NumberingPropertie
       DotNetNumberingProperties.NumberingId := DotNetNumberingId;
     END;
 
-    PROCEDURE SetNumberingProperties@7(NewDotNetNumberingProperties@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.NumberingProperties");
+    PROCEDURE SetNumberingProperties@7(VAR NewDotNetNumberingProperties@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.NumberingProperties");
     BEGIN
       DotNetNumberingProperties := NewDotNetNumberingProperties;
     END;

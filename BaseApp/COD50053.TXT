@@ -61,7 +61,7 @@ OBJECT Codeunit 50053 DotNet_Word.ShapeProperties
       OpenXmlDotNetHelper.AppendGeneric(DotNetShapeProperties, DotNetPresetGeometry);
     END;
 
-    PROCEDURE SetShapeProperties@7(NewDotNetShapeProperties@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Drawing.Pictures.ShapeProperties");
+    PROCEDURE SetShapeProperties@7(VAR NewDotNetShapeProperties@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Drawing.Pictures.ShapeProperties");
     BEGIN
       DotNetShapeProperties := NewDotNetShapeProperties;
     END;

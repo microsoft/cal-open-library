@@ -76,7 +76,7 @@ OBJECT Codeunit 50045 DotNet_Word.VerticalPosition
       DotNetVerticalPosition.PercentagePositionVerticalOffset := DotNetPercentagePositionVerticalOffset.PercentagePositionVerticalOffset(NewPercentagePositionVerticalOffset);
     END;
 
-    PROCEDURE SetVerticalPosition@9(NewDotNetVerticalPosition@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Drawing.Wordprocessing.VerticalPosition");
+    PROCEDURE SetVerticalPosition@9(VAR NewDotNetVerticalPosition@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Drawing.Wordprocessing.VerticalPosition");
     BEGIN
       DotNetVerticalPosition := NewDotNetVerticalPosition;
     END;

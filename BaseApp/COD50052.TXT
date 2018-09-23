@@ -59,7 +59,7 @@ OBJECT Codeunit 50052 DotNet_Word.NonVisualPicturePr
       DotNetNonVisualPictureProperties.NonVisualPictureDrawingProperties := DotNetNonVisualPictureDrawingProperties;
     END;
 
-    PROCEDURE SetNonVisualPictureProperties@7(NewDotNetNonVisualPictureProperties@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Drawing.Pictures.NonVisualPictureProperties");
+    PROCEDURE SetNonVisualPictureProperties@7(VAR NewDotNetNonVisualPictureProperties@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Drawing.Pictures.NonVisualPictureProperties");
     BEGIN
       DotNetNonVisualPictureProperties := NewDotNetNonVisualPictureProperties;
     END;

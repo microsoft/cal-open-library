@@ -78,7 +78,7 @@ OBJECT Codeunit 50035 DotNet_Word.Hyperlink
       DotNetHyperlink.History := DotNetOnOffValue.FromBoolean(NewHistory);
     END;
 
-    PROCEDURE SetHyperlink@9(NewDotNetHyperlink@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.Hyperlink");
+    PROCEDURE SetHyperlink@9(VAR NewDotNetHyperlink@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.Hyperlink");
     BEGIN
       DotNetHyperlink := NewDotNetHyperlink;
     END;

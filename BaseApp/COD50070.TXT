@@ -28,8 +28,11 @@ OBJECT Codeunit 50070 DotNet_Word.NumberingDefinitio
 
     [External]
     PROCEDURE GetNumbering@2(VAR WordNumbering@1000 : Codeunit 50071);
+    VAR
+      DotNetNumbering@1001 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.Numbering";
     BEGIN
-      WordNumbering.SetNumbering(DotNetNumberingDefinitionsPart.Numbering);
+      DotNetNumbering := DotNetNumberingDefinitionsPart.Numbering;
+      WordNumbering.SetNumbering(DotNetNumbering);
     END;
 
     [External]

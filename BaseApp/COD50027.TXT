@@ -64,7 +64,7 @@ OBJECT Codeunit 50027 DotNet_Word.Table
       WordTableRowEnumerator.SetEnumerator(DotNetEnumerator);
     END;
 
-    PROCEDURE SetTable@7(NewDotNetTable@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.Table");
+    PROCEDURE SetTable@7(VAR NewDotNetTable@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.Table");
     BEGIN
       DotNetTable := NewDotNetTable;
     END;

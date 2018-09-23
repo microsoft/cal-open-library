@@ -73,7 +73,7 @@ OBJECT Codeunit 50039 DotNet_Word.Styles
       WordStylesEnumerator.SetEnumerator(DotNetEnumerator);
     END;
 
-    PROCEDURE SetStyles@8(NewDotNetStyles@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.Styles");
+    PROCEDURE SetStyles@8(VAR NewDotNetStyles@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.Styles");
     BEGIN
       DotNetStyles := NewDotNetStyles;
     END;

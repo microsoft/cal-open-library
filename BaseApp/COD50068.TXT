@@ -348,7 +348,7 @@ OBJECT Codeunit 50068 OpenXml WordProcessing Helper
       WordStyles.GetStyleEnumerator(WordStylesEnumerator);
       WHILE WordStylesEnumerator.MoveNext DO
         BEGIN
-          WordStylesEnumerator.GetCurrent(WordStyle);
+          WordStylesEnumerator.Current(WordStyle);
           IF (WordStyle.GetStyleId = StyleId) AND (WordStyle.GetStyleType = 0) THEN //Type = Paragraph
             EXIT(TRUE);
         END;
@@ -366,7 +366,7 @@ OBJECT Codeunit 50068 OpenXml WordProcessing Helper
       WordStyles.GetStyleEnumerator(WordStylesEnumerator);
       WHILE WordStylesEnumerator.MoveNext DO
         BEGIN
-          WordStylesEnumerator.GetCurrent(WordStyle);
+          WordStylesEnumerator.Current(WordStyle);
           IF (WordStyle.GetStyleName = StyleName) AND (WordStyle.GetStyleType = 0) THEN //Type = Paragraph
             EXIT(WordStyle.GetStyleId);
         END;

@@ -45,7 +45,7 @@ OBJECT Codeunit 50030 DotNet_Word.SpacingBetweenLine
       DotNetSpacingBetweenLines.After := DotNetStringValue;
     END;
 
-    PROCEDURE SetSpacingBetweenLines@5(NewDotNetSpacingBetweenLines@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.SpacingBetweenLines");
+    PROCEDURE SetSpacingBetweenLines@5(VAR NewDotNetSpacingBetweenLines@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.SpacingBetweenLines");
     BEGIN
       DotNetSpacingBetweenLines := NewDotNetSpacingBetweenLines;
     END;

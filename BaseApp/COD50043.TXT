@@ -52,7 +52,7 @@ OBJECT Codeunit 50043 DotNet_Word.Drawing
       OpenXmlDotNetHelper.AppendGeneric(DotNetDrawing, DotNetAnchor);
     END;
 
-    PROCEDURE SetDrawing@6(NewDotNetDrawing@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.Drawing");
+    PROCEDURE SetDrawing@6(VAR NewDotNetDrawing@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.Drawing");
     BEGIN
       DotNetDrawing := NewDotNetDrawing;
     END;

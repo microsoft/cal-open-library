@@ -110,7 +110,7 @@ OBJECT Codeunit 50025 DotNet_Word.RunProperties
       DotNetRunProperties.RunStyle := DotNetRunStyle;
     END;
 
-    PROCEDURE SetRunProperties@11(NewDotNetRunProperties@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.RunProperties");
+    PROCEDURE SetRunProperties@11(VAR NewDotNetRunProperties@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.RunProperties");
     BEGIN
       DotNetRunProperties := NewDotNetRunProperties;
     END;

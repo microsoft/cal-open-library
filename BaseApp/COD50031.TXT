@@ -55,7 +55,7 @@ OBJECT Codeunit 50031 DotNet_Word.Indentation
       DotNetIndentation.Hanging := DotNetStringValue;
     END;
 
-    PROCEDURE SetIndentation@6(NewDotNetIndentation@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.Indentation");
+    PROCEDURE SetIndentation@6(VAR NewDotNetIndentation@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.Indentation");
     BEGIN
       DotNetIndentation := NewDotNetIndentation;
     END;

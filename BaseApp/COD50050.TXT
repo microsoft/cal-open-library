@@ -89,7 +89,7 @@ OBJECT Codeunit 50050 DotNet_Word.GraphicFrameLocks
       DotNetGraphicFrameLocks.NoResize := DotNetBooleanValue.FromBoolean(NewNoResize);
     END;
 
-    PROCEDURE SetGraphicFrameLocks@11(NewDotNetGraphicFrameLocks@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Drawing.GraphicFrameLocks");
+    PROCEDURE SetGraphicFrameLocks@11(VAR NewDotNetGraphicFrameLocks@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Drawing.GraphicFrameLocks");
     BEGIN
       DotNetGraphicFrameLocks := NewDotNetGraphicFrameLocks;
     END;

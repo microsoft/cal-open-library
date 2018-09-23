@@ -100,7 +100,7 @@ OBJECT Codeunit 50037 DotNet_Word.StyleRunProperties
       DotNetStyleRunProperties.Color := DotNetColor;
     END;
 
-    PROCEDURE SetStyleRunProperties@10(NewDotNetStyleRunProperties@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.StyleRunProperties");
+    PROCEDURE SetStyleRunProperties@10(VAR NewDotNetStyleRunProperties@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.StyleRunProperties");
     BEGIN
       DotNetStyleRunProperties := NewDotNetStyleRunProperties;
     END;

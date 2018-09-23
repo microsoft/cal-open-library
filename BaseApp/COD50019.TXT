@@ -32,9 +32,11 @@ OBJECT Codeunit 50019 DotNet_Word.MainDocumentPart
     PROCEDURE AddHyperlinkRelationship@3(VAR Uri@1000 : Codeunit 3024;IsExternal@1001 : Boolean;VAR CreatedHyperlinkRelationship@1002 : Codeunit 50034);
     VAR
       DotNetUri@1003 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Uri";
+      DotNetHyperlinkRelationship@1004 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Packaging.HyperlinkRelationship";
     BEGIN
       Uri.GetUri(DotNetUri);
-      CreatedHyperlinkRelationship.SetHyperlinkRelationship(DotNetMainDocumentPart.AddHyperlinkRelationship(DotNetUri, IsExternal));
+      DotNetHyperlinkRelationship := DotNetMainDocumentPart.AddHyperlinkRelationship(DotNetUri, IsExternal);
+      CreatedHyperlinkRelationship.SetHyperlinkRelationship(DotNetHyperlinkRelationship);
     END;
 
     [External]
@@ -79,9 +81,11 @@ OBJECT Codeunit 50019 DotNet_Word.MainDocumentPart
     PROCEDURE AddImagePart@10(VAR ImagePartType@1000 : Codeunit 50078;VAR CreatedImagePart@1001 : Codeunit 50042);
     VAR
       DotNetImagePartType@1002 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Packaging.ImagePartType";
+      DotNetImagePart@1003 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Packaging.ImagePart";
     BEGIN
       ImagePartType.GetImagePartType(DotNetImagePartType);
-      CreatedImagePart.SetImagePart(DotNetMainDocumentPart.AddImagePart(DotNetImagePartType));
+      DotNetImagePart := DotNetMainDocumentPart.AddImagePart(DotNetImagePartType);
+      CreatedImagePart.SetImagePart(DotNetImagePart);
     END;
 
     [External]

@@ -60,7 +60,7 @@ OBJECT Codeunit 50074 DotNet_Word.NumberingInstance
       DotNetNumberingInstance.AbstractNumId := DotNetAbstractNumId;
     END;
 
-    PROCEDURE SetNumberingInstance@7(NewDotNetNumberingInstance@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.NumberingInstance");
+    PROCEDURE SetNumberingInstance@7(VAR NewDotNetNumberingInstance@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.NumberingInstance");
     BEGIN
       DotNetNumberingInstance := NewDotNetNumberingInstance;
     END;

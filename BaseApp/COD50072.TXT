@@ -66,7 +66,7 @@ OBJECT Codeunit 50072 DotNet_Word.AbstractNum
       OpenXmlDotNetHelper.AppendGeneric(DotNetAbstractNum, DotNetLevel);
     END;
 
-    PROCEDURE SetAbstractNum@8(NewDotNetAbstractNum@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.AbstractNum");
+    PROCEDURE SetAbstractNum@8(VAR NewDotNetAbstractNum@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.AbstractNum");
     BEGIN
       DotNetAbstractNum := NewDotNetAbstractNum;
     END;

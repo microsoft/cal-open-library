@@ -17,7 +17,7 @@ OBJECT Codeunit 50040 DotNet_Word.StylesEnumerator
     VAR
       DotNetEnumerator@1000 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Collections.IEnumerator";
 
-    PROCEDURE SetEnumerator@1(NewEnumerator@1000 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Collections.IEnumerator");
+    PROCEDURE SetEnumerator@1(VAR NewEnumerator@1000 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Collections.IEnumerator");
     BEGIN
       DotNetEnumerator := NewEnumerator;
     END;
@@ -40,9 +40,12 @@ OBJECT Codeunit 50040 DotNet_Word.StylesEnumerator
     END;
 
     [External]
-    PROCEDURE GetCurrent@5(VAR CurrentStyle@1000 : Codeunit 50038);
+    PROCEDURE Current@5(VAR CurrentStyle@1000 : Codeunit 50038);
+    VAR
+      DotNetStyle@1001 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.Style";
     BEGIN
-      CurrentStyle.SetStyle(DotNetEnumerator.Current);
+      DotNetStyle := DotNetEnumerator.Current;
+      CurrentStyle.SetStyle(DotNetStyle);
     END;
 
     BEGIN
