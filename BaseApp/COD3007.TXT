@@ -45,6 +45,12 @@ OBJECT Codeunit 3007 DotNet_String
     END;
 
     [External]
+    PROCEDURE Length@11() : Integer;
+    BEGIN
+      EXIT(DotNetString.Length);
+    END;
+
+    [External]
     PROCEDURE StartsWith@7(Value@1000 : Text) : Boolean;
     BEGIN
       EXIT(DotNetString.StartsWith(Value))
