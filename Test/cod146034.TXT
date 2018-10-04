@@ -1,0 +1,169 @@
+OBJECT Codeunit 146034 Test_DotNet_StreamAndBuffer
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    Subtype=Test;
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      Assert@1000 : Codeunit 130000;
+      LibraryLowerPermissions@1001 : Codeunit 132217;
+      DotNet_Buffer@1002 : Codeunit 3035;
+      DotNet_Stream@1004 : Codeunit 3034;
+      DotNet_MemoryStream@1005 : Codeunit 3009;
+      Byte_DotNet_Array@1007 : Codeunit 3000;
+      ExpectedByte_DotNet_Array@1008 : Codeunit 3000;
+      DotNet_SeekOrigin@1003 : Codeunit 3039;
+
+    [Test]
+    PROCEDURE TestReadingWritingUsingMemoryStream@1();
+    BEGIN
+      LibraryLowerPermissions.SetO365Basic;
+      CreateStream;
+      Assert.AreEqual(TRUE,DotNet_Stream.CanRead,'CanRead check failed');
+      Assert.AreEqual(TRUE,DotNet_Stream.CanWrite,'CanWrite check failed');
+      Assert.AreEqual(TRUE,DotNet_Stream.CanSeek,'CanSeek check failed');
+      Assert.AreEqual(FALSE,DotNet_Stream.IsDotNetNull,'Null check failed');
+      DotNet_Stream.WriteByte(1);
+      CreateExampleByteArray;
+      DotNet_Stream.Write(Byte_DotNet_Array,0,4);
+      // Seek to the start of stream but skip first byte
+      DotNet_SeekOrigin.SeekBegin;
+      DotNet_Stream.Seek(1,DotNet_SeekOrigin);
+      ClearActualArray;
+      DotNet_Stream.Read(Byte_DotNet_Array,0,4);
+      CheckArrayItems(Byte_DotNet_Array,ExpectedByte_DotNet_Array);
+      DotNet_Stream.Seek(0,DotNet_SeekOrigin);
+      Assert.AreEqual(1,DotNet_Stream.ReadByte,'ReadByte check failed');
+      DotNet_Stream.Close;
+      DotNet_Stream.Dispose;
+    END;
+
+    [Test]
+    PROCEDURE TestReadingWritingUsingTempBlob@2();
+    VAR
+      TempBlob@1002 : TEMPORARY Record 99008535;
+      InputData@1003 : InStream;
+      OutputData@1004 : OutStream;
+    BEGIN
+      LibraryLowerPermissions.SetO365Basic;
+      TempBlob.Blob.CREATEOUTSTREAM(OutputData);
+      DotNet_Stream.FromOutStream(OutputData);
+      Assert.AreEqual(TRUE,DotNet_Stream.CanRead,'CanRead check failed');
+      Assert.AreEqual(TRUE,DotNet_Stream.CanWrite,'CanWrite check failed');
+      Assert.AreEqual(TRUE,DotNet_Stream.CanSeek,'CanSeek check failed');
+      Assert.AreEqual(FALSE,DotNet_Stream.IsDotNetNull,'Null check failed');
+      DotNet_Stream.WriteByte(1);
+      CreateExampleByteArray;
+      DotNet_Stream.Write(Byte_DotNet_Array,0,4);
+      DotNet_Stream.Close;
+      DotNet_Stream.Dispose;
+      TempBlob.Blob.CREATEINSTREAM(InputData);
+      DotNet_Stream.FromInStream(InputData);
+      Assert.AreEqual(TRUE,DotNet_Stream.CanRead,'CanRead check failed');
+      Assert.AreEqual(TRUE,DotNet_Stream.CanWrite,'CanWrite check failed');
+      Assert.AreEqual(TRUE,DotNet_Stream.CanSeek,'CanSeek check failed');
+      Assert.AreEqual(FALSE,DotNet_Stream.IsDotNetNull,'Null check failed');
+      Assert.AreEqual(1,DotNet_Stream.ReadByte,'ReadByte check failed');
+      ClearActualArray;
+      DotNet_Stream.Read(Byte_DotNet_Array,0,4);
+      CheckArrayItems(Byte_DotNet_Array,ExpectedByte_DotNet_Array);
+      DotNet_Stream.Close;
+      DotNet_Stream.Dispose;
+    END;
+
+    [Test]
+    PROCEDURE TestBufferMethods@3();
+    VAR
+      DotNetString@1002 : Codeunit 3007;
+      Char_DotNet_Array@1003 : Codeunit 3000;
+      TestChar@1004 : Char;
+    BEGIN
+      LibraryLowerPermissions.SetO365Basic;
+      TestChar := 261;
+      DotNetString.Set(FORMAT(TestChar) + FORMAT(TestChar));
+      DotNetString.ToCharArray(0,2,Char_DotNet_Array);
+      Assert.AreEqual(4,DotNet_Buffer.ByteLength(Char_DotNet_Array),'ByteLength check failed');
+      CreateExampleByteArray;
+      Assert.AreEqual(10,DotNet_Buffer.GetByte(Byte_DotNet_Array,0),'GetByte Check failed');
+      Assert.AreEqual(11,DotNet_Buffer.GetByte(Byte_DotNet_Array,1),'GetByte Check failed');
+      Assert.AreEqual(12,DotNet_Buffer.GetByte(Byte_DotNet_Array,2),'GetByte Check failed');
+      Assert.AreEqual(13,DotNet_Buffer.GetByte(Byte_DotNet_Array,3),'GetByte Check failed');
+      Assert.AreEqual(5,DotNet_Buffer.GetByte(Char_DotNet_Array,0),'GetByte Check failed');
+      Assert.AreEqual(1,DotNet_Buffer.GetByte(Char_DotNet_Array,1),'GetByte Check failed');
+      Assert.AreEqual(5,DotNet_Buffer.GetByte(Char_DotNet_Array,2),'GetByte Check failed');
+      Assert.AreEqual(1,DotNet_Buffer.GetByte(Char_DotNet_Array,3),'GetByte Check failed');
+
+      DotNet_Buffer.BlockCopy(Char_DotNet_Array,0,Byte_DotNet_Array,0,4);
+      Assert.AreEqual(5,DotNet_Buffer.GetByte(Byte_DotNet_Array,0),'GetByte Check failed');
+      Assert.AreEqual(1,DotNet_Buffer.GetByte(Byte_DotNet_Array,1),'GetByte Check failed');
+      Assert.AreEqual(5,DotNet_Buffer.GetByte(Byte_DotNet_Array,2),'GetByte Check failed');
+      Assert.AreEqual(1,DotNet_Buffer.GetByte(Byte_DotNet_Array,3),'GetByte Check failed');
+      DotNet_Buffer.SetByte(Byte_DotNet_Array,0,15);
+      Assert.AreEqual(15,DotNet_Buffer.GetByte(Byte_DotNet_Array,0),'GetByte Check failed');
+    END;
+
+    LOCAL PROCEDURE CreateStream@100();
+    VAR
+      DotNetStream@1000 : DotNet "'mscorlib'.System.IO.Stream";
+    BEGIN
+      DotNet_MemoryStream.InitMemoryStream;
+      DotNet_MemoryStream.GetMemoryStream(DotNetStream);
+      DotNet_Stream.SetStream(DotNetStream);
+    END;
+
+    LOCAL PROCEDURE CreateExampleByteArray@101();
+    VAR
+      DotNetArray@1000 : DotNet "'mscorlib'.System.Array";
+      DotNetByte@1001 : DotNet "'mscorlib'.System.Byte";
+      DotNetConvert@1002 : DotNet "'mscorlib'.System.Convert";
+    BEGIN
+      DotNetArray := DotNetArray.CreateInstance(GETDOTNETTYPE(DotNetByte),4);
+      DotNetByte := DotNetConvert.ChangeType(10,GETDOTNETTYPE(DotNetByte));
+      DotNetArray.SetValue(DotNetByte,0);
+      DotNetByte := DotNetConvert.ChangeType(11,GETDOTNETTYPE(DotNetByte));
+      DotNetArray.SetValue(DotNetByte,1);
+      DotNetByte := DotNetConvert.ChangeType(12,GETDOTNETTYPE(DotNetByte));
+      DotNetArray.SetValue(DotNetByte,2);
+      DotNetByte := DotNetConvert.ChangeType(13,GETDOTNETTYPE(DotNetByte));
+      DotNetArray.SetValue(DotNetByte,3);
+      Byte_DotNet_Array.SetArray(DotNetArray);
+      ExpectedByte_DotNet_Array.SetArray(DotNetArray);
+    END;
+
+    LOCAL PROCEDURE ClearActualArray@102();
+    VAR
+      DotNetArray@1000 : DotNet "'mscorlib'.System.Array";
+      DotNetByte@1001 : DotNet "'mscorlib'.System.Byte";
+    BEGIN
+      DotNetArray := DotNetArray.CreateInstance(GETDOTNETTYPE(DotNetByte),4);
+      Byte_DotNet_Array.SetArray(DotNetArray);
+    END;
+
+    LOCAL PROCEDURE CheckArrayItems@103(VAR Actual_DotNet_Array@1000 : Codeunit 3000;VAR Expected_DotNet_Array@1001 : Codeunit 3000);
+    VAR
+      DotNetActualArray@1002 : DotNet "'mscorlib'.System.Array";
+      DotNetExpectedArray@1003 : DotNet "'mscorlib'.System.Array";
+      Index@1004 : Integer;
+    BEGIN
+      Actual_DotNet_Array.GetArray(DotNetActualArray);
+      Expected_DotNet_Array.GetArray(DotNetExpectedArray);
+      FOR Index := 0 TO DotNetActualArray.Length - 1 DO
+        Assert.AreEqual(DotNetExpectedArray.GetValue(Index),DotNetActualArray.GetValue(Index),'Array item check failed');
+    END;
+
+    BEGIN
+    END.
+  }
+}
+

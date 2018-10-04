@@ -466,6 +466,10 @@ OBJECT Codeunit 132542 TestMappingToW1Tables
       LibraryVariableStorage.Enqueue(GenJnlLineTemplate."Journal Template Name");
       BankStatementLineDetails.TRAP;
       GeneralJournal.OPENVIEW;
+      // Based on new changes General Journal page (PAG39) is always opened in simple mode which
+      // displays one document number at a time. So, we need to filter simple page document number
+      // to display this record on the view.
+      GeneralJournal."<Document No. Simple Page>".SETVALUE(GenJnlLineTemplate."Document No.");
       GeneralJournal.GOTORECORD(GenJnlLineTemplate);
       GeneralJournal.ShowStatementLineDetails.INVOKE;
 
@@ -927,6 +931,7 @@ OBJECT Codeunit 132542 TestMappingToW1Tables
       LibraryVariableStorage.Clear;
       IF IsInitialized THEN
         EXIT;
+
       IsInitialized := TRUE;
     END;
 

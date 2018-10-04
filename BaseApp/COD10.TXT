@@ -23,6 +23,7 @@ OBJECT Codeunit 10 Type Helper
       BitwiseAndTxt@1005 : TextConst '@@@={Locked};ENU=BitwiseAnd';
       BitwiseOrTxt@1006 : TextConst '@@@={Locked};ENU=BitwiseOr';
       BitwiseXorTxt@1007 : TextConst '@@@={Locked};ENU=BitwiseXor';
+      ObsoleteFieldErr@1008 : TextConst '@@@=%1 - field name, %2 - table name;ENU=The field %1 of %2 table is obsolete and cannot be used.';
 
     [External]
     PROCEDURE Evaluate@3(VAR Variable@1000 : Variant;String@1001 : Text;Format@1002 : Text;CultureName@1003 : Text) : Boolean;
@@ -47,64 +48,66 @@ OBJECT Codeunit 10 Type Helper
 
     LOCAL PROCEDURE TryEvaluateDate@12(DateText@1000 : Text;Format@1001 : Text;CultureName@1004 : Text;VAR EvaluatedDate@1006 : Date) : Boolean;
     VAR
-      CultureInfo@1003 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Globalization.CultureInfo";
-      DotNetDateTime@1002 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.DateTime";
-      DateTimeStyles@1005 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Globalization.DateTimeStyles";
-      XMLConvert@1007 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlConvert";
+      DotNet_CultureInfo@1003 : Codeunit 3002;
+      DotNet_DateTime@1002 : Codeunit 3003;
+      DotNet_DateTimeStyles@1005 : Codeunit 3004;
+      DotNet_XMLConvert@1007 : Codeunit 3005;
+      DotNet_DateTimeOffset@1008 : Codeunit 3006;
     BEGIN
-      IF (Format = '') AND (CultureName = '') THEN
-        DotNetDateTime := XMLConvert.ToDateTimeOffset(DateText).DateTime
-      ELSE BEGIN
-        DotNetDateTime := DotNetDateTime.DateTime(0);
-        CultureInfo := CultureInfo.GetCultureInfo(CultureName);
+      IF (Format = '') AND (CultureName = '') THEN BEGIN
+        DotNet_XMLConvert.ToDateTimeOffset(DateText,DotNet_DateTimeOffset);
+        DotNet_DateTimeOffset.DateTime(DotNet_DateTime);
+      END ELSE BEGIN
+        DotNet_CultureInfo.GetCultureInfoByName(CultureName);
+        DotNet_DateTimeStyles.None;
         CASE Format OF
           '':
-            IF NOT DotNetDateTime.TryParse(DateText,CultureInfo,DateTimeStyles.None,DotNetDateTime) THEN
+            IF NOT DotNet_DateTime.TryParse(DateText,DotNet_CultureInfo,DotNet_DateTimeStyles) THEN
               EXIT(FALSE);
           ELSE
-            IF NOT DotNetDateTime.TryParseExact(DateText,Format,CultureInfo,DateTimeStyles.None,DotNetDateTime) THEN
+            IF NOT DotNet_DateTime.TryParseExact(DateText,Format,DotNet_CultureInfo,DotNet_DateTimeStyles) THEN
               EXIT(FALSE);
         END;
       END;
 
-      EvaluatedDate := DMY2DATE(DotNetDateTime.Day,DotNetDateTime.Month,DotNetDateTime.Year);
+      EvaluatedDate := DMY2DATE(DotNet_DateTime.Day,DotNet_DateTime.Month,DotNet_DateTime.Year);
       EXIT(TRUE);
     END;
 
     LOCAL PROCEDURE TryEvaluateDateTime@41(DateTimeText@1000 : Text;Format@1001 : Text;CultureName@1004 : Text;VAR EvaluatedDateTime@1006 : DateTime) : Boolean;
     VAR
-      CultureInfo@1003 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Globalization.CultureInfo";
-      DotNetDateTime@1002 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.DateTime";
-      DateTimeStyles@1005 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Globalization.DateTimeStyles";
+      DotNet_CultureInfo@1003 : Codeunit 3002;
+      DotNet_DateTime@1002 : Codeunit 3003;
+      DotNet_DateTimeStyles@1005 : Codeunit 3004;
       EvaluatedTime@1008 : Time;
     BEGIN
-      DotNetDateTime := DotNetDateTime.DateTime(0);
       IF CultureName = '' THEN
-        CultureInfo := CultureInfo.InvariantCulture
+        DotNet_CultureInfo.InvariantCulture
       ELSE
-        CultureInfo := CultureInfo.GetCultureInfo(CultureName);
+        DotNet_CultureInfo.GetCultureInfoByName(CultureName);
+      DotNet_DateTimeStyles.None;
       CASE Format OF
         '':
-          IF NOT DotNetDateTime.TryParse(DateTimeText,CultureInfo,DateTimeStyles.None,DotNetDateTime) THEN
+          IF NOT DotNet_DateTime.TryParse(DateTimeText,DotNet_CultureInfo,DotNet_DateTimeStyles) THEN
             EXIT(FALSE);
         ELSE
-          IF NOT DotNetDateTime.TryParseExact(DateTimeText,Format,CultureInfo,DateTimeStyles.None,DotNetDateTime) THEN
+          IF NOT DotNet_DateTime.TryParseExact(DateTimeText,Format,DotNet_CultureInfo,DotNet_DateTimeStyles) THEN
             EXIT(FALSE);
       END;
 
-      IF NOT EVALUATE(
+      IF NOT SYSTEM.EVALUATE(
            EvaluatedTime,
            STRSUBSTNO(
              '%1:%2:%3.%4',
-             DotNetDateTime.Hour,
-             DotNetDateTime.Minute,
-             DotNetDateTime.Second,
-             DotNetDateTime.Millisecond))
+             DotNet_DateTime.Hour,
+             DotNet_DateTime.Minute,
+             DotNet_DateTime.Second,
+             DotNet_DateTime.Millisecond))
       THEN
         EXIT(FALSE);
       EvaluatedDateTime :=
         CREATEDATETIME(
-          DMY2DATE(DotNetDateTime.Day,DotNetDateTime.Month,DotNetDateTime.Year),EvaluatedTime);
+          DMY2DATE(DotNet_DateTime.Day,DotNet_DateTime.Month,DotNet_DateTime.Year),EvaluatedTime);
       EXIT(TRUE);
     END;
 
@@ -179,14 +182,14 @@ OBJECT Codeunit 10 Type Helper
     [External]
     PROCEDURE FormatDate@25(DateToFormat@1000 : Date;LanguageId@1003 : Integer) : Text;
     VAR
-      CultureInfo@1004 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Globalization.CultureInfo";
-      DateTimeFormatInfo@1007 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Globalization.DateTimeFormatInfo";
-      DotNetDateTime@1001 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.DateTime";
+      DotNet_CultureInfo@1004 : Codeunit 3002;
+      DotNet_DateTimeFormatInfo@1007 : Codeunit 3022;
+      DotNet_DateTime@1001 : Codeunit 3003;
     BEGIN
-      CultureInfo := CultureInfo.GetCultureInfo(LanguageId);
-      DateTimeFormatInfo := CultureInfo.DateTimeFormat;
-      DotNetDateTime := DotNetDateTime.DateTime(DATE2DMY(DateToFormat,3),DATE2DMY(DateToFormat,2),DATE2DMY(DateToFormat,1));
-      EXIT(DotNetDateTime.ToString('d',DateTimeFormatInfo));
+      DotNet_CultureInfo.GetCultureInfoById(LanguageId);
+      DotNet_CultureInfo.DateTimeFormat(DotNet_DateTimeFormatInfo);
+      DotNet_DateTime.DateTimeFromYMD(DATE2DMY(DateToFormat,3),DATE2DMY(DateToFormat,2),DATE2DMY(DateToFormat,1));
+      EXIT(DotNet_DateTime.ToString(DotNet_DateTimeFormatInfo));
     END;
 
     [External]
@@ -245,6 +248,17 @@ OBJECT Codeunit 10 Type Helper
     END;
 
     [External]
+    PROCEDURE GetOptionNoFromTableField@71(Value@1001 : Text;TableNo@1000 : Integer;FieldNo@1002 : Integer) : Integer;
+    VAR
+      RecRef@1003 : RecordRef;
+      FieldRef@1004 : FieldRef;
+    BEGIN
+      RecRef.OPEN(TableNo);
+      FieldRef := RecRef.FIELD(FieldNo);
+      EXIT(GetOptionNo(Value,FieldRef.OPTIONCAPTION));
+    END;
+
+    [External]
     PROCEDURE GetNumberOfOptions@11(OptionString@1000 : Text) : Integer;
     BEGIN
       EXIT(STRLEN(OptionString) - STRLEN(DELCHR(OptionString,'=',',')));
@@ -252,7 +266,7 @@ OBJECT Codeunit 10 Type Helper
 
     LOCAL PROCEDURE OptionsAreEqual@18(Value@1000 : Text;CurrentOption@1001 : Text) : Boolean;
     BEGIN
-      EXIT((Value = CurrentOption) OR ((Value = '') AND (DELCHR(CurrentOption,'=',' ') = '')));
+      EXIT(((Value <> '') AND (Value = CurrentOption)) OR ((Value = '') AND (CurrentOption = ' ')));
     END;
 
     [External]
@@ -260,7 +274,21 @@ OBJECT Codeunit 10 Type Helper
     VAR
       Decimal@1001 : Decimal;
     BEGIN
-      EXIT(EVALUATE(Decimal,Text));
+      EXIT(SYSTEM.EVALUATE(Decimal,Text));
+    END;
+
+    [External]
+    PROCEDURE FindFields@64(TableNo@1001 : Integer;VAR Field@1000 : Record 2000000041) : Boolean;
+    BEGIN
+      Field.SETRANGE(TableNo,TableNo);
+      Field.SETFILTER(ObsoleteState,'<>%1',Field.ObsoleteState::Removed);
+      EXIT(Field.FINDSET);
+    END;
+
+    [External]
+    PROCEDURE GetField@63(TableNo@1000 : Integer;FieldNo@1001 : Integer;VAR Field@1002 : Record 2000000041) : Boolean;
+    BEGIN
+      EXIT(Field.GET(TableNo,FieldNo) AND (Field.ObsoleteState <> Field.ObsoleteState::Removed));
     END;
 
     [External]
@@ -268,10 +296,17 @@ OBJECT Codeunit 10 Type Helper
     VAR
       Field@1002 : Record 2000000041;
     BEGIN
-      IF Field.GET(TableNo,FieldNo) THEN
+      IF GetField(TableNo,FieldNo,Field) THEN
         EXIT(Field.Len);
 
       EXIT(0);
+    END;
+
+    [External]
+    PROCEDURE TestFieldIsNotObsolete@66(Field@1000 : Record 2000000041);
+    BEGIN
+      IF Field.ObsoleteState = Field.ObsoleteState::Removed THEN
+        ERROR(ObsoleteFieldErr);
     END;
 
     [External]
@@ -288,9 +323,7 @@ OBJECT Codeunit 10 Type Helper
       IF ThisRecRef.KEYCOUNT = ThisRecRef.FIELDCOUNT THEN
         EXIT(FALSE);
 
-      Field.SETRANGE(TableNo,ThisRecRef.NUMBER);
-      Field.FINDSET;
-
+      FindFields(ThisRecRef.NUMBER,Field);
       REPEAT
         IF NOT Key.GET(ThisRecRef.NUMBER,Field."No.") THEN BEGIN
           ThisFieldRef := ThisRecRef.FIELD(Field."No.");
@@ -415,6 +448,21 @@ OBJECT Codeunit 10 Type Helper
       EXIT(TempBlob.ReadAsText(LineSeparator,Encoding));
     END;
 
+    [TryFunction]
+    [External]
+    PROCEDURE TryConvertWordBlobToPdf@67(VAR TempBlob@1000 : Record 99008535);
+    VAR
+      TempBlobPdf@1001 : Record 99008535;
+      InStreamWordDoc@1002 : InStream;
+      OutStreamPdfDoc@1003 : OutStream;
+      PdfWriter@1004 : DotNet "'Microsoft.Dynamics.Nav.PdfWriter, Version=13.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.Microsoft.Dynamics.Nav.PdfWriter.WordToPdf";
+    BEGIN
+      TempBlob.Blob.CREATEINSTREAM(InStreamWordDoc);
+      TempBlobPdf.Blob.CREATEOUTSTREAM(OutStreamPdfDoc);
+      PdfWriter.ConvertToPdf(InStreamWordDoc,OutStreamPdfDoc);
+      TempBlob.Blob := TempBlobPdf.Blob;
+    END;
+
     [External]
     PROCEDURE RegexReplace@55(Input@1000 : Text;Pattern@1001 : Text;Replacement@1002 : Text) : Text;
     VAR
@@ -458,6 +506,12 @@ OBJECT Codeunit 10 Type Helper
     PROCEDURE IsPhoneNumber@29(Input@1000 : Text) : Boolean;
     BEGIN
       EXIT(IsMatch(Input,'^[\(\)\-\+0-9 ]*$'));
+    END;
+
+    [External]
+    PROCEDURE TextEndsWith@65(Value@1000 : Text;EndingText@1001 : Text) : Boolean;
+    BEGIN
+      EXIT(IsMatch(Value,EndingText + '$'));
     END;
 
     [External]
@@ -589,6 +643,15 @@ OBJECT Codeunit 10 Type Helper
     END;
 
     [External]
+    PROCEDURE UrlDecode@59(VAR Value@1000 : Text) : Text;
+    VAR
+      HttpUtility@1001 : DotNet "'System.Web, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a'.System.Web.HttpUtility";
+    BEGIN
+      Value := HttpUtility.UrlDecode(Value);
+      EXIT(Value);
+    END;
+
+    [External]
     PROCEDURE HtmlEncode@32(VAR Value@1000 : Text) : Text;
     VAR
       HttpUtility@1001 : DotNet "'System.Web, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a'.System.Web.HttpUtility";
@@ -598,11 +661,30 @@ OBJECT Codeunit 10 Type Helper
     END;
 
     [External]
+    PROCEDURE HtmlDecode@56(VAR Value@1000 : Text) : Text;
+    VAR
+      HttpUtility@1001 : DotNet "'System.Web, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a'.System.Web.HttpUtility";
+    BEGIN
+      Value := HttpUtility.HtmlDecode(Value);
+      EXIT(Value);
+    END;
+
+    [External]
     PROCEDURE UriEscapeDataString@155(Value@1000 : Text) : Text;
     VAR
       Uri@1001 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Uri";
     BEGIN
       EXIT(Uri.EscapeDataString(Value));
+    END;
+
+    [External]
+    PROCEDURE UriGetAuthority@72(Value@1000 : Text) : Text;
+    VAR
+      Uri@1001 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Uri";
+      UriPartial@1002 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.UriPartial";
+    BEGIN
+      Uri := Uri.Uri(Value);
+      EXIT(Uri.GetLeftPart(UriPartial.Authority));
     END;
 
     [External]
@@ -920,6 +1002,63 @@ OBJECT Codeunit 10 Type Helper
       Math@1002 : DotNet "'mscorlib'.System.Math";
     BEGIN
       EXIT(Math.Log10(Number));
+    END;
+
+    [External]
+    PROCEDURE GetAmountFormatLCYWithUserLocale@57() : Text;
+    VAR
+      GeneralLedgerSetup@1000 : Record 98;
+      CurrencySymbol@1001 : Text[10];
+    BEGIN
+      GeneralLedgerSetup.GET;
+      CurrencySymbol := GeneralLedgerSetup.GetCurrencySymbol;
+
+      EXIT(GetAmountFormatWithUserLocale(CurrencySymbol));
+    END;
+
+    [External]
+    PROCEDURE GetAmountFormatWithUserLocale@81(CurrencySymbol@1004 : Text[10]) : Text;
+    VAR
+      UserPersonalization@1002 : Record 2000000073;
+    BEGIN
+      IF NOT UserPersonalization.GET(USERSECURITYID) THEN
+        EXIT('<Precision,0:0><Standard Format,0>');
+
+      EXIT(GetAmountFormat(UserPersonalization."Locale ID",CurrencySymbol));
+    END;
+
+    [External]
+    PROCEDURE GetAmountFormat@62(LocaleId@1001 : Integer;CurrencySymbol@1004 : Text[10]) : Text;
+    VAR
+      CurrencyPositivePattern@1000 : Integer;
+    BEGIN
+      // set position of cyrrency symbol based on the locale
+      IF NOT GetCurrencyStyle(LocaleId,CurrencyPositivePattern) THEN
+        EXIT('<Precision,0:0><Standard Format,0>');
+
+      CASE CurrencyPositivePattern OF
+        0: // $n
+          EXIT(CurrencySymbol + '<Precision,0:0><Standard Format,0>');
+        1: // n$
+          EXIT('<Precision,0:0><Standard Format,0>' + CurrencySymbol);
+        2: // $ n
+          EXIT(CurrencySymbol + ' <Precision,0:0><Standard Format,0>');
+        3: // n $
+          EXIT('<Precision,0:0><Standard Format,0> ' + CurrencySymbol);
+        ELSE
+          EXIT('<Precision,0:0><Standard Format,0>');
+      END
+    END;
+
+    [TryFunction]
+    LOCAL PROCEDURE GetCurrencyStyle@70(LocaleId@1006 : Integer;VAR CurrencyPositivePattern@1002 : Integer);
+    VAR
+      CultureInfo@1001 : DotNet "'mscorlib'.System.Globalization.CultureInfo";
+      NumberFormat@1000 : DotNet "'mscorlib'.System.Globalization.NumberFormatInfo";
+    BEGIN
+      CultureInfo := CultureInfo.GetCultureInfo(LocaleId);
+      NumberFormat := CultureInfo.NumberFormat;
+      CurrencyPositivePattern := NumberFormat.CurrencyPositivePattern;
     END;
 
     BEGIN

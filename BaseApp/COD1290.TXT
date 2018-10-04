@@ -39,12 +39,12 @@ OBJECT Codeunit 1290 SOAP Web Service Request Mgt.
       TraceLogEnabled@1011 : Boolean;
       GlobalTimeout@1024 : Integer;
       InternalErr@1028 : TextConst 'ENU=The remote service has returned the following error message:\\';
+      GlobalContentType@1026 : Text;
       GlobalSkipCheckHttps@1018 : Boolean;
       GlobalProgressDialogEnabled@1023 : Boolean;
       InvalidTokenFormatErr@1025 : TextConst 'ENU=The token must be in JWS or JWE Compact Serialization Format.';
 
     [TryFunction]
-    [Internal]
     PROCEDURE SendRequestToWebService@17();
     VAR
       WebRequestHelper@1000 : Codeunit 1299;
@@ -72,7 +72,9 @@ OBJECT Codeunit 1290 SOAP Web Service Request Mgt.
       HttpWebRequest.KeepAlive := TRUE;
       HttpWebRequest.AllowAutoRedirect := TRUE;
       HttpWebRequest.UseDefaultCredentials := TRUE;
-      HttpWebRequest.ContentType := ContentTypeTxt;
+      IF GlobalContentType = '' THEN
+        GlobalContentType := ContentTypeTxt;
+      HttpWebRequest.ContentType := GlobalContentType;
       IF GlobalTimeout <= 0 THEN
         GlobalTimeout := 600000;
       HttpWebRequest.Timeout := GlobalTimeout;
@@ -165,13 +167,11 @@ OBJECT Codeunit 1290 SOAP Web Service Request Mgt.
       TraceLogXmlDocToTempFile(ResponseBodyXMLDoc,'ResponseBodyContent');
     END;
 
-    [Internal]
     PROCEDURE GetResponseContent@22(VAR ResponseBodyInStream@1000 : InStream);
     BEGIN
       ResponseBodyTempBlob.Blob.CREATEINSTREAM(ResponseBodyInStream);
     END;
 
-    [Internal]
     PROCEDURE ProcessFaultResponse@15(SupportInfo@1001 : Text);
     VAR
       WebRequestHelper@1002 : Codeunit 1299;
@@ -224,6 +224,12 @@ OBJECT Codeunit 1290 SOAP Web Service Request Mgt.
     PROCEDURE SetTimeout@7(NewTimeout@1000 : Integer);
     BEGIN
       GlobalTimeout := NewTimeout;
+    END;
+
+    [External]
+    PROCEDURE SetContentType@20(NewContentType@1000 : Text);
+    BEGIN
+      GlobalContentType := NewContentType;
     END;
 
     LOCAL PROCEDURE CheckGlobals@14();
@@ -313,9 +319,9 @@ OBJECT Codeunit 1290 SOAP Web Service Request Mgt.
     PROCEDURE GetTokenDetailsAsJson@19(JsonWebToken@1000 : Text;VAR WebTokenAsJson@1006 : Text);
     VAR
       JSONManagement@1005 : Codeunit 5459;
-      JwtSecurityTokenHandler@1004 : DotNet "'System.IdentityModel.Tokens.Jwt, Version=5.1.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler";
-      JwtSecurityToken@1003 : DotNet "'System.IdentityModel.Tokens.Jwt, Version=5.1.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.System.IdentityModel.Tokens.Jwt.JwtSecurityToken";
-      Claim@1002 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Security.Claims.Claim";
+      JwtSecurityTokenHandler@1004 : DotNet "'System.IdentityModel.Tokens.Jwt'.System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler";
+      JwtSecurityToken@1003 : DotNet "'System.IdentityModel.Tokens.Jwt'.System.IdentityModel.Tokens.Jwt.JwtSecurityToken";
+      Claim@1002 : DotNet "'mscorlib'.System.Security.Claims.Claim";
       JObject@1001 : DotNet "'Newtonsoft.Json'.Newtonsoft.Json.Linq.JObject";
     BEGIN
       IF JsonWebToken = '' THEN

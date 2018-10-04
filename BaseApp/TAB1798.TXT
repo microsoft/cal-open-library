@@ -8,13 +8,16 @@ OBJECT Table 1798 Data Migration Parameters
   }
   PROPERTIES
   {
+    ReplicateData=No;
   }
   FIELDS
   {
     { 1   ;   ;Key                 ;Integer       ;AutoIncrement=Yes }
     { 2   ;   ;Migration Type      ;Text250        }
-    { 3   ;   ;Staging Table Migr. Codeunit;Integer }
-    { 4   ;   ;Staging Table RecId To Process;RecordID;DataClassification=SystemMetadata}
+    { 3   ;   ;Staging Table Migr. Codeunit;Integer;
+                                                   DataClassification=SystemMetadata }
+    { 4   ;   ;Staging Table RecId To Process;RecordID;
+                                                   DataClassification=SystemMetadata }
   }
   KEYS
   {

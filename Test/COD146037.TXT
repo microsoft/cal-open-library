@@ -1,0 +1,142 @@
+OBJECT Codeunit 146037 Test_DotNet_GzipStream
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    Subtype=Test;
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      Assert@1000 : Codeunit 130000;
+      LibraryLowerPermissions@1001 : Codeunit 132217;
+      DotNet_GzipStream@1002 : Codeunit 3036;
+      StreamManagement@1003 : Codeunit 705;
+
+    [Test]
+    PROCEDURE SampleDataCompression@1();
+    VAR
+      TempBlobSource@1000 : TEMPORARY Record 99008535;
+      TempBlobDestination@1001 : TEMPORARY Record 99008535;
+      DotNet_CompressionMode@1002 : Codeunit 3037;
+    BEGIN
+      LibraryLowerPermissions.SetO365Basic;
+      CLEAR(DotNet_GzipStream);
+      DotNet_CompressionMode.Compress;
+
+      // [Given] Uncompressed data is 'TestData'
+      TempBlobSource.WriteAsText('TestData',TEXTENCODING::UTF8);
+
+      // [WHEN] Gzip Compression completes
+      StreamManagement.InitGzipStreamFromTempBlob(TempBlobDestination,DotNet_CompressionMode,DotNet_GzipStream);
+      StreamManagement.ReadGzipStreamFromTempBlob(DotNet_GzipStream,TempBlobSource);
+      DotNet_GzipStream.Close;
+      DotNet_GzipStream.Dispose;
+
+      // [THEN] Compressed data as Base64 should be 'H4sIAAAAAAAEAAtJLS5xSSxJBAA2+6HACAAAAA=='
+      Assert.AreEqual('H4sIAAAAAAAEAAtJLS5xSSxJBAA2+6HACAAAAA==',TempBlobDestination.ToBase64String,'Compression fails');
+    END;
+
+    [Test]
+    PROCEDURE SampleDataDecompression@2();
+    VAR
+      TempBlobSource@1000 : TEMPORARY Record 99008535;
+      TempBlobDestination@1001 : TEMPORARY Record 99008535;
+      DotNet_CompressionMode@1002 : Codeunit 3037;
+    BEGIN
+      LibraryLowerPermissions.SetO365Basic;
+      CLEAR(DotNet_GzipStream);
+      DotNet_CompressionMode.Decompress;
+
+      // [Given] Compressed data (as Base64) is 'H4sIAAAAAAAEAAtJLS5xSSxJBAA2+6HACAAAAA=='
+      TempBlobSource.FromBase64String('H4sIAAAAAAAEAAtJLS5xSSxJBAA2+6HACAAAAA==');
+
+      // [WHEN] Gzip Decompression completes
+      StreamManagement.InitGzipStreamFromTempBlob(TempBlobSource,DotNet_CompressionMode,DotNet_GzipStream);
+      StreamManagement.WriteGzipStreamToTempBlob(DotNet_GzipStream,TempBlobDestination);
+      DotNet_GzipStream.Close;
+      DotNet_GzipStream.Dispose;
+
+      // [THEN] Decompressed data should be 'TestData'
+      Assert.AreEqual('TestData',TempBlobDestination.ReadAsTextWithCRLFLineSeparator,'Decompression fails');
+    END;
+
+    [Test]
+    PROCEDURE SampleDataCompressionDecompression@3();
+    VAR
+      TempBlobSource@1000 : TEMPORARY Record 99008535;
+      TempBlobDestination@1001 : TEMPORARY Record 99008535;
+      TempBlobIntermediate@1002 : TEMPORARY Record 99008535;
+      DotNet_CompressionMode@1003 : Codeunit 3037;
+    BEGIN
+      LibraryLowerPermissions.SetO365Basic;
+      CLEAR(DotNet_GzipStream);
+      DotNet_CompressionMode.Compress;
+
+      // [Given] Uncompressed data is 'TestData'
+      TempBlobSource.WriteAsText('TestData',TEXTENCODING::UTF8);
+
+      // [WHEN] Gzip Compression completes
+      StreamManagement.InitGzipStreamFromTempBlob(TempBlobIntermediate,DotNet_CompressionMode,DotNet_GzipStream);
+      StreamManagement.ReadGzipStreamFromTempBlob(DotNet_GzipStream,TempBlobSource);
+      DotNet_GzipStream.Close;
+      DotNet_GzipStream.Dispose;
+
+      // [WHEN] And Gzip Decompression from the same stream completes
+      CLEAR(DotNet_GzipStream);
+      DotNet_CompressionMode.Decompress;
+      StreamManagement.InitGzipStreamFromTempBlob(TempBlobIntermediate,DotNet_CompressionMode,DotNet_GzipStream);
+      CLEAR(TempBlobDestination.Blob);
+      StreamManagement.WriteGzipStreamToTempBlob(DotNet_GzipStream,TempBlobDestination);
+      DotNet_GzipStream.Close;
+      DotNet_GzipStream.Dispose;
+
+      // [THEN] Result must be the same string
+      Assert.AreEqual('TestData',TempBlobDestination.ReadAsTextWithCRLFLineSeparator,'Compression/Decompression fails');
+    END;
+
+    [Test]
+    PROCEDURE SampleDataDecompressionUsingMemoryStream@4();
+    VAR
+      TempBlobSource@1000 : TEMPORARY Record 99008535;
+      TempBlobDestination@1001 : TEMPORARY Record 99008535;
+      DotNet_Stream@1004 : Codeunit 3034;
+      DotNet_MemoryStream@1002 : Codeunit 3009;
+      DotNet_CompressionMode@1005 : Codeunit 3037;
+      DataStream@1003 : InStream;
+    BEGIN
+      LibraryLowerPermissions.SetO365Basic;
+      CLEAR(DotNet_GzipStream);
+      DotNet_CompressionMode.Decompress;
+
+      // [Given] Compressed data (as Base64) is 'H4sIAAAAAAAEAAtJLS5xSSxJBAA2+6HACAAAAA=='
+      TempBlobSource.FromBase64String('H4sIAAAAAAAEAAtJLS5xSSxJBAA2+6HACAAAAA==');
+
+      // [WHEN] Gzip Decompression completes
+      TempBlobSource.Blob.CREATEINSTREAM(DataStream);
+      DotNet_MemoryStream.InitMemoryStream;
+      DotNet_MemoryStream.CopyFromInStream(DataStream);
+      DotNet_MemoryStream.SetPosition(0);
+      DotNet_MemoryStream.GetDotNetStream(DotNet_Stream);
+      DotNet_GzipStream.GZipStream(DotNet_Stream,DotNet_CompressionMode);
+      StreamManagement.WriteGzipStreamToTempBlob(DotNet_GzipStream,TempBlobDestination);
+      DotNet_GzipStream.Close;
+      DotNet_GzipStream.Dispose;
+
+      // [THEN] Decompressed data should be 'TestData'
+      Assert.AreEqual('TestData',TempBlobDestination.ReadAsTextWithCRLFLineSeparator,'Decompression fails');
+    END;
+
+    BEGIN
+    END.
+  }
+}
+

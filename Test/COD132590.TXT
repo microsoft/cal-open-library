@@ -11,6 +11,7 @@ OBJECT Codeunit 132590 Type Helper Unit Tests
     Subtype=Test;
     TestPermissions=Disabled;
     OnRun=BEGIN
+            // [FEATURE] [Type Helper] [UT]
           END;
 
   }
@@ -1383,6 +1384,47 @@ OBJECT Codeunit 132590 Type Helper Unit Tests
     END;
 
     [Test]
+    PROCEDURE TestGetAmountFormat@59();
+    VAR
+      TypeHelper@1000 : Codeunit 10;
+    BEGIN
+      // $n formats
+      Assert.AreEqual('$<Precision,0:0><Standard Format,0>',TypeHelper.GetAmountFormat(2057,'$'),'Invalid amount format for en-gb'); // en-gb
+      Assert.AreEqual('$<Precision,0:0><Standard Format,0>',TypeHelper.GetAmountFormat(1033,'$'),'Invalid amount format for en-us'); // en-us
+
+      // $ n formats
+      Assert.AreEqual('$ <Precision,0:0><Standard Format,0>',TypeHelper.GetAmountFormat(1044,'$'),'Invalid amount format for no-no '); // no-no
+      Assert.AreEqual('$ <Precision,0:0><Standard Format,0>',TypeHelper.GetAmountFormat(2055,'$'),'Invalid amount format for de-ch'); // de-ch
+      Assert.AreEqual('$ <Precision,0:0><Standard Format,0>',TypeHelper.GetAmountFormat(2064,'$'),'Invalid amount format for it-ch'); // it-ch
+      Assert.AreEqual('$ <Precision,0:0><Standard Format,0>',TypeHelper.GetAmountFormat(1043,'$'),'Invalid amount format for nl-nl'); // nl-nl
+      Assert.AreEqual('$ <Precision,0:0><Standard Format,0>',TypeHelper.GetAmountFormat(3079,'$'),'Invalid amount format for de-at'); // de-at
+
+      // n $ formats
+      Assert.AreEqual('<Precision,0:0><Standard Format,0> $',TypeHelper.GetAmountFormat(2067,'$'),'Invalid amount format for nl-be'); // nl-be
+      Assert.AreEqual('<Precision,0:0><Standard Format,0> $',TypeHelper.GetAmountFormat(2060,'$'),'Invalid amount format for fr-be'); // fr-be
+      Assert.AreEqual('<Precision,0:0><Standard Format,0> $',TypeHelper.GetAmountFormat(1040,'$'),'Invalid amount format for it-it'); // it-it
+      Assert.AreEqual('<Precision,0:0><Standard Format,0> $',TypeHelper.GetAmountFormat(1035,'$'),'Invalid amount format for fi'); // fi
+      Assert.AreEqual('<Precision,0:0><Standard Format,0> $',TypeHelper.GetAmountFormat(1034,'$'),'Invalid amount format for es-es'); // es-es
+      // FIXME Assert.AreEqual('<Precision,0:0><Standard Format,0> $',TypeHelper.GetAmountFormat(4108,'$'),'Invalid amount format for fr-ch'); // fr-ch
+      Assert.AreEqual('<Precision,0:0><Standard Format,0> $',TypeHelper.GetAmountFormat(1031,'$'),'Invalid amount format for de-de'); // de-de
+      Assert.AreEqual('<Precision,0:0><Standard Format,0> $',TypeHelper.GetAmountFormat(1030,'$'),'Invalid amount format for da-DK'); // da-DK
+      Assert.AreEqual('<Precision,0:0><Standard Format,0> $',TypeHelper.GetAmountFormat(1053,'$'),'Invalid amount format for sv-SE'); // sv-Se
+
+      // error cases
+      Assert.AreEqual('<Precision,0:0><Standard Format,0>',TypeHelper.GetAmountFormat(-1,'$'),'Invalid amount format for error case');
+      Assert.AreEqual('<Precision,0:0><Standard Format,0>',TypeHelper.GetAmountFormat(0,'$'),'Invalid amount format for error case');
+    END;
+
+    [Test]
+    PROCEDURE TestTextEndsWith@63();
+    VAR
+      TypeHelper@1000 : Codeunit 10;
+    BEGIN
+      Assert.IsTrue(TypeHelper.TextEndsWith('sometextTheEnd','TheEnd'),'Text should end with TheEnd');
+      Assert.IsFalse(TypeHelper.TextEndsWith('sometextTheEnd','TheEnd123124'),'Text should not end with TheEnd123124');
+    END;
+
+    [Test]
     PROCEDURE VerifyReadRecordLinkNote@47();
     VAR
       RecordLink@1001 : Record 2000000068;
@@ -1546,9 +1588,6 @@ OBJECT Codeunit 132590 Type Helper Unit Tests
     END;
 
     BEGIN
-    {
-      // [FEATURE] [Type Helper] [UT]
-    }
     END.
   }
 }

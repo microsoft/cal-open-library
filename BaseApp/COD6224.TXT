@@ -293,7 +293,7 @@ OBJECT Codeunit 6224 XML DOM Management
         EXIT(FALSE);
 
       // NameStartChar ::= ":" | [A-Z] | "_" | [a-z] | [#xC0-#xD6] | [#xD8-#xF6] | [#xF8-#x2FF] | [#x370-#x37D] | [#x37F-#x1FFF] | [#x200C-#x200D] | [#x2070-#x218F] | [#x2C00-#x2FEF] | [#x3001-#xD7FF] | [#xF900-#xFDCF] | [#xFDF0-#xFFFD] | [#x10000-#xEFFF
-      IF InputChar IN [':','_','A'..'Z','a'..'z'] THEN
+      IF InputChar IN [':','_','A'..'Z','a'..'z','€'..'Ÿ',' '..'ï'] THEN
         EXIT(TRUE);
 
       CharCode := InputChar;
@@ -378,8 +378,10 @@ OBJECT Codeunit 6224 XML DOM Management
 
     PROCEDURE LoadXMLDocumentFromFile@28(FileName@1000 : Text;VAR XmlDocument@1001 : DotNet "'System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Xml.XmlDocument");
     VAR
+      FileManagement@1003 : Codeunit 419;
       File@1002 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.IO.File";
     BEGIN
+      FileManagement.IsAllowedPath(FileName,FALSE);
       LoadXMLDocumentFromText(File.ReadAllText(FileName),XmlDocument);
     END;
 
@@ -623,6 +625,38 @@ OBJECT Codeunit 6224 XML DOM Management
         '<xsl:copy />' +
         '</xsl:template>' +
         '</xsl:stylesheet>');
+    END;
+
+    [External]
+    PROCEDURE CreateXslTransformFromBlob@50(VAR TempBlob@1000 : Record 99008535;VAR DotNet_XslCompiledTransform@1001 : Codeunit 3038);
+    VAR
+      DotNet_XmlDocument@1003 : Codeunit 3013;
+      TransformStream@1002 : InStream;
+    BEGIN
+      TempBlob.Blob.CREATEINSTREAM(TransformStream);
+      DotNet_XslCompiledTransform.XslCompiledTransform;
+      DotNet_XmlDocument.InitXmlDocument;
+      DotNet_XmlDocument.Load(TransformStream);
+      DotNet_XslCompiledTransform.Load(DotNet_XmlDocument);
+    END;
+
+    [External]
+    PROCEDURE XslCompiledTransformToBlob@49(VAR DotNet_XslCompiledTransform@1000 : Codeunit 3038;VAR TempBlob@1001 : Record 99008535;VAR DestinationStream@1002 : OutStream);
+    VAR
+      SourceStream@1003 : InStream;
+    BEGIN
+      TempBlob.Blob.CREATEINSTREAM(SourceStream);
+      XslCompiledTransformToStream(DotNet_XslCompiledTransform,SourceStream,DestinationStream);
+    END;
+
+    [External]
+    PROCEDURE XslCompiledTransformToStream@47(VAR DotNet_XslCompiledTransform@1000 : Codeunit 3038;VAR SourceXmlStream@1001 : InStream;VAR DestinationStream@1002 : OutStream);
+    VAR
+      DotNet_XmlDocument@1003 : Codeunit 3013;
+    BEGIN
+      DotNet_XmlDocument.InitXmlDocument;
+      DotNet_XmlDocument.Load(SourceXmlStream);
+      DotNet_XslCompiledTransform.Transform(DotNet_XmlDocument,DestinationStream);
     END;
 
     BEGIN

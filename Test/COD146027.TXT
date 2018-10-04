@@ -1,10 +1,10 @@
-OBJECT Codeunit 146027 DotNet_Certificate Test
+OBJECT Codeunit 146027 Test_DotNet_StreamReader
 {
   OBJECT-PROPERTIES
   {
     Date=;
     Time=;
-    Version List=;
+    Version List=Test,W1,All;
   }
   PROPERTIES
   {
@@ -16,116 +16,164 @@ OBJECT Codeunit 146027 DotNet_Certificate Test
   CODE
   {
     VAR
-      Assert@1000 : Codeunit 130000;
+      TempBlob@1005 : TEMPORARY Record 99008535;
+      Assert@1001 : Codeunit 130000;
+      LibraryLowerPermissions@1000 : Codeunit 132217;
+      DotNet_StreamWriter@1002 : Codeunit 3025;
+      DotNet_StreamReader@1003 : Codeunit 3027;
+      DotNet_Encoding@1004 : Codeunit 3026;
 
     [Test]
-    PROCEDURE TestDemoCertificateFromBase64String@5();
+    PROCEDURE TestReadingUsingReadLine@1();
     VAR
-      TempBlob@1002 : Record 99008535;
-      DotNet_MemoryStream@1001 : Codeunit 3009;
-      DotNet_Certificate@1003 : Codeunit 3027;
-      InStr@1000 : InStream;
+      Expected@1003 : Text;
+      Actual@1000 : Text;
+      Count@1002 : Integer;
+      ActualCodepage@1004 : Integer;
     BEGIN
-      TempBlob.FromBase64String(DemoCertificate);
-      TempBlob.Blob.CREATEINSTREAM(InStr);
-      DotNet_MemoryStream.InitMemoryStream;
-      DotNet_MemoryStream.CopyFromInStream(InStr);
-      DotNet_Certificate.LoadFromMemoryStream(DotNet_MemoryStream,''); // Password not needed
-      TestCertificate(DotNet_Certificate);
+      LibraryLowerPermissions.SetO365Basic;
+
+      // [WHEN] One-lined text file with encoding 1252 is created as read line by line
+      CreateSampleStreamFromText('Test',1,1252);
+      ReadLineByLineInGivenCodepage(1252,Count,Actual,ActualCodepage);
+      // [THEN] Expected line count is 1 and concatenation of all lines should be 'Test'
+      Assert.AreEqual(1252,ActualCodepage,'Codepage check failed');
+      Assert.AreEqual(1,Count,'Line count check failed');
+      Expected := 'Test';
+      Assert.AreEqual(Expected,Actual,'Simple text file read failed');
+
+      // [WHEN] Two-lined text file with encoding 1252 is created
+      CreateSampleStreamFromText('Test',2,1252);
+      ReadLineByLineInGivenCodepage(1252,Count,Actual,ActualCodepage);
+      // [THEN] Expected line count is 2 and concatenation of all lines should be 'TestTest'
+      Assert.AreEqual(2,Count,'Line count check failed');
+      Expected := 'TestTest';
+      Assert.AreEqual(Expected,Actual,'Simple text file read failed');
     END;
 
-    LOCAL PROCEDURE TestCertificate@1(DotNet_Certificate@1000 : Codeunit 3027);
+    [Test]
+    PROCEDURE TestReadingUsingReadToEnd@2();
     VAR
-      TempBlob@1012 : Record 99008535;
-      DotNet_MemoryStream@1009 : Codeunit 3009;
-      DotNet_Array@1010 : Codeunit 3000;
-      DotNet_Convert@1011 : Codeunit 3008;
-      InStr@1013 : InStream;
-      OutStr@1014 : OutStream;
-      FriendlyName@1008 : Text;
-      Thumbprint@1007 : Text;
-      Issuer@1006 : Text;
-      Subject@1005 : Text;
-      Expiration@1004 : DateTime;
-      HasPrivateKey@1003 : Boolean;
+      Expected@1003 : Text;
+      Actual@1000 : Text;
     BEGIN
-      // Get Details to compare with
-      FriendlyName := DotNet_Certificate.GetFriendlyName;
-      Thumbprint := DotNet_Certificate.GetThumbprint;
-      Issuer := DotNet_Certificate.GetIssuer;
-      Subject := DotNet_Certificate.GetSubject;
-      Expiration := DotNet_Certificate.GetExpiration;
-      HasPrivateKey := DotNet_Certificate.GetHasPrivateKey;
+      LibraryLowerPermissions.SetO365Basic;
 
-      // Export Certificate to TempBlob as Byte Array
-      DotNet_Certificate.ExportToArray(DotNet_Array);
-      DotNet_MemoryStream.InitMemoryStreamFromArray(DotNet_Array);
-      TempBlob.Blob.CREATEOUTSTREAM(OutStr);
-      DotNet_MemoryStream.WriteTo(OutStr);
-
-      // Import Certificate from TempBlob as Byte Array
-      TempBlob.Blob.CREATEINSTREAM(InStr);
-      DotNet_MemoryStream.InitMemoryStream;
-      DotNet_MemoryStream.CopyFromInStream(InStr);
-      DotNet_Certificate.LoadFromMemoryStream(DotNet_MemoryStream,''); // Password not needed
-
-      // Verify Certificate Details
-      Assert.AreEqual(FriendlyName,DotNet_Certificate.GetFriendlyName,'Certificate Details incorrect!');
-      Assert.AreEqual(Thumbprint,DotNet_Certificate.GetThumbprint,'Certificate Details incorrect!');
-      Assert.AreEqual(Issuer,DotNet_Certificate.GetIssuer,'Certificate Details incorrect!');
-      Assert.AreEqual(Subject,DotNet_Certificate.GetSubject,'Certificate Details incorrect!');
-      Assert.AreEqual(Expiration,DotNet_Certificate.GetExpiration,'Certificate Details incorrect!');
-      Assert.AreEqual(HasPrivateKey,DotNet_Certificate.GetHasPrivateKey,'Certificate Details incorrect!');
+      // [WHEN] One-lined text file with encoding 1252 is created and whole content is read
+      CreateSampleStreamFromText('Test',0,1252);
+      Actual := ReadToEndInGivenCodepage(1252);
+      // [THEN] Actual content that was read should be 'Test'
+      Expected := 'Test';
+      Assert.AreEqual(Expected,Actual,'Simple text file read failed');
     END;
 
-    PROCEDURE DemoCertificate@6() : Text;
+    [Test]
+    PROCEDURE TestReadingFromStreamsInBalticEncodings@3();
+    VAR
+      Expected@1003 : Text;
+      Actual@1000 : Text;
     BEGIN
-      EXIT(
-        'MIIM/QIBAzCCDLkGCSqGSIb3DQEHAaCCDKoEggymMIIMojCCBgsGCSqGSIb3DQEHAaCCBfwEggX4MIIF9DCCBfAGCyqGSIb3DQEM' +
-        'CgECoIIE9jCCBPIwHAYKKoZIhvcNAQwBAzAOBAivq0/HTeszygICB9AEggTQizw8VPs6yzahoZiKKjB8Qwo0HHeYTKclP3NBon0l' +
-        '0Kf5S69NT14MXFjqDoecdLV5l3C2Cwc3BugKdGXP+TRd7ECfOlHYWwsLkRrWtlbo/lCKoHwyemIbKkXENBANqcEtDmUsCGqdjRbY' +
-        'Jfq+235O9K6R2jEvh07Q8UugC+6Z7TThxaWDYGUN4dZlPzZSOiPVun0DDuLRu7vJvDicb73ywBNtb2yy9qlD/FK2hI68eHtj0TDr' +
-        'WHl6uieuCEC7IbZHvfDjRWHbYV4efUlUv+N5qqhSg8oFmvLs2bvqf2kQuzNXMNRk4P05V2ixr2oTwIW2+TCOxemvvv8mKqMJW60g' +
-        '4KZtfKl6s/1RfO1Pv3nrDl0c0zI0A078TcfAC1zcrlZoUSD67K/1ovEpqQXljNVzm1385RlMyA40eBR7HhTxEiR4E0j4aeVfmJ3t' +
-        'WPVGmeBGk4gxNhqmbHpsOO3XZp3WcEYG5tJIoI+ggW5FHRr6dMrsTaJjgpfaGcAN9AZCJoIysPdxPVciH4TsI1zA9l4FED8zdFk4' +
-        's0kQU7ZGDQUIKI9cOghbtnqIE5SsHQWSsTZcVbMwwL9moehJXw/GmOz/T6K/98YxaFISjMw5yHdqZ6rz+7uKCINYh9SQMQSfatZJ' +
-        'BYf1UehW3+Fvye/tG8Jah8x2byD7cB2rODBQItH79sWAo96CSOgcfc6o1eRZt82uHeoggTIxENzt0YxrJu6QeGbrmDcZU32pKBT6' +
-        'HvCbzqxCDo7KK6YdmANPmbmryZscD5NaVBZLzN8V2rojoQA2nAnbLur7p5OWM87Dz+H70hdjy62gxtbOOT2xHYmdWbVKxOAGjWp+' +
-        '/aR1BRT0WT6ipQI3rNrgR3Ak48ATmhzQ7K3c7g9AjuSMkWS+K6+PMvkhPpY7zWL20uKldt9qR7sWRfvknzPIsDAK0uje4zJjTu1H' +
-        'ew5RBK+Y/DzNx8B2kqXYEDGfoVS6VbvfzPLJwP6c3GwV/OxWTj4fk2YlMr+ss3jTTPbAvQbpaYhcFrJ6m0c+Rb9loSZR3odB4Dzc' +
-        'yLmnw4lNDXT7t3I/BcPtbboRkMLViecqlnZKQnb2pcC2hyDClWWkQxB2jNCRBhfQd/LLL9VRLlVzoOLIfLJw5oHVM5ZLlUjGJCID' +
-        'owxL76QbftTvdFqu157e1f/uobTyKFRqZovI5h20feTiLwfx6SwrS1ZN5tpNnXg9bv2vTnlS7f9BuUBbJL6TkgoQRPEX628YJzfb' +
-        'FAyoTAZnlQD7ILUZLik/9Gj0fD4bJ4hNO/rYi7FwX8LUkymCXElpq589+ikov3B+717f385x87kJ19NSqvxp4S5Vc6RFLHBEOx5z' +
-        '8GbQeiegiJo/d4m9f1CxdnoL4GUqTKFAOsji1hKZ/VakhuRvUCslZLQMH3IK1WNUbQtJgh0XZ2Shr8P7bLVW0gOlnp84bUIW20nk' +
-        'bqgIYoWldH6iHcZCWxQbjeYHMcEKj9MlxNuC1t0PvDR0WVInEuJhhOu6H0hPfZB4J+h74NXbOdbFIUlgRybu0c+QlEYuuyW3WbLL' +
-        '4QzfwE+I55nIKRYDyo4j4QTBJ2YzTkOjDBVIOCnijiwSRqemkugCLQGNdSgJniQmnt2cYQpmK42kGysq2SC/bm2sgPMu3f7P4ARV' +
-        'PEoxgeYwDQYJKwYBBAGCNxECMQAwEwYJKoZIhvcNAQkVMQYEBAEAAAAwWwYJKoZIhvcNAQkUMU4eTAB7AEQAOAA2ADAAMQA5ADEA' +
-        'NwAtAEIAMgAxADQALQA0AEMANwBGAC0AQgBBADQARQAtADQAQwA0AEYAOAAyADAAQwBDAEMAQgA3AH0wYwYJKwYBBAGCNxEBMVYe' +
-        'VABNAGkAYwByAG8AcwBvAGYAdAAgAEIAYQBzAGUAIABDAHIAeQBwAHQAbwBnAHIAYQBwAGgAaQBjACAAUAByAG8AdgBpAGQAZQBy' +
-        'ACAAdgAxAC4AMDCCBo8GCSqGSIb3DQEHBqCCBoAwggZ8AgEAMIIGdQYJKoZIhvcNAQcBMBwGCiqGSIb3DQEMAQMwDgQIlVUYGcm6' +
-        'uFcCAgfQgIIGSOUPWRLbuCZYq4mtum+MvV3EPZE+EIMD9iOMJZYFJdNChtVz5/3noHeWzyviaWW1Kq397ZYPjKiuMw5Eyjf1o/z1' +
-        '3gj4d7jo892+lRFxmGyX5e07wMhmg+uxeSHCUziDg67s7Tj3/o2hP4zZwOOa0aMSy/1zzE9+0MKuVu+9WIic1UoTQNNN6Hp1w8h3' +
-        'OAsf8hMM3S9apoxHJJR69Al+aSD9X/piblvjO364CuWdbR7IJZMkelcSb4NqdVE3CKjYTfsFGKVM1tLKtoANAI1ZVN7XbmMoVbw/' +
-        'THd3/6GumF0tw8IQqF6tTCoUQa/hIzXEBci87BF49fSlm0EdeiDahdlpKx0wEYh6tx2xBybffuUQySz6QHaC/vmQ0a4fr7315Zfy' +
-        'd7a9QRGWRS/BdwT6B8eDoePNHdmIEHw+6YCKCmrQ+2SbLTWChDD5g9BFNzYQ6zY5etSG9/LoNColBl8MmNVTFuwnyec0o6OGkNcA' +
-        'QjYHCUMn3YDj/J57S9qVqzB66bFqUaN+Lu4v6i3vPWDUKap6Se1yVM27RSBJ3il9NX/syHAvHu73KEAGDGbxBRNLOPkNs+K6EjO3' +
-        'K3N2RRPerZBEMoR9f8h1vWg+/5OqDXqjp+hcrlCRzWsNa/YeGT0L1vailZi3IEAPQ9ViLtk8Q9wsqwCUM40Cg9MvTIFbLORUZrRR' +
-        'LRGzaqCjsxTc6yLdCBxunAr2g/yHe/c+mdmPf4xMvwe6nSUCr2p9NEq9yG+SQ1gYtq59bzWMB6PJpQ1zKm4i//RKb4CsRuQJL1VW' +
-        'JRLcVglrv7a6oqQJOZDHTud4GKXIMv3V7S5mjHRllSYqux9+WPmh83ppjAdWNaZ3/+z+ibLiX3AEwSivmx1VCWcdHTYGCNt6s+k3' +
-        'B7DlVr4ji+ZnSQhtJiEOmeoDJgGYsm8XlQSJ0TUV8YXij0PuVocDcryScYZ1F0F7DFaJxuugWjjMBCLcsnSRbxqJ4UmmhNO1mX1E' +
-        'Bfaf6Kt86bdtolrnD2A1w9kUSnCskPWLkfJuy2H8Lwmwto/mlbvoxFTczLB+BeM8EYfKsoEaeV9VHamD4lvlEw9a1MaFbZYUm2M5' +
-        'DUoVhSWLvhBA8H43lZA9e1casPFaPDJy0ri+x99GZVQCl8I5MCkjvPUjDgzKAFLBRZr7aCXwqSsPXUk0Pt0HzgVuHCYguaQKR/dq' +
-        'qNo8MjqCmUOK9CoE6inMkQkicSMeT1YJBIuoShhPq4mI6xzMZC8hxsjGoZRcgPLiQOKsS7IXLi2ks7cw8H2TASf+X96cx+SpzD9z' +
-        'vHjrx1yQHZKJDZvGI/Zouw6kznoirupdMFvnBcEfk0lNYwMS1oWOFVLv3R5uz5Z8UjWPCTTX9FYLJqQ7138tuOjn1o9N88gTgVDH' +
-        'PyGdnsAxP/uaBQ9L7H4Azx9HIXo9I9zxPk+K4INyFRUmdJYxM4BErdjScbxj/zGn+5ACyMSDJTIGLp3nf6JhOy/YZ2bCqlSYpC06' +
-        'OiCypdP/TmdsmloqO++4kJyCCgK31Hp8e9VBI///be5GBY92nmyg6+ERb/ECMFWP1U2yQQLN6HKt3ImevD9ftsjMc2yC0na6/iZE' +
-        '7Ui+lbVdircvpc4XQacbtmsnQsf4qZlo13KDVIjhSuTPgAeGG6d+D5bXQQZI1swnFeGjGwZsqszcW2FDdm82Le4SF28Q65IWLhPO' +
-        'xvOj5lTUYkndDGlWlrECa0o/JJpy7j2OPJsQNGji38EVXrSn6Sa9bpfNANvCAv1z9AwrkioU2gOVpSQ8kVlAUc6Zbc4lYAqx8rIe' +
-        '/Qpjf09BxmgNV54ZJl47QsdEVRRbBfUBx3bhIH2BDomVMhs+Fn5jhX7r007nMgxIDy70IFTtyq5Vo3PFJ3WlV9yGVPuEYMfw5q+E' +
-        'q6ln+XcJOOTS9qpeXqqL1H+Ws/aNx3brQWS9NGJ5j6zUgNUHX+8jkxGmWjMY3KP0bkMPxl2oNTITTKuYTw/tpKvAd4hwCir3HM7b' +
-        '51oCg3HOl+WkhpzXB4H/NkGpnaWHtp0akKOzwcvuUKTsfnw69bqljO6R2X0zMEaox9UVbyIo1QUAI0VSIiMu+3vt9MVLftfbmvUY' +
-        'ICQOp3rdfMd08ZIOjcl0zkBwMEuI9AsQU9+kPn9ukuUW1Qf7TpaGbhjlHjA7MB8wBwYFKw4DAhoEFG1grKyxrHxLVUhsqdYUksJb' +
-        '/luMBBSdPaTR4St9owOt4E6M2KbzawNCJAICB9A=');
+      LibraryLowerPermissions.SetO365Basic;
+
+      // [GIVEN] A sample text full of Baltic specific characters encoded using Utf8
+      CreateSampleStreamFromBase64('xIXEjcSZxJfEr8WhxbPFq8W+xITEjMSYxJbErsWgxbLFqsW9YWJjZA==');
+      Expected := ReadToEndInGivenCodepage(0);
+
+      // [WHEN] The same text is read from stream in Windows-1257 encoding:
+      CreateSampleStreamFromBase64('4Ojm6+Hw+Pv+wMjGy8HQ2NveYWJjZA==');
+      Actual := ReadToEndInGivenCodepage(1257);
+      // [THEN] Final string from Windows-1257 encoded stream should be the same to string from Utf-8 stream
+      Assert.AreEqual(Expected,Actual,'Windows-1257 stream check failed');
+
+      // [WHEN] The same text is read from stream in OEM-775 encoding:
+      CreateSampleStreamFromBase64('0NHS09TV1tfYtba3uL2+xsfPYWJjZA==');
+      Actual := ReadToEndInGivenCodepage(775);
+      // [THEN] Final string from OEM-775 encoded stream should be the same to string from Utf-8 stream
+      Assert.AreEqual(Expected,Actual,'OEM-775 stream check failed');
+
+      // [WHEN] The same text is read from stream in ISO-8859-4 (Windows-28594) encoding:
+      CreateSampleStreamFromBase64('sejq7Oe5+f6+ocjKzMep2d6uYWJjZA==');
+      Actual := ReadToEndInGivenCodepage(28594);
+      // [THEN] Final string from ISO-8859-4 encoded stream should be the same to string from Utf-8 stream
+      Assert.AreEqual(Expected,Actual,'ISO-8859-4 stream check failed');
+
+      // [WHEN] The same text is read from stream in ISO-8859-13 (Windows-28603) encoding:
+      CreateSampleStreamFromBase64('4Ojm6+Hw+Pv+wMjGy8HQ2NveYWJjZA==');
+      Actual := ReadToEndInGivenCodepage(28603);
+      // [THEN] Final string from ISO-8859-13 encoded stream should be the same to string from Utf-8 stream
+      Assert.AreEqual(Expected,Actual,'ISO-8859-13 stream check failed');
+    END;
+
+    PROCEDURE CreateSampleStreamFromText@4(SampleText@1000 : Text;LineCount@1003 : Integer;Codepage@1001 : Integer);
+    VAR
+      OutputStream@1002 : OutStream;
+      LineNo@1004 : Integer;
+    BEGIN
+      CLEAR(TempBlob);
+      TempBlob.Blob.CREATEOUTSTREAM(OutputStream);
+      DotNet_Encoding.Encoding(Codepage);
+      DotNet_StreamWriter.StreamWriter(OutputStream,DotNet_Encoding);
+      FOR LineNo := 1 TO LineCount DO
+        DotNet_StreamWriter.WriteLine(SampleText);
+      IF LineCount = 0 THEN
+        DotNet_StreamWriter.Write(SampleText);
+
+      DotNet_StreamWriter.Close;
+      DotNet_StreamWriter.Dispose;
+    END;
+
+    PROCEDURE CreateSampleStreamFromBase64@5(Base64@1000 : Text);
+    BEGIN
+      CLEAR(TempBlob);
+      TempBlob.FromBase64String(Base64);
+    END;
+
+    PROCEDURE ReadToEndInGivenCodepage@6(Codepage@1000 : Integer) : Text;
+    VAR
+      InputStream@1001 : InStream;
+      ResultText@1002 : Text;
+    BEGIN
+      TempBlob.Blob.CREATEINSTREAM(InputStream);
+      IF Codepage > 0 THEN
+        DotNet_Encoding.Encoding(Codepage)
+      ELSE
+        DotNet_Encoding.UTF8;
+
+      DotNet_StreamReader.StreamReader(InputStream,DotNet_Encoding);
+      ResultText := DotNet_StreamReader.ReadToEnd;
+      DotNet_StreamReader.Close;
+      DotNet_StreamReader.Dispose;
+      EXIT(ResultText);
+    END;
+
+    PROCEDURE ReadLineByLineInGivenCodepage@7(Codepage@1000 : Integer;VAR LineCount@1003 : Integer;VAR ResultText@1004 : Text;VAR StreamCodepage@1005 : Integer);
+    VAR
+      InputStream@1001 : InStream;
+      CurrentLine@1002 : Text;
+      IsEmpty@1006 : Boolean;
+    BEGIN
+      TempBlob.Blob.CREATEINSTREAM(InputStream);
+      IF Codepage > 0 THEN
+        DotNet_Encoding.Encoding(Codepage)
+      ELSE
+        DotNet_Encoding.UTF8;
+
+      DotNet_StreamReader.StreamReader(InputStream,DotNet_Encoding);
+      LineCount := 0;
+      ResultText := '';
+      REPEAT
+        CurrentLine := DotNet_StreamReader.ReadLine;
+        IsEmpty := (CurrentLine = '') AND DotNet_StreamReader.EndOfStream;
+        IF NOT IsEmpty THEN BEGIN
+          LineCount += 1;
+          ResultText += CurrentLine;
+        END;
+      UNTIL IsEmpty;
+
+      DotNet_StreamReader.CurrentEncoding(DotNet_Encoding);
+      StreamCodepage := DotNet_Encoding.Codepage;
+      DotNet_StreamReader.Close;
+      DotNet_StreamReader.Dispose;
     END;
 
     BEGIN

@@ -18,15 +18,21 @@ OBJECT Codeunit 3014 DotNet_StringBuilder
       DotNetStringBuilder@1000 : DotNet "'mscorlib'.System.Text.StringBuilder";
 
     [External]
-    PROCEDURE InitStringBuilder@2(value@1000 : Text);
+    PROCEDURE InitStringBuilder@2(Value@1000 : Text);
     BEGIN
-      DotNetStringBuilder := DotNetStringBuilder.StringBuilder(value)
+      DotNetStringBuilder := DotNetStringBuilder.StringBuilder(Value)
     END;
 
     [External]
-    PROCEDURE Append@3(value@1000 : Text);
+    PROCEDURE Append@3(Value@1000 : Text);
     BEGIN
-      DotNetStringBuilder.Append(value)
+      DotNetStringBuilder.Append(Value)
+    END;
+
+    [External]
+    PROCEDURE AppendFormat@10(Format@1000 : Text;Value@1001 : Variant);
+    BEGIN
+      DotNetStringBuilder.AppendFormat(Format,Value);
     END;
 
     [External]

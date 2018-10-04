@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 OBJECT Codeunit 3027 DotNet_Certificate
+=======
+OBJECT Codeunit 3027 DotNet_StreamReader
+>>>>>>> 8aa27ba88df37d2056d86aa0dcb38dc9f414cb28
 {
   OBJECT-PROPERTIES
   {
@@ -15,6 +19,7 @@ OBJECT Codeunit 3027 DotNet_Certificate
   CODE
   {
     VAR
+<<<<<<< HEAD
       X509Certificate2@1000 : DotNet "'System, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Security.Cryptography.X509Certificates.X509Certificate2";
       LoadCertificateErr@1001 : TextConst 'ENU=Failed to load certificate!';
 
@@ -82,6 +87,59 @@ OBJECT Codeunit 3027 DotNet_Certificate
     PROCEDURE SetCertificate@11(DotNetX509Certificate2@1000 : DotNet "'System, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Security.Cryptography.X509Certificates.X509Certificate2");
     BEGIN
       X509Certificate2 := DotNetX509Certificate2;
+=======
+      DotNetStreamReader@1000 : DotNet "'mscorlib'.System.IO.StreamReader";
+
+    [External]
+    PROCEDURE StreamReader@1(VAR InputStream@1000 : InStream;DotNet_Encoding@1001 : Codeunit 3026);
+    VAR
+      DotNetEncoding@1002 : DotNet "'mscorlib'.System.Text.Encoding";
+    BEGIN
+      DotNet_Encoding.GetEncoding(DotNetEncoding);
+      DotNetStreamReader := DotNetStreamReader.StreamReader(InputStream,DotNetEncoding);
+    END;
+
+    [External]
+    PROCEDURE StreamReaderDetectEncoding@2(VAR InputStream@1000 : InStream;DetectEncodingFromByteOrderMarks@1001 : Boolean);
+    BEGIN
+      DotNetStreamReader := DotNetStreamReader.StreamReader(InputStream,DetectEncodingFromByteOrderMarks);
+    END;
+
+    [External]
+    PROCEDURE Close@3();
+    BEGIN
+      DotNetStreamReader.Close;
+    END;
+
+    [External]
+    PROCEDURE Dispose@4();
+    BEGIN
+      DotNetStreamReader.Dispose;
+    END;
+
+    [External]
+    PROCEDURE EndOfStream@6() : Boolean;
+    BEGIN
+      EXIT(DotNetStreamReader.EndOfStream);
+    END;
+
+    [External]
+    PROCEDURE CurrentEncoding@7(VAR DotNet_Encoding@1000 : Codeunit 3026);
+    BEGIN
+      DotNet_Encoding.SetEncoding(DotNetStreamReader.CurrentEncoding);
+    END;
+
+    [External]
+    PROCEDURE ReadLine@8() : Text;
+    BEGIN
+      EXIT(DotNetStreamReader.ReadLine);
+    END;
+
+    [External]
+    PROCEDURE ReadToEnd@9() : Text;
+    BEGIN
+      EXIT(DotNetStreamReader.ReadToEnd);
+>>>>>>> 8aa27ba88df37d2056d86aa0dcb38dc9f414cb28
     END;
 
     BEGIN

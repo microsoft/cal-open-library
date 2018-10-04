@@ -1,0 +1,52 @@
+OBJECT Codeunit 3039 DotNet_SeekOrigin
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      DotNetSeekOrigin@1000 : DotNet "'mscorlib'.System.IO.SeekOrigin";
+
+    [External]
+    PROCEDURE SeekBegin@2();
+    BEGIN
+      DotNetSeekOrigin := DotNetSeekOrigin."Begin";
+    END;
+
+    [External]
+    PROCEDURE SeekCurrent@3();
+    BEGIN
+      DotNetSeekOrigin := DotNetSeekOrigin.Current;
+    END;
+
+    [External]
+    PROCEDURE SeekEnd@4();
+    BEGIN
+      DotNetSeekOrigin := DotNetSeekOrigin."End";
+    END;
+
+    PROCEDURE GetSeekOrigin@5(VAR DotNetSeekOrigin2@1000 : DotNet "'mscorlib'.System.IO.SeekOrigin");
+    BEGIN
+      DotNetSeekOrigin2 := DotNetSeekOrigin;
+    END;
+
+    PROCEDURE SetSeekOrigin@6(VAR DotNetSeekOrigin2@1000 : DotNet "'mscorlib'.System.IO.SeekOrigin");
+    BEGIN
+      DotNetSeekOrigin := DotNetSeekOrigin2;
+    END;
+
+    BEGIN
+    END.
+  }
+}
+

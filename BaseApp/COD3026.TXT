@@ -18,9 +18,39 @@ OBJECT Codeunit 3026 DotNet_Encoding
       DotNetEncoding@1000 : DotNet "'mscorlib'.System.Text.Encoding";
 
     [External]
+    PROCEDURE ASCII@5();
+    BEGIN
+      DotNetEncoding := DotNetEncoding.ASCII;
+    END;
+
+    [External]
+    PROCEDURE UTF8@6();
+    BEGIN
+      DotNetEncoding := DotNetEncoding.UTF8;
+    END;
+
+    [External]
+    PROCEDURE UTF32@7();
+    BEGIN
+      DotNetEncoding := DotNetEncoding.UTF32;
+    END;
+
+    [External]
+    PROCEDURE Unicode@8();
+    BEGIN
+      DotNetEncoding := DotNetEncoding.Unicode;
+    END;
+
+    [External]
     PROCEDURE Encoding@4(codePage@1000 : Integer);
     BEGIN
       DotNetEncoding := DotNetEncoding.GetEncoding(codePage);
+    END;
+
+    [External]
+    PROCEDURE Codepage@3() : Integer;
+    BEGIN
+      EXIT(DotNetEncoding.CodePage);
     END;
 
     [External]
