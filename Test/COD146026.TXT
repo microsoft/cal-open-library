@@ -1,4 +1,4 @@
-OBJECT Codeunit 50300 Test_DotNet_Encoding
+OBJECT Codeunit 146026 Test_DotNet_Encoding
 {
   OBJECT-PROPERTIES
   {
