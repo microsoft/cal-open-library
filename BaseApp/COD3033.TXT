@@ -1,1 +1,145 @@
- 
+OBJECT Codeunit 3033 DotNet_BinaryWriter
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      DotNetBinaryWriter@1000 : DotNet "'mscorlib'.System.IO.BinaryWriter";
+
+    [External]
+    PROCEDURE BinaryWriter@1(VAR DotNet_Stream@1000 : Codeunit 3034);
+    VAR
+      DotNetStream@1001 : DotNet "'mscorlib'.System.IO.Stream";
+    BEGIN
+      DotNet_Stream.GetStream(DotNetStream);
+      DotNetBinaryWriter := DotNetBinaryWriter.BinaryWriter(DotNetStream);
+    END;
+
+    [External]
+    PROCEDURE BinaryWriterWithEncoding@2(VAR DotNet_Stream@1000 : Codeunit 3034;VAR DotNet_Encoding@1001 : Codeunit 3026);
+    VAR
+      DotNetEncoding@1002 : DotNet "'mscorlib'.System.Text.Encoding";
+      DotNetStream@1003 : DotNet "'mscorlib'.System.IO.Stream";
+    BEGIN
+      DotNet_Encoding.GetEncoding(DotNetEncoding);
+      DotNet_Stream.GetStream(DotNetStream);
+      DotNetBinaryWriter := DotNetBinaryWriter.BinaryWriter(DotNetStream,DotNetEncoding);
+    END;
+
+    [External]
+    PROCEDURE Close@3();
+    BEGIN
+      DotNetBinaryWriter.Close();
+    END;
+
+    [External]
+    PROCEDURE Dispose@4();
+    BEGIN
+      DotNetBinaryWriter.Dispose();
+    END;
+
+    [External]
+    PROCEDURE Flush@5();
+    BEGIN
+      DotNetBinaryWriter.Flush();
+    END;
+
+    [External]
+    PROCEDURE IsDotNetNull@6() : Boolean;
+    BEGIN
+      EXIT(ISNULL(DotNetBinaryWriter));
+    END;
+
+    [External]
+    PROCEDURE Seek@7(Offset@1000 : Integer;VAR DotNet_SeekOrigin@1001 : Codeunit 3039) : BigInteger;
+    VAR
+      DotNetSeekOrigin@1002 : DotNet "'mscorlib'.System.IO.SeekOrigin";
+    BEGIN
+      DotNet_SeekOrigin.GetSeekOrigin(DotNetSeekOrigin);
+      EXIT(DotNetBinaryWriter.Seek(Offset,DotNetSeekOrigin));
+    END;
+
+    [External]
+    PROCEDURE WriteByte@8(Byte@1000 : Byte);
+    BEGIN
+      DotNetBinaryWriter.Write(Byte);
+    END;
+
+    [External]
+    PROCEDURE WriteInt32@9(Integer@1000 : Integer);
+    VAR
+      DotNetConvert@1002 : DotNet "'mscorlib'.System.Convert";
+    BEGIN
+      DotNetBinaryWriter.Write(DotNetConvert.ToInt32(Integer));
+    END;
+
+    [External]
+    PROCEDURE WriteInt16@10(Integer@1000 : Integer);
+    VAR
+      DotNetConvert@1002 : DotNet "'mscorlib'.System.Convert";
+    BEGIN
+      DotNetBinaryWriter.Write(DotNetConvert.ToInt16(Integer))
+    END;
+
+    [External]
+    PROCEDURE WriteUInt16@11(Integer@1000 : Integer);
+    VAR
+      DotNetConvert@1002 : DotNet "'mscorlib'.System.Convert";
+    BEGIN
+      DotNetBinaryWriter.Write(DotNetConvert.ToUInt16(Integer))
+    END;
+
+    [External]
+    PROCEDURE WriteUInt32@12(Integer@1000 : Integer);
+    VAR
+      DotNetConvert@1002 : DotNet "'mscorlib'.System.Convert";
+    BEGIN
+      DotNetBinaryWriter.Write(DotNetConvert.ToUInt32(Integer))
+    END;
+
+    [External]
+    PROCEDURE WriteChar@14(Char@1000 : Char);
+    BEGIN
+      DotNetBinaryWriter.Write(Char)
+    END;
+
+    [External]
+    PROCEDURE BaseStream@15(VAR DotNet_Stream@1000 : Codeunit 3034);
+    BEGIN
+      DotNet_Stream.SetStream(DotNetBinaryWriter.BaseStream);
+    END;
+
+    [External]
+    PROCEDURE WriteString@17(Text@1000 : Text);
+    BEGIN
+      DotNetBinaryWriter.Write(Text);
+    END;
+
+    [External]
+    PROCEDURE WriteBoolean@18(Boolean@1000 : Boolean);
+    BEGIN
+      DotNetBinaryWriter.Write(Boolean)
+    END;
+
+    [External]
+    PROCEDURE WriteDecimal@19(Decimal@1000 : Decimal);
+    BEGIN
+      DotNetBinaryWriter.Write(Decimal);
+    END;
+
+    BEGIN
+    END.
+  }
+}
+
