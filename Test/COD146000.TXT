@@ -1,4 +1,4 @@
-OBJECT Codeunit 50301 Test_DotNet_Array
+OBJECT Codeunit 146000 Test_DotNet_Array
 {
   OBJECT-PROPERTIES
   {
