@@ -1,8 +1,4 @@
-<<<<<<< HEAD
-OBJECT Codeunit 3027 DotNet_Certificate
-=======
 OBJECT Codeunit 3027 DotNet_StreamReader
->>>>>>> 8aa27ba88df37d2056d86aa0dcb38dc9f414cb28
 {
   OBJECT-PROPERTIES
   {
@@ -19,75 +15,6 @@ OBJECT Codeunit 3027 DotNet_StreamReader
   CODE
   {
     VAR
-<<<<<<< HEAD
-      X509Certificate2@1000 : DotNet "'System, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Security.Cryptography.X509Certificates.X509Certificate2";
-      LoadCertificateErr@1001 : TextConst 'ENU=Failed to load certificate!';
-
-    [External]
-    PROCEDURE LoadFromMemoryStream@3(DotNet_MemoryStream@1000 : Codeunit 3009;Password@1001 : Text);
-    VAR
-      DotNetMemoryStream2@1003 : DotNet "'mscorlib'.System.IO.MemoryStream";
-      X509KeyStorageFlags@1002 : DotNet "'mscorlib'.System.Security.Cryptography.X509Certificates.X509KeyStorageFlags";
-    BEGIN
-      DotNet_MemoryStream.GetMemoryStream(DotNetMemoryStream2);
-      X509Certificate2 := X509Certificate2.X509Certificate2(DotNetMemoryStream2.ToArray,Password,X509KeyStorageFlags.Exportable);
-      IF ISNULL(X509Certificate2) THEN
-        ERROR(LoadCertificateErr);
-    END;
-
-    [External]
-    PROCEDURE ExportToArray@13(VAR DotNet_Array@1001 : Codeunit 3000);
-    VAR
-      X509ContentType@1003 : DotNet "'mscorlib'.System.Security.Cryptography.X509Certificates.X509ContentType";
-    BEGIN
-      DotNet_Array.SetArray(X509Certificate2.Export(X509ContentType.Pkcs12));
-    END;
-
-    [External]
-    PROCEDURE GetFriendlyName@2() : Text;
-    BEGIN
-      EXIT(X509Certificate2.FriendlyName);
-    END;
-
-    [External]
-    PROCEDURE GetThumbprint@6() : Text;
-    BEGIN
-      EXIT(X509Certificate2.Thumbprint);
-    END;
-
-    [External]
-    PROCEDURE GetIssuer@5() : Text;
-    BEGIN
-      EXIT(X509Certificate2.Issuer);
-    END;
-
-    [External]
-    PROCEDURE GetSubject@4() : Text;
-    BEGIN
-      EXIT(X509Certificate2.Subject);
-    END;
-
-    [External]
-    PROCEDURE GetExpiration@1() Expiration : DateTime;
-    BEGIN
-      EVALUATE(Expiration,X509Certificate2.GetExpirationDateString);
-    END;
-
-    [External]
-    PROCEDURE GetHasPrivateKey@7() : Boolean;
-    BEGIN
-      EXIT(X509Certificate2.HasPrivateKey);
-    END;
-
-    PROCEDURE GetCertificate@10(VAR DotNetX509Certificate2@1000 : DotNet "'System, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Security.Cryptography.X509Certificates.X509Certificate2");
-    BEGIN
-      DotNetX509Certificate2 := X509Certificate2;
-    END;
-
-    PROCEDURE SetCertificate@11(DotNetX509Certificate2@1000 : DotNet "'System, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Security.Cryptography.X509Certificates.X509Certificate2");
-    BEGIN
-      X509Certificate2 := DotNetX509Certificate2;
-=======
       DotNetStreamReader@1000 : DotNet "'mscorlib'.System.IO.StreamReader";
 
     [External]
@@ -139,7 +66,6 @@ OBJECT Codeunit 3027 DotNet_StreamReader
     PROCEDURE ReadToEnd@9() : Text;
     BEGIN
       EXIT(DotNetStreamReader.ReadToEnd);
->>>>>>> 8aa27ba88df37d2056d86aa0dcb38dc9f414cb28
     END;
 
     BEGIN
