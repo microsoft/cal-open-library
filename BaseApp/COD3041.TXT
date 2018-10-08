@@ -1,1 +1,39 @@
- 
+OBJECT Codeunit 3041 DotNet_X509KeyStorageFlags
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      DotNetX509KeyStorageFlags@1000 : DotNet "'mscorlib'.System.Security.Cryptography.X509Certificates.X509KeyStorageFlags";
+
+    PROCEDURE Exportable@3();
+    BEGIN
+      DotNetX509KeyStorageFlags := DotNetX509KeyStorageFlags.Exportable;
+    END;
+
+    PROCEDURE GetX509KeyStorageFlags@1(VAR DotNetX509KeyStorageFlags2@1000 : DotNet "'mscorlib'.System.Security.Cryptography.X509Certificates.X509KeyStorageFlags");
+    BEGIN
+      DotNetX509KeyStorageFlags2 := DotNetX509KeyStorageFlags;
+    END;
+
+    PROCEDURE SetX509KeyStorageFlags@2(VAR DotNetX509KeyStorageFlags2@1000 : DotNet "'mscorlib'.System.Security.Cryptography.X509Certificates.X509KeyStorageFlags");
+    BEGIN
+      DotNetX509KeyStorageFlags := DotNetX509KeyStorageFlags2;
+    END;
+
+    BEGIN
+    END.
+  }
+}
+
