@@ -53,54 +53,52 @@ OBJECT Codeunit 3026 DotNet_Encoding
       EXIT(DotNetEncoding.CodePage);
     END;
 
-    [External]
     PROCEDURE GetEncoding@2(VAR DotNetEncoding2@1000 : DotNet "'mscorlib'.System.Text.Encoding");
     BEGIN
       DotNetEncoding2 := DotNetEncoding;
     END;
 
-    [External]
     PROCEDURE SetEncoding@1(DotNetEncoding2@1000 : DotNet "'mscorlib'.System.Text.Encoding");
     BEGIN
       DotNetEncoding := DotNetEncoding2;
     END;
 
     [External]
-    PROCEDURE GetChars@10(Bytes@1000 : Codeunit 3000;Index@1001 : Integer;Count@1002 : Integer;VAR Result@1003 : Codeunit 3000);
+    PROCEDURE GetChars@10(DotNet_ArrayBytes@1000 : Codeunit 3000;Index@1001 : Integer;Count@1002 : Integer;VAR DotNet_ArrayResult@1003 : Codeunit 3000);
     VAR
       DotNetArray@1004 : DotNet "'mscorlib'.System.Array";
     BEGIN
-      Bytes.GetArray(DotNetArray);
-      Result.SetArray(DotNetEncoding.GetChars(DotNetArray, Index, Count));
+      DotNet_ArrayBytes.GetArray(DotNetArray);
+      DotNet_ArrayResult.SetArray(DotNetEncoding.GetChars(DotNetArray,Index,Count));
     END;
 
     [External]
-    PROCEDURE GetBytes@11(Chars@1000 : Codeunit 3000;Index@1001 : Integer;Count@1002 : Integer;VAR Result@1003 : Codeunit 3000);
+    PROCEDURE GetBytes@11(DotNet_ArrayChars@1000 : Codeunit 3000;Index@1001 : Integer;Count@1002 : Integer;VAR DotNet_ArrayResult@1003 : Codeunit 3000);
     VAR
       DotNetArray@1004 : DotNet "'mscorlib'.System.Array";
     BEGIN
-      Chars.GetArray(DotNetArray);
-      Result.SetArray(DotNetEncoding.GetBytes(DotNetArray, Index, Count));
+      DotNet_ArrayChars.GetArray(DotNetArray);
+      DotNet_ArrayResult.SetArray(DotNetEncoding.GetBytes(DotNetArray,Index,Count));
     END;
 
     [External]
-    PROCEDURE GetBytesWithOffset@12(Chars@1000 : Codeunit 3000;Index@1001 : Integer;Count@1002 : Integer;VAR Result@1003 : Codeunit 3000;ByteIndex@1004 : Integer);
+    PROCEDURE GetBytesWithOffset@12(DotNet_ArrayChars@1000 : Codeunit 3000;Index@1001 : Integer;Count@1002 : Integer;VAR DotNet_ArrayResult@1003 : Codeunit 3000;ByteIndex@1004 : Integer);
     VAR
       DotNetArray@1005 : DotNet "'mscorlib'.System.Array";
       DotNetArrayResult@1006 : DotNet "'mscorlib'.System.Array";
     BEGIN
-      Chars.GetArray(DotNetArray);
-      Result.GetArray(DotNetArrayResult);
-      DotNetEncoding.GetBytes(DotNetArray, Index, Count, DotNetArrayResult, ByteIndex);
+      DotNet_ArrayChars.GetArray(DotNetArray);
+      DotNet_ArrayResult.GetArray(DotNetArrayResult);
+      DotNetEncoding.GetBytes(DotNetArray,Index,Count,DotNetArrayResult,ByteIndex);
     END;
 
     [External]
-    PROCEDURE GetString@13(Bytes@1000 : Codeunit 3000;Index@1001 : Integer;Count@1002 : Integer) : Text;
+    PROCEDURE GetString@13(DotNet_ArrayBytes@1000 : Codeunit 3000;Index@1001 : Integer;Count@1002 : Integer) : Text;
     VAR
       DotNetArray@1004 : DotNet "'mscorlib'.System.Array";
     BEGIN
-      Bytes.GetArray(DotNetArray);
-      EXIT(DotNetEncoding.GetString(DotNetArray, Index, Count));
+      DotNet_ArrayBytes.GetArray(DotNetArray);
+      EXIT(DotNetEncoding.GetString(DotNetArray,Index,Count));
     END;
 
     BEGIN
