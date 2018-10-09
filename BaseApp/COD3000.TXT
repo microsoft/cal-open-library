@@ -22,7 +22,7 @@ OBJECT Codeunit 3000 DotNet_Array
     VAR
       DotNetString@1002 : DotNet "'mscorlib'.System.String";
     BEGIN
-      DotNetArray := DotNetArray.CreateInstance(GETDOTNETTYPE(DotNetString), Length);
+      DotNetArray := DotNetArray.CreateInstance(GETDOTNETTYPE(DotNetString),Length);
     END;
 
     [External]
@@ -30,7 +30,7 @@ OBJECT Codeunit 3000 DotNet_Array
     VAR
       DotNetChar@1002 : DotNet "'mscorlib'.System.Char";
     BEGIN
-      DotNetArray := DotNetArray.CreateInstance(GETDOTNETTYPE(DotNetChar), Length);
+      DotNetArray := DotNetArray.CreateInstance(GETDOTNETTYPE(DotNetChar),Length);
     END;
 
     [External]
@@ -38,7 +38,7 @@ OBJECT Codeunit 3000 DotNet_Array
     VAR
       DotNetByte@1002 : DotNet "'mscorlib'.System.Byte";
     BEGIN
-      DotNetArray := DotNetArray.CreateInstance(GETDOTNETTYPE(DotNetByte), Length);
+      DotNetArray := DotNetArray.CreateInstance(GETDOTNETTYPE(DotNetByte),Length);
     END;
 
     [External]
@@ -46,7 +46,7 @@ OBJECT Codeunit 3000 DotNet_Array
     VAR
       DotNetInt32@1002 : DotNet "'mscorlib'.System.Int32";
     BEGIN
-      DotNetArray := DotNetArray.CreateInstance(GETDOTNETTYPE(DotNetInt32), Length);
+      DotNetArray := DotNetArray.CreateInstance(GETDOTNETTYPE(DotNetInt32),Length);
     END;
 
     [External]
@@ -56,41 +56,27 @@ OBJECT Codeunit 3000 DotNet_Array
     END;
 
     [External]
-    PROCEDURE SetTextValue@103(Index@1000 : Integer;NewValue@1001 : Text);
-    VAR
-      DotNetString@1002 : DotNet "'mscorlib'.System.String";
+    PROCEDURE SetTextValue@103(NewValue@1001 : Text;Index@1000 : Integer);
     BEGIN
-      DotNetString := NewValue;
-      DotNetArray.SetValue(DotNetString, Index);
+      DotNetArray.SetValue(NewValue,Index);
     END;
 
     [External]
-    PROCEDURE SetCharValue@109(Index@1000 : Integer;NewValue@1001 : Char);
-    VAR
-      DotNetString@1002 : DotNet "'mscorlib'.System.String";
+    PROCEDURE SetCharValue@109(NewValue@1001 : Char;Index@1000 : Integer);
     BEGIN
-      DotNetString := FORMAT(NewValue);
-      DotNetArray.SetValue(DotNetString.Chars(0), Index);
+      DotNetArray.SetValue(NewValue,Index);
     END;
 
     [External]
-    PROCEDURE SetByteValue@104(Index@1000 : Integer;NewValue@1001 : Integer);
-    VAR
-      DotNetByte@1003 : DotNet "'mscorlib'.System.Byte";
-      DotNetConvert@1004 : DotNet "'mscorlib'.System.Convert";
+    PROCEDURE SetByteValue@104(NewValue@1001 : Byte;Index@1000 : Integer);
     BEGIN
-      DotNetByte := DotNetConvert.ChangeType(NewValue, GETDOTNETTYPE(DotNetByte));
-      DotNetArray.SetValue(DotNetByte, Index);
+      DotNetArray.SetValue(NewValue,Index);
     END;
 
     [External]
-    PROCEDURE SetInt32Value@105(Index@1000 : Integer;NewValue@1001 : Integer);
-    VAR
-      DotNetInt32@1003 : DotNet "'mscorlib'.System.Int32";
-      DotNetConvert@17024400 : DotNet "'mscorlib'.System.Convert";
+    PROCEDURE SetIntValue@105(NewValue@1001 : Integer;Index@1000 : Integer);
     BEGIN
-      DotNetInt32 := DotNetConvert.ChangeType(NewValue, GETDOTNETTYPE(DotNetInt32));
-      DotNetArray.SetValue(DotNetInt32, Index);
+      DotNetArray.SetValue(NewValue,Index);
     END;
 
     [External]
@@ -122,7 +108,7 @@ OBJECT Codeunit 3000 DotNet_Array
     END;
 
     [External]
-    PROCEDURE IsDotNetNull@107() : Boolean;
+    PROCEDURE IsNull@107() : Boolean;
     BEGIN
       EXIT(ISNULL(DotNetArray));
     END;
