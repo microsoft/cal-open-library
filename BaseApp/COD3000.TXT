@@ -18,15 +18,83 @@ OBJECT Codeunit 3000 DotNet_Array
       DotNetArray@1000 : DotNet "'mscorlib'.System.Array";
 
     [External]
+    PROCEDURE StringArray@108(Length@1000 : Integer);
+    VAR
+      DotNetString@1002 : DotNet "'mscorlib'.System.String";
+    BEGIN
+      DotNetArray := DotNetArray.CreateInstance(GETDOTNETTYPE(DotNetString),Length);
+    END;
+
+    [External]
+    PROCEDURE CharArray@100(Length@1000 : Integer);
+    VAR
+      DotNetChar@1002 : DotNet "'mscorlib'.System.Char";
+    BEGIN
+      DotNetArray := DotNetArray.CreateInstance(GETDOTNETTYPE(DotNetChar),Length);
+    END;
+
+    [External]
+    PROCEDURE ByteArray@101(Length@1000 : Integer);
+    VAR
+      DotNetByte@1002 : DotNet "'mscorlib'.System.Byte";
+    BEGIN
+      DotNetArray := DotNetArray.CreateInstance(GETDOTNETTYPE(DotNetByte),Length);
+    END;
+
+    [External]
+    PROCEDURE Int32Array@102(Length@1000 : Integer);
+    VAR
+      DotNetInt32@1002 : DotNet "'mscorlib'.System.Int32";
+    BEGIN
+      DotNetArray := DotNetArray.CreateInstance(GETDOTNETTYPE(DotNetInt32),Length);
+    END;
+
+    [External]
     PROCEDURE Length@4() : Integer;
     BEGIN
       EXIT(DotNetArray.Length)
     END;
 
     [External]
+    PROCEDURE SetTextValue@103(NewValue@1001 : Text;Index@1000 : Integer);
+    BEGIN
+      DotNetArray.SetValue(NewValue,Index);
+    END;
+
+    [External]
+    PROCEDURE SetCharValue@109(NewValue@1001 : Char;Index@1000 : Integer);
+    BEGIN
+      DotNetArray.SetValue(NewValue,Index);
+    END;
+
+    [External]
+    PROCEDURE SetByteValue@104(NewValue@1001 : Byte;Index@1000 : Integer);
+    BEGIN
+      DotNetArray.SetValue(NewValue,Index);
+    END;
+
+    [External]
+    PROCEDURE SetIntValue@105(NewValue@1001 : Integer;Index@1000 : Integer);
+    BEGIN
+      DotNetArray.SetValue(NewValue,Index);
+    END;
+
+    [External]
     PROCEDURE GetValueAsText@5(Index@1000 : Integer) : Text;
     BEGIN
       EXIT(DotNetArray.GetValue(Index))
+    END;
+
+    [External]
+    PROCEDURE GetValueAsChar@110(Index@1000 : Integer) : Char;
+    BEGIN
+      EXIT(DotNetArray.GetValue(Index));
+    END;
+
+    [External]
+    PROCEDURE GetValueAsInteger@106(Index@1000 : Integer) : Integer;
+    BEGIN
+      EXIT(DotNetArray.GetValue(Index));
     END;
 
     PROCEDURE GetArray@2(VAR DotNetArray2@1000 : DotNet "'mscorlib'.System.Array");
@@ -37,6 +105,12 @@ OBJECT Codeunit 3000 DotNet_Array
     PROCEDURE SetArray@3(DotNetArray2@1000 : DotNet "'mscorlib'.System.Array");
     BEGIN
       DotNetArray := DotNetArray2
+    END;
+
+    [External]
+    PROCEDURE IsNull@107() : Boolean;
+    BEGIN
+      EXIT(ISNULL(DotNetArray));
     END;
 
     BEGIN

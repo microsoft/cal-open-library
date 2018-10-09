@@ -18,6 +18,15 @@ OBJECT Codeunit 3007 DotNet_String
       DotNetString@1000 : DotNet "'mscorlib'.System.String";
 
     [External]
+    PROCEDURE FromCharArray@100(DotNet_ArrayChar@1000 : Codeunit 3000);
+    VAR
+      DotNetArray@1001 : DotNet "'mscorlib'.System.Array";
+    BEGIN
+      DotNet_ArrayChar.GetArray(DotNetArray);
+      DotNetString := DotNetString.String(DotNetArray);
+    END;
+
+    [External]
     PROCEDURE Set@6(Text@1000 : Text);
     BEGIN
       DotNetString := Text
@@ -82,6 +91,60 @@ OBJECT Codeunit 3007 DotNet_String
     PROCEDURE SetString@4(DotNetString2@1000 : DotNet "'mscorlib'.System.String");
     BEGIN
       DotNetString := DotNetString2
+    END;
+
+    [External]
+    PROCEDURE PadRight@101(TotalWidth@1000 : Integer;PaddingChar@1001 : Char) : Text;
+    BEGIN
+      EXIT(DotNetString.PadRight(TotalWidth,PaddingChar));
+    END;
+
+    [External]
+    PROCEDURE PadLeft@107(TotalWidth@1000 : Integer;PaddingChar@1001 : Char) : Text;
+    BEGIN
+      EXIT(DotNetString.PadLeft(TotalWidth,PaddingChar));
+    END;
+
+    [External]
+    PROCEDURE IndexOfChar@103(Value@1000 : Char;StartIndex@1001 : Integer) : Integer;
+    BEGIN
+      EXIT(DotNetString.IndexOf(Value,StartIndex));
+    END;
+
+    [External]
+    PROCEDURE IndexOfString@106(Value@1000 : Text;StartIndex@1001 : Integer) : Integer;
+    BEGIN
+      EXIT(DotNetString.IndexOf(Value,StartIndex));
+    END;
+
+    [External]
+    PROCEDURE Substring@104(StartIndex@1000 : Integer;Length@1001 : Integer) : Text;
+    BEGIN
+      EXIT(DotNetString.Substring(StartIndex,Length));
+    END;
+
+    [External]
+    PROCEDURE Trim@105() : Text;
+    BEGIN
+      EXIT(DotNetString.Trim);
+    END;
+
+    [External]
+    PROCEDURE TrimStart@108(VAR DotNet_ArrayTrimChars@1000 : Codeunit 3000) : Text;
+    VAR
+      DotNetArray@1002 : DotNet "'mscorlib'.System.Array";
+    BEGIN
+      DotNet_ArrayTrimChars.GetArray(DotNetArray);
+      EXIT(DotNetString.TrimStart(DotNetArray));
+    END;
+
+    [External]
+    PROCEDURE TrimEnd@109(VAR DotNet_ArrayTrimChars@1000 : Codeunit 3000) : Text;
+    VAR
+      DotNetArray@1002 : DotNet "'mscorlib'.System.Array";
+    BEGIN
+      DotNet_ArrayTrimChars.GetArray(DotNetArray);
+      EXIT(DotNetString.TrimEnd(DotNetArray));
     END;
 
     BEGIN
