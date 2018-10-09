@@ -1,1 +1,94 @@
- 
+OBJECT Codeunit 3043 DotNet_X509Certificate2
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      DotNetX509Certificate2@1000 : DotNet "'System, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Security.Cryptography.X509Certificates.X509Certificate2";
+      LoadCertificateErr@1001 : TextConst 'ENU=Failed to load certificate.';
+
+    [External]
+    PROCEDURE X509Certificate2@3(DotNet_Array@1000 : Codeunit 3000;Password@1001 : Text;DotNet_X509KeyStorageFlags@1004 : Codeunit 3041);
+    VAR
+      DotNetArray@1003 : DotNet "'mscorlib'.System.Array";
+      DotNetX509KeyStorageFlags@1002 : DotNet "'mscorlib'.System.Security.Cryptography.X509Certificates.X509KeyStorageFlags";
+    BEGIN
+      DotNet_Array.GetArray(DotNetArray);
+      DotNet_X509KeyStorageFlags.GetX509KeyStorageFlags(DotNetX509KeyStorageFlags);
+      DotNetX509Certificate2 := DotNetX509Certificate2.X509Certificate2(DotNetArray,Password,DotNetX509KeyStorageFlags);
+
+      IF ISNULL(DotNetX509Certificate2) THEN
+        ERROR(LoadCertificateErr);
+    END;
+
+    [External]
+    PROCEDURE Export@13(DotNet_X509ContentType@1000 : Codeunit 3042;Password@1002 : Text;VAR DotNet_Array@1001 : Codeunit 3000);
+    VAR
+      DotNetX509ContentType@1003 : DotNet "'mscorlib'.System.Security.Cryptography.X509Certificates.X509ContentType";
+    BEGIN
+      DotNet_X509ContentType.GetX509ContentType(DotNetX509ContentType);
+      DotNet_Array.SetArray(DotNetX509Certificate2.Export(DotNetX509ContentType,Password));
+    END;
+
+    [External]
+    PROCEDURE FriendlyName@2() : Text;
+    BEGIN
+      EXIT(DotNetX509Certificate2.FriendlyName);
+    END;
+
+    [External]
+    PROCEDURE Thumbprint@6() : Text;
+    BEGIN
+      EXIT(DotNetX509Certificate2.Thumbprint);
+    END;
+
+    [External]
+    PROCEDURE Issuer@5() : Text;
+    BEGIN
+      EXIT(DotNetX509Certificate2.Issuer);
+    END;
+
+    [External]
+    PROCEDURE Subject@4() : Text;
+    BEGIN
+      EXIT(DotNetX509Certificate2.Subject);
+    END;
+
+    [External]
+    PROCEDURE Expiration@1() Expiration : DateTime;
+    BEGIN
+      EVALUATE(Expiration,DotNetX509Certificate2.GetExpirationDateString);
+    END;
+
+    [External]
+    PROCEDURE HasPrivateKey@7() : Boolean;
+    BEGIN
+      EXIT(DotNetX509Certificate2.HasPrivateKey);
+    END;
+
+    PROCEDURE GetX509Certificate2@10(VAR DotNetX509Certificate2_2@1000 : DotNet "'System, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Security.Cryptography.X509Certificates.X509Certificate2");
+    BEGIN
+      DotNetX509Certificate2_2 := DotNetX509Certificate2;
+    END;
+
+    PROCEDURE SetX509Certificate2@11(VAR DotNetX509Certificate2_2@1000 : DotNet "'System, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Security.Cryptography.X509Certificates.X509Certificate2");
+    BEGIN
+      DotNetX509Certificate2 := DotNetX509Certificate2_2;
+    END;
+
+    BEGIN
+    END.
+  }
+}
+
