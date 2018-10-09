@@ -19,7 +19,6 @@ OBJECT Codeunit 146007 Test_DotNet_String
   {
     VAR
       Assert@1000 : Codeunit 130000;
-      LibraryLowerPermissions@1001 : Codeunit 132217;
 
     [Test]
     PROCEDURE TestDotNetStringSplit@1();
@@ -92,141 +91,105 @@ OBJECT Codeunit 146007 Test_DotNet_String
     [Test]
     PROCEDURE TestStringLengthMethod@4();
     VAR
-      Index@1000 : Integer;
-      Actual@1001 : Text;
-      Expected@1002 : Text;
       DotNet_String@1003 : Codeunit 3007;
     BEGIN
-      LibraryLowerPermissions.SetO365Basic;
       // [Given] an empty string
       DotNet_String.Set('');
       // [THEN] string length should be 0
-      Assert.AreEqual(0, DotNet_String.Length, 'String length check failed');
+      Assert.AreEqual(0,DotNet_String.Length,'String length check failed');
       // [Given] a string 'Test'
       DotNet_String.Set('Test');
       // [THEN] string length should be 4
-      Assert.AreEqual(4, DotNet_String.Length, 'String length check failed');
+      Assert.AreEqual(4,DotNet_String.Length,'String length check failed');
     END;
 
     [Test]
     PROCEDURE TestStringPadMethods@5();
     VAR
-      Index@1000 : Integer;
-      Actual@1001 : Text;
-      Expected@1002 : Text;
       DotNet_String@1003 : Codeunit 3007;
     BEGIN
-      LibraryLowerPermissions.SetO365Basic;
       // [Given] a string 'T'
       DotNet_String.Set('T');
       // [WHEN] when we pad it right with spaces by 10 characters
-      DotNet_String.PadRight(10, ' ', DotNet_String);
-      // [THEN] string length must be 10
-      Assert.AreEqual(10, DotNet_String.Length, 'String length check failed');
       // [THEN] string actual value must be 'T         '
-      Assert.AreEqual('T         ', DotNet_String.ToString, 'String value check failed');
+      Assert.AreEqual('T         ',DotNet_String.PadRight(10,' '),'String value check failed');
       // [WHEN] when we pad it right with spaces by 10 characters
-      DotNet_String.PadLeft(20, ' ', DotNet_String);
-      // [THEN] string length must be 10
-      Assert.AreEqual(20, DotNet_String.Length, 'String length check failed');
-      // [THEN] string actual value must be '          T         '
-      Assert.AreEqual('          T         ', DotNet_String.ToString, 'String value check failed');
+      // [THEN] string actual value must be '          T'
+      Assert.AreEqual('         T',DotNet_String.PadLeft(10,' '),'String value check failed');
+      // [WHEN] when we pad it left and right with spaces by 10 characters
+      // [THEN] string actual value must be '          T          '
+      DotNet_String.Set(DotNet_String.PadLeft(10,' '));
+      DotNet_String.Set(DotNet_String.PadRight(20,' '));
+      Assert.AreEqual('         T          ',DotNet_String.ToString,'String value check failed');
     END;
 
     [Test]
     PROCEDURE TestStringTrimMethods@6();
     VAR
-      Index@1000 : Integer;
-      Actual@1001 : Text;
-      Expected@1002 : Text;
-      DotNet_CharArray@1003 : Codeunit 3000;
+      DotNet_ArrayChar@1003 : Codeunit 3000;
       DotNet_String@1004 : Codeunit 3007;
     BEGIN
-      LibraryLowerPermissions.SetO365Basic;
-      // [Given] a string ' ,T, '
-      DotNet_String.Set(' ,T, ');
+      // [Given] a string ' ,T,'
+      DotNet_String.Set(' ,T,');
       // [WHEN] when we trim it
-      DotNet_String.Trim(DotNet_String);
-      // [THEN] string length must be 3
-      Assert.AreEqual(3, DotNet_String.Length, 'String length check failed');
       // [THEN] string actual value must be ',T,'
-      Assert.AreEqual(',T,', DotNet_String.ToString, 'String value check failed');
-      DotNet_CharArray.CharArray(1);
-      DotNet_CharArray.SetCharValue(0, ',');
+      Assert.AreEqual(',T,',DotNet_String.Trim,'String value check failed');
+      DotNet_ArrayChar.CharArray(2);
+      DotNet_ArrayChar.SetCharValue(',',0);
+      DotNet_ArrayChar.SetCharValue(' ',1);
       // [WHEN] when we trim it from left with trim char ','
-      DotNet_String.TrimStart(DotNet_CharArray, DotNet_String);
-      // [THEN] string length must be 2
-      Assert.AreEqual(2, DotNet_String.Length, 'String length check failed');
       // [THEN] string actual value must be 'T,'
-      Assert.AreEqual('T,', DotNet_String.ToString, 'String value check failed');
+      Assert.AreEqual('T,',DotNet_String.TrimStart(DotNet_ArrayChar),'String value check failed');
       // [WHEN] when we trim it from right with trim char ','
-      DotNet_String.TrimEnd(DotNet_CharArray, DotNet_String);
-      // [THEN] string length must be 1
-      Assert.AreEqual(1, DotNet_String.Length, 'String length check failed');
       // [THEN] string actual value must be 'T'
-      Assert.AreEqual('T', DotNet_String.ToString, 'String value check failed');
+      Assert.AreEqual(' ,T',DotNet_String.TrimEnd(DotNet_ArrayChar),'String value check failed');
     END;
 
     [Test]
     PROCEDURE TestStringSubstringMethod@7();
     VAR
-      Index@1000 : Integer;
-      Actual@1001 : Text;
-      Expected@1002 : Text;
       DotNet_String@1003 : Codeunit 3007;
     BEGIN
-      LibraryLowerPermissions.SetO365Basic;
       // [Given] a string 'ABCD'
       DotNet_String.Set('ABCD');
-      // [WHEN] when we trim it
-      DotNet_String.Substring(1, 2, DotNet_String);
-      // [THEN] string length must be 1
-      Assert.AreEqual(2, DotNet_String.Length, 'String length check failed');
+      // [WHEN] when we trim it;
       // [THEN] string actual value must be 'BC'
-      Assert.AreEqual('BC', DotNet_String.ToString, 'String value check failed');
+      Assert.AreEqual('BC',DotNet_String.Substring(1,2),'String value check failed');
     END;
 
     [Test]
     PROCEDURE TestStringIndexOfMethods@8();
     VAR
-      Index@1000 : Integer;
-      Actual@1001 : Text;
-      Expected@1002 : Text;
       DotNet_String@1003 : Codeunit 3007;
     BEGIN
-      LibraryLowerPermissions.SetO365Basic;
       // [Given] a string 'ABCDBC'
       DotNet_String.Set('ABCDBC');
       // [THEN] first index of char 'B' must be 1
-      Assert.AreEqual(1, DotNet_String.IndexOfChar('B', 0), 'Index of check failed');
+      Assert.AreEqual(1,DotNet_String.IndexOfChar('B',0),'Index of check failed');
       // [THEN] second index of char 'B' must be 4
-      Assert.AreEqual(4, DotNet_String.IndexOfChar('B', 2), 'Index of check failed');
+      Assert.AreEqual(4,DotNet_String.IndexOfChar('B',2),'Index of check failed');
       // [THEN] first index of string 'BC' must be 1
-      Assert.AreEqual(1, DotNet_String.IndexOfString('BC', 0), 'Index of check failed');
+      Assert.AreEqual(1,DotNet_String.IndexOfString('BC',0),'Index of check failed');
       // [THEN] second index of string 'BC' must be 4
-      Assert.AreEqual(4, DotNet_String.IndexOfString('BC', 2), 'Index of check failed');
+      Assert.AreEqual(4,DotNet_String.IndexOfString('BC',2),'Index of check failed');
     END;
 
     [Test]
     PROCEDURE TestStringFromCharArrayMethod@9();
     VAR
-      Index@1000 : Integer;
-      Actual@1001 : Text;
-      Expected@1002 : Text;
-      DotNet_CharArray@1005 : Codeunit 3000;
+      DotNet_ArrayChar@1005 : Codeunit 3000;
       DotNet_String@1006 : Codeunit 3007;
     BEGIN
-      LibraryLowerPermissions.SetO365Basic;
       // [Given] a string 'ABCDBC'
       DotNet_String.Set('ABCDBC');
       // [WHEN] we convert it to char array and convert back
-      DotNet_String.ToCharArray(0, DotNet_String.Length, DotNet_CharArray);
+      DotNet_String.ToCharArray(0,DotNet_String.Length,DotNet_ArrayChar);
       CLEAR(DotNet_String);
-      DotNet_String.FromCharArray(DotNet_CharArray);
+      DotNet_String.FromCharArray(DotNet_ArrayChar);
       // [THEN] length of string must be 6
-      Assert.AreEqual(6, DotNet_String.Length, 'String length check failed');
+      Assert.AreEqual(6,DotNet_String.Length,'String length check failed');
       // [THEN] value of string must be 'ABCDBC'
-      Assert.AreEqual('ABCDBC', DotNet_String.ToString, 'String value check failed');
+      Assert.AreEqual('ABCDBC',DotNet_String.ToString,'String value check failed');
     END;
 
     BEGIN
