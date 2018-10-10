@@ -1,0 +1,209 @@
+OBJECT Codeunit 3051 DotNet_RegexOptions
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      DotNetRegexOptions@1000000001 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.RegularExpressions.RegexOptions";
+
+    [External]
+    PROCEDURE Compiled@1000000009() : Integer;
+    BEGIN
+      DotNetRegexOptions := DotNetRegexOptions.Compiled;
+      EXIT(DotNetRegexOptions);
+    END;
+
+    [External]
+    PROCEDURE CultureInvariant@1000000017() : Integer;
+    BEGIN
+      DotNetRegexOptions := DotNetRegexOptions.CultureInvariant;
+      EXIT(DotNetRegexOptions);
+    END;
+
+    [External]
+    PROCEDURE ECMAScript@1000000018() : Integer;
+    BEGIN
+      DotNetRegexOptions := DotNetRegexOptions.ECMAScript;
+      EXIT(DotNetRegexOptions);
+    END;
+
+    [External]
+    PROCEDURE ExplicitCapture@1000000019() : Integer;
+    BEGIN
+      DotNetRegexOptions := DotNetRegexOptions.ExplicitCapture;
+      EXIT(DotNetRegexOptions);
+    END;
+
+    [External]
+    PROCEDURE IgnoreCase@1000000020() : Integer;
+    BEGIN
+      DotNetRegexOptions := DotNetRegexOptions.IgnoreCase;
+      EXIT(DotNetRegexOptions);
+    END;
+
+    [External]
+    PROCEDURE IgnorePatternWhitespace@1000000021() : Integer;
+    BEGIN
+      DotNetRegexOptions := DotNetRegexOptions.IgnorePatternWhitespace;
+      EXIT(DotNetRegexOptions);
+    END;
+
+    [External]
+    PROCEDURE Multiline@1000000022() : Integer;
+    BEGIN
+      DotNetRegexOptions := DotNetRegexOptions.Multiline;
+      EXIT(DotNetRegexOptions);
+    END;
+
+    [External]
+    PROCEDURE None@100000028() : Integer;
+    BEGIN
+      DotNetRegexOptions := DotNetRegexOptions.None;
+      EXIT(DotNetRegexOptions);
+    END;
+
+    [External]
+    PROCEDURE RightToLeft@1000000024() : Integer;
+    BEGIN
+      DotNetRegexOptions := DotNetRegexOptions.RightToLeft;
+      EXIT(DotNetRegexOptions);
+    END;
+
+    [External]
+    PROCEDURE Singleline@1000000025() : Integer;
+    BEGIN
+      DotNetRegexOptions := DotNetRegexOptions.Singleline;
+      EXIT(DotNetRegexOptions);
+    END;
+
+    [External]
+    PROCEDURE BitwiseOr@100000016(Option1@100000000 : Integer;Option2@100000001 : Integer) : Integer;
+    VAR
+      Bits1@100000002 : ARRAY [32] OF Integer;
+      Bits2@100000003 : ARRAY [32] OF Integer;
+      Position@100000005 : Integer;
+      Result@100000004 : Integer;
+      ResultBits@100000006 : ARRAY [32] OF Integer;
+    BEGIN
+      IntegerToBits(Option1, Bits1);
+      IntegerToBits(Option2, Bits2);
+      FOR Position := 1 TO 32 DO BEGIN
+        IF ((Bits1[Position] = 1) OR (Bits2[Position] = 1)) THEN BEGIN
+          ResultBits[Position] := 1;
+        END;
+      END;
+      Result := BitsToInteger(ResultBits);
+      DotNetRegexOptions := Result;
+      EXIT(Result);
+    END;
+
+    [External]
+    PROCEDURE BitwiseAnd@100000025(Option1@100000000 : Integer;Option2@100000001 : Integer) : Integer;
+    VAR
+      Bits1@100000002 : ARRAY [32] OF Integer;
+      Bits2@100000003 : ARRAY [32] OF Integer;
+      Position@100000005 : Integer;
+      Result@100000004 : Integer;
+      ResultBits@100000006 : ARRAY [32] OF Integer;
+    BEGIN
+      IntegerToBits(Option1, Bits1);
+      IntegerToBits(Option2, Bits2);
+      FOR Position := 1 TO 32 DO BEGIN
+        IF ((Bits1[Position] = 1) AND (Bits2[Position] = 1)) THEN BEGIN
+          ResultBits[Position] := 1;
+        END;
+      END;
+      Result := BitsToInteger(ResultBits);
+      DotNetRegexOptions := Result;
+      EXIT(Result);
+    END;
+
+    [External]
+    PROCEDURE BitwiseXor@100000026(Option1@100000000 : Integer;Option2@100000001 : Integer) : Integer;
+    VAR
+      Bits1@100000002 : ARRAY [32] OF Integer;
+      Bits2@100000003 : ARRAY [32] OF Integer;
+      Position@100000005 : Integer;
+      Result@100000004 : Integer;
+      ResultBits@100000006 : ARRAY [32] OF Integer;
+    BEGIN
+      IntegerToBits(Option1, Bits1);
+      IntegerToBits(Option2, Bits2);
+      FOR Position := 1 TO 32 DO BEGIN
+        IF (Bits1[Position] <> Bits2[Position]) THEN BEGIN
+          ResultBits[Position] := 1;
+        END;
+      END;
+      Result := BitsToInteger(ResultBits);
+      DotNetRegexOptions := Result;
+      EXIT(Result);
+    END;
+
+    [External]
+    PROCEDURE ToString@100000000() : Text;
+    BEGIN
+      EXIT(DotNetRegexOptions.ToString());
+    END;
+
+    [External]
+    PROCEDURE ToInteger@100000006() : Integer;
+    BEGIN
+      EXIT(DotNetRegexOptions);
+    END;
+    PROCEDURE GetRegexOptions@1000000002(VAR DotNetRegexOptions2@1000000000 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.RegularExpressions.RegexOptions");
+    VAR
+      String@1000000002 : Text;
+    BEGIN
+      DotNetRegexOptions2 := DotNetRegexOptions;
+    END;
+    PROCEDURE SetRegexOptions@1000000004(VAR DotNetRegexOptions2@1000000000 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.RegularExpressions.RegexOptions");
+    VAR
+      String@1000000001 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.String";
+      Separators@1000000002 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.String";
+      StringParts@1000000003 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Array";
+      StringPart@1000000004 : Text;
+      IntegerValue@1000000005 : Integer;
+    BEGIN
+      DotNetRegexOptions := DotNetRegexOptions2;
+    END;
+    LOCAL PROCEDURE IntegerToBits@100000004(Integer@100000000 : Integer;VAR Bits@100000002 : ARRAY [32] OF Integer);
+    VAR
+      Position@100000001 : Integer;
+    BEGIN
+      CLEAR(Bits);
+      Position := 32;
+      WHILE (Integer > 0) DO BEGIN
+        Bits[Position] := Integer MOD 2;
+        Integer := Integer DIV 2;
+        Position -= 1;
+      END;
+    END;
+    LOCAL PROCEDURE BitsToInteger@100000005(Bits@100000000 : ARRAY [32] OF Integer) : Integer;
+    VAR
+      Integer@100000001 : Integer;
+      Position@100000002 : Integer;
+    BEGIN
+      CLEAR(Integer);
+      FOR Position := 1 TO 32 DO BEGIN
+        Integer *= 2;
+        Integer += Bits[Position];
+      END;
+      EXIT(Integer);
+    END;
+
+    BEGIN
+    END.
+  }
+}
+

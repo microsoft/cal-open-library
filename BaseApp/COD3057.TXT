@@ -1,0 +1,92 @@
+OBJECT Codeunit 3057 DotNet_CaptureCollection
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      DotNetCaptureCollection@1000000001 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.RegularExpressions.CaptureCollection";
+
+    [External]
+    PROCEDURE Count@1000000002() : Integer;
+    BEGIN
+      EXIT(DotNetCaptureCollection.Count);
+    END;
+
+    [External]
+    PROCEDURE IsReadOnly@1000000003() : Boolean;
+    BEGIN
+      EXIT(DotNetCaptureCollection.IsReadOnly);
+    END;
+
+    [External]
+    PROCEDURE IsSynchronized@1000000004() : Boolean;
+    BEGIN
+      EXIT(DotNetCaptureCollection.IsSynchronized);
+    END;
+
+    [External]
+    PROCEDURE Item@1000000005(CaptureNumber@1000000001 : Integer;VAR Capture@1000000000 : Codeunit 3056);
+    VAR
+      DotNetCapture@1000000002 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.RegularExpressions.Capture";
+    BEGIN
+      DotNetCapture := DotNetCaptureCollection.Item(CaptureNumber);
+      Capture.SetCapture(DotNetCapture);
+    END;
+    LOCAL PROCEDURE CopyTo@1000000009(VAR Captures@1000000000 : Codeunit 3057;Index@1000000002 : Integer);
+    VAR
+      DotNetCaptures@1000000001 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.RegularExpressions.CaptureCollection";
+    BEGIN
+      DotNetCaptureCollection.CopyTo(DotNetCaptures, Index);
+      Captures.SetCaptureCollection(DotNetCaptures);
+    END;
+
+    [External]
+    PROCEDURE Equals@1000000010(VAR Capture@1000000000 : Codeunit 3056) : Boolean;
+    VAR
+      DotNetCapture@1000000001 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.RegularExpressions.Capture";
+    BEGIN
+      Capture.GetCapture(DotNetCapture);
+      EXIT(DotNetCaptureCollection.Equals(DotNetCapture));
+    END;
+
+    [External]
+    PROCEDURE Equals2@1000000006(VAR CapturesA@1000000000 : Codeunit 3057;VAR CapturesB@1000000001 : Codeunit 3057) : Boolean;
+    VAR
+      DotNetCapturesA@1000000002 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.RegularExpressions.CaptureCollection";
+      DotNetCapturesB@1000000003 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.RegularExpressions.CaptureCollection";
+    BEGIN
+      CapturesA.GetCaptureCollection(DotNetCapturesA);
+      CapturesB.GetCaptureCollection(DotNetCapturesB);
+      EXIT(DotNetCaptureCollection.Equals(DotNetCapturesA, DotNetCapturesB));
+    END;
+
+    [External]
+    PROCEDURE GetHashCode@1000000012() : Integer;
+    BEGIN
+      EXIT(DotNetCaptureCollection.GetHashCode());
+    END;
+    PROCEDURE GetCaptureCollection@1000000001(VAR DotNetCaptureCollection2@1000000000 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.RegularExpressions.CaptureCollection");
+    BEGIN
+      DotNetCaptureCollection2 := DotNetCaptureCollection;
+    END;
+    PROCEDURE SetCaptureCollection@1000000000(VAR DotNetCaptureCollection2@1000000000 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.RegularExpressions.CaptureCollection");
+    BEGIN
+      DotNetCaptureCollection := DotNetCaptureCollection2;
+    END;
+
+    BEGIN
+    END.
+  }
+}
+

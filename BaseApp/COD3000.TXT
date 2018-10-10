@@ -96,12 +96,10 @@ OBJECT Codeunit 3000 DotNet_Array
     BEGIN
       EXIT(DotNetArray.GetValue(Index));
     END;
-
     PROCEDURE GetArray@2(VAR DotNetArray2@1000 : DotNet "'mscorlib'.System.Array");
     BEGIN
       DotNetArray2 := DotNetArray
     END;
-
     PROCEDURE SetArray@3(DotNetArray2@1000 : DotNet "'mscorlib'.System.Array");
     BEGIN
       DotNetArray := DotNetArray2

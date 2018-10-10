@@ -37,15 +37,313 @@ OBJECT Codeunit 3001 DotNet_RegEx
     BEGIN
       EXIT(DotNetRegEx.Replace(input,evaluator))
     END;
-
     PROCEDURE GetRegEx@2(VAR DotNetRegEx2@1000 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.RegularExpressions.Regex");
     BEGIN
       DotNetRegEx2 := DotNetRegEx
     END;
-
     PROCEDURE SetRegEx@3(DotNetRegEx2@1000 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.RegularExpressions.Regex");
     BEGIN
       DotNetRegEx := DotNetRegEx2
+    END;
+
+    [External]
+    PROCEDURE Regex2@1000000002(Pattern@1000000000 : Text;VAR Options@1000000003 : Codeunit 3051);
+    VAR
+      DotNetRegexOptions@1000000002 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.RegularExpressions.RegexOptions";
+    BEGIN
+      Options.GetRegexOptions(DotNetRegexOptions);
+      DotNetRegEx := DotNetRegEx.Regex(Pattern, DotNetRegexOptions);
+    END;
+
+    [External]
+    PROCEDURE Regex3@1000000017(Pattern@1000000001 : Text;VAR Options@1000000000 : Codeunit 3051;MatchTimeout@1000000002 : Duration);
+    VAR
+      DotNetRegexOptions@1000000003 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.RegularExpressions.RegexOptions";
+    BEGIN
+      Options.GetRegexOptions(DotNetRegexOptions);
+      DotNetRegEx := DotNetRegEx.Regex(Pattern, DotNetRegexOptions, MatchTimeout);
+    END;
+
+    [External]
+    PROCEDURE GetCacheSize@1000000006() : Integer;
+    BEGIN
+      EXIT(DotNetRegEx.CacheSize);
+    END;
+
+    [External]
+    PROCEDURE SetCacheSize@1000000007(CacheSize@1000000000 : Integer);
+    BEGIN
+      DotNetRegEx.CacheSize := CacheSize;
+    END;
+
+    [External]
+    PROCEDURE GetGroupNames@1000000026(VAR Names@1000000002 : Codeunit 3000);
+    VAR
+      DotNetNames@1000000000 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Array";
+    BEGIN
+      DotNetNames := DotNetRegEx.GetGroupNames();
+      Names.SetArray(DotNetNames);
+    END;
+
+    [External]
+    PROCEDURE GetGroupNumbers@1000000027(VAR Numbers@1000000002 : Codeunit 3000);
+    VAR
+      DotNetNumbers@1000000000 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Array";
+    BEGIN
+      DotNetNumbers := DotNetRegEx.GetGroupNumbers();
+      Numbers.SetArray(DotNetNumbers);
+    END;
+
+    [External]
+    PROCEDURE GroupNameFromNumber@1000000030(Number@1000000000 : Integer) : Text;
+    BEGIN
+      EXIT(DotNetRegEx.GroupNameFromNumber(Number));
+    END;
+
+    [External]
+    PROCEDURE GroupNumberFromName@1000000032(Name@1000000000 : Text) : Integer;
+    BEGIN
+      EXIT(DotNetRegEx.GroupNumberFromName(Name));
+    END;
+
+    [External]
+    PROCEDURE IsMatch@1000000034(Input@1000000000 : Text) : Boolean;
+    BEGIN
+      EXIT(DotNetRegEx.IsMatch(Input));
+    END;
+
+    [External]
+    PROCEDURE IsMatch2@1000000036(Input@1000000000 : Text;StartAt@1000000001 : Integer) : Boolean;
+    BEGIN
+      EXIT(DotNetRegEx.IsMatch(Input, StartAt));
+    END;
+
+    [External]
+    PROCEDURE IsMatch3@1000000038(Input@1000000000 : Text;Pattern@1000000001 : Text) : Boolean;
+    VAR
+      Regex@1000000002 : Codeunit 3001;
+    BEGIN
+      Regex.Regex(Pattern);
+      EXIT(Regex.IsMatch(Input));
+    END;
+
+    [External]
+    PROCEDURE IsMatch4@1000000041(Input@1000000001 : Text;Pattern@1000000000 : Text;VAR Options@1000000004 : Codeunit 3051) : Boolean;
+    VAR
+      Regex@1000000003 : Codeunit 3001;
+    BEGIN
+      Regex.Regex2(Pattern, Options);
+      EXIT(Regex.IsMatch(Input));
+    END;
+
+    [External]
+    PROCEDURE IsMatch5@1000000043(Input@1000000001 : Text;Pattern@1000000000 : Text;VAR Options@1000000005 : Codeunit 3051;MatchTimeout@1000000004 : Duration) : Boolean;
+    VAR
+      Regex@1000000003 : Codeunit 3001;
+    BEGIN
+      Regex.Regex3(Pattern, Options, MatchTimeout);
+      EXIT(Regex.IsMatch(Input));
+    END;
+
+    [External]
+    PROCEDURE Match@1000000000(Input@1000000000 : Text;VAR Match@1000000001 : Codeunit 3052);
+    VAR
+      DotNetMatch@1000000003 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.RegularExpressions.Match";
+    BEGIN
+      DotNetMatch := DotNetRegEx.Match(Input);
+      Match.SetDotNetMatch(DotNetMatch);
+    END;
+
+    [External]
+    PROCEDURE Match2@1000000009(Input@1000000000 : Text;StartAt@1000000002 : Integer;VAR Match@1000000001 : Codeunit 3052);
+    VAR
+      DotNetMatch@1000000003 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.RegularExpressions.Match";
+    BEGIN
+      DotNetMatch := DotNetRegEx.Match(Input, StartAt);
+      Match.SetDotNetMatch(DotNetMatch);
+    END;
+
+    [External]
+    PROCEDURE Match3@1000000011(Input@1000000000 : Text;Beginning@1000000002 : Integer;Length@1000000003 : Integer;VAR Match@1000000001 : Codeunit 3052);
+    VAR
+      DotNetMatch@1000000004 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.RegularExpressions.Match";
+    BEGIN
+      DotNetMatch := DotNetRegEx.Match(Input, Beginning, Length);
+      Match.SetDotNetMatch(DotNetMatch);
+    END;
+
+    [External]
+    PROCEDURE Match4@1000000013(Input@1000000000 : Text;Pattern@1000000002 : Text;VAR Match@1000000001 : Codeunit 3052);
+    VAR
+      Regex@1000000003 : Codeunit 3001;
+    BEGIN
+      Regex.Regex(Pattern);
+      Regex.Match(Input, Match);
+    END;
+
+    [External]
+    PROCEDURE Match5@1000000012(Input@1000000000 : Text;Pattern@1000000002 : Text;VAR Options@1000000005 : Codeunit 3051;VAR Match@1000000001 : Codeunit 3052);
+    VAR
+      Regex@1000000003 : Codeunit 3001;
+    BEGIN
+      Regex.Regex2(Pattern, Options);
+      Regex.Match(Input, Match);
+    END;
+
+    [External]
+    PROCEDURE Match6@1000000016(Input@1000000000 : Text;Pattern@1000000002 : Text;VAR Options@1000000006 : Codeunit 3051;MatchTimeout@1000000005 : Duration;VAR Match@1000000001 : Codeunit 3052);
+    VAR
+      Regex@1000000003 : Codeunit 3001;
+    BEGIN
+      Regex.Regex3(Pattern, Options, MatchTimeout);
+      Regex.Match(Input, Match);
+    END;
+
+    [External]
+    PROCEDURE Matches@1000000019(Input@1000000000 : Text;VAR MatchCollection@1000000001 : Codeunit 3053);
+    VAR
+      DotNetMatchCollection@1000000002 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.RegularExpressions.MatchCollection";
+    BEGIN
+      DotNetMatchCollection := DotNetRegEx.Matches(Input);
+      MatchCollection.SetMatchCollection(DotNetMatchCollection);
+    END;
+
+    [External]
+    PROCEDURE Matches2@1000000010(Input@1000000000 : Text;StartAt@1000000003 : Integer;VAR MatchCollection@1000000001 : Codeunit 3053);
+    VAR
+      DotNetMatchCollection@1000000002 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.RegularExpressions.MatchCollection";
+    BEGIN
+      DotNetMatchCollection := DotNetRegEx.Matches(Input, StartAt);
+      MatchCollection.SetMatchCollection(DotNetMatchCollection);
+    END;
+
+    [External]
+    PROCEDURE Matches3@1000000015(Input@1000000000 : Text;Pattern@1000000003 : Text;VAR MatchCollection@1000000001 : Codeunit 3053);
+    VAR
+      Regex@1000000004 : Codeunit 3001;
+    BEGIN
+      Regex.Regex(Pattern);
+      Regex.Matches(Input, MatchCollection);
+    END;
+
+    [External]
+    PROCEDURE Matches4@1000000014(Input@1000000000 : Text;Pattern@1000000003 : Text;VAR Options@1000000005 : Codeunit 3051;VAR MatchCollection@1000000001 : Codeunit 3053);
+    VAR
+      Regex@1000000004 : Codeunit 3001;
+    BEGIN
+      Regex.Regex2(Pattern, Options);
+      Regex.Matches(Input, MatchCollection);
+    END;
+
+    [External]
+    PROCEDURE Matches5@1000000022(Input@1000000000 : Text;Pattern@1000000003 : Text;VAR Options@1000000006 : Codeunit 3051;MatchTimeout@1000000005 : Duration;VAR MatchCollection@1000000001 : Codeunit 3053);
+    VAR
+      Regex@1000000004 : Codeunit 3001;
+    BEGIN
+      Regex.Regex3(Pattern, Options, MatchTimeout);
+      Regex.Matches(Input, MatchCollection);
+    END;
+
+    [External]
+    PROCEDURE Replace2@1000000031(Input@1000000000 : Text;Replacement@1000000001 : Text;Count@1000000002 : Integer) : Text;
+    BEGIN
+      EXIT(DotNetRegEx.Replace(Input, Replacement, Count));
+    END;
+
+    [External]
+    PROCEDURE Replace3@1000000035(Input@1000000000 : Text;Replacement@1000000001 : Text;Count@1000000002 : Integer;StartAt@1000000003 : Integer) : Text;
+    BEGIN
+      EXIT(DotNetRegEx.Replace(Input, Replacement, Count, StartAt));
+    END;
+
+    [External]
+    PROCEDURE Replace4@1000000039(Input@1000000000 : Text;Pattern@1000000002 : Text;Replacement@1000000001 : Text) : Text;
+    VAR
+      Regex@1000000003 : Codeunit 3001;
+    BEGIN
+      Regex.Regex(Pattern);
+      EXIT(Regex.Replace(Input, Replacement));
+    END;
+
+    [External]
+    PROCEDURE Replace5@1000000008(Input@1000000000 : Text;Pattern@1000000002 : Text;Replacement@1000000001 : Text;VAR Options@1000000005 : Codeunit 3051) : Text;
+    VAR
+      Regex@1000000003 : Codeunit 3001;
+    BEGIN
+      Regex.Regex2(Pattern, Options);
+      EXIT(Regex.Replace(Input, Replacement));
+    END;
+
+    [External]
+    PROCEDURE Replace6@1000000023(Input@1000000000 : Text;Pattern@1000000002 : Text;Replacement@1000000001 : Text;VAR Options@1000000006 : Codeunit 3051;MatchTimeout@1000000005 : Duration) : Text;
+    VAR
+      Regex@1000000003 : Codeunit 3001;
+    BEGIN
+      Regex.Regex3(Pattern, Options, MatchTimeout);
+      EXIT(Regex.Replace(Input, Replacement));
+    END;
+
+    [External]
+    PROCEDURE Split2@1000000033(Input@1000000000 : Text;VAR Strings@1000000001 : Codeunit 3000);
+    VAR
+      StringsDotNetArray@1000000002 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Array";
+    BEGIN
+      StringsDotNetArray := DotNetRegEx.Split(Input);
+      Strings.SetArray(StringsDotNetArray);
+    END;
+
+    [External]
+    PROCEDURE Split3@1000000044(Input@1000000000 : Text;Count@1000000003 : Integer;VAR Strings@1000000001 : Codeunit 3000);
+    VAR
+      StringsDotNetArray@1000000002 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Array";
+    BEGIN
+      StringsDotNetArray := DotNetRegEx.Split(Input, Count);
+      Strings.SetArray(StringsDotNetArray);
+    END;
+
+    [External]
+    PROCEDURE Split4@1000000046(Input@1000000000 : Text;Count@1000000003 : Integer;StartAt@1000000004 : Integer;VAR Strings@1000000001 : Codeunit 3000);
+    VAR
+      StringsDotNetArray@1000000002 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Array";
+    BEGIN
+      StringsDotNetArray := DotNetRegEx.Split(Input, Count, StartAt);
+      Strings.SetArray(StringsDotNetArray);
+    END;
+
+    [External]
+    PROCEDURE Split5@1000000018(Input@1000000000 : Text;Pattern@1000000003 : Text;VAR Options@1000000005 : Codeunit 3051;VAR Strings@1000000001 : Codeunit 3000);
+    VAR
+      Regex@1000000004 : Codeunit 3001;
+    BEGIN
+      Regex.Regex2(Pattern, Options);
+      Regex.Split2(Input, Strings);
+    END;
+
+    [External]
+    PROCEDURE Split6@1000000029(Input@1000000000 : Text;Pattern@1000000003 : Text;VAR Options@1000000006 : Codeunit 3051;MatchTimeout@1000000005 : Duration;VAR Strings@1000000001 : Codeunit 3000);
+    VAR
+      Regex@1000000004 : Codeunit 3001;
+    BEGIN
+      Regex.Regex3(Pattern, Options, MatchTimeout);
+      Regex.Split2(Input, Strings);
+    END;
+
+    [External]
+    PROCEDURE GetHashCode@1000000028() : Integer;
+    BEGIN
+      EXIT(DotNetRegEx.GetHashCode());
+    END;
+
+    [External]
+    PROCEDURE Escape@1000000021(String@1000000000 : Text) : Text;
+    BEGIN
+      EXIT(DotNetRegEx.Escape(String));
+    END;
+
+    [External]
+    PROCEDURE Unescape@1000000048(String@1000000000 : Text) : Text;
+    BEGIN
+      EXIT(DotNetRegEx.Unescape(String));
     END;
 
     BEGIN

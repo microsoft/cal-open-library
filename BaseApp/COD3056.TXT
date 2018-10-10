@@ -1,0 +1,73 @@
+OBJECT Codeunit 3056 DotNet_Capture
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      DotNetCapture@1000000000 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.RegularExpressions.Capture";
+
+    [External]
+    PROCEDURE Index@1000000002() : Integer;
+    BEGIN
+      EXIT(DotNetCapture.Index);
+    END;
+
+    [External]
+    PROCEDURE Length@1000000003() : Integer;
+    BEGIN
+      EXIT(DotNetCapture.Length);
+    END;
+
+    [External]
+    PROCEDURE Value@1000000004() : Text;
+    BEGIN
+      EXIT(DotNetCapture.Value);
+    END;
+
+    [External]
+    PROCEDURE Equals@1000000005(Value@1000000000 : Text) : Boolean;
+    BEGIN
+      EXIT(DotNetCapture.Equals(Value));
+    END;
+
+    [External]
+    PROCEDURE Equals2@1000000006(VAR CaptureA@1000000000 : Codeunit 3056;VAR CaptureB@1000000001 : Codeunit 3056) : Boolean;
+    VAR
+      DotNetCaptureA@1000000002 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.RegularExpressions.Capture";
+      DotNetCaptureB@1000000003 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.RegularExpressions.Capture";
+    BEGIN
+      CaptureA.GetCapture(DotNetCaptureA);
+      CaptureB.GetCapture(DotNetCaptureB);
+      EXIT(DotNetCapture.Equals(DotNetCaptureA, DotNetCaptureB));
+    END;
+
+    [External]
+    PROCEDURE GetHashCode@1000000007() : Integer;
+    BEGIN
+      EXIT(DotNetCapture.GetHashCode());
+    END;
+    PROCEDURE GetCapture@1000000001(VAR DotNetCapture2@1000000000 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.RegularExpressions.Capture");
+    BEGIN
+      DotNetCapture2 := DotNetCapture;
+    END;
+    PROCEDURE SetCapture@1000000000(VAR DotNetCapture2@1000000000 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.RegularExpressions.Capture");
+    BEGIN
+      DotNetCapture := DotNetCapture2;
+    END;
+
+    BEGIN
+    END.
+  }
+}
+

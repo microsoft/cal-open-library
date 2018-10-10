@@ -1,0 +1,186 @@
+OBJECT Codeunit 145904 Test_DotNet_Regex_Toolkit
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      TxtError@1000000000 : TextConst 'ENU=Arguments: %1\Result: %2\Expected: %3';
+    PROCEDURE VerifyBooleanResult@1000000020(Arguments@1000000003 : Text;Result@1000000001 : Boolean;ExpectedResult@1000000000 : Boolean);
+    BEGIN
+      VerifyResult(Arguments, Result = ExpectedResult, Result, ExpectedResult);
+    END;
+    PROCEDURE VerifyIntegerResult@1000000004(Arguments@1000000003 : Text;Result@1000000001 : Integer;ExpectedResult@1000000000 : Integer);
+    BEGIN
+      VerifyResult(Arguments, Result = ExpectedResult, Result, ExpectedResult);
+    END;
+    PROCEDURE VerifyTextResult@1000000006(Arguments@1000000003 : Text;Result@1000000001 : Text;ExpectedResult@1000000000 : Text);
+    BEGIN
+      VerifyResult(Arguments, Result = ExpectedResult, Result, ExpectedResult);
+    END;
+    PROCEDURE VerifyResult@1000000003(Arguments@1000000003 : Text;Verified@1000000001 : Boolean;Result@1000000000 : Variant;ExpectedResult@1000000004 : Variant);
+    BEGIN
+      IF ( NOT (Verified)) THEN
+        ERROR(TxtError, Arguments, Result, ExpectedResult);
+    END;
+    PROCEDURE ToString1@1000000007(Value1@1000000000 : Variant) : Text;
+    BEGIN
+      EXIT(STRSUBSTNO('%1', Value1));
+    END;
+    PROCEDURE ToString2@1000000012(Value1@1000000000 : Variant;Value2@1000000001 : Variant) : Text;
+    BEGIN
+      EXIT(STRSUBSTNO('%1, %2', Value1, Value2));
+    END;
+    PROCEDURE ToString3@1000000011(Value1@1000000000 : Variant;Value2@1000000001 : Variant;Value3@1000000005 : Variant) : Text;
+    BEGIN
+      EXIT(STRSUBSTNO('%1, %2, %3', Value1, Value2, Value3));
+    END;
+    PROCEDURE ToString4@1000000010(Value1@1000000000 : Variant;Value2@1000000001 : Variant;Value3@1000000005 : Variant;Value4@1000000004 : Variant) : Text;
+    BEGIN
+      EXIT(STRSUBSTNO('%1, %2, %3, %4', Value1, Value2, Value3, Value4));
+    END;
+    PROCEDURE ToString5@1000000009(Value1@1000000000 : Variant;Value2@1000000001 : Variant;Value3@1000000005 : Variant;Value4@1000000004 : Variant;Value5@1000000003 : Variant) : Text;
+    BEGIN
+      EXIT(STRSUBSTNO('%1, %2, %3, %4, %5', Value1, Value2, Value3, Value4, Value5));
+    END;
+    PROCEDURE ToString6@1000000018(Value1@1000000000 : Variant;Value2@1000000001 : Variant;Value3@1000000002 : Variant;Value4@1000000003 : Variant;Value5@1000000004 : Variant;Value6@1000000005 : Variant) : Text;
+    BEGIN
+      EXIT(STRSUBSTNO('%1, %2, %3, %4, %5, %6', Value1, Value2, Value3, Value4, Value5, Value6));
+    END;
+    PROCEDURE ArgsToString1@1000000021(Name1@1000000001 : Text;Value1@1000000000 : Variant) : Text;
+    BEGIN
+      EXIT(STRSUBSTNO('"%1"=%2', Name1, ToString(Value1)));
+    END;
+    PROCEDURE ArgsToString2@1000000022(Name1@1000000002 : Text;Value1@1000000000 : Variant;Name2@1000000003 : Text;Value2@1000000001 : Variant) : Text;
+    BEGIN
+      EXIT(STRSUBSTNO('"%1"=%2, "%3"=%4', Name1, ToString(Value1), Name2, ToString(Value2)));
+    END;
+    PROCEDURE ArgsToString3@1000000023(Name1@1000000003 : Text;Value1@1000000001 : Variant;Name2@1000000004 : Text;Value2@1000000000 : Variant;Name3@1000000005 : Text;Value3@1000000002 : Variant) : Text;
+    BEGIN
+      EXIT(STRSUBSTNO('"%1"=%2, "%3"=%4, "%5"=%6', Name1, ToString(Value1), Name2, ToString(Value2), Name3, ToString(Value3)));
+    END;
+    PROCEDURE ArgsToString4@1000000024(Name1@1000000004 : Text;Value1@1000000001 : Variant;Name2@1000000005 : Text;Value2@1000000000 : Variant;Name3@1000000006 : Text;Value3@1000000002 : Variant;Name4@1000000007 : Text;Value4@1000000003 : Variant) : Text;
+    BEGIN
+      EXIT(STRSUBSTNO('"%1"=%2, "%3"=%4, "%5"=%6, "%7"=%8', Name1, ToString(Value1), Name2, ToString(Value2), Name3, ToString(Value3), Name4, ToString(Value4)));
+    END;
+    PROCEDURE ArgsToString5@1000000001(Name1@1000000005 : Text;Value1@1000000001 : Variant;Name2@1000000006 : Text;Value2@1000000000 : Variant;Name3@1000000007 : Text;Value3@1000000002 : Variant;Name4@1000000008 : Text;Value4@1000000003 : Variant;Name5@1000000009 : Text;Value5@1000000004 : Variant) : Text;
+    BEGIN
+      EXIT(STRSUBSTNO('"%1"=%2, "%3"=%4, "%5"=%6, "%7"=%8, "%9"=%10', Name1, ToString(Value1), Name2, ToString(Value2), Name3, ToString(Value3), Name4, ToString(Value4), Name5, ToString(Value5)));
+    END;
+    PROCEDURE ArgsToString6@1000000014(Name1@1000000005 : Text;Value1@1000000001 : Variant;Name2@1000000006 : Text;Value2@1000000000 : Variant;Name3@1000000007 : Text;Value3@1000000002 : Variant;Name4@1000000008 : Text;Value4@1000000003 : Variant;Name5@1000000009 : Text;Value5@1000000004 : Variant;Name6@1000000011 : Text;Value6@1000000010 : Variant) : Text;
+    BEGIN
+      EXIT(STRSUBSTNO('"%1"=%2, "%3"=%4, "%5"=%6, "%7"=%8, "%9"=%10, "%11"=%12', Name1, ToString(Value1), Name2, ToString(Value2), Name3, ToString(Value3), Name4, ToString(Value4), Name5, ToString(Value5), Name6, ToString(Value6)));
+    END;
+    LOCAL PROCEDURE ToString@1000000005(Value@1000000000 : Variant) : Text;
+    BEGIN
+      EXIT(CONVERTSTR(FORMAT(Value), '\', '/'));
+    END;
+    PROCEDURE ClearArray@1000000025(VAR TheArray@1000000000 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Collections.ArrayList");
+    BEGIN
+      TheArray := TheArray.ArrayList();
+    END;
+    PROCEDURE SetArray1@1000000017(VAR TheArray@1000000002 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Collections.ArrayList";Value1@1000000000 : Variant);
+    BEGIN
+      TheArray := TheArray.ArrayList();
+      TheArray.Add(Value1);
+    END;
+    PROCEDURE SetArray2@1000000015(VAR TheArray@1000000002 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Collections.ArrayList";Value1@1000000000 : Variant;Value2@1000000001 : Variant);
+    BEGIN
+      TheArray := TheArray.ArrayList();
+      TheArray.Add(Value1);
+      TheArray.Add(Value2);
+    END;
+    PROCEDURE SetArray3@1000000016(VAR TheArray@1000000002 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Collections.ArrayList";Value1@1000000000 : Variant;Value2@1000000001 : Variant;Value3@1000000003 : Variant);
+    BEGIN
+      TheArray := TheArray.ArrayList();
+      TheArray.Add(Value1);
+      TheArray.Add(Value2);
+      TheArray.Add(Value3);
+    END;
+    PROCEDURE SetArray4@1000000000(VAR TheArray@1000000002 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Collections.ArrayList";Value1@1000000000 : Variant;Value2@1000000001 : Variant;Value3@1000000003 : Variant;Value4@1000000004 : Variant);
+    BEGIN
+      TheArray := TheArray.ArrayList();
+      TheArray.Add(Value1);
+      TheArray.Add(Value2);
+      TheArray.Add(Value3);
+      TheArray.Add(Value4);
+    END;
+    PROCEDURE SetArray5@1000000002(VAR TheArray@1000000002 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Collections.ArrayList";Value1@1000000000 : Variant;Value2@1000000001 : Variant;Value3@1000000003 : Variant;Value4@1000000004 : Variant;Value5@1000000005 : Variant);
+    BEGIN
+      TheArray := TheArray.ArrayList();
+      TheArray.Add(Value1);
+      TheArray.Add(Value2);
+      TheArray.Add(Value3);
+      TheArray.Add(Value4);
+      TheArray.Add(Value5);
+    END;
+    PROCEDURE SetArray6@1000000013(VAR TheArray@1000000002 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Collections.ArrayList";Value1@1000000000 : Variant;Value2@1000000001 : Variant;Value3@1000000003 : Variant;Value4@1000000004 : Variant;Value5@1000000005 : Variant;Value6@1000000006 : Variant);
+    BEGIN
+      TheArray := TheArray.ArrayList();
+      TheArray.Add(Value1);
+      TheArray.Add(Value2);
+      TheArray.Add(Value3);
+      TheArray.Add(Value4);
+      TheArray.Add(Value5);
+      TheArray.Add(Value6);
+    END;
+    PROCEDURE ArrayToString@1000000019(ArrayIn@1000000000 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Array") : Text;
+    VAR
+      String@1000000002 : Text;
+      ArrayItem@1000000001 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Object";
+      FirstItem@1000000003 : Boolean;
+    BEGIN
+      String := '';
+      FirstItem := TRUE;
+      FOREACH ArrayItem IN ArrayIn DO BEGIN
+        IF (FirstItem) THEN BEGIN
+          FirstItem := FALSE;
+        END ELSE BEGIN
+          String := String + ',';
+        END;
+        IF ( NOT (ISNULL(ArrayItem))) THEN BEGIN
+          String := String + ArrayItem.ToString();
+        END ELSE BEGIN
+          String := String + 'null';
+        END;
+      END;
+      EXIT(String);
+    END;
+    PROCEDURE ArrayListToString@1000000008(ArrayList@1000000000 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Collections.ArrayList") : Text;
+    VAR
+      String@1000000002 : Text;
+      ArrayListItem@1000000001 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Object";
+      FirstItem@1000000003 : Boolean;
+    BEGIN
+      String := '';
+      FirstItem := TRUE;
+      FOREACH ArrayListItem IN ArrayList DO BEGIN
+        IF (FirstItem) THEN BEGIN
+          FirstItem := FALSE;
+        END ELSE BEGIN
+          String := String + ',';
+        END;
+        IF ( NOT (ISNULL(ArrayListItem))) THEN BEGIN
+          String := String + ArrayListItem.ToString();
+        END ELSE BEGIN
+          String := String + 'null';
+        END;
+      END;
+      EXIT(String);
+    END;
+
+    BEGIN
+    END.
+  }
+}
+
