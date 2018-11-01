@@ -42,7 +42,7 @@ OBJECT Table 1223 Data Exch. Column Def
     { 5   ;   ;Data Type           ;Option        ;OptionString=Text,Date,Decimal,DateTime }
     { 6   ;   ;Data Format         ;Text100        }
     { 7   ;   ;Data Formatting Culture;Text10      }
-    { 8   ;   ;Description         ;Text50         }
+    { 8   ;   ;Description         ;Text100        }
     { 10  ;   ;Data Exch. Line Def Code;Code20    ;TableRelation="Data Exch. Line Def".Code WHERE (Data Exch. Def Code=FIELD(Data Exch. Def Code));
                                                    NotBlank=Yes }
     { 11  ;   ;Length              ;Integer        }

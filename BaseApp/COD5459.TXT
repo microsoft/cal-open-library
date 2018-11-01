@@ -139,6 +139,7 @@ OBJECT Codeunit 5459 JSON Management
       TempBlob@1015 : Record 99008535;
       OutlookSynchTypeConv@1011 : Codeunit 5302;
       JProperty@1003 : DotNet "'Newtonsoft.Json'.Newtonsoft.Json.Linq.JProperty";
+      RecID@1012 : RecordID;
       Value@1005 : Variant;
       DecimalVal@1004 : Decimal;
       BoolVal@1007 : Boolean;
@@ -196,6 +197,11 @@ OBJECT Codeunit 5459 JSON Management
           IF TryReadAsBase64(TempBlob,Value) THEN BEGIN
             FieldRef.VALUE := TempBlob.Blob;
             Success := TRUE;
+          END;
+        'RecordID':
+          BEGIN
+            Success := EVALUATE(RecID,Value);
+            FieldRef.VALUE(RecID);
           END;
       END;
 
@@ -326,12 +332,12 @@ OBJECT Codeunit 5459 JSON Management
       EXIT(FALSE);
     END;
 
-    LOCAL PROCEDURE GetValueFromJObject@19(JObject@1001 : DotNet "'Newtonsoft.Json'.Newtonsoft.Json.Linq.JObject";VAR value@1000 : Variant);
+    LOCAL PROCEDURE GetValueFromJObject@19(JToken@1001 : DotNet "'Newtonsoft.Json'.Newtonsoft.Json.Linq.JToken";VAR value@1000 : Variant);
     VAR
       JValue@1002 : DotNet "'Newtonsoft.Json'.Newtonsoft.Json.Linq.JValue";
     BEGIN
       CLEAR(value);
-      JValue := JObject;
+      JValue := JToken;
       value := JValue.Value;
     END;
 
@@ -397,7 +403,7 @@ OBJECT Codeunit 5459 JSON Management
       JObject.Add(propertyName,JValue.CreateNull);
     END;
 
-    PROCEDURE AddJValueToJObject@22(VAR JObject@1002 : DotNet "'Newtonsoft.Json'.Newtonsoft.Json.Linq.JObject";value@1003 : Variant);
+    PROCEDURE AddJValueToJObject@22(VAR JObject@1002 : DotNet "'Newtonsoft.Json'.Newtonsoft.Json.Linq.JToken";value@1003 : Variant);
     VAR
       JValue@1001 : DotNet "'Newtonsoft.Json'.Newtonsoft.Json.Linq.JValue";
     BEGIN

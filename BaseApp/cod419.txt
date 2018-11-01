@@ -54,6 +54,7 @@ OBJECT Codeunit 419 File Management
       ChooseFileTitleMsg@1036 : TextConst 'ENU=Choose the file to upload.';
       NotAllowedPathErr@1037 : TextConst '@@@="%1=the full path to a file. ex: C:\Windows\TextFile.txt ";ENU=Files outside of the current user''s folder cannot be accessed. Access is denied to file %1.';
 
+    [External]
     PROCEDURE BLOBImport@3(VAR BLOBRef@1000 : TEMPORARY Record 99008535;Name@1002 : Text) : Text;
     BEGIN
       EXIT(BLOBImportWithFilter(BLOBRef,Text007,Name,AllFilesDescriptionTxt,AllFilesFilterTxt));
@@ -113,6 +114,7 @@ OBJECT Codeunit 419 File Management
       EXIT('');
     END;
 
+    [External]
     PROCEDURE BLOBExportWithEncoding@67(VAR TempBlob@1002 : TEMPORARY Record 99008535;Name@1001 : Text;CommonDialog@1000 : Boolean;Encoding@1004 : TextEncoding) : Text;
     VAR
       NVInStream@1003 : InStream;
@@ -818,6 +820,7 @@ OBJECT Codeunit 419 File Management
       EXIT(ClientTypeManagement.IsWindowsClientType);
     END;
 
+    [External]
     PROCEDURE IsValidFileName@22(FileName@1000 : Text) : Boolean;
     VAR
       String@1001 : DotNet "'mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.String";
@@ -884,6 +887,7 @@ OBJECT Codeunit 419 File Management
       END
     END;
 
+    [External]
     PROCEDURE Ansi2SystemEncoding@28(Destination@1000 : OutStream;Source@1001 : InStream);
     VAR
       StreamReader@1004 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.IO.StreamReader";
@@ -895,6 +899,7 @@ OBJECT Codeunit 419 File Management
       Destination.WRITETEXT(EncodedTxt);
     END;
 
+    [External]
     PROCEDURE Ansi2SystemEncodingTxt@29(Destination@1001 : OutStream;Source@1000 : Text);
     VAR
       StreamWriter@1004 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.IO.StreamWriter";
