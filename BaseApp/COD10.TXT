@@ -306,7 +306,7 @@ OBJECT Codeunit 10 Type Helper
     PROCEDURE TestFieldIsNotObsolete@66(Field@1000 : Record 2000000041);
     BEGIN
       IF Field.ObsoleteState = Field.ObsoleteState::Removed THEN
-        ERROR(ObsoleteFieldErr);
+        ERROR(ObsoleteFieldErr,Field."Field Caption",Field.TableName);
     END;
 
     [External]

@@ -222,6 +222,14 @@ OBJECT Table 370 Excel Buffer
     END;
 
     [External]
+    PROCEDURE UpdateBookStream@3(VAR ExcelStream@1000 : InStream;SheetName@1001 : Text;PreserveDataOnUpdate@1002 : Boolean);
+    BEGIN
+      FileNameServer := FileManagement.InstreamExportToServerFile(ExcelStream,'xlsx');
+
+      UpdateBookExcel(FileNameServer,SheetName,PreserveDataOnUpdate);
+    END;
+
+    [External]
     PROCEDURE CloseBook@30();
     BEGIN
       IF NOT ISNULL(XlWrkBkWriter) THEN BEGIN
