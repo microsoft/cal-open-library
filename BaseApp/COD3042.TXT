@@ -1,1 +1,39 @@
- 
+OBJECT Codeunit 3042 DotNet_X509ContentType
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      DotNetX509ContentType@1003 : DotNet "'mscorlib'.System.Security.Cryptography.X509Certificates.X509ContentType";
+
+    PROCEDURE Pkcs12@3();
+    BEGIN
+      DotNetX509ContentType := DotNetX509ContentType.Pkcs12;
+    END;
+
+    PROCEDURE GetX509ContentType@1(VAR DotNetX509ContentType2@1000 : DotNet "'mscorlib'.System.Security.Cryptography.X509Certificates.X509ContentType");
+    BEGIN
+      DotNetX509ContentType2 := DotNetX509ContentType;
+    END;
+
+    PROCEDURE SetX509ContentType@2(VAR DotNetX509ContentType2@1000 : DotNet "'mscorlib'.System.Security.Cryptography.X509Certificates.X509ContentType");
+    BEGIN
+      DotNetX509ContentType := DotNetX509ContentType2;
+    END;
+
+    BEGIN
+    END.
+  }
+}
+

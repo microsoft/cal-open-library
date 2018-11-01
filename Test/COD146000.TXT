@@ -1,0 +1,139 @@
+OBJECT Codeunit 146000 Test_DotNet_Array
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=Test,W1,All;
+  }
+  PROPERTIES
+  {
+    Subtype=Test;
+    TestPermissions=Disabled;
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      Assert@1000 : Codeunit 130000;
+      DotNet_Array@1004 : Codeunit 3000;
+
+    [Test]
+    PROCEDURE TestStringArrayManipulation@1();
+    VAR
+      Index@1000 : Integer;
+      Actual@1001 : Text;
+      Expected@1002 : Text;
+    BEGIN
+      // [WHEN] String array of four elements are created
+      DotNet_Array.StringArray(4);
+      DotNet_Array.SetTextValue('One',0);
+      DotNet_Array.SetTextValue('Two',1);
+      DotNet_Array.SetTextValue('Three',2);
+      DotNet_Array.SetTextValue('Four',3);
+      // [WHEN] And all values are concatinated
+      Actual := '';
+      FOR Index := 0 TO DotNet_Array.Length - 1 DO
+        Actual += DotNet_Array.GetValueAsText(Index);
+      // [THEN] Array must be not null
+      Assert.AreEqual(FALSE,DotNet_Array.IsNull,'Null check failed');
+      // [THEN] Expected array length is 4
+      Assert.AreEqual(4,DotNet_Array.Length,'Array length check failed');
+      // [THEN] First element should be 'One'
+      Assert.AreEqual('One',DotNet_Array.GetValueAsText(0),'First element check failed');
+      // [THEN] Concatenated values are 'OneTwoThreeFour'
+      Expected := 'OneTwoThreeFour';
+      Assert.AreEqual(Expected,Actual,'All values check failed');
+    END;
+
+    [Test]
+    PROCEDURE TestByteArrayManipulation@2();
+    VAR
+      Index@1000 : Integer;
+      Actual@1001 : Text;
+      Expected@1002 : Text;
+    BEGIN
+      // [WHEN] Byte array of four elements are created
+      DotNet_Array.ByteArray(4);
+      DotNet_Array.SetByteValue(1,0);
+      DotNet_Array.SetByteValue(2,1);
+      DotNet_Array.SetByteValue(3,2);
+      DotNet_Array.SetByteValue(4,3);
+      // [WHEN] And all values are concatinated
+      Actual := '';
+      FOR Index := 0 TO DotNet_Array.Length - 1 DO
+        Actual += FORMAT(DotNet_Array.GetValueAsInteger(Index));
+      // [THEN] Array must be not null
+      Assert.AreEqual(FALSE,DotNet_Array.IsNull,'Null check failed');
+      // [THEN] Expected array length is 4
+      Assert.AreEqual(4,DotNet_Array.Length,'Array length check failed');
+      // [THEN] First element should be 1
+      Assert.AreEqual(1,DotNet_Array.GetValueAsInteger(0),'First element check failed');
+      // [THEN] Concatenated values are '1234'
+      Expected := '1234';
+      Assert.AreEqual(Expected,Actual,'All values check failed');
+    END;
+
+    [Test]
+    PROCEDURE TestInt32ArrayManipulation@3();
+    VAR
+      Index@1000 : Integer;
+      Actual@1001 : Text;
+      Expected@1002 : Text;
+    BEGIN
+      // [WHEN] Int32 array of four elements are created
+      DotNet_Array.Int32Array(4);
+      DotNet_Array.SetByteValue(1,0);
+      DotNet_Array.SetByteValue(2,1);
+      DotNet_Array.SetByteValue(3,2);
+      DotNet_Array.SetByteValue(4,3);
+      // [WHEN] And all values are concatinated
+      Actual := '';
+      FOR Index := 0 TO DotNet_Array.Length - 1 DO
+        Actual += FORMAT(DotNet_Array.GetValueAsInteger(Index));
+      // [THEN] Array must be not null
+      Assert.AreEqual(FALSE,DotNet_Array.IsNull,'Null check failed');
+      // [THEN] Expected array length is 4
+      Assert.AreEqual(4,DotNet_Array.Length,'Array length check failed');
+      // [THEN] First element should be 1
+      Assert.AreEqual(1,DotNet_Array.GetValueAsInteger(0),'First element check failed');
+      // [THEN] Concatenated values are '1234'
+      Expected := '1234';
+      Assert.AreEqual(Expected,Actual,'All values check failed');
+    END;
+
+    [Test]
+    PROCEDURE TestCharArrayManipulation@4();
+    VAR
+      Index@1000 : Integer;
+      Actual@1001 : Text;
+      Expected@1002 : Text;
+    BEGIN
+      // [WHEN] Char array of four elements are created
+      DotNet_Array.CharArray(4);
+      DotNet_Array.SetByteValue('1',0);
+      DotNet_Array.SetByteValue('2',1);
+      DotNet_Array.SetByteValue('3',2);
+      DotNet_Array.SetByteValue('4',3);
+      // [WHEN] And all values are concatinated
+      Actual := '';
+      FOR Index := 0 TO DotNet_Array.Length - 1 DO
+        Actual += FORMAT(DotNet_Array.GetValueAsChar(Index));
+      // [THEN] Array must be not null
+      Assert.AreEqual(FALSE,DotNet_Array.IsNull,'Null check failed');
+      // [THEN] Expected array length is 4
+      Assert.AreEqual(4,DotNet_Array.Length,'Array length check failed');
+      // [THEN] First element should be 1
+      Assert.AreEqual('1',DotNet_Array.GetValueAsChar(0),'First element check failed');
+      // [THEN] Concatenated values are '1234'
+      Expected := '1234';
+      Assert.AreEqual(Expected,Actual,'All values check failed');
+    END;
+
+    BEGIN
+    END.
+  }
+}
+
