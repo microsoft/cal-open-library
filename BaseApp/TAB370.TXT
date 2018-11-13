@@ -264,6 +264,20 @@ OBJECT Table 370 Excel Buffer
     END;
 
     [External]
+    PROCEDURE SetActiveReaderSheet@59(NewSheetName@1000 : Text);
+    BEGIN
+      IF NewSheetName = '' THEN
+        EXIT;
+
+      IF XlWrkBkReader.HasWorksheet(NewSheetName) THEN
+        XlWrkShtReader := XlWrkBkReader.GetWorksheetByName(NewSheetName)
+      ELSE BEGIN
+        CloseBook;
+        ERROR(Text004,NewSheetName);
+      END;
+    END;
+
+    [External]
     PROCEDURE WriteSheet@37(ReportHeader@1001 : Text;CompanyName2@1002 : Text;UserID2@1003 : Text);
     VAR
       OrientationValues@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.5.5631.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Spreadsheet.OrientationValues";
@@ -482,6 +496,12 @@ OBJECT Table 370 Excel Buffer
 
     [External]
     PROCEDURE ReadSheet@4();
+    BEGIN
+      ReadSheetContinous('',TRUE);
+    END;
+
+    [External]
+    PROCEDURE ReadSheetContinous@58(SheetName@1005 : Text;CloseBookOnCompletion@1000 : Boolean);
     VAR
       ExcelBufferDialogMgt@1003 : Codeunit 5370;
       CellData@1002 : DotNet "'Microsoft.Dynamics.Nav.OpenXml, Version=13.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.Microsoft.Dynamics.Nav.OpenXml.Spreadsheet.CellData";
@@ -489,6 +509,9 @@ OBJECT Table 370 Excel Buffer
       RowCount@1009 : Integer;
       LastUpdate@1004 : DateTime;
     BEGIN
+      // Allows reading Excel files with more than one sheet without closing and reopening file
+      IF SheetName <> '' THEN
+        SetActiveReaderSheet(SheetName);
       LastUpdate := CURRENTDATETIME;
       ExcelBufferDialogMgt.Open(Text007);
       DELETEALL;
@@ -510,7 +533,8 @@ OBJECT Table 370 Excel Buffer
         END;
       END;
 
-      CloseBook;
+      IF CloseBookOnCompletion THEN
+        CloseBook;
       ExcelBufferDialogMgt.Close;
     END;
 
@@ -559,7 +583,7 @@ OBJECT Table 370 Excel Buffer
     [Internal]
     PROCEDURE SelectSheetsName@6(FileName@1000 : Text) : Text[250];
     VAR
-      TempBlob@1001 : Record 99008535;
+      TempBlob@1001 : TEMPORARY Record 99008535;
       InStr@1002 : InStream;
     BEGIN
       IF FileName = '' THEN
@@ -1041,6 +1065,46 @@ OBJECT Table 370 Excel Buffer
       DotNetDateTime := DotNetDateTime.FromOADate(DateTimeAsOADate);
       DotNetDateTimeWithKind := DotNetDateTime.DateTime(DotNetDateTime.Ticks,DotNetDateTimeKind.Local);
       EXIT(DotNetDateTimeWithKind);
+    END;
+
+    [External]
+    PROCEDURE SaveToStream@55(VAR ResultStream@1000 : OutStream;EraseFileAfterCompletion@1003 : Boolean);
+    VAR
+      TempBlob@1004 : TEMPORARY Record 99008535;
+      BlobStream@1002 : InStream;
+    BEGIN
+      FileManagement.BLOBImportFromServerFile(TempBlob,FileNameServer);
+      TempBlob.Blob.CREATEINSTREAM(BlobStream);
+      COPYSTREAM(ResultStream,BlobStream);
+      IF EraseFileAfterCompletion THEN
+        FILE.ERASE(FileNameServer);
+    END;
+
+    [External]
+    PROCEDURE GetSheetsNameListFromStream@53(FileStream@1000 : InStream;VAR TempNameValueBufferOut@1004 : TEMPORARY Record 823);
+    VAR
+      SheetNames@1008 : DotNet "'mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Collections.ArrayList";
+      SheetName@1002 : Text[250];
+      i@1001 : Integer;
+    BEGIN
+      XlWrkBkReader := XlWrkBkReader.Open(FileStream);
+      TempNameValueBufferOut.RESET;
+      TempNameValueBufferOut.DELETEALL;
+
+      SheetNames := SheetNames.ArrayList(XlWrkBkReader.SheetNames);
+      IF NOT ISNULL(SheetNames) THEN
+        FOR i := 0 TO SheetNames.Count - 1 DO BEGIN
+          SheetName := SheetNames.Item(i);
+          IF SheetName <> '' THEN BEGIN
+            TempNameValueBufferOut.INIT;
+            TempNameValueBufferOut.ID := i;
+            TempNameValueBufferOut.Name := FORMAT(i + 1);
+            TempNameValueBufferOut.Value := SheetName;
+            TempNameValueBufferOut.INSERT;
+          END;
+        END;
+
+      CloseBook;
     END;
 
     BEGIN
