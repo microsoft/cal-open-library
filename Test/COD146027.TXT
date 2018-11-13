@@ -9,6 +9,7 @@ OBJECT Codeunit 146027 Test_DotNet_StreamReader
   PROPERTIES
   {
     Subtype=Test;
+    TestPermissions=Disabled;
     OnRun=BEGIN
           END;
 
@@ -18,7 +19,6 @@ OBJECT Codeunit 146027 Test_DotNet_StreamReader
     VAR
       TempBlob@1005 : TEMPORARY Record 99008535;
       Assert@1001 : Codeunit 130000;
-      LibraryLowerPermissions@1000 : Codeunit 132217;
       DotNet_StreamWriter@1002 : Codeunit 3025;
       DotNet_StreamReader@1003 : Codeunit 3027;
       DotNet_Encoding@1004 : Codeunit 3026;
@@ -31,8 +31,6 @@ OBJECT Codeunit 146027 Test_DotNet_StreamReader
       Count@1002 : Integer;
       ActualCodepage@1004 : Integer;
     BEGIN
-      LibraryLowerPermissions.SetO365Basic;
-
       // [WHEN] One-lined text file with encoding 1252 is created as read line by line
       CreateSampleStreamFromText('Test',1,1252);
       ReadLineByLineInGivenCodepage(1252,Count,Actual,ActualCodepage);
@@ -57,8 +55,6 @@ OBJECT Codeunit 146027 Test_DotNet_StreamReader
       Expected@1003 : Text;
       Actual@1000 : Text;
     BEGIN
-      LibraryLowerPermissions.SetO365Basic;
-
       // [WHEN] One-lined text file with encoding 1252 is created and whole content is read
       CreateSampleStreamFromText('Test',0,1252);
       Actual := ReadToEndInGivenCodepage(1252);
@@ -73,8 +69,6 @@ OBJECT Codeunit 146027 Test_DotNet_StreamReader
       Expected@1003 : Text;
       Actual@1000 : Text;
     BEGIN
-      LibraryLowerPermissions.SetO365Basic;
-
       // [GIVEN] A sample text full of Baltic specific characters encoded using Utf8
       CreateSampleStreamFromBase64('xIXEjcSZxJfEr8WhxbPFq8W+xITEjMSYxJbErsWgxbLFqsW9YWJjZA==');
       Expected := ReadToEndInGivenCodepage(0);

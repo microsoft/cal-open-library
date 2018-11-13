@@ -293,7 +293,7 @@ OBJECT Codeunit 6224 XML DOM Management
         EXIT(FALSE);
 
       // NameStartChar ::= ":" | [A-Z] | "_" | [a-z] | [#xC0-#xD6] | [#xD8-#xF6] | [#xF8-#x2FF] | [#x370-#x37D] | [#x37F-#x1FFF] | [#x200C-#x200D] | [#x2070-#x218F] | [#x2C00-#x2FEF] | [#x3001-#xD7FF] | [#xF900-#xFDCF] | [#xFDF0-#xFFFD] | [#x10000-#xEFFF
-      IF InputChar IN [':','_','A'..'Z','a'..'z','€'..'Ÿ',' '..'ï'] THEN
+      IF InputChar IN [':','_','A'..'Z','a'..'z','Â€'..'ÂŸ','Â '..'Ã¯'] THEN
         EXIT(TRUE);
 
       CharCode := InputChar;
@@ -653,10 +653,11 @@ OBJECT Codeunit 6224 XML DOM Management
     PROCEDURE XslCompiledTransformToStream@47(VAR DotNet_XslCompiledTransform@1000 : Codeunit 3038;VAR SourceXmlStream@1001 : InStream;VAR DestinationStream@1002 : OutStream);
     VAR
       DotNet_XmlDocument@1003 : Codeunit 3013;
+      DotNet_XsltArgumentList@1004 : Codeunit 3040;
     BEGIN
       DotNet_XmlDocument.InitXmlDocument;
       DotNet_XmlDocument.Load(SourceXmlStream);
-      DotNet_XslCompiledTransform.Transform(DotNet_XmlDocument,DestinationStream);
+      DotNet_XslCompiledTransform.Transform(DotNet_XmlDocument,DotNet_XsltArgumentList,DestinationStream);
     END;
 
     BEGIN

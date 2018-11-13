@@ -127,6 +127,7 @@ OBJECT Table 370 Excel Buffer
       CreateBook('',SheetName);
     END;
 
+    [Internal]
     PROCEDURE CreateBook@1(FileName@1001 : Text;SheetName@1000 : Text);
     BEGIN
       IF SheetName = '' THEN
@@ -151,6 +152,7 @@ OBJECT Table 370 Excel Buffer
       OpenXMLManagement.SetupWorksheetHelper(XlWrkBkWriter);
     END;
 
+    [Internal]
     PROCEDURE OpenBook@2(FileName@1000 : Text;SheetName@1001 : Text);
     BEGIN
       IF FileName = '' THEN
@@ -191,11 +193,13 @@ OBJECT Table 370 Excel Buffer
       END;
     END;
 
+    [Internal]
     PROCEDURE UpdateBook@5(FileName@1000 : Text;SheetName@1001 : Text);
     BEGIN
       UpdateBookExcel(FileName,SheetName,TRUE);
     END;
 
+    [Internal]
     PROCEDURE UpdateBookExcel@48(FileName@1001 : Text;SheetName@1000 : Text;PreserveDataOnUpdate@1002 : Boolean);
     BEGIN
       IF FileName = '' THEN
@@ -219,6 +223,14 @@ OBJECT Table 370 Excel Buffer
         CloseBook;
         ERROR(Text004,SheetName);
       END;
+    END;
+
+    [External]
+    PROCEDURE UpdateBookStream@3(VAR ExcelStream@1000 : InStream;SheetName@1001 : Text;PreserveDataOnUpdate@1002 : Boolean);
+    BEGIN
+      FileNameServer := FileManagement.InstreamExportToServerFile(ExcelStream,'xlsx');
+
+      UpdateBookExcel(FileNameServer,SheetName,PreserveDataOnUpdate);
     END;
 
     [External]
@@ -463,6 +475,7 @@ OBJECT Table 370 Excel Buffer
         XlWrkShtWriter.SetColumnWidth(ColName,NewColWidth);
     END;
 
+    [Internal]
     PROCEDURE CreateRangeName@9(RangeName@1000 : Text[30];FromColumnNo@1001 : Integer;FromRowNo@1002 : Integer);
     VAR
       TempExcelBuf@1005 : TEMPORARY Record 370;
@@ -567,6 +580,7 @@ OBJECT Table 370 Excel Buffer
       "Cell Value as Text" := FORMAT(ROUND(Decimal,0.000001),0,1);
     END;
 
+    [Internal]
     PROCEDURE SelectSheetsName@6(FileName@1000 : Text) : Text[250];
     VAR
       TempBlob@1001 : Record 99008535;
@@ -926,6 +940,7 @@ OBJECT Table 370 Excel Buffer
       CurrentCol := NewCurrentCol;
     END;
 
+    [Internal]
     PROCEDURE CreateValidationRule@17(Range@1000 : Code[20]);
     BEGIN
       XlWrkShtWriter.AddRangeDataValidation(
@@ -950,11 +965,13 @@ OBJECT Table 370 Excel Buffer
       FileManagement.DownloadHandler(FileNameServer,'','',Text034,GetFriendlyFilename);
     END;
 
+    [Internal]
     PROCEDURE DownloadAndOpenExcel@34();
     BEGIN
       OpenExcelWithName(GetFriendlyFilename);
     END;
 
+    [Internal]
     PROCEDURE OpenExcelWithName@15(FileName@1000 : Text);
     BEGIN
       IF FileName = '' THEN
@@ -999,6 +1016,7 @@ OBJECT Table 370 Excel Buffer
       EXIT(FALSE);
     END;
 
+    [Internal]
     PROCEDURE CreateBookAndOpenExcel@32(FileName@1004 : Text;SheetName@1000 : Text[250];ReportHeader@1003 : Text;CompanyName2@1002 : Text;UserID2@1001 : Text);
     BEGIN
       CreateBook(FileName,SheetName);

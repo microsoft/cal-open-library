@@ -184,7 +184,7 @@ OBJECT Codeunit 1218 Map Incoming Doc to Purch Doc
       ItemChargeAssignmentPurch@1003 : Record 5805;
       IntermediateDataImport@1002 : Record 1214;
       InvoiceChargeAmount@1005 : Decimal;
-      InvoiceChargeReason@1001 : Text[50];
+      InvoiceChargeReason@1001 : Text[100];
     BEGIN
       WITH IntermediateDataImport DO BEGIN
         SETRANGE("Data Exch. No.",DataExch."Entry No.");
@@ -431,7 +431,7 @@ OBJECT Codeunit 1218 Map Incoming Doc to Purch Doc
       CorrelateCreatedPurchLineWithRecordNo(RecRef,ComposeKeyForCreatedPurchLine(ParentRecNo,RecordNo));
     END;
 
-    LOCAL PROCEDURE CreateInvoiceChargePurchaseLine@27(EntryNo@1006 : Integer;RecordNo@1005 : Integer;VAR PurchaseHeader@1000 : Record 38;InvoiceChargeReason@1001 : Text[50];InvoiceChargeAmount@1002 : Decimal);
+    LOCAL PROCEDURE CreateInvoiceChargePurchaseLine@27(EntryNo@1006 : Integer;RecordNo@1005 : Integer;VAR PurchaseHeader@1000 : Record 38;InvoiceChargeReason@1001 : Text[100];InvoiceChargeAmount@1002 : Decimal);
     VAR
       PurchaseLine@1004 : Record 39;
       PreMapIncomingPurchDoc@1003 : Codeunit 1217;
@@ -445,7 +445,6 @@ OBJECT Codeunit 1218 Map Incoming Doc to Purch Doc
       PurchaseLine.VALIDATE(Type,PurchaseLine.Type::"G/L Account");
       PurchaseLine.VALIDATE("No.",GLAccountNo);
       PurchaseLine.VALIDATE(Description,InvoiceChargeReason);
-      PurchaseLine.VALIDATE("Description 2",InvoiceChargeReason);
       PurchaseLine.VALIDATE(Quantity,1);
       PurchaseLine.VALIDATE("Direct Unit Cost",InvoiceChargeAmount);
       PurchaseLine.MODIFY(TRUE);
@@ -619,7 +618,7 @@ OBJECT Codeunit 1218 Map Incoming Doc to Purch Doc
       EXIT(Amount);
     END;
 
-    LOCAL PROCEDURE GetInvoiceChargeReason@22(IntermediateDataImport@1000 : Record 1214) : Text[50];
+    LOCAL PROCEDURE GetInvoiceChargeReason@22(IntermediateDataImport@1000 : Record 1214) : Text[100];
     VAR
       IntermediateDataImport2@1001 : Record 1214;
       ItemCharge@1002 : Record 5800;
