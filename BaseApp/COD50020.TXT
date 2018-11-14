@@ -1,0 +1,491 @@
+OBJECT Codeunit 50020 Symmetric Encryption Mgt
+{
+  OBJECT-PROPERTIES
+  {
+    Date=11/13/18;
+    Time=[ 3:23:36 PM];
+    Modified=Yes;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+
+            // Helper Interface ======================================================================================
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      KeySize@1000000001 : Integer;
+      BlockSize@1000000000 : Integer;
+      Algorithm@1000000003 : 'Aes,DES,RC2,Rijndael,TripleDES';
+      Mode@1000000002 : ',CBC,ECB,OFB,CFB,CTS';
+      Padding@1000000005 : ',None,PKCS7,Zeros,ANSIX923,ISO10126';
+      DotNet_ArrayKey@1000000008 : Codeunit 3000;
+      DotNet_ArrayIV@1000000007 : Codeunit 3000;
+      E_NO_CIPHER@1000000004 : TextConst 'ENU=SymmetricAlgorithm - cipher not defined';
+
+    [External]
+    PROCEDURE SetCipher@1000000015(VAR CipherText@1000000000 : Text);
+    VAR
+      TempBlob@1000000001 : Record 99008535;
+    BEGIN
+
+      // NOTE: Passing a cipher as plain text is not secure.
+      // For a more secure interface use the SetCipherFromBlob interface
+
+      IF CipherText = '' THEN
+        EXIT;
+
+      TempBlob.WriteAsText(CipherText, TEXTENCODING::UTF8);
+      IF TrySetCipher(TempBlob) THEN ;
+    END;
+
+    [External]
+    PROCEDURE SetCipherFromBlob@1000000014(VAR TempBlob@1000000000 : Record 99008535);
+    BEGIN
+
+      IF TrySetCipher(TempBlob) THEN ;
+    END;
+
+    [External]
+    PROCEDURE Base64ToPlainText@1000000053(Base64Text@1000000000 : Text) : Text;
+    VAR
+      DotNet_Encoding@1000000001 : Codeunit 3026;
+      DotNet_Convert@1000000002 : Codeunit 3008;
+      DotNetConvert@1000000004 : DotNet "'mscorlib'.System.Convert";
+      DotNetEncoding@1000000003 : DotNet "'mscorlib'.System.Text.Encoding";
+    BEGIN
+
+      IF Base64Text = '' THEN
+        EXIT('');
+
+      DotNet_Encoding.UTF8;
+      DotNet_Encoding.GetEncoding(DotNetEncoding);
+      DotNet_Convert.GetConvert(DotNetConvert);
+      EXIT(DotNetEncoding.GetString(DotNetConvert.FromBase64String(Base64Text)));
+
+      // Public Interface ======================================================================================
+    END;
+
+    [External]
+    PROCEDURE SetAlgorithm@1000000023(Algorithm@1000000000 : 'Aes,DES,RC2,Rijndael,TripleDES');
+    BEGIN
+
+      Algorithm := Algorithm;
+    END;
+
+    [External]
+    PROCEDURE SetKeySize@1000000021(Size@1000000000 : Integer);
+    BEGIN
+
+      KeySize := Size;
+    END;
+
+    [External]
+    PROCEDURE SetBlockSize@1000000022(Size@1000000000 : Integer);
+    BEGIN
+
+      BlockSize := Size;
+    END;
+
+    [External]
+    PROCEDURE SetMode@1000000024(CipherMode@1000000000 : ',CBC,ECB,OFB,CFB,CTS');
+    BEGIN
+
+      Mode := CipherMode;
+    END;
+
+    [External]
+    PROCEDURE SetPadding@1000000000(PaddingMode@1000000000 : ',None,PKCS7,Zeros,ANSIX923,ISO10126');
+    BEGIN
+
+      Padding := PaddingMode;
+    END;
+
+    [External]
+    PROCEDURE SetKey@1000000008(VAR DotNet_Array@1000000000 : Codeunit 3000);
+    BEGIN
+
+      DotNet_Array.Clone(DotNet_ArrayKey);
+    END;
+
+    [External]
+    PROCEDURE SetIV@1000000009(VAR DotNet_Array@1000000000 : Codeunit 3000);
+    BEGIN
+
+      DotNet_Array.Clone(DotNet_ArrayIV);
+    END;
+
+    [External]
+    PROCEDURE EncryptTextBase64@1000000001(UnEncryptedText@1000000000 : Text;VAR EncryptedTextBase64@1000000003 : Text) : Boolean;
+    VAR
+      Result@1000000002 : Boolean;
+    BEGIN
+
+      IF STRLEN(UnEncryptedText) > 0 THEN
+        Result := TryEncryptTextBase64(UnEncryptedText, EncryptedTextBase64);
+      CLEARLASTERROR;
+      EXIT(Result);
+    END;
+
+    [External]
+    PROCEDURE DecryptTextBase64@1000000002(EncryptedText@1000000000 : Text;VAR UnEncryptedText@1000000003 : Text) : Boolean;
+    VAR
+      Result@1000000002 : Boolean;
+    BEGIN
+
+      IF STRLEN(EncryptedText) > 0 THEN
+        Result := TryDecryptTextBase64(EncryptedText, UnEncryptedText);
+      CLEARLASTERROR;
+      EXIT(Result);
+    END;
+
+    [External]
+    PROCEDURE EncryptTempBlob@1000000006(VAR UnEncryptedTempBlob@1000000000 : Record 99008535;VAR EncryptedTempBlob@1000000003 : Record 99008535) : Boolean;
+    VAR
+      Result@1000000002 : Boolean;
+    BEGIN
+
+      Result := TryEncryptTempBlob(UnEncryptedTempBlob, EncryptedTempBlob);
+      CLEARLASTERROR;
+      EXIT(Result);
+    END;
+
+    [External]
+    PROCEDURE DecryptTempBlob@1000000005(VAR EncryptedTempBlob@1000000000 : Record 99008535;VAR DecryptedTempBlob@1000000003 : Record 99008535) : Boolean;
+    VAR
+      Result@1000000002 : Boolean;
+    BEGIN
+
+      Result := TryDecryptTempBlob(EncryptedTempBlob, DecryptedTempBlob);
+      CLEARLASTERROR;
+      EXIT(Result);
+    END;
+
+    [External]
+    PROCEDURE EncryptStream@1000000003(VAR UnEncryptedStream@1000000002 : InStream;VAR EncryptedStream@1000000000 : OutStream) : Boolean;
+    VAR
+      Result@1000000003 : Boolean;
+    BEGIN
+
+      Result := TryEncryptStream(UnEncryptedStream, EncryptedStream);
+      CLEARLASTERROR;
+      EXIT(Result);
+    END;
+
+    [External]
+    PROCEDURE DecryptStream@1000000004(VAR EncryptedStream@1000000001 : InStream;VAR UnEncryptedStream@1000000000 : OutStream) : Boolean;
+    VAR
+      Result@1000000003 : Boolean;
+    BEGIN
+
+      Result := TryDecryptStream(EncryptedStream, UnEncryptedStream);
+      CLEARLASTERROR;
+      EXIT(Result);
+
+      // Private Interface ======================================================================================
+    END;
+
+    LOCAL PROCEDURE KeyLengthInBytes@1000000017() : Integer;
+    VAR
+      Size@1000000000 : Integer;
+    BEGIN
+
+      IF KeySize = 0 THEN
+        KeySize := 256;
+      EXIT(KeySize/8);
+    END;
+
+    [TryFunction]
+    LOCAL PROCEDURE TryEncryptTextBase64@1000000040(VAR UnEncryptedText@1000000012 : Text;VAR EncryptedTextBase64@1000000014 : Text);
+    VAR
+      OStream@1000000002 : OutStream;
+      TempBlobUnEncrypted@1000000001 : Record 99008535;
+      TempBlobEncrypted@1000000000 : Record 99008535;
+    BEGIN
+
+      // Push unencrypted text into tempblob
+      CLEAR(TempBlobUnEncrypted.Blob);
+      IF UnEncryptedText <> '' THEN BEGIN
+        TempBlobUnEncrypted.Blob.CREATEOUTSTREAM(OStream);
+        OStream.WRITETEXT(UnEncryptedText);
+      END;
+
+      // Encrypt
+      IF TryEncryptTempBlob(TempBlobUnEncrypted, TempBlobEncrypted) THEN
+      BEGIN
+        // Read the encrypted text from the encrypted tempblob
+        EncryptedTextBase64 := TempBlobEncrypted.ToBase64String();
+      END ELSE BEGIN
+        CLEARLASTERROR;
+        ERROR('Encrypt failed');
+      END;
+    END;
+
+    [TryFunction]
+    LOCAL PROCEDURE TryDecryptTextBase64@1000000039(VAR EncryptedTextBase64@1000000001 : Text;VAR DecryptedText@1000000000 : Text);
+    VAR
+      IStream@1000000008 : InStream;
+      TempBlobDecrypted@1000000006 : Record 99008535;
+      TempBlobEncrypted@1000000005 : Record 99008535;
+      DotNet_Encoding@1000000003 : Codeunit 3026;
+      DotNet_MemoryStream@1000000004 : Codeunit 3009;
+      DotNetEncoding@1000000002 : DotNet "'mscorlib'.System.Text.Encoding";
+      DotNetMemoryStream@1000000007 : DotNet "'mscorlib'.System.IO.MemoryStream";
+    BEGIN
+
+      // Anything to do?
+      IF EncryptedTextBase64 = '' THEN
+        EXIT;
+
+      // Push converted base64 encrypted text into blob
+      TempBlobEncrypted.FromBase64String(EncryptedTextBase64);
+
+      // Decrypt
+      IF TryDecryptTempBlob(TempBlobEncrypted, TempBlobDecrypted) AND TempBlobDecrypted.Blob.HASVALUE THEN
+      BEGIN
+        // Create a stream to read from decrypted blob
+        TempBlobDecrypted.Blob.CREATEINSTREAM(IStream);
+
+        // Read the decrypted bytes from the blob
+        DotNet_MemoryStream.InitMemoryStream();
+        DotNet_MemoryStream.CopyFromInStream(IStream);
+        DotNet_MemoryStream.GetMemoryStream(DotNetMemoryStream);
+
+        // Convert to text using UTF8 encoding
+        DotNet_Encoding.UTF8;
+        DotNet_Encoding.GetEncoding(DotNetEncoding);
+        DecryptedText := DotNetEncoding.GetString(DotNetMemoryStream.ToArray());
+
+      END ELSE BEGIN
+        CLEARLASTERROR;
+        ERROR('Decrypt failed');
+      END;
+    END;
+
+    [TryFunction]
+    LOCAL PROCEDURE TryEncryptTempBlob@1000000012(VAR UnEncryptedTempBlob@1000000006 : Record 99008535;VAR EncryptedTempBlob@1000000002 : Record 99008535);
+    VAR
+      IStream@1000000001 : InStream;
+      OStream@1000000000 : OutStream;
+    BEGIN
+
+      // Create a stream to read from unencrypted tempblob
+      UnEncryptedTempBlob.Blob.CREATEINSTREAM(IStream);
+
+      // Create a stream to write to encrypted tempblob
+      EncryptedTempBlob.INIT();
+      EncryptedTempBlob.Blob.CREATEOUTSTREAM(OStream);
+
+      // Encrypt
+      IF NOT TryEncryptStream(IStream, OStream) THEN
+      BEGIN
+        CLEARLASTERROR;
+        ERROR('Encrypt failed');
+      END;
+    END;
+
+    [TryFunction]
+    LOCAL PROCEDURE TryDecryptTempBlob@1000000007(VAR EncryptedTempBlob@1000000001 : Record 99008535;VAR DecryptedTempBlob@1000000000 : Record 99008535);
+    VAR
+      IStream@1000000008 : InStream;
+      OStream@1000000007 : OutStream;
+    BEGIN
+
+      // Create a stream to read from encrypted tempblob
+      EncryptedTempBlob.Blob.CREATEINSTREAM(IStream);
+
+      // Create a stream to write to decrypted tempblob
+      CLEAR(DecryptedTempBlob.Blob);
+      DecryptedTempBlob.Blob.CREATEOUTSTREAM(OStream);
+
+      // Decrypt
+      IF NOT TryDecryptStream(IStream, OStream) THEN
+      BEGIN
+        CLEARLASTERROR;
+        ERROR('Decrypt failed');
+      END;
+    END;
+
+    [TryFunction]
+    LOCAL PROCEDURE TryEncryptStream@1000000035(VAR UnEncryptedStream@1000000001 : InStream;VAR EncryptedStream@1000000000 : OutStream);
+    VAR
+      DotNetSymmetricAlgorithm@1000000021 : DotNet "'mscorlib'.System.Security.Cryptography.SymmetricAlgorithm";
+      DotNetICryptoTransform@1000000020 : DotNet "'mscorlib'.System.Security.Cryptography.ICryptoTransform";
+      DotNetCryptoStream@1000000019 : DotNet "'mscorlib'.System.Security.Cryptography.CryptoStream";
+      DotNetCryptoStreamMode@1000000018 : DotNet "'mscorlib'.System.Security.Cryptography.CryptoStreamMode";
+      DotNetEncoding@1000000017 : DotNet "'mscorlib'.System.Text.Encoding";
+      DotNetStreamReader@1000000016 : DotNet "'mscorlib'.System.IO.StreamReader";
+      DotNetStreamWriter@1000000015 : DotNet "'mscorlib'.System.IO.StreamWriter";
+      DotNetArray@1000000013 : DotNet "'mscorlib'.System.Array";
+      DotNet_SymmetricAlgorithm@1000000012 : Codeunit 50010;
+      DotNet_ICryptoTransform@1000000011 : Codeunit 50013;
+      DotNet_CryptoStream@1000000010 : Codeunit 50014;
+      DotNet_Encoding@1000000009 : Codeunit 3026;
+      DotNet_StreamReader@1000000008 : Codeunit 3027;
+      DotNet_StreamWriter@1000000007 : Codeunit 3025;
+      DotNet_StreamEncrypted@1000000005 : Codeunit 3034;
+      DotNet_StreamDecrypted@1000000004 : Codeunit 3034;
+      DotNet_Array@1000000002 : Codeunit 3000;
+      BytesRead@1000000003 : Integer;
+    BEGIN
+
+      IF TryCreateSymmetricAlgorithm(DotNet_SymmetricAlgorithm) THEN BEGIN
+
+        // encoding used for transforms
+        DotNet_Encoding.UTF8;
+
+        // setup reader for unencrypted stream
+        DotNet_StreamReader.StreamReader(UnEncryptedStream, DotNet_Encoding);
+        DotNet_StreamReader.GetStreamReader(DotNetStreamReader);
+
+        // setup the encryption pipeline
+        DotNet_SymmetricAlgorithm.GetSymmetricAlgorithm(DotNetSymmetricAlgorithm);
+        DotNetICryptoTransform := DotNetSymmetricAlgorithm.CreateEncryptor();
+        DotNet_ICryptoTransform.SetICryptoTransform(DotNetICryptoTransform);
+        DotNet_CryptoStream.CryptoOutStream(EncryptedStream, DotNet_ICryptoTransform);
+        DotNet_CryptoStream.GetCryptoStream(DotNetCryptoStream);
+
+        // setup crypto writer for encrypted stream
+        DotNet_StreamEncrypted.SetStream(DotNetCryptoStream);
+        DotNet_StreamWriter.StreamWriterFromDotNetStream(DotNet_StreamEncrypted, DotNet_Encoding);
+        DotNet_StreamWriter.GetStreamWriter(DotNetStreamWriter);
+
+        // create a byte array buffer for data transfer
+        DotNet_Array.ByteArray(4096);
+        DotNet_Array.GetArray(DotNetArray);
+
+        // encrypt
+        REPEAT
+          BytesRead := DotNetStreamReader.BaseStream.Read(DotNetArray, 0, DotNetArray.Length);
+          IF BytesRead > 0 THEN
+            DotNetStreamWriter.BaseStream.Write(DotNetArray, 0, BytesRead);
+        UNTIL BytesRead < 1;
+        DotNetStreamWriter.Flush();
+
+        // dispose
+        DotNetStreamReader.Dispose();
+        DotNetStreamWriter.Dispose();
+        DotNetCryptoStream.Dispose();
+        DotNetICryptoTransform.Dispose();
+        DotNetSymmetricAlgorithm.Dispose();
+      END;
+    END;
+
+    [TryFunction]
+    LOCAL PROCEDURE TryDecryptStream@1000000036(VAR EncryptedStream@1000000001 : InStream;VAR DecryptedStream@1000000000 : OutStream);
+    VAR
+      DotNetSymmetricAlgorithm@1000000010 : DotNet "'mscorlib'.System.Security.Cryptography.SymmetricAlgorithm";
+      DotNetICryptoTransform@1000000016 : DotNet "'mscorlib'.System.Security.Cryptography.ICryptoTransform";
+      DotNetCryptoStream@1000000008 : DotNet "'mscorlib'.System.Security.Cryptography.CryptoStream";
+      DotNetCryptoStreamMode@1000000007 : DotNet "'mscorlib'.System.Security.Cryptography.CryptoStreamMode";
+      DotNetEncoding@1000000020 : DotNet "'mscorlib'.System.Text.Encoding";
+      DotNetStreamReader@1000000005 : DotNet "'mscorlib'.System.IO.StreamReader";
+      DotNetStreamWriter@1000000004 : DotNet "'mscorlib'.System.IO.StreamWriter";
+      DotNetArray@1000000006 : DotNet "'mscorlib'.System.Array";
+      DotNet_SymmetricAlgorithm@1000000002 : Codeunit 50010;
+      DotNet_ICryptoTransform@1000000009 : Codeunit 50013;
+      DotNet_CryptoStream@1000000011 : Codeunit 50014;
+      DotNet_Encoding@1000000012 : Codeunit 3026;
+      DotNet_StreamReader@1000000013 : Codeunit 3027;
+      DotNet_StreamWriter@1000000014 : Codeunit 3025;
+      DotNet_StreamEncrypted@1000000017 : Codeunit 3034;
+      DotNet_StreamDecrypted@1000000018 : Codeunit 3034;
+      DotNet_Array@1000000015 : Codeunit 3000;
+      BytesRead@1000000003 : Integer;
+    BEGIN
+
+      IF TryCreateSymmetricAlgorithm(DotNet_SymmetricAlgorithm) THEN BEGIN
+
+        // encoding used for transforms
+        DotNet_Encoding.UTF8;
+
+        // setup the decryption pipeline
+        DotNet_SymmetricAlgorithm.GetSymmetricAlgorithm(DotNetSymmetricAlgorithm);
+        DotNetICryptoTransform := DotNetSymmetricAlgorithm.CreateDecryptor();
+        DotNet_ICryptoTransform.SetICryptoTransform(DotNetICryptoTransform);
+        DotNet_CryptoStream.CryptoInStream(EncryptedStream, DotNet_ICryptoTransform);
+        DotNet_CryptoStream.GetCryptoStream(DotNetCryptoStream);
+
+        // setup reader for encrypted stream
+        DotNet_StreamEncrypted.SetStream(DotNetCryptoStream);
+        DotNet_StreamReader.StreamReaderFromDotNetStream(DotNet_StreamEncrypted, DotNet_Encoding);
+        DotNet_StreamReader.GetStreamReader(DotNetStreamReader);
+
+        // setup writer for decrypted stream
+        DotNet_StreamWriter.StreamWriter(DecryptedStream, DotNet_Encoding);
+        DotNet_StreamWriter.GetStreamWriter(DotNetStreamWriter);
+
+        // create a byte array buffer for data transfer
+        DotNet_Array.ByteArray(4096);
+        DotNet_Array.GetArray(DotNetArray);
+
+        // decrypt
+        REPEAT
+          BytesRead := DotNetStreamReader.BaseStream.Read(DotNetArray, 0, DotNetArray.Length);
+          IF BytesRead > 0 THEN
+            DotNetStreamWriter.BaseStream.Write(DotNetArray, 0, BytesRead);
+        UNTIL BytesRead < 1;
+        DotNetStreamWriter.Flush();
+        DotNetStreamWriter.Close();
+
+        // dispose
+        DotNetStreamReader.Dispose();
+        DotNetStreamWriter.Dispose();
+        DotNetCryptoStream.Dispose();
+        DotNetICryptoTransform.Dispose();
+        DotNetSymmetricAlgorithm.Dispose();
+      END;
+    END;
+
+    [TryFunction]
+    LOCAL PROCEDURE TryCreateSymmetricAlgorithm@1000000025(VAR DotNet_SymmetricAlgorithm@1000000005 : Codeunit 50010);
+    BEGIN
+
+      IF (DotNet_ArrayIV.Length = 0) OR (DotNet_ArrayIV.Length = 0) THEN
+        ERROR(E_NO_CIPHER);
+
+      DotNet_SymmetricAlgorithm.Create(Algorithm);
+      IF Mode > 0 THEN DotNet_SymmetricAlgorithm.SetMode(Mode);
+      IF BlockSize > 0 THEN DotNet_SymmetricAlgorithm.SetBlockSize(BlockSize);
+      IF Padding > 0 THEN DotNet_SymmetricAlgorithm.SetPadding(Padding);
+      IF KeySize > 0 THEN DotNet_SymmetricAlgorithm.SetKeySize(KeySize);
+      DotNet_SymmetricAlgorithm.SetKey(DotNet_ArrayKey);
+      DotNet_SymmetricAlgorithm.SetIV(DotNet_ArrayIV);
+    END;
+
+    [TryFunction]
+    LOCAL PROCEDURE TrySetCipher@1000000016(VAR TempBlob@1000000000 : Record 99008535);
+    VAR
+      IStream@1000000001 : InStream;
+      DotNet_HashAlgorithm@1000000006 : Codeunit 50012;
+      DotNet_HashAlgorithmOption@1000000008 : 'SHA1,MD5,SHA256,SHA384,SHA512';
+      DotNet_ArrayHashBytes@1000000012 : Codeunit 3000;
+    BEGIN
+
+      // Generate a Key & IV from the cipher text stored in the blob
+      // This method uses a SHA384 hash of the cipher to generate the
+      // bytes for the Key & IV
+
+      TempBlob.Blob.CREATEINSTREAM(IStream);
+
+      DotNet_HashAlgorithm.Create(DotNet_HashAlgorithmOption::SHA384);
+      DotNet_HashAlgorithm.ComputeHashFromInStream(IStream, DotNet_ArrayHashBytes);
+
+      DotNet_ArrayKey.ByteArray(KeyLengthInBytes);
+      DotNet_ArrayHashBytes.ConstrainedCopy(0, DotNet_ArrayKey, 0, KeyLengthInBytes);
+
+      DotNet_ArrayIV.ByteArray(16);
+      DotNet_ArrayHashBytes.ConstrainedCopy(KeyLengthInBytes, DotNet_ArrayIV, 0, 16);
+
+      DotNet_HashAlgorithm.Dispose();
+    END;
+
+    BEGIN
+    END.
+  }
+}
+

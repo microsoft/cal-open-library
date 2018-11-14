@@ -1,0 +1,71 @@
+OBJECT Codeunit 50012 DotNet_HashAlgorithm
+{
+  OBJECT-PROPERTIES
+  {
+    Date=11/13/18;
+    Time=12:07:12 PM;
+    Modified=Yes;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      DotNetHashAlgorithm@1000000000 : DotNet "'mscorlib'.System.Security.Cryptography.HashAlgorithm";
+
+    [External]
+    PROCEDURE Create@1000000005(HashAlgorithm@1000000000 : 'SHA1,MD5,SHA256,SHA384,SHA512');
+    BEGIN
+      IF (HashAlgorithm < 0) OR (HashAlgorithm > 4) THEN
+        EXIT;
+      DotNetHashAlgorithm := DotNetHashAlgorithm.Create(FORMAT(HashAlgorithm));
+    END;
+
+    [External]
+    PROCEDURE ComputeHashFromText@1000000000(VAR Text@1000000001 : Text;VAR DotNet_Array@1000 : Codeunit 3000);
+    VAR
+      DotNetArray@1000000000 : DotNet "'mscorlib'.System.Array";
+      DotNetEncoding@1000000002 : DotNet "'mscorlib'.System.Text.Encoding";
+      DotNet_Encoding@1000000003 : Codeunit 3026;
+    BEGIN
+      IF Text = '' THEN
+        EXIT;
+      DotNet_Encoding.UTF8;
+      DotNet_Encoding.GetEncoding(DotNetEncoding);
+      DotNet_Array.SetArray(DotNetHashAlgorithm.ComputeHash(DotNetEncoding.GetBytes(Text)));
+    END;
+
+    [External]
+    PROCEDURE ComputeHashFromInStream@5(VAR IStream@1000000001 : InStream;VAR DotNet_Array@1000 : Codeunit 3000);
+    VAR
+      DotNetArray@1000000000 : DotNet "'mscorlib'.System.Array";
+    BEGIN
+      DotNet_Array.SetArray(DotNetHashAlgorithm.ComputeHash(IStream));
+    END;
+
+    [External]
+    PROCEDURE Dispose@1000000006();
+    BEGIN
+      DotNetHashAlgorithm.Dispose();
+    END;
+
+    PROCEDURE GetHashAlgorithm@2(VAR DotNetHashAlgorithm2@1000000001 : DotNet "'mscorlib'.System.Security.Cryptography.HashAlgorithm");
+    BEGIN
+      DotNetHashAlgorithm2 := DotNetHashAlgorithm;
+    END;
+
+    PROCEDURE SetHashAlgorithm@3(VAR DotNetHashAlgorithm2@1000000000 : DotNet "'mscorlib'.System.Security.Cryptography.HashAlgorithm");
+    BEGIN
+      DotNetHashAlgorithm := DotNetHashAlgorithm2;
+    END;
+
+    BEGIN
+    END.
+  }
+}
+

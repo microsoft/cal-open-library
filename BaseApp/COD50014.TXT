@@ -1,0 +1,61 @@
+OBJECT Codeunit 50014 DotNet_CryptoStream
+{
+  OBJECT-PROPERTIES
+  {
+    Date=11/07/18;
+    Time=[ 9:09:28 AM];
+    Modified=Yes;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      DotNetCryptoStream@1000000000 : DotNet "'mscorlib'.System.Security.Cryptography.CryptoStream";
+
+    [External]
+    PROCEDURE CryptoInStream@1000000005(IStream@1000000000 : InStream;VAR DotNet_ICryptoTransform@1000000001 : Codeunit 50013);
+    VAR
+      DotNetICryptoTransform@1000000004 : DotNet "'mscorlib'.System.Security.Cryptography.ICryptoTransform";
+      DotNetCryptoStreamMode@1000000003 : DotNet "'mscorlib'.System.Security.Cryptography.CryptoStreamMode";
+    BEGIN
+      DotNet_ICryptoTransform.GetICryptoTransform(DotNetICryptoTransform);
+      DotNetCryptoStream := DotNetCryptoStream.CryptoStream(IStream, DotNetICryptoTransform, DotNetCryptoStreamMode.Read);
+    END;
+
+    [External]
+    PROCEDURE CryptoOutStream@1000000000(OStream@1000000000 : OutStream;VAR DotNet_ICryptoTransform@1000000001 : Codeunit 50013);
+    VAR
+      DotNetICryptoTransform@1000000004 : DotNet "'mscorlib'.System.Security.Cryptography.ICryptoTransform";
+      DotNetCryptoStreamMode@1000000003 : DotNet "'mscorlib'.System.Security.Cryptography.CryptoStreamMode";
+    BEGIN
+      DotNet_ICryptoTransform.GetICryptoTransform(DotNetICryptoTransform);
+      DotNetCryptoStream := DotNetCryptoStream.CryptoStream(OStream, DotNetICryptoTransform, DotNetCryptoStreamMode.Write);
+    END;
+
+    [External]
+    PROCEDURE Dispose@1000000006();
+    BEGIN
+      DotNetCryptoStream.Dispose();
+    END;
+
+    PROCEDURE GetCryptoStream@2(VAR DotNetCryptoStream2@1000000000 : DotNet "'mscorlib'.System.Security.Cryptography.CryptoStream");
+    BEGIN
+      DotNetCryptoStream2 := DotNetCryptoStream;
+    END;
+
+    PROCEDURE SetCryptoStream@3(VAR DotNetCryptoStream2@1000000000 : DotNet "'mscorlib'.System.Security.Cryptography.CryptoStream");
+    BEGIN
+      DotNetCryptoStream := DotNetCryptoStream2;
+    END;
+
+    BEGIN
+    END.
+  }
+}
+

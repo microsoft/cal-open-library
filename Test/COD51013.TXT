@@ -1,0 +1,59 @@
+OBJECT Codeunit 51013 Test_DotNet_ICryptoTransform
+{
+  OBJECT-PROPERTIES
+  {
+    Date=11/13/18;
+    Time=[ 8:23:46 PM];
+    Modified=Yes;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    Subtype=Test;
+    TestPermissions=Disabled;
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      Assert@1001 : Codeunit 130000;
+      IsInitialized@1000000002 : Boolean;
+
+    LOCAL PROCEDURE Initialize@1000000005();
+    BEGIN
+      IF IsInitialized THEN
+        EXIT;
+      IsInitialized := TRUE;
+    END;
+
+    [Test]
+    PROCEDURE TestGetSet@1000000000();
+    VAR
+      DotNet_SymmetricAlgorithm@1000000001 : Codeunit 50010;
+      DotNet_ICryptoTransform@1000000000 : Codeunit 50013;
+      DotNetSymmetricAlgorithm@1000000003 : DotNet "'mscorlib'.System.Security.Cryptography.SymmetricAlgorithm";
+      DotNetICryptoTransform@1000000002 : DotNet "'mscorlib'.System.Security.Cryptography.ICryptoTransform";
+      DotNetICryptoTransform2@1000000004 : DotNet "'mscorlib'.System.Security.Cryptography.ICryptoTransform";
+      Algorithm@1000000005 : 'Aes,DES,RC2,Rijndael,TripleDES';
+    BEGIN
+
+      // [WHEN] AES Symmetric Algorithm (with default settings) is created
+      DotNet_SymmetricAlgorithm.Create(Algorithm::Aes);
+      DotNet_SymmetricAlgorithm.GetSymmetricAlgorithm(DotNetSymmetricAlgorithm);
+      // [WHEN] Encryptor transform is created
+      DotNetICryptoTransform := DotNetSymmetricAlgorithm.CreateEncryptor();
+      // [WHEN] DotNet Encryptor transform is set
+      DotNet_ICryptoTransform.SetICryptoTransform(DotNetICryptoTransform);
+      // [WHEN] DotNet Encryptor transform is retrieved
+      DotNet_ICryptoTransform.GetICryptoTransform(DotNetICryptoTransform2);
+      // [THEN] DotNet original and retrived must be equal
+      Assert.IsFalse(ISNULL(DotNetICryptoTransform2), 'ICryptoTransform Get/Set failed');
+    END;
+
+    BEGIN
+    END.
+  }
+}
+

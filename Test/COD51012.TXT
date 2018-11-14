@@ -1,0 +1,143 @@
+OBJECT Codeunit 51012 Test_DotNet_HashAlgorithm
+{
+  OBJECT-PROPERTIES
+  {
+    Date=11/13/18;
+    Time=[ 4:19:06 PM];
+    Modified=Yes;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    Subtype=Test;
+    TestPermissions=Disabled;
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      Assert@1001 : Codeunit 130000;
+      DotNet_HashAlgorithm@1002 : Codeunit 3025;
+      DotNet_Array@1000000001 : Codeunit 3000;
+      HashAlgorithm@1000000000 : 'SHA1,MD5,SHA256,SHA384,SHA512';
+      IsInitialized@1000000002 : Boolean;
+
+    LOCAL PROCEDURE Initialize@1000000005();
+    BEGIN
+      IF IsInitialized THEN
+        EXIT;
+      IsInitialized := TRUE;
+    END;
+
+    [Test]
+    PROCEDURE TestGenerateFromText@1();
+    VAR
+      SampleText@1000000000 : Text;
+      ExpectedText@1000000003 : Text;
+      HashText@1000000001 : Text;
+    BEGIN
+      Initialize();
+      SampleText := 'Lorem ipsum dolor sit amet, consectetur adipiscing elit';
+
+      // SHA1
+      ExpectedText := '4045ed3c779e3b27760e4da357279508a8452dcb';
+      HashText := GenerateFromText(HashAlgorithm::SHA1, SampleText);
+      Assert.AreEqual(ExpectedText, LOWERCASE(HashText), 'SHA1 Hashes differ, failed');
+      // MD5
+      ExpectedText := 'fc10a08df7fafa3871166646609e1c95';
+      HashText := GenerateFromText(HashAlgorithm::MD5, SampleText);
+      Assert.AreEqual(ExpectedText, LOWERCASE(HashText), 'MD5 Hashes differ, failed');
+      // SHA256
+      ExpectedText := '07fe4d4a25718241af145a93f890eb5469052e251d199d173bd3bd50c3bb4da2';
+      HashText := GenerateFromText(HashAlgorithm::SHA256, SampleText);
+      Assert.AreEqual(ExpectedText, LOWERCASE(HashText), 'SHA256 Hashes differ, failed');
+      // SHA384
+      ExpectedText := '845524c97cf0606df6ce8a2e5a7e35701a9ed12685a366eabef599648dd8ba33c1e176e96efe51320a40a6b65c18c4cf';
+      HashText := GenerateFromText(HashAlgorithm::SHA384, SampleText);
+      Assert.AreEqual(ExpectedText, LOWERCASE(HashText), 'SHA384 Hashes differ, failed');
+      // SHA512
+      ExpectedText := 'd3b3d69ccc163089f91d42ebef0f01dd70ec40deb76a9da5ba63ef5b39601b41a34b04f8236ce9e59a150241716a5e2da9f1bdcc2734d4d7fcd8e69df36022f0';
+      HashText := GenerateFromText(HashAlgorithm::SHA512, SampleText);
+      Assert.AreEqual(ExpectedText, LOWERCASE(HashText), 'SHA512 Hashes differ, failed');
+    END;
+
+    [Test]
+    PROCEDURE TestGenerateFromStream@1000000001();
+    VAR
+      SampleText@1000000002 : Text;
+      ExpectedText@1000000001 : Text;
+      HashText@1000000000 : Text;
+      IStream@1000000003 : InStream;
+      TempBlob@1000000004 : TEMPORARY Record 99008535;
+    BEGIN
+      Initialize();
+      SampleText := 'Lorem ipsum dolor sit amet, consectetur adipiscing elit';
+
+      CLEAR(TempBlob.Blob);
+      TempBlob.WriteAsText(SampleText, TEXTENCODING::UTF8);
+
+      // SHA1
+      ExpectedText := '4045ed3c779e3b27760e4da357279508a8452dcb';
+      TempBlob.Blob.CREATEINSTREAM(IStream);
+      HashText := GenerateFromStream(HashAlgorithm::SHA1, IStream);
+      Assert.AreEqual(ExpectedText, LOWERCASE(HashText), 'SHA1 Hashes differ, failed');
+      // MD5
+      ExpectedText := 'fc10a08df7fafa3871166646609e1c95';
+      TempBlob.Blob.CREATEINSTREAM(IStream);
+      HashText := GenerateFromStream(HashAlgorithm::MD5, IStream);
+      Assert.AreEqual(ExpectedText, LOWERCASE(HashText), 'MD5 Hashes differ, failed');
+      // SHA256
+      ExpectedText := '07fe4d4a25718241af145a93f890eb5469052e251d199d173bd3bd50c3bb4da2';
+      TempBlob.Blob.CREATEINSTREAM(IStream);
+      HashText := GenerateFromStream(HashAlgorithm::SHA256, IStream);
+      Assert.AreEqual(ExpectedText, LOWERCASE(HashText), 'SHA256 Hashes differ, failed');
+      // SHA384
+      ExpectedText := '845524c97cf0606df6ce8a2e5a7e35701a9ed12685a366eabef599648dd8ba33c1e176e96efe51320a40a6b65c18c4cf';
+      TempBlob.Blob.CREATEINSTREAM(IStream);
+      HashText := GenerateFromStream(HashAlgorithm::SHA384, IStream);
+      Assert.AreEqual(ExpectedText, LOWERCASE(HashText), 'SHA384 Hashes differ, failed');
+      // SHA512
+      ExpectedText := 'd3b3d69ccc163089f91d42ebef0f01dd70ec40deb76a9da5ba63ef5b39601b41a34b04f8236ce9e59a150241716a5e2da9f1bdcc2734d4d7fcd8e69df36022f0';
+      TempBlob.Blob.CREATEINSTREAM(IStream);
+      HashText := GenerateFromStream(HashAlgorithm::SHA512, IStream);
+      Assert.AreEqual(ExpectedText, LOWERCASE(HashText), 'SHA512 Hashes differ, failed');
+    END;
+
+    LOCAL PROCEDURE GenerateFromText@1000000002(HashMode@1000000000 : 'SHA1,MD5,SHA256,SHA384,SHA512';TextToHash@1000000003 : Text) : Text;
+    VAR
+      DotNet_HashAlgorithm@1000000002 : Codeunit 50012;
+      DotNetBitConverter@1000000004 : DotNet "'mscorlib'.System.BitConverter";
+      DotNetArray@1000000005 : DotNet "'mscorlib'.System.Array";
+      DotNetString@1000000001 : DotNet "'mscorlib'.System.String";
+    BEGIN
+      DotNet_HashAlgorithm.Create(HashMode);
+      DotNet_HashAlgorithm.ComputeHashFromText(TextToHash, DotNet_Array);
+      DotNet_Array.GetArray(DotNetArray);
+      DotNetString := DotNetBitConverter.ToString(DotNetArray);
+      EXIT(DotNetString.Replace('-',''));
+    END;
+
+    LOCAL PROCEDURE GenerateFromStream@1000000003(HashMode@1000000001 : 'SHA1,MD5,SHA256,SHA384,SHA512';InputStream@1000000000 : InStream) : Text;
+    VAR
+      DotNet_HashAlgorithm@1000000003 : Codeunit 50012;
+      DotNetBitConverter@1000000004 : DotNet "'mscorlib'.System.BitConverter";
+      DotNetArray@1000000002 : DotNet "'mscorlib'.System.Array";
+      DotNetString@1000000005 : DotNet "'mscorlib'.System.String";
+    BEGIN
+      DotNet_HashAlgorithm.Create(HashMode);
+      DotNet_HashAlgorithm.ComputeHashFromInStream(InputStream, DotNet_Array);
+      DotNet_Array.GetArray(DotNetArray);
+      DotNetString := DotNetBitConverter.ToString(DotNetArray);
+      EXIT(DotNetString.Replace('-',''));
+    END;
+
+    BEGIN
+    {
+      // Hashes generated from: https://www.browserling.com/tools/all-hashes
+    }
+    END.
+  }
+}
+

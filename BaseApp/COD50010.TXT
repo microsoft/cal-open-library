@@ -1,0 +1,159 @@
+OBJECT Codeunit 50010 DotNet_SymmetricAlgorithm
+{
+  OBJECT-PROPERTIES
+  {
+    Date=11/13/18;
+    Time=[ 4:01:01 PM];
+    Modified=Yes;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      DotNetSymmetricAlgorithm@1000000000 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Security.Cryptography.SymmetricAlgorithm";
+
+    [External]
+    PROCEDURE GetBlockSize@1000000000(VAR BlockSize@1000000000 : Integer);
+    BEGIN
+      BlockSize := DotNetSymmetricAlgorithm.BlockSize;
+    END;
+
+    [External]
+    PROCEDURE SetBlockSize@1000000027(BlockSize@1000000000 : Integer);
+    BEGIN
+      DotNetSymmetricAlgorithm.BlockSize := BlockSize;
+    END;
+
+    [External]
+    PROCEDURE GetFeedbackSize@1000000007(VAR FeedbackSize@1000000000 : Integer);
+    BEGIN
+      FeedbackSize := DotNetSymmetricAlgorithm.FeedbackSize;
+    END;
+
+    [External]
+    PROCEDURE SetFeedbackSize@1000000006(FeedbackSize@1000000000 : Integer);
+    BEGIN
+      DotNetSymmetricAlgorithm.FeedbackSize := FeedbackSize;
+    END;
+
+    [External]
+    PROCEDURE GetIV@1000000001(VAR DotNet_Array@1000000000 : Codeunit 3000);
+    VAR
+      DotNetArray@1000000001 : DotNet "'mscorlib'.System.Array";
+    BEGIN
+      DotNet_Array.GetArray(DotNetArray);
+      DotNetArray := DotNetSymmetricAlgorithm.IV.Clone();
+      DotNet_Array.SetArray(DotNetArray);
+    END;
+
+    [External]
+    PROCEDURE SetIV@1000000023(VAR DotNet_Array@1000000000 : Codeunit 3000);
+    VAR
+      DotNetArray@1000000001 : DotNet "'mscorlib'.System.Array";
+    BEGIN
+      DotNet_Array.GetArray(DotNetArray);
+      DotNetSymmetricAlgorithm.IV := DotNetArray.Clone();
+    END;
+
+    [External]
+    PROCEDURE GetKey@1000000002(VAR DotNet_Array@1000000000 : Codeunit 3000);
+    VAR
+      DotNetArray@1000000001 : DotNet "'mscorlib'.System.Array";
+    BEGIN
+      DotNet_Array.GetArray(DotNetArray);
+      DotNetArray := DotNetSymmetricAlgorithm.Key.Clone();
+      DotNet_Array.SetArray(DotNetArray);
+    END;
+
+    [External]
+    PROCEDURE SetKey@1000000021(VAR DotNet_Array@1000000000 : Codeunit 3000);
+    VAR
+      DotNetArray@1000000001 : DotNet "'mscorlib'.System.Array";
+    BEGIN
+      DotNet_Array.GetArray(DotNetArray);
+      DotNetSymmetricAlgorithm.Key := DotNetArray.Clone();
+    END;
+
+    [External]
+    PROCEDURE GetKeySize@1000000003(VAR KeySize@1000000000 : Integer);
+    BEGIN
+      KeySize := DotNetSymmetricAlgorithm.KeySize;
+    END;
+
+    [External]
+    PROCEDURE SetKeySize@1000000018(KeySize@1000000000 : Integer);
+    BEGIN
+      DotNetSymmetricAlgorithm.KeySize := KeySize;
+    END;
+
+    [External]
+    PROCEDURE GetMode@1000000004(VAR Mode@1000000000 : ',CBC,ECB,OFB,CFB,CTS');
+    VAR
+      CipherMode@1000000001 : Integer;
+    BEGIN
+      CipherMode := DotNetSymmetricAlgorithm.Mode;
+      Mode := CipherMode;
+    END;
+
+    [External]
+    PROCEDURE SetMode@1000000020(Mode@1000000000 : ',CBC,ECB,OFB,CFB,CTS');
+    VAR
+      CipherMode@1000000001 : Integer;
+    BEGIN
+      CipherMode := Mode;
+      DotNetSymmetricAlgorithm.Mode := CipherMode;
+    END;
+
+    [External]
+    PROCEDURE GetPadding@1000000005(VAR Padding@1000000000 : ',None,PKCS7,Zeros,ANSIX923,ISO10126');
+    VAR
+      PaddingMode@1000000001 : Integer;
+    BEGIN
+      PaddingMode := DotNetSymmetricAlgorithm.Padding;
+      Padding := PaddingMode;
+    END;
+
+    [External]
+    PROCEDURE SetPadding@1000000019(Padding@1000000000 : ',None,PKCS7,Zeros,ANSIX923,ISO10126');
+    VAR
+      PaddingMode@1000000001 : Integer;
+    BEGIN
+      PaddingMode := Padding;
+      DotNetSymmetricAlgorithm.Padding := PaddingMode;
+    END;
+
+    [External]
+    PROCEDURE Create@1000000028(Algorithm@1000000000 : 'Aes,DES,RC2,Rijndael,TripleDES');
+    BEGIN
+      Dispose();
+      DotNetSymmetricAlgorithm := DotNetSymmetricAlgorithm.Create(FORMAT(Algorithm));
+    END;
+
+    [External]
+    PROCEDURE Dispose@1000000008();
+    BEGIN
+      IF NOT ISNULL(DotNetSymmetricAlgorithm) THEN
+        DotNetSymmetricAlgorithm.Dispose();
+    END;
+
+    PROCEDURE GetSymmetricAlgorithm@1000000013(VAR DotNetSymmetricAlgorithm2@1000000000 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Security.Cryptography.SymmetricAlgorithm");
+    BEGIN
+      DotNetSymmetricAlgorithm2 := DotNetSymmetricAlgorithm;
+    END;
+
+    PROCEDURE SetSymmetricAlgorithm@1000000014(VAR DotNetSymmetricAlgorithm2@1000000000 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Security.Cryptography.SymmetricAlgorithm");
+    BEGIN
+      DotNetSymmetricAlgorithm := DotNetSymmetricAlgorithm2;
+    END;
+
+    BEGIN
+    END.
+  }
+}
+
