@@ -598,37 +598,17 @@ OBJECT Table 370 Excel Buffer
     PROCEDURE SelectSheetsNameStream@56(FileStream@1000 : InStream) : Text[250];
     VAR
       TempNameValueBuffer@1009 : TEMPORARY Record 823;
-      SheetNames@1008 : DotNet "'mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Collections.ArrayList";
-      SheetName@1002 : Text[250];
       SelectedSheetName@1007 : Text[250];
-      i@1001 : Integer;
     BEGIN
-      XlWrkBkReader := XlWrkBkReader.Open(FileStream);
-
-      SelectedSheetName := '';
-      SheetNames := SheetNames.ArrayList(XlWrkBkReader.SheetNames);
-      IF NOT ISNULL(SheetNames) THEN BEGIN
-        FOR i := 0 TO SheetNames.Count - 1 DO BEGIN
-          SheetName := SheetNames.Item(i);
-          IF SheetName <> '' THEN BEGIN
-            TempNameValueBuffer.INIT;
-            TempNameValueBuffer.ID := i;
-            TempNameValueBuffer.Name := FORMAT(i + 1);
-            TempNameValueBuffer.Value := SheetName;
-            TempNameValueBuffer.INSERT;
-          END;
+      IF GetSheetsNameListFromStream(FileStream,TempNameValueBuffer) THEN
+        IF TempNameValueBuffer.COUNT = 1 THEN
+          SelectedSheetName := TempNameValueBuffer.Value
+        ELSE BEGIN
+          TempNameValueBuffer.FINDFIRST;
+          IF PAGE.RUNMODAL(PAGE::"Name/Value Lookup",TempNameValueBuffer) = ACTION::LookupOK THEN
+            SelectedSheetName := TempNameValueBuffer.Value;
         END;
-        IF NOT TempNameValueBuffer.ISEMPTY THEN
-          IF TempNameValueBuffer.COUNT = 1 THEN
-            SelectedSheetName := TempNameValueBuffer.Value
-          ELSE BEGIN
-            TempNameValueBuffer.FINDFIRST;
-            IF PAGE.RUNMODAL(PAGE::"Name/Value Lookup",TempNameValueBuffer) = ACTION::LookupOK THEN
-              SelectedSheetName := TempNameValueBuffer.Value;
-          END;
-      END;
 
-      CloseBook;
       EXIT(SelectedSheetName);
     END;
 
@@ -1081,7 +1061,7 @@ OBJECT Table 370 Excel Buffer
     END;
 
     [External]
-    PROCEDURE GetSheetsNameListFromStream@53(FileStream@1000 : InStream;VAR TempNameValueBufferOut@1004 : TEMPORARY Record 823);
+    PROCEDURE GetSheetsNameListFromStream@53(FileStream@1000 : InStream;VAR TempNameValueBufferOut@1004 : TEMPORARY Record 823) SheetsFound : Boolean;
     VAR
       SheetNames@1008 : DotNet "'mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Collections.ArrayList";
       SheetName@1002 : Text[250];
@@ -1092,17 +1072,24 @@ OBJECT Table 370 Excel Buffer
       TempNameValueBufferOut.DELETEALL;
 
       SheetNames := SheetNames.ArrayList(XlWrkBkReader.SheetNames);
-      IF NOT ISNULL(SheetNames) THEN
-        FOR i := 0 TO SheetNames.Count - 1 DO BEGIN
-          SheetName := SheetNames.Item(i);
-          IF SheetName <> '' THEN BEGIN
-            TempNameValueBufferOut.INIT;
-            TempNameValueBufferOut.ID := i;
-            TempNameValueBufferOut.Name := FORMAT(i + 1);
-            TempNameValueBufferOut.Value := SheetName;
-            TempNameValueBufferOut.INSERT;
-          END;
+      IF ISNULL(SheetNames) THEN
+        EXIT(FALSE);
+
+      SheetsFound := SheetNames.Count > 0;
+
+      IF NOT SheetsFound THEN
+        EXIT(FALSE);
+
+      FOR i := 0 TO SheetNames.Count - 1 DO BEGIN
+        SheetName := SheetNames.Item(i);
+        IF SheetName <> '' THEN BEGIN
+          TempNameValueBufferOut.INIT;
+          TempNameValueBufferOut.ID := i;
+          TempNameValueBufferOut.Name := FORMAT(i + 1);
+          TempNameValueBufferOut.Value := SheetName;
+          TempNameValueBufferOut.INSERT;
         END;
+      END;
 
       CloseBook;
     END;
