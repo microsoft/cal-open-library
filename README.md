@@ -1,7 +1,7 @@
 
 # C/AL Open Library
 
-The purpose of this repository is to build a C/AL library based on community contributions that will serve as an accelerator for adoption of the Extensions V2 technology. The source code from this library will be included in the base application of 'Dynamics 365 for Financials' on a monthly basis. 
+The purpose of this repository is to build a C/AL library based on community contributions that will serve as an accelerator for adoption of the Extensions V2 technology. The source code from this library will be included in the base application of 'Dynamics 365 Business Central' on a monthly basis. 
 
 The primary goal is to enable creation of .NET type wrappers written in C/AL that can then be subsequently used from Extensions V2. DotNet types must not be part of the definition of public functions in the submitted code to be callable by Extensions V2.
 
