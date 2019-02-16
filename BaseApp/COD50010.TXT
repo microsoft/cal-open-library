@@ -2,9 +2,8 @@ OBJECT Codeunit 50010 DotNet_SymmetricAlgorithm
 {
   OBJECT-PROPERTIES
   {
-    Date=20190215D;
-    Time=110335.543T;
-    Modified=true;
+    Date=;
+    Time=;
     Version List=;
   }
   PROPERTIES

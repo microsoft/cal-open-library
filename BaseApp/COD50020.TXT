@@ -2,9 +2,8 @@ OBJECT Codeunit 50020 Symmetric Encryption Mgt
 {
   OBJECT-PROPERTIES
   {
-    Date=20190215D;
-    Time=161812.983T;
-    Modified=true;
+    Date=;
+    Time=;
     Version List=;
   }
   PROPERTIES

@@ -2,9 +2,8 @@ OBJECT Codeunit 50014 DotNet_CryptoStream
 {
   OBJECT-PROPERTIES
   {
-    Date=20181107D;
-    Time=090928T;
-    Modified=true;
+    Date=;
+    Time=;
     Version List=;
   }
   PROPERTIES

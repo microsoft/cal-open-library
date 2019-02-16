@@ -2,9 +2,8 @@ OBJECT Codeunit 3027 DotNet_StreamReader
 {
   OBJECT-PROPERTIES
   {
-    Date=20181113D;
-    Time=102833T;
-    Modified=true;
+    Date=;
+    Time=;
     Version List=;
   }
   PROPERTIES

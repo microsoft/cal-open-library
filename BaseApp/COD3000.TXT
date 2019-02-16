@@ -2,9 +2,8 @@ OBJECT Codeunit 3000 DotNet_Array
 {
   OBJECT-PROPERTIES
   {
-    Date=20181113D;
-    Time=104906T;
-    Modified=true;
+    Date=;
+    Time=;
     Version List=;
   }
   PROPERTIES

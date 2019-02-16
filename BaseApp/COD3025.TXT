@@ -2,9 +2,8 @@ OBJECT Codeunit 3025 DotNet_StreamWriter
 {
   OBJECT-PROPERTIES
   {
-    Date=20181113D;
-    Time=102817T;
-    Modified=true;
+    Date=;
+    Time=;
     Version List=;
   }
   PROPERTIES
