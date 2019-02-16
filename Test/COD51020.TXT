@@ -2,9 +2,8 @@ OBJECT Codeunit 51020 Test_Symmetric_Encryption_Mgt
 {
   OBJECT-PROPERTIES
   {
-    Date=11/13/18;
-    Time=[ 3:22:43 PM];
-    Modified=Yes;
+    Date=;
+    Time=;
     Version List=;
   }
   PROPERTIES

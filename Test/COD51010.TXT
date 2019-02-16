@@ -2,9 +2,8 @@ OBJECT Codeunit 51010 Test_DotNet_SymmetricAlgorithm
 {
   OBJECT-PROPERTIES
   {
-    Date=11/13/18;
-    Time=[ 4:00:25 PM];
-    Modified=Yes;
+    Date=;
+    Time=;
     Version List=;
   }
   PROPERTIES

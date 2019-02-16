@@ -2,9 +2,8 @@ OBJECT Codeunit 51013 Test_DotNet_ICryptoTransform
 {
   OBJECT-PROPERTIES
   {
-    Date=11/13/18;
-    Time=[ 8:23:46 PM];
-    Modified=Yes;
+    Date=;
+    Time=;
     Version List=;
   }
   PROPERTIES

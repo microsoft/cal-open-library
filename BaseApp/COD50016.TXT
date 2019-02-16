@@ -1,0 +1,87 @@
+OBJECT Codeunit 50016 DotNet_PaddingMode
+{
+  OBJECT-PROPERTIES
+  {
+    Date=20190215D;
+    Time=154300.203T;
+    Modified=true;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      DotNetPaddingMode@1000000000 : DotNet "'mscorlib'.System.Security.Cryptography.PaddingMode";
+
+    [External]
+    [LineStart(289)]
+    PROCEDURE None@1000000000() : Integer;
+    VAR
+      Mode@1000000000 : Integer;
+    BEGIN
+      Mode := DotNetPaddingMode.None;
+      exit(Mode);
+    END;
+
+    [External]
+    [LineStart(293)]
+    PROCEDURE PKCS7@1000000001() : Integer;
+    VAR
+      Mode@1000000000 : Integer;
+    BEGIN
+      Mode := DotNetPaddingMode.PKCS7;
+      exit(Mode);
+    END;
+
+    [External]
+    [LineStart(297)]
+    PROCEDURE Zeros@1000000002() : Integer;
+    VAR
+      Mode@1000000000 : Integer;
+    BEGIN
+      Mode := DotNetPaddingMode.Zeros;
+      exit(Mode);
+    END;
+
+    [External]
+    [LineStart(301)]
+    PROCEDURE ANSIX923@1000000003() : Integer;
+    VAR
+      Mode@1000000000 : Integer;
+    BEGIN
+      Mode := DotNetPaddingMode.ANSIX923;
+      exit(Mode);
+    END;
+
+    [External]
+    [LineStart(305)]
+    PROCEDURE ISO10126@1000000004() : Integer;
+    VAR
+      Mode@1000000000 : Integer;
+    BEGIN
+      Mode := DotNetPaddingMode.ISO10126;
+      exit(Mode);
+    END;
+
+    [LineStart(309)]
+    PROCEDURE GetPaddingMode@1000000005(VAR DotNetPaddingMode2@1000000000 : DotNet "'mscorlib'.System.Security.Cryptography.PaddingMode");
+    BEGIN
+      DotNetPaddingMode2 := DotNetPaddingMode;
+    END;
+
+    [LineStart(312)]
+    PROCEDURE SetPaddingMode@1000000006(VAR DotNetPaddingMode2@1000000000 : DotNet "'mscorlib'.System.Security.Cryptography.PaddingMode");
+    BEGIN
+      DotNetPaddingMode := DotNetPaddingMode2;
+    END;
+
+    BEGIN
+    END.
+  }
+}
+

@@ -2,8 +2,9 @@ OBJECT Codeunit 3000 DotNet_Array
 {
   OBJECT-PROPERTIES
   {
-    Date=;
-    Time=;
+    Date=20181113D;
+    Time=104906T;
+    Modified=true;
     Version List=;
   }
   PROPERTIES
@@ -18,99 +19,132 @@ OBJECT Codeunit 3000 DotNet_Array
       DotNetArray@1000 : DotNet "'mscorlib'.System.Array";
 
     [External]
+    [LineStart(2)]
     PROCEDURE StringArray@108(Length@1000 : Integer);
     VAR
       DotNetString@1002 : DotNet "'mscorlib'.System.String";
     BEGIN
-      DotNetArray := DotNetArray.CreateInstance(GETDOTNETTYPE(DotNetString),Length);
+      DotNetArray := DotNetArray.CreateInstance(GetDotNetType(DotNetString),Length);
     END;
 
     [External]
+    [LineStart(5)]
     PROCEDURE CharArray@100(Length@1000 : Integer);
     VAR
       DotNetChar@1002 : DotNet "'mscorlib'.System.Char";
     BEGIN
-      DotNetArray := DotNetArray.CreateInstance(GETDOTNETTYPE(DotNetChar),Length);
+      DotNetArray := DotNetArray.CreateInstance(GetDotNetType(DotNetChar),Length);
     END;
 
     [External]
+    [LineStart(8)]
     PROCEDURE ByteArray@101(Length@1000 : Integer);
     VAR
       DotNetByte@1002 : DotNet "'mscorlib'.System.Byte";
     BEGIN
-      DotNetArray := DotNetArray.CreateInstance(GETDOTNETTYPE(DotNetByte),Length);
+      DotNetArray := DotNetArray.CreateInstance(GetDotNetType(DotNetByte),Length);
     END;
 
     [External]
+    [LineStart(11)]
     PROCEDURE Int32Array@102(Length@1000 : Integer);
     VAR
       DotNetInt32@1002 : DotNet "'mscorlib'.System.Int32";
     BEGIN
-      DotNetArray := DotNetArray.CreateInstance(GETDOTNETTYPE(DotNetInt32),Length);
+      DotNetArray := DotNetArray.CreateInstance(GetDotNetType(DotNetInt32),Length);
     END;
 
     [External]
+    [LineStart(14)]
     PROCEDURE Length@4() : Integer;
     BEGIN
-      EXIT(DotNetArray.Length)
+      exit(DotNetArray.Length)
     END;
 
     [External]
+    [LineStart(17)]
     PROCEDURE SetTextValue@103(NewValue@1001 : Text;Index@1000 : Integer);
     BEGIN
       DotNetArray.SetValue(NewValue,Index);
     END;
 
     [External]
+    [LineStart(20)]
     PROCEDURE SetCharValue@109(NewValue@1001 : Char;Index@1000 : Integer);
     BEGIN
       DotNetArray.SetValue(NewValue,Index);
     END;
 
     [External]
+    [LineStart(23)]
     PROCEDURE SetByteValue@104(NewValue@1001 : Byte;Index@1000 : Integer);
     BEGIN
       DotNetArray.SetValue(NewValue,Index);
     END;
 
     [External]
+    [LineStart(26)]
     PROCEDURE SetIntValue@105(NewValue@1001 : Integer;Index@1000 : Integer);
     BEGIN
       DotNetArray.SetValue(NewValue,Index);
     END;
 
     [External]
+    [LineStart(29)]
     PROCEDURE GetValueAsText@5(Index@1000 : Integer) : Text;
     BEGIN
-      EXIT(DotNetArray.GetValue(Index))
+      exit(DotNetArray.GetValue(Index))
     END;
 
     [External]
+    [LineStart(32)]
     PROCEDURE GetValueAsChar@110(Index@1000 : Integer) : Char;
     BEGIN
-      EXIT(DotNetArray.GetValue(Index));
+      exit(DotNetArray.GetValue(Index));
     END;
 
     [External]
+    [LineStart(35)]
     PROCEDURE GetValueAsInteger@106(Index@1000 : Integer) : Integer;
     BEGIN
-      EXIT(DotNetArray.GetValue(Index));
+      exit(DotNetArray.GetValue(Index));
     END;
 
+    [LineStart(38)]
     PROCEDURE GetArray@2(VAR DotNetArray2@1000 : DotNet "'mscorlib'.System.Array");
     BEGIN
       DotNetArray2 := DotNetArray
     END;
 
+    [LineStart(41)]
     PROCEDURE SetArray@3(DotNetArray2@1000 : DotNet "'mscorlib'.System.Array");
     BEGIN
       DotNetArray := DotNetArray2
     END;
 
     [External]
+    [LineStart(44)]
     PROCEDURE IsNull@107() : Boolean;
     BEGIN
-      EXIT(ISNULL(DotNetArray));
+      exit(IsNull(DotNetArray));
+    END;
+
+    [External]
+    [LineStart(47)]
+    PROCEDURE Clone@1000000001(VAR DotNet_ArrayTarget@1000000000 : Codeunit DotNet_Array);
+    BEGIN
+      DotNet_ArrayTarget.SetArray(DotNetArray.Clone());
+    END;
+
+    [External]
+    [LineStart(50)]
+    PROCEDURE ConstrainedCopy@1000000000(SourceIndex@1000000001 : Integer;VAR DotNet_ArrayTarget@1000000002 : Codeunit DotNet_Array;TargetIndex@1000000003 : Integer;Length@1000000004 : Integer);
+    VAR
+      DotNetArrayTarget@1000000006 : DotNet "'mscorlib'.System.Array";
+    BEGIN
+      DotNet_ArrayTarget.GetArray(DotNetArrayTarget);
+      DotNetArray.ConstrainedCopy(DotNetArray, SourceIndex, DotNetArrayTarget, TargetIndex, Length);
+      DotNet_ArrayTarget.SetArray(DotNetArrayTarget);
     END;
 
     BEGIN

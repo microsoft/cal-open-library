@@ -2,9 +2,9 @@ OBJECT Codeunit 50013 DotNet_ICryptoTransform
 {
   OBJECT-PROPERTIES
   {
-    Date=11/06/18;
-    Time=[ 8:19:27 PM];
-    Modified=Yes;
+    Date=20181106D;
+    Time=201927T;
+    Modified=true;
     Version List=;
   }
   PROPERTIES
@@ -19,16 +19,19 @@ OBJECT Codeunit 50013 DotNet_ICryptoTransform
       DotNetICryptoTransform@1000000000 : DotNet "'mscorlib'.System.Security.Cryptography.ICryptoTransform";
 
     [External]
+    [LineStart(231)]
     PROCEDURE Dispose@1000000006();
     BEGIN
       DotNetICryptoTransform.Dispose()
     END;
 
+    [LineStart(234)]
     PROCEDURE GetICryptoTransform@2(VAR DotNetICryptoTransform2@1000000001 : DotNet "'mscorlib'.System.Security.Cryptography.ICryptoTransform");
     BEGIN
       DotNetICryptoTransform2 := DotNetICryptoTransform
     END;
 
+    [LineStart(237)]
     PROCEDURE SetICryptoTransform@3(VAR DotNetICryptoTransform2@1000000000 : DotNet "'mscorlib'.System.Security.Cryptography.ICryptoTransform");
     BEGIN
       DotNetICryptoTransform := DotNetICryptoTransform2

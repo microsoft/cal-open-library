@@ -2,9 +2,8 @@ OBJECT Codeunit 51012 Test_DotNet_HashAlgorithm
 {
   OBJECT-PROPERTIES
   {
-    Date=11/13/18;
-    Time=[ 4:19:06 PM];
-    Modified=Yes;
+    Date=;
+    Time=;
     Version List=;
   }
   PROPERTIES
