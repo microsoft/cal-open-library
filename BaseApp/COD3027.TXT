@@ -18,7 +18,7 @@ OBJECT Codeunit 3027 DotNet_StreamReader
       DotNetStreamReader@1000 : DotNet "'mscorlib'.System.IO.StreamReader";
 
     [External]
-    [LineStart(92)]
+    [LineStart(37)]
     PROCEDURE StreamReader@1(VAR InputStream@1000 : InStream;DotNet_Encoding@1001 : Codeunit DotNet_Encoding);
     VAR
       DotNetEncoding@1002 : DotNet "'mscorlib'.System.Text.Encoding";
@@ -28,7 +28,7 @@ OBJECT Codeunit 3027 DotNet_StreamReader
     END;
 
     [External]
-    [LineStart(96)]
+    [LineStart(41)]
     PROCEDURE StreamReaderFromDotNetStream@1000000000(VAR DotNet_Stream@1000 : Codeunit DotNet_Stream;DotNet_Encoding@1001 : Codeunit DotNet_Encoding);
     VAR
       DotNetEncoding@1002 : DotNet "'mscorlib'.System.Text.Encoding";
@@ -41,61 +41,61 @@ OBJECT Codeunit 3027 DotNet_StreamReader
     END;
 
     [External]
-    [LineStart(102)]
+    [LineStart(47)]
     PROCEDURE StreamReaderDetectEncoding@2(VAR InputStream@1000 : InStream;DetectEncodingFromByteOrderMarks@1001 : Boolean);
     BEGIN
       DotNetStreamReader := DotNetStreamReader.StreamReader(InputStream,DetectEncodingFromByteOrderMarks);
     END;
 
     [External]
-    [LineStart(105)]
+    [LineStart(50)]
     PROCEDURE Close@3();
     BEGIN
       DotNetStreamReader.Close;
     END;
 
     [External]
-    [LineStart(108)]
+    [LineStart(53)]
     PROCEDURE Dispose@4();
     BEGIN
       DotNetStreamReader.Dispose;
     END;
 
     [External]
-    [LineStart(111)]
+    [LineStart(56)]
     PROCEDURE EndOfStream@6() : Boolean;
     BEGIN
       exit(DotNetStreamReader.EndOfStream);
     END;
 
     [External]
-    [LineStart(114)]
+    [LineStart(59)]
     PROCEDURE CurrentEncoding@7(VAR DotNet_Encoding@1000 : Codeunit DotNet_Encoding);
     BEGIN
       DotNet_Encoding.SetEncoding(DotNetStreamReader.CurrentEncoding);
     END;
 
     [External]
-    [LineStart(117)]
+    [LineStart(62)]
     PROCEDURE ReadLine@8() : Text;
     BEGIN
       exit(DotNetStreamReader.ReadLine);
     END;
 
     [External]
-    [LineStart(120)]
+    [LineStart(65)]
     PROCEDURE ReadToEnd@9() : Text;
     BEGIN
       exit(DotNetStreamReader.ReadToEnd);
     END;
 
-    [LineStart(123)]
+    [LineStart(68)]
     PROCEDURE GetStreamReader@1000000001(VAR DotNetStreamReader2@1000000000 : DotNet "'mscorlib'.System.IO.StreamReader");
     BEGIN
       DotNetStreamReader2 := DotNetStreamReader;
     END;
 
-    [LineStart(126)]
+    [LineStart(71)]
     PROCEDURE SetStreamReader@1000000002(VAR DotNetStreamReader2@1000000000 : DotNet "'mscorlib'.System.IO.StreamReader");
     BEGIN
       DotNetStreamReader := DotNetStreamReader2;

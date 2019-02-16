@@ -18,7 +18,21 @@ OBJECT Codeunit 50014 DotNet_CryptoStream
       DotNetCryptoStream@1000000000 : DotNet "'mscorlib'.System.Security.Cryptography.CryptoStream";
 
     [External]
-    [LineStart(242)]
+    [LineStart(195)]
+    PROCEDURE CryptoStream@1000000001(VAR DotNet_Stream@1000000000 : Codeunit DotNet_Stream;VAR DotNet_ICryptoTransform@1000000001 : Codeunit DotNet_ICryptoTransform;VAR DotNet_CryptoStreamMode@1000000005 : Codeunit DotNet_CryptoStreamMode);
+    VAR
+      DotNetStream@1000000002 : DotNet "'mscorlib'.System.IO.Stream";
+      DotNetICryptoTransform@1000000004 : DotNet "'mscorlib'.System.Security.Cryptography.ICryptoTransform";
+      DotNetCryptoStreamMode@1000000003 : DotNet "'mscorlib'.System.Security.Cryptography.CryptoStreamMode";
+    BEGIN
+      DotNet_Stream.GetStream(DotNetStream);
+      DotNet_ICryptoTransform.GetICryptoTransform(DotNetICryptoTransform);
+      DotNet_CryptoStreamMode.GetCryptoStreamMode(DotNetCryptoStreamMode);
+      DotNetCryptoStream := DotNetCryptoStream.CryptoStream(DotNetStream, DotNetICryptoTransform, DotNetCryptoStreamMode);
+    END;
+
+    [External]
+    [LineStart(201)]
     PROCEDURE CryptoInStream@1000000005(IStream@1000000000 : InStream;VAR DotNet_ICryptoTransform@1000000001 : Codeunit DotNet_ICryptoTransform);
     VAR
       DotNetICryptoTransform@1000000004 : DotNet "'mscorlib'.System.Security.Cryptography.ICryptoTransform";
@@ -29,7 +43,7 @@ OBJECT Codeunit 50014 DotNet_CryptoStream
     END;
 
     [External]
-    [LineStart(246)]
+    [LineStart(205)]
     PROCEDURE CryptoOutStream@1000000000(OStream@1000000000 : OutStream;VAR DotNet_ICryptoTransform@1000000001 : Codeunit DotNet_ICryptoTransform);
     VAR
       DotNetICryptoTransform@1000000004 : DotNet "'mscorlib'.System.Security.Cryptography.ICryptoTransform";
@@ -40,19 +54,64 @@ OBJECT Codeunit 50014 DotNet_CryptoStream
     END;
 
     [External]
-    [LineStart(250)]
+    [LineStart(209)]
+    PROCEDURE CanRead@1000000002() : Boolean;
+    BEGIN
+      if not IsNull(DotNetCryptoStream) then
+        exit(DotNetCryptoStream.CanRead);
+      exit(false);
+    END;
+
+    [External]
+    [LineStart(214)]
+    PROCEDURE CanSeek@1000000003() : Boolean;
+    BEGIN
+      if not IsNull(DotNetCryptoStream) then
+        exit(DotNetCryptoStream.CanSeek);
+      exit(false);
+    END;
+
+    [External]
+    [LineStart(219)]
+    PROCEDURE CanWrite@1000000004() : Boolean;
+    BEGIN
+      if not IsNull(DotNetCryptoStream) then
+        exit(DotNetCryptoStream.CanWrite);
+      exit(false);
+    END;
+
+    [External]
+    [LineStart(224)]
+    PROCEDURE Length@1000000008() : Integer;
+    BEGIN
+      if not IsNull(DotNetCryptoStream) then
+        exit(DotNetCryptoStream.Length);
+      exit(0);
+    END;
+
+    [External]
+    [LineStart(229)]
+    PROCEDURE Position@1000000007() : Integer;
+    BEGIN
+      if not IsNull(DotNetCryptoStream) then
+        exit(DotNetCryptoStream.Position);
+      exit(0);
+    END;
+
+    [External]
+    [LineStart(234)]
     PROCEDURE Dispose@1000000006();
     BEGIN
       DotNetCryptoStream.Dispose();
     END;
 
-    [LineStart(253)]
+    [LineStart(237)]
     PROCEDURE GetCryptoStream@2(VAR DotNetCryptoStream2@1000000000 : DotNet "'mscorlib'.System.Security.Cryptography.CryptoStream");
     BEGIN
       DotNetCryptoStream2 := DotNetCryptoStream;
     END;
 
-    [LineStart(256)]
+    [LineStart(240)]
     PROCEDURE SetCryptoStream@3(VAR DotNetCryptoStream2@1000000000 : DotNet "'mscorlib'.System.Security.Cryptography.CryptoStream");
     BEGIN
       DotNetCryptoStream := DotNetCryptoStream2;

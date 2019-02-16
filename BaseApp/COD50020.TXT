@@ -20,16 +20,14 @@ OBJECT Codeunit 50020 Symmetric Encryption Mgt
       KeySize@1000000001 : Integer;
       BlockSize@1000000000 : Integer;
       SymmetricAlgorithm@1000000003 : Text;
-      Mode@1000000002 : ',CBC,ECB,OFB,CFB,CTS';
-      Padding@1000000005 : ',None,PKCS7,Zeros,ANSIX923,ISO10126';
+      DotNetCipherMode@1000000002 : DotNet "'mscorlib'.System.Security.Cryptography.CipherMode";
+      DotNetPaddingMode@1000000005 : DotNet "'mscorlib'.System.Security.Cryptography.PaddingMode";
       DotNet_ArrayKey@1000000008 : Codeunit DotNet_Array;
       DotNet_ArrayIV@1000000007 : Codeunit DotNet_Array;
       E_NO_CIPHER@1000000004 : TextConst 'ENU=SymmetricAlgorithm - cipher not defined';
-      E_INVALID_CIPHERMODE@1000000006 : TextConst 'ENU=Invalid Cipher mode';
-      E_INVALID_PADDINGMODE@1000000009 : TextConst 'ENU=Invalid Padding mode';
 
     [External]
-    [LineStart(319)]
+    [LineStart(315)]
     PROCEDURE SetCipher@1000000015(VAR CipherText@1000000000 : Text);
     VAR
       TempBlob@1000000001 : Record TempBlob;
@@ -46,7 +44,7 @@ OBJECT Codeunit 50020 Symmetric Encryption Mgt
     END;
 
     [External]
-    [LineStart(330)]
+    [LineStart(326)]
     PROCEDURE SetCipherFromBlob@1000000014(VAR TempBlob@1000000000 : Record TempBlob);
     BEGIN
 
@@ -54,7 +52,7 @@ OBJECT Codeunit 50020 Symmetric Encryption Mgt
     END;
 
     [External]
-    [LineStart(334)]
+    [LineStart(330)]
     PROCEDURE Base64ToPlainText@1000000053(Base64Text@1000000000 : Text) : Text;
     VAR
       DotNet_Encoding@1000000001 : Codeunit DotNet_Encoding;
@@ -75,7 +73,7 @@ OBJECT Codeunit 50020 Symmetric Encryption Mgt
     END;
 
     [External]
-    [LineStart(346)]
+    [LineStart(342)]
     PROCEDURE SetAlgorithm@1000000023(Algorithm@1000000000 : Text);
     BEGIN
 
@@ -83,7 +81,7 @@ OBJECT Codeunit 50020 Symmetric Encryption Mgt
     END;
 
     [External]
-    [LineStart(350)]
+    [LineStart(346)]
     PROCEDURE SetKeySize@1000000021(Size@1000000000 : Integer);
     BEGIN
 
@@ -91,7 +89,7 @@ OBJECT Codeunit 50020 Symmetric Encryption Mgt
     END;
 
     [External]
-    [LineStart(354)]
+    [LineStart(350)]
     PROCEDURE SetBlockSize@1000000022(Size@1000000000 : Integer);
     BEGIN
 
@@ -99,31 +97,21 @@ OBJECT Codeunit 50020 Symmetric Encryption Mgt
     END;
 
     [External]
-    [LineStart(358)]
-    PROCEDURE SetMode@1000000024(CipherMode@1000000000 : Integer);
-    VAR
-      DotNet_CipherMode@1000000001 : Codeunit DotNet_CipherMode;
+    [LineStart(354)]
+    PROCEDURE SetMode@1000000024(VAR DotNet_CipherMode@1000000000 : Codeunit DotNet_CipherMode);
     BEGIN
-
-      if (CipherMode < DotNet_CipherMode.CBC) or (CipherMode > DotNet_CipherMode.CTS) then
-        Error(E_INVALID_CIPHERMODE);
-      Mode := CipherMode;
+      DotNet_CipherMode.GetCipherMode(DotNetCipherMode);
     END;
 
     [External]
-    [LineStart(364)]
-    PROCEDURE SetPadding@1000000000(PaddingMode@1000000000 : Integer);
-    VAR
-      DotNet_PaddingMode@1000000001 : Codeunit DotNet_PaddingMode;
+    [LineStart(357)]
+    PROCEDURE SetPadding@1000000000(VAR DotNet_PaddingMode@1000000000 : Codeunit DotNet_PaddingMode);
     BEGIN
-
-      if (PaddingMode < DotNet_PaddingMode.None) or (PaddingMode > DotNet_PaddingMode.ISO10126) then
-        Error(E_INVALID_PADDINGMODE);
-      Padding := PaddingMode;
+      DotNet_PaddingMode.GetPaddingMode(DotNetPaddingMode);
     END;
 
     [External]
-    [LineStart(370)]
+    [LineStart(360)]
     PROCEDURE SetKey@1000000008(VAR DotNet_Array@1000000000 : Codeunit DotNet_Array);
     BEGIN
 
@@ -131,7 +119,7 @@ OBJECT Codeunit 50020 Symmetric Encryption Mgt
     END;
 
     [External]
-    [LineStart(374)]
+    [LineStart(364)]
     PROCEDURE SetIV@1000000009(VAR DotNet_Array@1000000000 : Codeunit DotNet_Array);
     BEGIN
 
@@ -139,7 +127,7 @@ OBJECT Codeunit 50020 Symmetric Encryption Mgt
     END;
 
     [External]
-    [LineStart(378)]
+    [LineStart(368)]
     PROCEDURE EncryptTextBase64@1000000001(UnEncryptedText@1000000000 : Text;VAR EncryptedTextBase64@1000000003 : Text) : Boolean;
     VAR
       Result@1000000002 : Boolean;
@@ -152,7 +140,7 @@ OBJECT Codeunit 50020 Symmetric Encryption Mgt
     END;
 
     [External]
-    [LineStart(385)]
+    [LineStart(375)]
     PROCEDURE DecryptTextBase64@1000000002(EncryptedText@1000000000 : Text;VAR UnEncryptedText@1000000003 : Text) : Boolean;
     VAR
       Result@1000000002 : Boolean;
@@ -165,7 +153,7 @@ OBJECT Codeunit 50020 Symmetric Encryption Mgt
     END;
 
     [External]
-    [LineStart(392)]
+    [LineStart(382)]
     PROCEDURE EncryptTempBlob@1000000006(VAR UnEncryptedTempBlob@1000000000 : Record TempBlob;VAR EncryptedTempBlob@1000000003 : Record TempBlob) : Boolean;
     VAR
       Result@1000000002 : Boolean;
@@ -177,7 +165,7 @@ OBJECT Codeunit 50020 Symmetric Encryption Mgt
     END;
 
     [External]
-    [LineStart(398)]
+    [LineStart(388)]
     PROCEDURE DecryptTempBlob@1000000005(VAR EncryptedTempBlob@1000000000 : Record TempBlob;VAR DecryptedTempBlob@1000000003 : Record TempBlob) : Boolean;
     VAR
       Result@1000000002 : Boolean;
@@ -189,7 +177,7 @@ OBJECT Codeunit 50020 Symmetric Encryption Mgt
     END;
 
     [External]
-    [LineStart(404)]
+    [LineStart(394)]
     PROCEDURE EncryptStream@1000000003(VAR UnEncryptedStream@1000000002 : InStream;VAR EncryptedStream@1000000000 : OutStream) : Boolean;
     VAR
       Result@1000000003 : Boolean;
@@ -201,7 +189,7 @@ OBJECT Codeunit 50020 Symmetric Encryption Mgt
     END;
 
     [External]
-    [LineStart(410)]
+    [LineStart(400)]
     PROCEDURE DecryptStream@1000000004(VAR EncryptedStream@1000000001 : InStream;VAR UnEncryptedStream@1000000000 : OutStream) : Boolean;
     VAR
       Result@1000000003 : Boolean;
@@ -214,7 +202,7 @@ OBJECT Codeunit 50020 Symmetric Encryption Mgt
       // Private Interface ======================================================================================
     END;
 
-    [LineStart(418)]
+    [LineStart(408)]
     LOCAL PROCEDURE KeyLengthInBytes@1000000017() : Integer;
     VAR
       Size@1000000000 : Integer;
@@ -226,7 +214,7 @@ OBJECT Codeunit 50020 Symmetric Encryption Mgt
     END;
 
     [TryFunction]
-    [LineStart(424)]
+    [LineStart(414)]
     LOCAL PROCEDURE TryEncryptTextBase64@1000000040(VAR UnEncryptedText@1000000012 : Text;VAR EncryptedTextBase64@1000000014 : Text);
     VAR
       OStream@1000000002 : OutStream;
@@ -253,7 +241,7 @@ OBJECT Codeunit 50020 Symmetric Encryption Mgt
     END;
 
     [TryFunction]
-    [LineStart(443)]
+    [LineStart(433)]
     LOCAL PROCEDURE TryDecryptTextBase64@1000000039(VAR EncryptedTextBase64@1000000001 : Text;VAR DecryptedText@1000000000 : Text);
     VAR
       IStream@1000000008 : InStream;
@@ -295,7 +283,7 @@ OBJECT Codeunit 50020 Symmetric Encryption Mgt
     END;
 
     [TryFunction]
-    [LineStart(473)]
+    [LineStart(463)]
     LOCAL PROCEDURE TryEncryptTempBlob@1000000012(VAR UnEncryptedTempBlob@1000000006 : Record TempBlob;VAR EncryptedTempBlob@1000000002 : Record TempBlob);
     VAR
       IStream@1000000001 : InStream;
@@ -318,7 +306,7 @@ OBJECT Codeunit 50020 Symmetric Encryption Mgt
     END;
 
     [TryFunction]
-    [LineStart(489)]
+    [LineStart(479)]
     LOCAL PROCEDURE TryDecryptTempBlob@1000000007(VAR EncryptedTempBlob@1000000001 : Record TempBlob;VAR DecryptedTempBlob@1000000000 : Record TempBlob);
     VAR
       IStream@1000000008 : InStream;
@@ -341,7 +329,7 @@ OBJECT Codeunit 50020 Symmetric Encryption Mgt
     END;
 
     [TryFunction]
-    [LineStart(505)]
+    [LineStart(495)]
     LOCAL PROCEDURE TryEncryptStream@1000000035(VAR UnEncryptedStream@1000000001 : InStream;VAR EncryptedStream@1000000000 : OutStream);
     VAR
       DotNetSymmetricAlgorithm@1000000021 : DotNet "'mscorlib'.System.Security.Cryptography.SymmetricAlgorithm";
@@ -407,7 +395,7 @@ OBJECT Codeunit 50020 Symmetric Encryption Mgt
     END;
 
     [TryFunction]
-    [LineStart(548)]
+    [LineStart(538)]
     LOCAL PROCEDURE TryDecryptStream@1000000036(VAR EncryptedStream@1000000001 : InStream;VAR DecryptedStream@1000000000 : OutStream);
     VAR
       DotNetSymmetricAlgorithm@1000000010 : DotNet "'mscorlib'.System.Security.Cryptography.SymmetricAlgorithm";
@@ -474,24 +462,30 @@ OBJECT Codeunit 50020 Symmetric Encryption Mgt
     END;
 
     [TryFunction]
-    [LineStart(592)]
+    [LineStart(582)]
     LOCAL PROCEDURE TryCreateSymmetricAlgorithm@1000000025(VAR DotNet_SymmetricAlgorithm@1000000005 : Codeunit DotNet_SymmetricAlgorithm);
+    VAR
+      DotNet_CipherMode@1000000000 : Codeunit DotNet_CipherMode;
+      DotNet_PaddingMode@1000000001 : Codeunit DotNet_PaddingMode;
     BEGIN
 
       if (DotNet_ArrayIV.Length = 0) or (DotNet_ArrayIV.Length = 0) then
         Error(E_NO_CIPHER);
 
+      DotNet_CipherMode.SetCipherMode(DotNetCipherMode);
+      DotNet_PaddingMode.SetPaddingMode(DotNetPaddingMode);
+
       DotNet_SymmetricAlgorithm.Create(SymmetricAlgorithm);
-      if Mode > 0 then DotNet_SymmetricAlgorithm.SetMode(Mode);
+      DotNet_SymmetricAlgorithm.SetMode(DotNet_CipherMode);
       if BlockSize > 0 then DotNet_SymmetricAlgorithm.SetBlockSize(BlockSize);
-      if Padding > 0 then DotNet_SymmetricAlgorithm.SetPadding(Padding);
+      DotNet_SymmetricAlgorithm.SetPadding(DotNet_PaddingMode);
       if KeySize > 0 then DotNet_SymmetricAlgorithm.SetKeySize(KeySize);
       DotNet_SymmetricAlgorithm.SetKey(DotNet_ArrayKey);
       DotNet_SymmetricAlgorithm.SetIV(DotNet_ArrayIV);
     END;
 
     [TryFunction]
-    [LineStart(605)]
+    [LineStart(598)]
     LOCAL PROCEDURE TrySetCipher@1000000016(VAR TempBlob@1000000000 : Record TempBlob);
     VAR
       IStream@1000000001 : InStream;

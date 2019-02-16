@@ -17,86 +17,66 @@ OBJECT Codeunit 51014 Test_DotNet_CryptoStream
   CODE
   {
     VAR
-      Assert@1001 : Codeunit 130000;
-      IsInitialized@1000000002 : Boolean;
-
-    LOCAL PROCEDURE Initialize@1000000005();
-    BEGIN
-      IF IsInitialized THEN
-        EXIT;
-      IsInitialized := TRUE;
-    END;
+      Assert@1001 : Codeunit Assert;
 
     [Test]
+    [LineStart(812)]
     PROCEDURE TestCryptoOutStream@1000000000();
     VAR
-      DotNet_SymmetricAlgorithm@1000000001 : Codeunit 50010;
-      DotNet_ICryptoTransform@1000000000 : Codeunit 50013;
-      DotNet_CryptoStream@1000000005 : Codeunit 50014;
-      DotNetSymmetricAlgorithm@1000000003 : DotNet "'mscorlib'.System.Security.Cryptography.SymmetricAlgorithm";
-      DotNetICryptoTransform@1000000002 : DotNet "'mscorlib'.System.Security.Cryptography.ICryptoTransform";
-      DotNetCryptoStream@1000000004 : DotNet "'mscorlib'.System.Security.Cryptography.CryptoStream";
-      Algorithm@1000000006 : 'Aes,DES,RC2,Rijndael,TripleDES';
-      TempBlob@1000000007 : TEMPORARY Record 99008535;
+      DotNet_SymmetricAlgorithm@1000000001 : Codeunit DotNet_SymmetricAlgorithm;
+      DotNet_ICryptoTransform@1000000000 : Codeunit DotNet_ICryptoTransform;
+      DotNet_CryptoStream@1000000005 : Codeunit DotNet_CryptoStream;
+      TempBlob@1000000007 : TEMPORARY Record TempBlob;
       OStream@1000000008 : OutStream;
     BEGIN
       // [WHEN] OutStream is initialized
-      CLEAR(TempBlob.Blob);
-      TempBlob.Blob.CREATEOUTSTREAM(OStream);
+      Clear(TempBlob.Blob);
+      TempBlob.Blob.CreateOutStream(OStream);
       // [WHEN] AES Symmetric Algorithm (with default settings) is created
-      DotNet_SymmetricAlgorithm.Create(Algorithm::Aes);
-      DotNet_SymmetricAlgorithm.GetSymmetricAlgorithm(DotNetSymmetricAlgorithm);
+      DotNet_SymmetricAlgorithm.Create('Aes');
       // [WHEN] Encryptor transform is created
-      DotNetICryptoTransform := DotNetSymmetricAlgorithm.CreateEncryptor();
-      DotNet_ICryptoTransform.SetICryptoTransform(DotNetICryptoTransform);
+      DotNet_SymmetricAlgorithm.CreateEncryptor(DotNet_ICryptoTransform);
       // [WHEN] Encrypting crypto outstream is created
       DotNet_CryptoStream.CryptoOutStream(OStream, DotNet_ICryptoTransform);
-      DotNet_CryptoStream.GetCryptoStream(DotNetCryptoStream);
       // [THEN] Encrypting crypto outstream is not NULL
-      Assert.IsFalse(ISNULL(DotNetCryptoStream), 'CryptoStream CryptoOutStream failed');
+      Assert.IsTrue(DotNet_CryptoStream.CanWrite, 'CryptoStream CryptoOutStream failed');
     END;
 
     [Test]
+    [LineStart(825)]
     PROCEDURE TestCryptoInStream@1000000001();
     VAR
-      DotNet_SymmetricAlgorithm@1000000001 : Codeunit 50010;
-      DotNet_ICryptoTransform@1000000000 : Codeunit 50013;
-      DotNet_CryptoStream@1000000005 : Codeunit 50014;
-      DotNet_Array@1000000010 : Codeunit 3000;
-      DotNetSymmetricAlgorithm@1000000003 : DotNet "'mscorlib'.System.Security.Cryptography.SymmetricAlgorithm";
-      DotNetICryptoTransform@1000000002 : DotNet "'mscorlib'.System.Security.Cryptography.ICryptoTransform";
-      DotNetCryptoStream@1000000007 : DotNet "'mscorlib'.System.Security.Cryptography.CryptoStream";
-      Algorithm@1000000008 : 'Aes,DES,RC2,Rijndael,TripleDES';
-      TempBlob@1000000004 : TEMPORARY Record 99008535;
+      DotNet_SymmetricAlgorithm@1000000001 : Codeunit DotNet_SymmetricAlgorithm;
+      DotNet_ICryptoTransform@1000000000 : Codeunit DotNet_ICryptoTransform;
+      DotNet_CryptoStream@1000000005 : Codeunit DotNet_CryptoStream;
+      DotNet_Array@1000000010 : Codeunit DotNet_Array;
+      TempBlob@1000000004 : TEMPORARY Record TempBlob;
       IStream@1000000006 : InStream;
       Index@1000000009 : Integer;
     BEGIN
       // [WHEN] InStream is initialized
-      CLEAR(TempBlob.Blob);
+      Clear(TempBlob.Blob);
       TempBlob.WriteAsText('Lorem ipsum dolor', TEXTENCODING::UTF8);
-      TempBlob.Blob.CREATEINSTREAM(IStream);
+      TempBlob.Blob.CreateInStream(IStream);
       // [WHEN] AES Symmetric Algorithm (with 256 keysize, 128 blocksize) is created)
-      DotNet_SymmetricAlgorithm.Create(Algorithm::Aes);
+      DotNet_SymmetricAlgorithm.Create('Aes');
       DotNet_SymmetricAlgorithm.SetKeySize(256);
       // [WHEN] Any key vector is initialized
       DotNet_Array.ByteArray(32);
-      FOR Index := 0 TO DotNet_Array.Length-1 DO
+      for Index := 0 to DotNet_Array.Length-1 do
         DotNet_Array.SetByteValue(Index, Index);
       DotNet_SymmetricAlgorithm.SetKey(DotNet_Array);
       // [WHEN] Any IV vector is initialized
       DotNet_Array.ByteArray(16);
-      FOR Index := 0 TO DotNet_Array.Length-1 DO
+      for Index := 0 to DotNet_Array.Length-1 do
         DotNet_Array.SetByteValue(Index, Index);
       DotNet_SymmetricAlgorithm.SetIV(DotNet_Array);
-      DotNet_SymmetricAlgorithm.GetSymmetricAlgorithm(DotNetSymmetricAlgorithm);
       // [WHEN] Decryptor transform is created
-      DotNetICryptoTransform := DotNetSymmetricAlgorithm.CreateDecryptor();
-      DotNet_ICryptoTransform.SetICryptoTransform(DotNetICryptoTransform);
+      DotNet_SymmetricAlgorithm.CreateDecryptor(DotNet_ICryptoTransform);
       // [WHEN] Decrypting crypto instream is created
       DotNet_CryptoStream.CryptoInStream(IStream, DotNet_ICryptoTransform);
-      DotNet_CryptoStream.GetCryptoStream(DotNetCryptoStream);
       // [THEN] Decrypting crypto outstream is not NULL
-      Assert.IsFalse(ISNULL(DotNetCryptoStream), 'CryptoStream CryptoInStream failed');
+      Assert.IsTrue(DotNet_CryptoStream.CanWrite, 'CryptoStream CryptoInStream failed');
     END;
 
     BEGIN

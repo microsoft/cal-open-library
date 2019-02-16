@@ -17,118 +17,150 @@ OBJECT Codeunit 51010 Test_DotNet_SymmetricAlgorithm
   CODE
   {
     VAR
-      Assert@1001 : Codeunit 130000;
+      Assert@1001 : Codeunit Assert;
       IsInitialized@1000000002 : Boolean;
       Algorithm@1000000000 : 'Aes,DES,RC2,Rijndael,TripleDES';
       Mode@1000000003 : ',CBC,ECB,OFB,CFB,CTS';
       Padding@1000000001 : ',None,PKCS7,Zeros,ANSIX923,ISO10126';
 
-    LOCAL PROCEDURE Initialize@1000000005();
+    [Test]
+    [LineStart(619)]
+    PROCEDURE TestSymmetricAlgorithmCreateAes@1000000006();
+    VAR
+      DotNet_SymmetricAlgorithm@1000000000 : Codeunit DotNet_SymmetricAlgorithm;
+      DotNetSymmetricAlgorithm@1000000001 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Security.Cryptography.SymmetricAlgorithm";
     BEGIN
-      IF IsInitialized THEN
-        EXIT;
-      IsInitialized := TRUE;
+      SymmetricAlgorithmCreateAes();
     END;
 
     [Test]
-    PROCEDURE TestSymmetricAlgorithmCreate@1000000006();
+    [LineStart(622)]
+    PROCEDURE TestSymmetricAlgorithmCreateDES@1000000014();
     VAR
-      DotNet_SymmetricAlgorithm@1000000000 : Codeunit 50010;
+      DotNet_SymmetricAlgorithm@1000000000 : Codeunit DotNet_SymmetricAlgorithm;
       DotNetSymmetricAlgorithm@1000000001 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Security.Cryptography.SymmetricAlgorithm";
     BEGIN
-      Initialize();
-      SymmetricAlgorithmCreateAes();
       SymmetricAlgorithmCreateDES();
+    END;
+
+    [Test]
+    [LineStart(625)]
+    PROCEDURE TestSymmetricAlgorithmCreateRC2@1000000015();
+    VAR
+      DotNet_SymmetricAlgorithm@1000000000 : Codeunit DotNet_SymmetricAlgorithm;
+      DotNetSymmetricAlgorithm@1000000001 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Security.Cryptography.SymmetricAlgorithm";
+    BEGIN
       SymmetricAlgorithmCreateRC2();
+    END;
+
+    [Test]
+    [LineStart(628)]
+    PROCEDURE TestSymmetricAlgorithmCreateRijndael@1000000016();
+    VAR
+      DotNet_SymmetricAlgorithm@1000000000 : Codeunit DotNet_SymmetricAlgorithm;
+      DotNetSymmetricAlgorithm@1000000001 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Security.Cryptography.SymmetricAlgorithm";
+    BEGIN
       SymmetricAlgorithmCreateRijndael();
+    END;
+
+    [Test]
+    [LineStart(631)]
+    PROCEDURE TestSymmetricAlgorithmCreateTripleDES@1000000017();
+    VAR
+      DotNet_SymmetricAlgorithm@1000000000 : Codeunit DotNet_SymmetricAlgorithm;
+      DotNetSymmetricAlgorithm@1000000001 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Security.Cryptography.SymmetricAlgorithm";
+    BEGIN
       SymmetricAlgorithmCreateTripleDES();
     END;
 
     [Test]
+    [LineStart(634)]
     PROCEDURE TestSetGetMode@1000000008();
     VAR
-      DotNet_SymmetricAlgorithm@1000000001 : Codeunit 50010;
-      CipherMode@1000000000 : ',CBC,ECB,OFB,CFB,CTS';
+      DotNet_SymmetricAlgorithm@1000000001 : Codeunit DotNet_SymmetricAlgorithm;
+      DotNet_CipherMode@1000000002 : Codeunit DotNet_CipherMode;
+      DotNet_CipherMode2@1000000003 : Codeunit DotNet_CipherMode;
     BEGIN
-      Initialize();
-      DotNet_SymmetricAlgorithm.Create(Algorithm::Aes);
-      DotNet_SymmetricAlgorithm.SetMode(Mode::CBC);
-      DotNet_SymmetricAlgorithm.GetMode(CipherMode);
-      Assert.AreEqual(Mode::CBC, CipherMode, 'SymmetricAlgorithm Get/Set Mode failed');
+      DotNet_SymmetricAlgorithm.Create('Aes');
+      DotNet_CipherMode.CBC();
+      DotNet_SymmetricAlgorithm.SetMode(DotNet_CipherMode);
+      DotNet_SymmetricAlgorithm.GetMode(DotNet_CipherMode2);
+      Assert.AreEqual(DotNet_CipherMode.Value, DotNet_CipherMode2.Value, 'SymmetricAlgorithm Get/Set Mode failed');
     END;
 
     [Test]
+    [LineStart(641)]
     PROCEDURE TestSetGetPadding@1000000007();
     VAR
-      DotNet_SymmetricAlgorithm@1000000000 : Codeunit 50010;
-      PaddingMode@1000000001 : ',None,PKCS7,Zeros,ANSIX923,ISO10126';
+      DotNet_SymmetricAlgorithm@1000000000 : Codeunit DotNet_SymmetricAlgorithm;
+      DotNet_PaddingMode@1000000001 : Codeunit DotNet_PaddingMode;
+      DotNet_PaddingMode2@1000000002 : Codeunit DotNet_PaddingMode;
     BEGIN
-      Initialize();
-      DotNet_SymmetricAlgorithm.Create(Algorithm::Aes);
-      DotNet_SymmetricAlgorithm.SetMode(Padding::Zeros);
-      DotNet_SymmetricAlgorithm.GetMode(PaddingMode);
-      Assert.AreEqual(Padding::Zeros, PaddingMode, 'SymmetricAlgorithm Get/Set Padding failed');
+      DotNet_SymmetricAlgorithm.Create('Aes');
+      DotNet_PaddingMode.Zeros();
+      DotNet_SymmetricAlgorithm.SetPadding(DotNet_PaddingMode);
+      DotNet_SymmetricAlgorithm.GetPadding(DotNet_PaddingMode2);
+      Assert.AreEqual(DotNet_PaddingMode.Value, DotNet_PaddingMode.Value, 'SymmetricAlgorithm Get/Set Padding failed');
     END;
 
     [Test]
+    [LineStart(648)]
     PROCEDURE TestSetGetBlockSize@1000000012();
     VAR
-      DotNet_SymmetricAlgorithm@1000000000 : Codeunit 50010;
+      DotNet_SymmetricAlgorithm@1000000000 : Codeunit DotNet_SymmetricAlgorithm;
       BlockSize@1000000001 : Integer;
     BEGIN
-      Initialize();
-      DotNet_SymmetricAlgorithm.Create(Algorithm::Aes);
+      DotNet_SymmetricAlgorithm.Create('Aes');
       DotNet_SymmetricAlgorithm.SetBlockSize(128);
-      DotNet_SymmetricAlgorithm.GetBlockSize(BlockSize);
+      BlockSize := DotNet_SymmetricAlgorithm.GetBlockSize();
       Assert.AreEqual(128, BlockSize, 'SymmetricAlgorithm Get/Set Blocksize failed');
     END;
 
     [Test]
+    [LineStart(654)]
     PROCEDURE TestSetGetKeySize@1000000009();
     VAR
-      DotNet_SymmetricAlgorithm@1000000000 : Codeunit 50010;
+      DotNet_SymmetricAlgorithm@1000000000 : Codeunit DotNet_SymmetricAlgorithm;
       KeySize@1000000001 : Integer;
     BEGIN
-      Initialize();
-      DotNet_SymmetricAlgorithm.Create(Algorithm::Aes);
+      DotNet_SymmetricAlgorithm.Create('Aes');
       DotNet_SymmetricAlgorithm.SetKeySize(256);
-      DotNet_SymmetricAlgorithm.GetKeySize(KeySize);
+      KeySize := DotNet_SymmetricAlgorithm.GetKeySize();
       Assert.AreEqual(256, KeySize, 'SymmetricAlgorithm Get/Set KeySize failed');
     END;
 
     [Test]
+    [LineStart(660)]
     PROCEDURE TestSetGetFeedbackSize@1000000013();
     VAR
-      DotNet_SymmetricAlgorithm@1000000000 : Codeunit 50010;
+      DotNet_SymmetricAlgorithm@1000000000 : Codeunit DotNet_SymmetricAlgorithm;
       FeedbackSize@1000000001 : Integer;
     BEGIN
-      Initialize();
-      DotNet_SymmetricAlgorithm.Create(Algorithm::Aes);
+      DotNet_SymmetricAlgorithm.Create('Aes');
       DotNet_SymmetricAlgorithm.SetBlockSize(128);
       DotNet_SymmetricAlgorithm.SetFeedbackSize(64);
-      DotNet_SymmetricAlgorithm.GetFeedbackSize(FeedbackSize);
+      FeedbackSize := DotNet_SymmetricAlgorithm.GetFeedbackSize();
       Assert.AreEqual(64, FeedbackSize, 'SymmetricAlgorithm Get/Set FeedbackSize failed');
     END;
 
     [Test]
+    [LineStart(667)]
     PROCEDURE TestSetGetKey@1000000010();
     VAR
-      DotNet_SymmetricAlgorithm@1000000000 : Codeunit 50010;
-      DotNet_Array@1000000001 : Codeunit 3000;
-      DotNet_ArrayKey@1000000002 : Codeunit 3000;
+      DotNet_SymmetricAlgorithm@1000000000 : Codeunit DotNet_SymmetricAlgorithm;
+      DotNet_Array@1000000001 : Codeunit DotNet_Array;
+      DotNet_ArrayKey@1000000002 : Codeunit DotNet_Array;
       Index@1000000003 : Integer;
     BEGIN
-      Initialize();
-
       DotNet_Array.ByteArray(32);
-      FOR Index := 0 TO DotNet_Array.Length-1 DO
+      for Index := 0 to DotNet_Array.Length-1 do
         DotNet_Array.SetByteValue(Index, Index);
 
-      DotNet_SymmetricAlgorithm.Create(Algorithm::Aes);
+      DotNet_SymmetricAlgorithm.Create('Aes');
       DotNet_SymmetricAlgorithm.SetKeySize(256);
       DotNet_SymmetricAlgorithm.SetKey(DotNet_Array);
       DotNet_SymmetricAlgorithm.GetKey(DotNet_ArrayKey);
-      FOR Index := 0 TO DotNet_Array.Length-1 DO
+      for Index := 0 to DotNet_Array.Length-1 do
         Assert.AreEqual(
           DotNet_Array.GetValueAsInteger(Index),
           DotNet_ArrayKey.GetValueAsInteger(Index),
@@ -136,78 +168,82 @@ OBJECT Codeunit 51010 Test_DotNet_SymmetricAlgorithm
     END;
 
     [Test]
+    [LineStart(682)]
     PROCEDURE TestSetGetIV@1000000011();
     VAR
-      DotNet_SymmetricAlgorithm@1000000000 : Codeunit 50010;
-      DotNet_Array@1000000003 : Codeunit 3000;
-      DotNet_ArrayIV@1000000002 : Codeunit 3000;
+      DotNet_SymmetricAlgorithm@1000000000 : Codeunit DotNet_SymmetricAlgorithm;
+      DotNet_Array@1000000003 : Codeunit DotNet_Array;
+      DotNet_ArrayIV@1000000002 : Codeunit DotNet_Array;
       Index@1000000001 : Integer;
     BEGIN
-      Initialize();
-
       DotNet_Array.ByteArray(16);
-      FOR Index := 0 TO DotNet_Array.Length-1 DO
+      for Index := 0 to DotNet_Array.Length-1 do
         DotNet_Array.SetByteValue(Index, Index);
 
-      DotNet_SymmetricAlgorithm.Create(Algorithm::Aes);
+      DotNet_SymmetricAlgorithm.Create('Aes');
       DotNet_SymmetricAlgorithm.SetBlockSize(128);
       DotNet_SymmetricAlgorithm.SetIV(DotNet_Array);
       DotNet_SymmetricAlgorithm.GetIV(DotNet_ArrayIV);
-      FOR Index := 0 TO DotNet_Array.Length-1 DO
+      for Index := 0 to DotNet_Array.Length-1 do
         Assert.AreEqual(
           DotNet_Array.GetValueAsInteger(Index),
           DotNet_ArrayIV.GetValueAsInteger(Index),
           'SymmetricAlgorithm Get/Set IV failed');
     END;
 
+    [LineStart(697)]
     PROCEDURE SymmetricAlgorithmCreateAes@1000000000();
     VAR
-      DotNet_SymmetricAlgorithm@1000000000 : Codeunit 50010;
+      DotNet_SymmetricAlgorithm@1000000000 : Codeunit DotNet_SymmetricAlgorithm;
       DotNetSymmetricAlgorithm@1000000001 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Security.Cryptography.SymmetricAlgorithm";
     BEGIN
-      DotNet_SymmetricAlgorithm.Create(Algorithm::Aes);
+      DotNet_SymmetricAlgorithm.Create('Aes');
       DotNet_SymmetricAlgorithm.GetSymmetricAlgorithm(DotNetSymmetricAlgorithm);
-      Assert.IsFalse(ISNULL(DotNetSymmetricAlgorithm), 'SymmetricAlgorithm Create AES failed');
+      Assert.IsFalse(IsNull(DotNetSymmetricAlgorithm), 'SymmetricAlgorithm Create AES failed');
     END;
 
+    [LineStart(702)]
     PROCEDURE SymmetricAlgorithmCreateDES@1000000003();
     VAR
-      DotNet_SymmetricAlgorithm@1000000000 : Codeunit 50010;
+      DotNet_SymmetricAlgorithm@1000000000 : Codeunit DotNet_SymmetricAlgorithm;
       DotNetSymmetricAlgorithm@1000000001 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Security.Cryptography.SymmetricAlgorithm";
     BEGIN
-      DotNet_SymmetricAlgorithm.Create(Algorithm::DES);
+      DotNet_SymmetricAlgorithm.Create('DES');
       DotNet_SymmetricAlgorithm.GetSymmetricAlgorithm(DotNetSymmetricAlgorithm);
-      Assert.IsFalse(ISNULL(DotNetSymmetricAlgorithm), 'SymmetricAlgorithm Create DES failed');
+      Assert.IsFalse(IsNull(DotNetSymmetricAlgorithm), 'SymmetricAlgorithm Create DES failed');
     END;
 
+    [LineStart(707)]
     PROCEDURE SymmetricAlgorithmCreateRC2@1000000001();
     VAR
-      DotNet_SymmetricAlgorithm@1000000000 : Codeunit 50010;
+      DotNet_SymmetricAlgorithm@1000000000 : Codeunit DotNet_SymmetricAlgorithm;
       DotNetSymmetricAlgorithm@1000000001 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Security.Cryptography.SymmetricAlgorithm";
     BEGIN
-      DotNet_SymmetricAlgorithm.Create(Algorithm::RC2);
+      DotNet_SymmetricAlgorithm.Create('RC2');
       DotNet_SymmetricAlgorithm.GetSymmetricAlgorithm(DotNetSymmetricAlgorithm);
-      Assert.IsFalse(ISNULL(DotNetSymmetricAlgorithm), 'SymmetricAlgorithm Create RC2 failed');
+      Assert.IsFalse(IsNull(DotNetSymmetricAlgorithm), 'SymmetricAlgorithm Create RC2 failed');
     END;
 
+    [LineStart(712)]
     PROCEDURE SymmetricAlgorithmCreateRijndael@1000000002();
     VAR
-      DotNet_SymmetricAlgorithm@1000000000 : Codeunit 50010;
+      DotNet_SymmetricAlgorithm@1000000000 : Codeunit DotNet_SymmetricAlgorithm;
       DotNetSymmetricAlgorithm@1000000001 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Security.Cryptography.SymmetricAlgorithm";
     BEGIN
-      DotNet_SymmetricAlgorithm.Create(Algorithm::Rijndael);
+      DotNet_SymmetricAlgorithm.Create('Rijndael');
       DotNet_SymmetricAlgorithm.GetSymmetricAlgorithm(DotNetSymmetricAlgorithm);
-      Assert.IsFalse(ISNULL(DotNetSymmetricAlgorithm), 'SymmetricAlgorithm Create Rijndael failed');
+      Assert.IsFalse(IsNull(DotNetSymmetricAlgorithm), 'SymmetricAlgorithm Create Rijndael failed');
     END;
 
+    [LineStart(717)]
     PROCEDURE SymmetricAlgorithmCreateTripleDES@1000000004();
     VAR
-      DotNet_SymmetricAlgorithm@1000000000 : Codeunit 50010;
+      DotNet_SymmetricAlgorithm@1000000000 : Codeunit DotNet_SymmetricAlgorithm;
       DotNetSymmetricAlgorithm@1000000001 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Security.Cryptography.SymmetricAlgorithm";
     BEGIN
-      DotNet_SymmetricAlgorithm.Create(Algorithm::TripleDES);
+      DotNet_SymmetricAlgorithm.Create('TripleDES');
       DotNet_SymmetricAlgorithm.GetSymmetricAlgorithm(DotNetSymmetricAlgorithm);
-      Assert.IsFalse(ISNULL(DotNetSymmetricAlgorithm), 'SymmetricAlgorithm Create TripleDES failed');
+      Assert.IsFalse(IsNull(DotNetSymmetricAlgorithm), 'SymmetricAlgorithm Create TripleDES failed');
     END;
 
     BEGIN
