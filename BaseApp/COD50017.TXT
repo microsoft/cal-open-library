@@ -18,30 +18,24 @@ OBJECT Codeunit 50017 DotNet_CryptoStreamMode
       DotNetCryptoStreamMode@1000000000 : DotNet "'mscorlib'.System.Security.Cryptography.CryptoStreamMode";
 
     [External]
-    [LineStart(299)]
-    PROCEDURE Read@1000000000();
-    VAR
-      Mode@1000000000 : Integer;
+    PROCEDURE Read@1000000000() : Integer;
     BEGIN
       DotNetCryptoStreamMode := DotNetCryptoStreamMode.Read;
+      EXIT(DotNetCryptoStreamMode);
     END;
 
     [External]
-    [LineStart(302)]
-    PROCEDURE Write@1000000001();
-    VAR
-      Mode@1000000000 : Integer;
+    PROCEDURE Write@1000000001() : Integer;
     BEGIN
       DotNetCryptoStreamMode := DotNetCryptoStreamMode.Write;
+      EXIT(DotNetCryptoStreamMode);
     END;
 
-    [LineStart(305)]
     PROCEDURE GetCryptoStreamMode@1000000005(VAR DotNetCryptoStreamMode2@1000000000 : DotNet "'mscorlib'.System.Security.Cryptography.CryptoStreamMode");
     BEGIN
       DotNetCryptoStreamMode2 := DotNetCryptoStreamMode;
     END;
 
-    [LineStart(308)]
     PROCEDURE SetCryptoStreamMode@1000000006(VAR DotNetCryptoStreamMode2@1000000000 : DotNet "'mscorlib'.System.Security.Cryptography.CryptoStreamMode");
     BEGIN
       DotNetCryptoStreamMode := DotNetCryptoStreamMode2;

@@ -17,21 +17,20 @@ OBJECT Codeunit 51014 Test_DotNet_CryptoStream
   CODE
   {
     VAR
-      Assert@1001 : Codeunit Assert;
+      Assert@1001 : Codeunit 130000;
 
     [Test]
-    [LineStart(812)]
     PROCEDURE TestCryptoOutStream@1000000000();
     VAR
-      DotNet_SymmetricAlgorithm@1000000001 : Codeunit DotNet_SymmetricAlgorithm;
-      DotNet_ICryptoTransform@1000000000 : Codeunit DotNet_ICryptoTransform;
-      DotNet_CryptoStream@1000000005 : Codeunit DotNet_CryptoStream;
-      TempBlob@1000000007 : TEMPORARY Record TempBlob;
+      DotNet_SymmetricAlgorithm@1000000001 : Codeunit 50010;
+      DotNet_ICryptoTransform@1000000000 : Codeunit 50013;
+      DotNet_CryptoStream@1000000005 : Codeunit 50014;
+      TempBlob@1000000007 : TEMPORARY Record 99008535;
       OStream@1000000008 : OutStream;
     BEGIN
       // [WHEN] OutStream is initialized
-      Clear(TempBlob.Blob);
-      TempBlob.Blob.CreateOutStream(OStream);
+      CLEAR(TempBlob.Blob);
+      TempBlob.Blob.CREATEOUTSTREAM(OStream);
       // [WHEN] AES Symmetric Algorithm (with default settings) is created
       DotNet_SymmetricAlgorithm.Create('Aes');
       // [WHEN] Encryptor transform is created
@@ -43,32 +42,31 @@ OBJECT Codeunit 51014 Test_DotNet_CryptoStream
     END;
 
     [Test]
-    [LineStart(825)]
     PROCEDURE TestCryptoInStream@1000000001();
     VAR
-      DotNet_SymmetricAlgorithm@1000000001 : Codeunit DotNet_SymmetricAlgorithm;
-      DotNet_ICryptoTransform@1000000000 : Codeunit DotNet_ICryptoTransform;
-      DotNet_CryptoStream@1000000005 : Codeunit DotNet_CryptoStream;
-      DotNet_Array@1000000010 : Codeunit DotNet_Array;
-      TempBlob@1000000004 : TEMPORARY Record TempBlob;
+      DotNet_SymmetricAlgorithm@1000000001 : Codeunit 50010;
+      DotNet_ICryptoTransform@1000000000 : Codeunit 50013;
+      DotNet_CryptoStream@1000000005 : Codeunit 50014;
+      DotNet_Array@1000000010 : Codeunit 3000;
+      TempBlob@1000000004 : TEMPORARY Record 99008535;
       IStream@1000000006 : InStream;
       Index@1000000009 : Integer;
     BEGIN
       // [WHEN] InStream is initialized
-      Clear(TempBlob.Blob);
+      CLEAR(TempBlob.Blob);
       TempBlob.WriteAsText('Lorem ipsum dolor', TEXTENCODING::UTF8);
-      TempBlob.Blob.CreateInStream(IStream);
+      TempBlob.Blob.CREATEINSTREAM(IStream);
       // [WHEN] AES Symmetric Algorithm (with 256 keysize, 128 blocksize) is created)
       DotNet_SymmetricAlgorithm.Create('Aes');
       DotNet_SymmetricAlgorithm.SetKeySize(256);
       // [WHEN] Any key vector is initialized
       DotNet_Array.ByteArray(32);
-      for Index := 0 to DotNet_Array.Length-1 do
+      FOR Index := 0 TO DotNet_Array.Length-1 DO
         DotNet_Array.SetByteValue(Index, Index);
       DotNet_SymmetricAlgorithm.SetKey(DotNet_Array);
       // [WHEN] Any IV vector is initialized
       DotNet_Array.ByteArray(16);
-      for Index := 0 to DotNet_Array.Length-1 do
+      FOR Index := 0 TO DotNet_Array.Length-1 DO
         DotNet_Array.SetByteValue(Index, Index);
       DotNet_SymmetricAlgorithm.SetIV(DotNet_Array);
       // [WHEN] Decryptor transform is created

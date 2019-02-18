@@ -18,67 +18,54 @@ OBJECT Codeunit 50016 DotNet_PaddingMode
       DotNetPaddingMode@1000000000 : DotNet "'mscorlib'.System.Security.Cryptography.PaddingMode";
 
     [External]
-    [LineStart(272)]
-    PROCEDURE None@1000000000();
-    VAR
-      Mode@1000000000 : Integer;
+    PROCEDURE None@1000000000() : Integer;
     BEGIN
       DotNetPaddingMode := DotNetPaddingMode.None;
+      EXIT(DotNetPaddingMode);
     END;
 
     [External]
-    [LineStart(275)]
-    PROCEDURE PKCS7@1000000001();
-    VAR
-      Mode@1000000000 : Integer;
+    PROCEDURE PKCS7@1000000001() : Integer;
     BEGIN
       DotNetPaddingMode := DotNetPaddingMode.PKCS7;
+      EXIT(DotNetPaddingMode);
     END;
 
     [External]
-    [LineStart(278)]
-    PROCEDURE Zeros@1000000002();
-    VAR
-      Mode@1000000000 : Integer;
+    PROCEDURE Zeros@1000000002() : Integer;
     BEGIN
       DotNetPaddingMode := DotNetPaddingMode.Zeros;
+      EXIT(DotNetPaddingMode);
     END;
 
     [External]
-    [LineStart(281)]
-    PROCEDURE ANSIX923@1000000003();
-    VAR
-      Mode@1000000000 : Integer;
+    PROCEDURE ANSIX923@1000000003() : Integer;
     BEGIN
       DotNetPaddingMode := DotNetPaddingMode.ANSIX923;
+      EXIT(DotNetPaddingMode);
     END;
 
     [External]
-    [LineStart(284)]
-    PROCEDURE ISO10126@1000000004();
-    VAR
-      Mode@1000000000 : Integer;
+    PROCEDURE ISO10126@1000000004() : Integer;
     BEGIN
       DotNetPaddingMode := DotNetPaddingMode.ISO10126;
+      EXIT(DotNetPaddingMode);
     END;
 
     [External]
-    [LineStart(287)]
     PROCEDURE Value@1000000007() : Integer;
     VAR
       PaddingMode@1000000000 : Integer;
     BEGIN
       PaddingMode := DotNetPaddingMode;
-      exit(PaddingMode);
+      EXIT(PaddingMode);
     END;
 
-    [LineStart(291)]
     PROCEDURE GetPaddingMode@1000000005(VAR DotNetPaddingMode2@1000000000 : DotNet "'mscorlib'.System.Security.Cryptography.PaddingMode");
     BEGIN
       DotNetPaddingMode2 := DotNetPaddingMode;
     END;
 
-    [LineStart(294)]
     PROCEDURE SetPaddingMode@1000000006(VAR DotNetPaddingMode2@1000000000 : DotNet "'mscorlib'.System.Security.Cryptography.PaddingMode");
     BEGIN
       DotNetPaddingMode := DotNetPaddingMode2;

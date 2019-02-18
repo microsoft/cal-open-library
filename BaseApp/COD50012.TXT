@@ -19,17 +19,15 @@ OBJECT Codeunit 50012 DotNet_HashAlgorithm
       EALGORITHM@1000000001 : TextConst 'ENU=Invalid Hash Algorithm';
 
     [External]
-    [LineStart(154)]
     PROCEDURE Create@1000000005(HashAlgorithm@1000000000 : Text);
     BEGIN
-      if not (UpperCase(HashAlgorithm) in ['SHA1','MD5','SHA256','SHA384','SHA512']) then
-        Error(EALGORITHM);
+      IF NOT (UPPERCASE(HashAlgorithm) IN ['SHA1','MD5','SHA256','SHA384','SHA512']) THEN
+        ERROR(EALGORITHM);
       DotNetHashAlgorithm := DotNetHashAlgorithm.Create(HashAlgorithm);
     END;
 
     [External]
-    [LineStart(159)]
-    PROCEDURE ComputeHash@1000000001(VAR DotNet_ArrayData@1000000001 : Codeunit DotNet_Array;VAR DotNet_ArrayHash@1000 : Codeunit DotNet_Array);
+    PROCEDURE ComputeHash@1000000001(VAR DotNet_ArrayData@1000000001 : Codeunit 3000;VAR DotNet_ArrayHash@1000 : Codeunit 3000);
     VAR
       DotNetArray@1000000000 : DotNet "'mscorlib'.System.Array";
     BEGIN
@@ -38,40 +36,35 @@ OBJECT Codeunit 50012 DotNet_HashAlgorithm
     END;
 
     [External]
-    [LineStart(163)]
-    PROCEDURE ComputeHashFromText@1000000000(VAR Text@1000000001 : Text;VAR DotNet_Array@1000 : Codeunit DotNet_Array);
+    PROCEDURE ComputeHashFromText@1000000000(VAR Text@1000000001 : Text;VAR DotNet_Array@1000 : Codeunit 3000);
     VAR
       DotNetEncoding@1000000002 : DotNet "'mscorlib'.System.Text.Encoding";
-      DotNet_Encoding@1000000003 : Codeunit DotNet_Encoding;
+      DotNet_Encoding@1000000003 : Codeunit 3026;
     BEGIN
-      if Text = '' then
-        exit;
+      IF Text = '' THEN
+        EXIT;
       DotNet_Encoding.UTF8;
       DotNet_Encoding.GetEncoding(DotNetEncoding);
       DotNet_Array.SetArray(DotNetHashAlgorithm.ComputeHash(DotNetEncoding.GetBytes(Text)));
     END;
 
     [External]
-    [LineStart(170)]
-    PROCEDURE ComputeHashFromInStream@5(VAR IStream@1000000001 : InStream;VAR DotNet_Array@1000 : Codeunit DotNet_Array);
+    PROCEDURE ComputeHashFromInStream@5(VAR IStream@1000000001 : InStream;VAR DotNet_Array@1000 : Codeunit 3000);
     BEGIN
       DotNet_Array.SetArray(DotNetHashAlgorithm.ComputeHash(IStream));
     END;
 
     [External]
-    [LineStart(173)]
     PROCEDURE Dispose@1000000006();
     BEGIN
       DotNetHashAlgorithm.Dispose();
     END;
 
-    [LineStart(176)]
     PROCEDURE GetHashAlgorithm@2(VAR DotNetHashAlgorithm2@1000000001 : DotNet "'mscorlib'.System.Security.Cryptography.HashAlgorithm");
     BEGIN
       DotNetHashAlgorithm2 := DotNetHashAlgorithm;
     END;
 
-    [LineStart(179)]
     PROCEDURE SetHashAlgorithm@3(VAR DotNetHashAlgorithm2@1000000000 : DotNet "'mscorlib'.System.Security.Cryptography.HashAlgorithm");
     BEGIN
       DotNetHashAlgorithm := DotNetHashAlgorithm2;

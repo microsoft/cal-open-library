@@ -17,14 +17,13 @@ OBJECT Codeunit 51013 Test_DotNet_ICryptoTransform
   CODE
   {
     VAR
-      Assert@1001 : Codeunit Assert;
+      Assert@1001 : Codeunit 130000;
 
     [Test]
-    [LineStart(796)]
     PROCEDURE TestGetSet@1000000000();
     VAR
-      DotNet_SymmetricAlgorithm@1000000001 : Codeunit DotNet_SymmetricAlgorithm;
-      DotNet_ICryptoTransform@1000000000 : Codeunit DotNet_ICryptoTransform;
+      DotNet_SymmetricAlgorithm@1000000001 : Codeunit 50010;
+      DotNet_ICryptoTransform@1000000000 : Codeunit 50013;
       DotNetSymmetricAlgorithm@1000000003 : DotNet "'mscorlib'.System.Security.Cryptography.SymmetricAlgorithm";
       DotNetICryptoTransform@1000000002 : DotNet "'mscorlib'.System.Security.Cryptography.ICryptoTransform";
       DotNetICryptoTransform2@1000000004 : DotNet "'mscorlib'.System.Security.Cryptography.ICryptoTransform";
@@ -41,7 +40,7 @@ OBJECT Codeunit 51013 Test_DotNet_ICryptoTransform
       // [WHEN] DotNet Encryptor transform is retrieved
       DotNet_ICryptoTransform.GetICryptoTransform(DotNetICryptoTransform2);
       // [THEN] DotNet original and retrived must be equal
-      Assert.IsFalse(IsNull(DotNetICryptoTransform2), 'ICryptoTransform Get/Set failed');
+      Assert.IsFalse(ISNULL(DotNetICryptoTransform2), 'ICryptoTransform Get/Set failed');
     END;
 
     BEGIN

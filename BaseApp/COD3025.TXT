@@ -18,22 +18,19 @@ OBJECT Codeunit 3025 DotNet_StreamWriter
       DotNetStreamWriter@1001 : DotNet "'mscorlib'.System.IO.StreamWriter";
 
     [External]
-    [LineStart(2)]
     PROCEDURE Write@6(Text@1000 : Text);
     BEGIN
       DotNetStreamWriter.Write(Text);
     END;
 
     [External]
-    [LineStart(5)]
     PROCEDURE WriteLine@2(LineText@1000 : Text);
     BEGIN
       DotNetStreamWriter.WriteLine(LineText);
     END;
 
     [External]
-    [LineStart(8)]
-    PROCEDURE StreamWriter@1(VAR OutStream@1000 : OutStream;DotNet_Encoding@1001 : Codeunit DotNet_Encoding);
+    PROCEDURE StreamWriter@1(VAR OutStream@1000 : OutStream;DotNet_Encoding@1001 : Codeunit 3026);
     VAR
       DotNetEncoding@1002 : DotNet "'mscorlib'.System.Text.Encoding";
     BEGIN
@@ -42,8 +39,7 @@ OBJECT Codeunit 3025 DotNet_StreamWriter
     END;
 
     [External]
-    [LineStart(12)]
-    PROCEDURE StreamWriterFromDotNetStream@1000000001(VAR DotNet_Stream@1000 : Codeunit DotNet_Stream;DotNet_Encoding@1001 : Codeunit DotNet_Encoding);
+    PROCEDURE StreamWriterFromDotNetStream@1000000001(VAR DotNet_Stream@1000 : Codeunit 3034;DotNet_Encoding@1001 : Codeunit 3026);
     VAR
       DotNetEncoding@1002 : DotNet "'mscorlib'.System.Text.Encoding";
       DotNetStream@1000000000 : DotNet "'mscorlib'.System.IO.Stream";
@@ -54,40 +50,34 @@ OBJECT Codeunit 3025 DotNet_StreamWriter
     END;
 
     [External]
-    [LineStart(17)]
     PROCEDURE StreamWriterWithDefaultEncoding@7(VAR OutStream@1000 : OutStream);
     BEGIN
       DotNetStreamWriter := DotNetStreamWriter.StreamWriter(OutStream);
     END;
 
     [External]
-    [LineStart(20)]
     PROCEDURE Flush@3();
     BEGIN
       DotNetStreamWriter.Flush;
     END;
 
     [External]
-    [LineStart(23)]
     PROCEDURE Close@4();
     BEGIN
       DotNetStreamWriter.Close;
     END;
 
     [External]
-    [LineStart(26)]
     PROCEDURE Dispose@5();
     BEGIN
       DotNetStreamWriter.Dispose;
     END;
 
-    [LineStart(29)]
     PROCEDURE GetStreamWriter@1000000000(VAR DotNetStreamWriter2@1000000000 : DotNet "'mscorlib'.System.IO.StreamWriter");
     BEGIN
       DotNetStreamWriter2 := DotNetStreamWriter;
     END;
 
-    [LineStart(32)]
     PROCEDURE SetStreamWriter@1000000002(VAR DotNetStreamWriter2@1000000000 : DotNet "'mscorlib'.System.IO.StreamWriter");
     BEGIN
       DotNetStreamWriter := DotNetStreamWriter2;
