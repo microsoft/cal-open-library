@@ -163,6 +163,18 @@ OBJECT Codeunit 1234 Json Text Reader/Writer
       JSon := StringBuilder.ToString;
     END;
 
+    [External]
+    PROCEDURE WriteValue@17(Variable@1000 : Variant);
+    BEGIN
+      JsonTextWriter.WriteValue(Variable);
+    END;
+
+    [External]
+    PROCEDURE WriteProperty@18(VariableName@1000 : Text);
+    BEGIN
+      JsonTextWriter.WritePropertyName(VariableName);
+    END;
+
     BEGIN
     END.
   }
