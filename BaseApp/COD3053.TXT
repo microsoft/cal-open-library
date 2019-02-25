@@ -1,0 +1,79 @@
+OBJECT Codeunit 3053 DotNet_MatchCollection
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      DotNetMatchCollection@1000 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.RegularExpressions.MatchCollection";
+
+    [External]
+    PROCEDURE Count@1() : Integer;
+    BEGIN
+      EXIT(DotNetMatchCollection.Count);
+    END;
+
+    [External]
+    PROCEDURE Item@2(Index@1002 : Integer;VAR DotNet_Match@1001 : Codeunit 3052);
+    VAR
+      DotNetMatch@1000 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.RegularExpressions.Match";
+    BEGIN
+      DotNetMatch := DotNetMatchCollection.Item(Index);
+      DotNet_Match.SetDotNetMatch(DotNetMatch);
+    END;
+
+    [External]
+    PROCEDURE CopyTo@3(VAR DotNet_Array@1000 : Codeunit 3000;Index@1002 : Integer);
+    VAR
+      DotNetArray@1001 : DotNet "'mscorlib'.System.Array";
+    BEGIN
+      DotNetMatchCollection.CopyTo(DotNetArray,Index);
+      DotNet_Array.SetArray(DotNetArray);
+    END;
+
+    [External]
+    PROCEDURE Equals@4(VAR DotNet_MatchCollection@1000 : Codeunit 3053) : Boolean;
+    VAR
+      DotNetMatches@1001 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.RegularExpressions.MatchCollection";
+    BEGIN
+      DotNet_MatchCollection.GetMatchCollection(DotNetMatches);
+      EXIT(DotNetMatchCollection.Equals(DotNetMatches));
+    END;
+
+    [External]
+    PROCEDURE GetHashCode@5() : Integer;
+    BEGIN
+      EXIT(DotNetMatchCollection.GetHashCode());
+    END;
+
+    [External]
+    PROCEDURE IsDotNetNull@8() : Boolean;
+    BEGIN
+      EXIT(ISNULL(DotNetMatchCollection));
+    END;
+
+    PROCEDURE GetMatchCollection@6(VAR DotNetMatchCollection2@1000 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.RegularExpressions.MatchCollection");
+    BEGIN
+      DotNetMatchCollection2 := DotNetMatchCollection;
+    END;
+
+    PROCEDURE SetMatchCollection@7(VAR DotNetMatchCollection2@1000 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.RegularExpressions.MatchCollection");
+    BEGIN
+      DotNetMatchCollection := DotNetMatchCollection2;
+    END;
+
+    BEGIN
+    END.
+  }
+}
+

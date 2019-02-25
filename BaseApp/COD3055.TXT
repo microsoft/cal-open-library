@@ -1,0 +1,88 @@
+OBJECT Codeunit 3055 DotNet_GroupCollection
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      DotNetGroupCollection@1000 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.RegularExpressions.GroupCollection";
+
+    [External]
+    PROCEDURE Count@1() : Integer;
+    BEGIN
+      EXIT(DotNetGroupCollection.Count);
+    END;
+
+    [External]
+    PROCEDURE Item@2(GroupNumber@1000 : Integer;VAR DotNet_Group@1002 : Codeunit 3054);
+    VAR
+      DotNetGroup@1001 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.RegularExpressions.Group";
+    BEGIN
+      DotNetGroup := DotNetGroupCollection.Item(GroupNumber);
+      DotNet_Group.SetGroup(DotNetGroup);
+    END;
+
+    [External]
+    PROCEDURE ItemGroupName@3(GroupName@1000 : Text;VAR DotNet_Group@1001 : Codeunit 3054);
+    VAR
+      DotNetGroup@1002 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.RegularExpressions.Group";
+    BEGIN
+      DotNetGroup := DotNetGroupCollection.Item(GroupName);
+      DotNet_Group.SetGroup(DotNetGroup);
+    END;
+
+    [External]
+    PROCEDURE CopyTo@4(VAR DotNet_Array@1000 : Codeunit 3000;Index@1002 : Integer);
+    VAR
+      DotNetArray@1001 : DotNet "'mscorlib'.System.Array";
+    BEGIN
+      DotNetGroupCollection.CopyTo(DotNetArray,Index);
+      DotNet_Array.SetArray(DotNetArray);
+    END;
+
+    [External]
+    PROCEDURE Equals@5(VAR DotNet_GroupCollection@1000 : Codeunit 3055) : Boolean;
+    VAR
+      DotNetGroups@1001 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.RegularExpressions.GroupCollection";
+    BEGIN
+      DotNet_GroupCollection.GetGroupCollection(DotNetGroups);
+      EXIT(DotNetGroupCollection.Equals(DotNetGroups));
+    END;
+
+    [External]
+    PROCEDURE GetHashCode@7() : Integer;
+    BEGIN
+      EXIT(DotNetGroupCollection.GetHashCode());
+    END;
+
+    [External]
+    PROCEDURE IsDotNetNull@10() : Boolean;
+    BEGIN
+      EXIT(ISNULL(DotNetGroupCollection));
+    END;
+
+    PROCEDURE GetGroupCollection@8(VAR DotNetGroupCollection2@1000 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.RegularExpressions.GroupCollection");
+    BEGIN
+      DotNetGroupCollection2 := DotNetGroupCollection;
+    END;
+
+    PROCEDURE SetGroupCollection@9(VAR DotNetGroupCollection2@1000 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.RegularExpressions.GroupCollection");
+    BEGIN
+      DotNetGroupCollection := DotNetGroupCollection2;
+    END;
+
+    BEGIN
+    END.
+  }
+}
+

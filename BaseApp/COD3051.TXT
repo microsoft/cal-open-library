@@ -1,0 +1,128 @@
+OBJECT Codeunit 3051 DotNet_RegexOptions
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      DotNetRegexOptions@1000 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.RegularExpressions.RegexOptions";
+
+    [External]
+    PROCEDURE Compiled@1() : Integer;
+    BEGIN
+      DotNetRegexOptions := DotNetRegexOptions.Compiled;
+      EXIT(DotNetRegexOptions);
+    END;
+
+    [External]
+    PROCEDURE CultureInvariant@2() : Integer;
+    BEGIN
+      DotNetRegexOptions := DotNetRegexOptions.CultureInvariant;
+      EXIT(DotNetRegexOptions);
+    END;
+
+    [External]
+    PROCEDURE ECMAScript@3() : Integer;
+    BEGIN
+      DotNetRegexOptions := DotNetRegexOptions.ECMAScript;
+      EXIT(DotNetRegexOptions);
+    END;
+
+    [External]
+    PROCEDURE ExplicitCapture@4() : Integer;
+    BEGIN
+      DotNetRegexOptions := DotNetRegexOptions.ExplicitCapture;
+      EXIT(DotNetRegexOptions);
+    END;
+
+    [External]
+    PROCEDURE IgnoreCase@5() : Integer;
+    BEGIN
+      DotNetRegexOptions := DotNetRegexOptions.IgnoreCase;
+      EXIT(DotNetRegexOptions);
+    END;
+
+    [External]
+    PROCEDURE IgnorePatternWhitespace@6() : Integer;
+    BEGIN
+      DotNetRegexOptions := DotNetRegexOptions.IgnorePatternWhitespace;
+      EXIT(DotNetRegexOptions);
+    END;
+
+    [External]
+    PROCEDURE Multiline@7() : Integer;
+    BEGIN
+      DotNetRegexOptions := DotNetRegexOptions.Multiline;
+      EXIT(DotNetRegexOptions);
+    END;
+
+    [External]
+    PROCEDURE None@8() : Integer;
+    BEGIN
+      DotNetRegexOptions := DotNetRegexOptions.None;
+      EXIT(DotNetRegexOptions);
+    END;
+
+    [External]
+    PROCEDURE RightToLeft@9() : Integer;
+    BEGIN
+      DotNetRegexOptions := DotNetRegexOptions.RightToLeft;
+      EXIT(DotNetRegexOptions);
+    END;
+
+    [External]
+    PROCEDURE Singleline@10() : Integer;
+    BEGIN
+      DotNetRegexOptions := DotNetRegexOptions.Singleline;
+      EXIT(DotNetRegexOptions);
+    END;
+
+    [External]
+    PROCEDURE ToString@11() : Text;
+    BEGIN
+      EXIT(DotNetRegexOptions.ToString());
+    END;
+
+    [External]
+    PROCEDURE ToInteger@12() : Integer;
+    BEGIN
+      EXIT(DotNetRegexOptions);
+    END;
+
+    [External]
+    PROCEDURE FromInteger@16(Value@1000 : Integer);
+    BEGIN
+      DotNetRegexOptions := Value;
+    END;
+
+    [External]
+    PROCEDURE IsDotNetNull@15() : Boolean;
+    BEGIN
+      EXIT(ISNULL(DotNetRegexOptions));
+    END;
+
+    PROCEDURE GetRegexOptions@13(VAR DotNetRegexOptions2@1000 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.RegularExpressions.RegexOptions");
+    BEGIN
+      DotNetRegexOptions2 := DotNetRegexOptions;
+    END;
+
+    PROCEDURE SetRegexOptions@14(VAR DotNetRegexOptions2@1000 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.RegularExpressions.RegexOptions");
+    BEGIN
+      DotNetRegexOptions := DotNetRegexOptions2;
+    END;
+
+    BEGIN
+    END.
+  }
+}
+

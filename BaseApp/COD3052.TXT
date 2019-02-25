@@ -1,0 +1,109 @@
+OBJECT Codeunit 3052 DotNet_Match
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      DotNetMatch@1000 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.RegularExpressions.Match";
+
+    [External]
+    PROCEDURE Groups@1(VAR DotNet_GroupCollection@1000 : Codeunit 3055);
+    VAR
+      DotNetGroups@1001 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.RegularExpressions.GroupCollection";
+    BEGIN
+      DotNetGroups := DotNetMatch.Groups;
+      DotNet_GroupCollection.SetGroupCollection(DotNetGroups);
+    END;
+
+    [External]
+    PROCEDURE Index@2() : Integer;
+    BEGIN
+      EXIT(DotNetMatch.Index);
+    END;
+
+    [External]
+    PROCEDURE Length@3() : Integer;
+    BEGIN
+      EXIT(DotNetMatch.Length);
+    END;
+
+    [External]
+    PROCEDURE Name@4() : Text;
+    BEGIN
+      EXIT(DotNetMatch.Name);
+    END;
+
+    [External]
+    PROCEDURE Success@5() : Boolean;
+    BEGIN
+      EXIT(DotNetMatch.Success);
+    END;
+
+    [External]
+    PROCEDURE Value@6() : Text;
+    BEGIN
+      EXIT(DotNetMatch.Value);
+    END;
+
+    [External]
+    PROCEDURE Equals@7(VAR DotNet_Match@1001 : Codeunit 3052) : Boolean;
+    VAR
+      DotNetMatch2@1000 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.RegularExpressions.Match";
+    BEGIN
+      DotNet_Match.GetDotNetMatch(DotNetMatch2);
+      EXIT(DotNetMatch.Equals(DotNetMatch2));
+    END;
+
+    [External]
+    PROCEDURE GetHashCode@8() : Integer;
+    BEGIN
+      EXIT(DotNetMatch.GetHashCode());
+    END;
+
+    [External]
+    PROCEDURE NextMatch@9(VAR NextDotNet_Match@1000 : Codeunit 3052);
+    VAR
+      NextDotNetMatch@1001 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.RegularExpressions.Match";
+    BEGIN
+      NextDotNetMatch := DotNetMatch.NextMatch();
+      NextDotNet_Match.SetDotNetMatch(NextDotNetMatch);
+    END;
+
+    [External]
+    PROCEDURE Result@10(Replacement@1000 : Text) : Text;
+    BEGIN
+      EXIT(DotNetMatch.Result(Replacement));
+    END;
+
+    [External]
+    PROCEDURE IsDotNetNull@15() : Boolean;
+    BEGIN
+      EXIT(ISNULL(DotNetMatch));
+    END;
+
+    PROCEDURE GetDotNetMatch@13(VAR DotNetMatch2@1000 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.RegularExpressions.Match");
+    BEGIN
+      DotNetMatch2 := DotNetMatch;
+    END;
+
+    PROCEDURE SetDotNetMatch@14(VAR DotNetMatch2@1000 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.RegularExpressions.Match");
+    BEGIN
+      DotNetMatch := DotNetMatch2;
+    END;
+
+    BEGIN
+    END.
+  }
+}
+

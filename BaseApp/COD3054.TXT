@@ -1,0 +1,94 @@
+OBJECT Codeunit 3054 DotNet_Group
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      DotNetGroup@1000 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.RegularExpressions.Group";
+
+    [External]
+    PROCEDURE Captures@1(VAR DotNet_CaptureCollection@1000 : Codeunit 3057);
+    VAR
+      DotNetCaptures@1001 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.RegularExpressions.CaptureCollection";
+    BEGIN
+      DotNetCaptures := DotNetGroup.Captures;
+      DotNet_CaptureCollection.SetCaptureCollection(DotNetCaptures);
+    END;
+
+    [External]
+    PROCEDURE Index@2() : Integer;
+    BEGIN
+      EXIT(DotNetGroup.Index);
+    END;
+
+    [External]
+    PROCEDURE Length@3() : Integer;
+    BEGIN
+      EXIT(DotNetGroup.Length);
+    END;
+
+    [External]
+    PROCEDURE Name@4() : Text;
+    BEGIN
+      EXIT(DotNetGroup.Name);
+    END;
+
+    [External]
+    PROCEDURE Success@5() : Boolean;
+    BEGIN
+      EXIT(DotNetGroup.Success);
+    END;
+
+    [External]
+    PROCEDURE Value@6() : Text;
+    BEGIN
+      EXIT(DotNetGroup.Value);
+    END;
+
+    [External]
+    PROCEDURE Equals@7(VAR DotNet_Group@1000 : Codeunit 3054) : Boolean;
+    VAR
+      DotNetGroup2@1001 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.RegularExpressions.Match";
+    BEGIN
+      DotNet_Group.GetGroup(DotNetGroup2);
+      EXIT(DotNetGroup.Equals(DotNetGroup2));
+    END;
+    
+    [External]
+    PROCEDURE GetHashCode@9() : Integer;
+    BEGIN
+      EXIT(DotNetGroup.GetHashCode());
+    END;
+
+    [External]
+    PROCEDURE IsDotNetNull@13() : Boolean;
+    BEGIN
+      EXIT(ISNULL(DotNetGroup));
+    END;
+
+    PROCEDURE GetGroup@11(VAR DotNetGroup2@1000 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.RegularExpressions.Group");
+    BEGIN
+      DotNetGroup2 := DotNetGroup;
+    END;
+
+    PROCEDURE SetGroup@12(VAR DotNetGroup2@1000 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.RegularExpressions.Group");
+    BEGIN
+      DotNetGroup := DotNetGroup2;
+    END;
+
+    BEGIN
+    END.
+  }
+}
+
