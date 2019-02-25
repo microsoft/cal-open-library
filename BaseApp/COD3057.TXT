@@ -1,0 +1,86 @@
+OBJECT Codeunit 3057 DotNet_CaptureCollection
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      DotNetCaptureCollection@1000 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.RegularExpressions.CaptureCollection";
+
+    [External]
+    PROCEDURE Count@1() : Integer;
+    BEGIN
+      EXIT(DotNetCaptureCollection.Count);
+    END;
+
+    [External]
+    PROCEDURE IsReadOnly@2() : Boolean;
+    BEGIN
+      EXIT(DotNetCaptureCollection.IsReadOnly);
+    END;
+
+    [External]
+    PROCEDURE Item@4(CaptureNumber@1001 : Integer;VAR DotNet_Capture@1000 : Codeunit 3056);
+    VAR
+      DotNetCapture@1002 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.RegularExpressions.Capture";
+    BEGIN
+      DotNetCapture := DotNetCaptureCollection.Item(CaptureNumber);
+      DotNet_Capture.SetCapture(DotNetCapture);
+    END;
+
+    [External]
+    PROCEDURE CopyTo@5(VAR DotNet_Array@1000 : Codeunit 3000;Index@1002 : Integer);
+    VAR
+      DotNetArray@1001 : DotNet "'mscorlib'.System.Array";
+    BEGIN
+      DotNetCaptureCollection.CopyTo(DotNetArray,Index);
+      DotNet_Array.SetArray(DotNetArray);
+    END;
+
+    [External]
+    PROCEDURE Equals@6(VAR DotNet_CaptureCollection@1000 : Codeunit 3057) : Boolean;
+    VAR
+      DotNetCaptures@1001 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.RegularExpressions.CaptureCollection";
+    BEGIN
+      DotNet_CaptureCollection.GetCaptureCollection(DotNetCaptures);
+      
+      EXIT(DotNetCaptureCollection.Equals(DotNetCaptures));
+    END;
+
+    [External]
+    PROCEDURE GetHashCode@8() : Integer;
+    BEGIN
+      EXIT(DotNetCaptureCollection.GetHashCode());
+    END;
+
+    [External]
+    PROCEDURE IsDotNetNull@11() : Boolean;
+    BEGIN
+      EXIT(ISNULL(DotNetCaptureCollection));
+    END;
+
+    PROCEDURE GetCaptureCollection@9(VAR DotNetCaptureCollection2@1000 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.RegularExpressions.CaptureCollection");
+    BEGIN
+      DotNetCaptureCollection2 := DotNetCaptureCollection;
+    END;
+
+    PROCEDURE SetCaptureCollection@10(VAR DotNetCaptureCollection2@1000 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.RegularExpressions.CaptureCollection");
+    BEGIN
+      DotNetCaptureCollection := DotNetCaptureCollection2;
+    END;
+
+    BEGIN
+    END.
+  }
+}
+
