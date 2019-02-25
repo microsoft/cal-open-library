@@ -13,8 +13,7 @@ OBJECT Codeunit 1234 Json Text Reader/Writer
 
   }
   CODE
-  {
-    VAR
+  {    VAR
       StringBuilder@1000 : DotNet "'mscorlib'.System.Text.StringBuilder";
       StringWriter@1001 : DotNet "'mscorlib'.System.IO.StringWriter";
       JsonTextWriter@1004 : DotNet "'Newtonsoft.Json'.Newtonsoft.Json.JsonTextWriter";
@@ -164,13 +163,13 @@ OBJECT Codeunit 1234 Json Text Reader/Writer
     END;
 
     [External]
-    PROCEDURE WriteValue@1000000000(Variable@1000000000 : Variant);
+    PROCEDURE WriteValue@17(Variable@1000 : Variant);
     BEGIN
       JsonTextWriter.WriteValue(Variable);
     END;
 
     [External]
-    PROCEDURE WriteProperty@1000000001(VariableName@1000000000 : Text);
+    PROCEDURE WriteProperty@18(VariableName@1000 : Text);
     BEGIN
       JsonTextWriter.WritePropertyName(VariableName);
     END;
