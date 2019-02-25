@@ -13,7 +13,8 @@ OBJECT Codeunit 1234 Json Text Reader/Writer
 
   }
   CODE
-  {    VAR
+  {
+    VAR
       StringBuilder@1000 : DotNet "'mscorlib'.System.Text.StringBuilder";
       StringWriter@1001 : DotNet "'mscorlib'.System.IO.StringWriter";
       JsonTextWriter@1004 : DotNet "'Newtonsoft.Json'.Newtonsoft.Json.JsonTextWriter";
