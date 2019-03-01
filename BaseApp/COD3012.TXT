@@ -27,6 +27,60 @@ OBJECT Codeunit 3012 DotNet_ImageFormat
       DotNetImageFormat := DotNetImageFormat2
     END;
 
+    [External]
+    PROCEDURE Bmp@4();
+    BEGIN
+      SetImageFormat(DotNetImageFormat.Bmp);
+    END;
+
+    [External]
+    PROCEDURE Emf@5();
+    BEGIN
+      SetImageFormat(DotNetImageFormat.Emf);
+    END;
+
+    [External]
+    PROCEDURE Exif@6();
+    BEGIN
+      SetImageFormat(DotNetImageFormat.Exif);
+    END;
+
+    [External]
+    PROCEDURE Gif@7();
+    BEGIN
+      SetImageFormat(DotNetImageFormat.Gif);
+    END;
+
+    [External]
+    PROCEDURE Icon@8();
+    BEGIN
+      SetImageFormat(DotNetImageFormat.Icon);
+    END;
+
+    [External]
+    PROCEDURE Jpeg@9();
+    BEGIN
+      SetImageFormat(DotNetImageFormat.Jpeg);
+    END;
+
+    [External]
+    PROCEDURE Png@10();
+    BEGIN
+      SetImageFormat(DotNetImageFormat.Png);
+    END;
+
+    [External]
+    PROCEDURE Tiff@11();
+    BEGIN
+      SetImageFormat(DotNetImageFormat.Tiff);
+    END;
+
+    [External]
+    PROCEDURE Wmf@12();
+    BEGIN
+      SetImageFormat(DotNetImageFormat.Wmf);
+    END;
+
     BEGIN
     END.
   }
