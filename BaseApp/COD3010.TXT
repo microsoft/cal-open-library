@@ -29,6 +29,41 @@ OBJECT Codeunit 3010 DotNet_Image
       DotNet_ImageFormat.SetImageFormat(DotNetImage.RawFormat)
     END;
 
+    [External]
+    PROCEDURE FromBitmap@6(Width@1000 : Integer;Height@1001 : Integer);
+    VAR
+      DotNetBitmap@1002 : DotNet "'System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a'.System.Drawing.Bitmap";
+    BEGIN
+      DotNetImage := DotNetBitmap.Bitmap(DotNetImage,Width,Height);
+    END;
+
+    [External]
+    PROCEDURE Save@7(VAR OutStream@1000 : OutStream;DotNet_ImageFormat@1001 : Codeunit 3012);
+    VAR
+      DotNetImageFormat@1002 : DotNet "'System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a'.System.Drawing.Imaging.ImageFormat";
+    BEGIN
+      DotNet_ImageFormat.GetImageFormat(DotNetImageFormat);
+      DotNetImage.Save(OutStream,DotNetImageFormat);
+    END;
+
+    [External]
+    PROCEDURE GetWidth@8() : Integer;
+    BEGIN
+      EXIT(DotNetImage.Width);
+    END;
+
+    [External]
+    PROCEDURE GetHeight@9() : Integer;
+    BEGIN
+      EXIT(DotNetImage.Height);
+    END;
+
+    [External]
+    PROCEDURE Dispose@10();
+    BEGIN
+      DotNetImage.Dispose;
+    END;
+
     PROCEDURE GetImage@4(VAR DotNetImage2@1000 : DotNet "'System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a'.System.Drawing.Image");
     BEGIN
       DotNetImage2 := DotNetImage

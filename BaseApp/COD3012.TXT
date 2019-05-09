@@ -17,6 +17,60 @@ OBJECT Codeunit 3012 DotNet_ImageFormat
     VAR
       DotNetImageFormat@1000 : DotNet "'System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a'.System.Drawing.Imaging.ImageFormat";
 
+    [External]
+    PROCEDURE Bmp@4();
+    BEGIN
+      DotNetImageFormat := DotNetImageFormat.Bmp;
+    END;
+
+    [External]
+    PROCEDURE Emf@5();
+    BEGIN
+      DotNetImageFormat := DotNetImageFormat.Emf;
+    END;
+
+    [External]
+    PROCEDURE Exif@6();
+    BEGIN
+      DotNetImageFormat := DotNetImageFormat.Exif;
+    END;
+
+    [External]
+    PROCEDURE Gif@7();
+    BEGIN
+      DotNetImageFormat := DotNetImageFormat.Gif;
+    END;
+
+    [External]
+    PROCEDURE Icon@8();
+    BEGIN
+      DotNetImageFormat := DotNetImageFormat.Icon;
+    END;
+
+    [External]
+    PROCEDURE Jpeg@9();
+    BEGIN
+      DotNetImageFormat := DotNetImageFormat.Jpeg;
+    END;
+
+    [External]
+    PROCEDURE Png@10();
+    BEGIN
+      DotNetImageFormat := DotNetImageFormat.Png;
+    END;
+
+    [External]
+    PROCEDURE Tiff@11();
+    BEGIN
+      DotNetImageFormat := DotNetImageFormat.Tiff;
+    END;
+
+    [External]
+    PROCEDURE Wmf@12();
+    BEGIN
+      DotNetImageFormat := DotNetImageFormat.Wmf;
+    END;
+
     PROCEDURE GetImageFormat@2(VAR DotNetImageFormat2@1000 : DotNet "'System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a'.System.Drawing.Imaging.ImageFormat");
     BEGIN
       DotNetImageFormat2 := DotNetImageFormat
