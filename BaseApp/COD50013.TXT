@@ -1,0 +1,40 @@
+OBJECT Codeunit 50013 DotNet_ICryptoTransform
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      DotNetICryptoTransform@1000000000 : DotNet "'mscorlib'.System.Security.Cryptography.ICryptoTransform";
+
+    [External]
+    PROCEDURE Dispose@1000000006();
+    BEGIN
+      DotNetICryptoTransform.Dispose()
+    END;
+
+    PROCEDURE GetICryptoTransform@2(VAR DotNetICryptoTransform2@1000000001 : DotNet "'mscorlib'.System.Security.Cryptography.ICryptoTransform");
+    BEGIN
+      DotNetICryptoTransform2 := DotNetICryptoTransform
+    END;
+
+    PROCEDURE SetICryptoTransform@3(VAR DotNetICryptoTransform2@1000000000 : DotNet "'mscorlib'.System.Security.Cryptography.ICryptoTransform");
+    BEGIN
+      DotNetICryptoTransform := DotNetICryptoTransform2
+    END;
+
+    BEGIN
+    END.
+  }
+}
+

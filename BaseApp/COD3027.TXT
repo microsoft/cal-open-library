@@ -27,6 +27,18 @@ OBJECT Codeunit 3027 DotNet_StreamReader
     END;
 
     [External]
+    PROCEDURE StreamReaderFromDotNetStream@1000000000(VAR DotNet_Stream@1000 : Codeunit 3034;DotNet_Encoding@1001 : Codeunit 3026);
+    VAR
+      DotNetEncoding@1002 : DotNet "'mscorlib'.System.Text.Encoding";
+      DotNetStream@1000000000 : DotNet "'mscorlib'.System.IO.Stream";
+    BEGIN
+      DotNet_Stream.GetStream(DotNetStream);
+      DotNet_Encoding.GetEncoding(DotNetEncoding);
+
+      DotNetStreamReader := DotNetStreamReader.StreamReader(DotNetStream,DotNetEncoding);
+    END;
+
+    [External]
     PROCEDURE StreamReaderDetectEncoding@2(VAR InputStream@1000 : InStream;DetectEncodingFromByteOrderMarks@1001 : Boolean);
     BEGIN
       DotNetStreamReader := DotNetStreamReader.StreamReader(InputStream,DetectEncodingFromByteOrderMarks);
@@ -66,6 +78,16 @@ OBJECT Codeunit 3027 DotNet_StreamReader
     PROCEDURE ReadToEnd@9() : Text;
     BEGIN
       EXIT(DotNetStreamReader.ReadToEnd);
+    END;
+
+    PROCEDURE GetStreamReader@1000000001(VAR DotNetStreamReader2@1000000000 : DotNet "'mscorlib'.System.IO.StreamReader");
+    BEGIN
+      DotNetStreamReader2 := DotNetStreamReader;
+    END;
+
+    PROCEDURE SetStreamReader@1000000002(VAR DotNetStreamReader2@1000000000 : DotNet "'mscorlib'.System.IO.StreamReader");
+    BEGIN
+      DotNetStreamReader := DotNetStreamReader2;
     END;
 
     BEGIN

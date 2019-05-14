@@ -132,6 +132,66 @@ OBJECT Codeunit 146000 Test_DotNet_Array
       Assert.AreEqual(Expected,Actual,'All values check failed');
     END;
 
+    [Test]
+    PROCEDURE TestClone@1000000001();
+    VAR
+      Index@1000 : Integer;
+      Actual@1001 : Text;
+      Expected@1002 : Text;
+      DotNet_ArrayClone@1000000000 : Codeunit 3000;
+    BEGIN
+      // [WHEN] Char array of four elements are created
+      DotNet_Array.CharArray(4);
+      DotNet_Array.SetByteValue('1',0);
+      DotNet_Array.SetByteValue('2',1);
+      DotNet_Array.SetByteValue('3',2);
+      DotNet_Array.SetByteValue('4',3);
+      // [WHEN] And array is cloned
+      DotNet_Array.Clone(DotNet_ArrayClone);
+      Actual := '';
+      FOR Index := 0 TO DotNet_ArrayClone.Length - 1 DO
+        Actual += FORMAT(DotNet_ArrayClone.GetValueAsChar(Index));
+      // [THEN] Array must be not null
+      Assert.AreEqual(FALSE,DotNet_ArrayClone.IsNull,'Null check failed');
+      // [THEN] Expected array length is 4
+      Assert.AreEqual(4,DotNet_ArrayClone.Length,'Array length check failed');
+      // [THEN] First element should be 1
+      Assert.AreEqual('1',DotNet_ArrayClone.GetValueAsChar(0),'First element check failed');
+      // [THEN] Concatenated values are '1234'
+      Expected := '1234';
+      Assert.AreEqual(Expected,Actual,'All values check failed');
+    END;
+
+    [Test]
+    PROCEDURE TestConstrainedCopy@1000000003();
+    VAR
+      Index@1000 : Integer;
+      Actual@1001 : Text;
+      Expected@1002 : Text;
+      DotNet_ArrayCopy1@1000000000 : Codeunit 3000;
+      DotNet_ArrayCopy2@1000000001 : Codeunit 3000;
+    BEGIN
+      // [WHEN] Char array of four elements are created
+      DotNet_Array.CharArray(4);
+      DotNet_Array.SetByteValue('1',0);
+      DotNet_Array.SetByteValue('2',1);
+      DotNet_Array.SetByteValue('3',2);
+      DotNet_Array.SetByteValue('4',3);
+      // [WHEN] And array is constrain copied
+      DotNet_ArrayCopy1.CharArray(2);
+      DotNet_ArrayCopy2.CharArray(2);
+      DotNet_Array.ConstrainedCopy(0, DotNet_ArrayCopy1, 0, 2);
+      DotNet_Array.ConstrainedCopy(2, DotNet_ArrayCopy2, 0, 2);
+      Actual := '';
+      FOR Index := 0 TO 1 DO
+        Actual += FORMAT(DotNet_ArrayCopy1.GetValueAsChar(Index));
+      FOR Index := 2 TO 3 DO
+        Actual += FORMAT(DotNet_ArrayCopy2.GetValueAsChar(Index-2));
+      // [THEN] Concatenated values are '1234'
+      Expected := '1234';
+      Assert.AreEqual(Expected,Actual,'All values check failed');
+    END;
+
     BEGIN
     END.
   }

@@ -1,0 +1,78 @@
+OBJECT Codeunit 50015 DotNet_CipherMode
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      DotNetCipherMode@1000000000 : DotNet "'mscorlib'.System.Security.Cryptography.CipherMode";
+
+    [External]
+    PROCEDURE CBC@1000000000() : Integer;
+    BEGIN
+      DotNetCipherMode := DotNetCipherMode.CBC;
+      EXIT(DotNetCipherMode);
+    END;
+
+    [External]
+    PROCEDURE ECB@1000000001() : Integer;
+    BEGIN
+      DotNetCipherMode := DotNetCipherMode.ECB;
+      EXIT(DotNetCipherMode);
+    END;
+
+    [External]
+    PROCEDURE OFB@1000000002() : Integer;
+    BEGIN
+      DotNetCipherMode := DotNetCipherMode.OFB;
+      EXIT(DotNetCipherMode);
+    END;
+
+    [External]
+    PROCEDURE CFB@1000000003() : Integer;
+    BEGIN
+      DotNetCipherMode := DotNetCipherMode.CFB;
+      EXIT(DotNetCipherMode);
+    END;
+
+    [External]
+    PROCEDURE CTS@1000000004() : Integer;
+    BEGIN
+      DotNetCipherMode := DotNetCipherMode.CTS;
+      EXIT(DotNetCipherMode);
+    END;
+
+    [External]
+    PROCEDURE Value@1000000005() : Integer;
+    VAR
+      Mode@1000000000 : Integer;
+    BEGIN
+      Mode := DotNetCipherMode;
+      EXIT(Mode);
+    END;
+
+    PROCEDURE GetCipherMode@1000000006(VAR DotNetCipherMode2@1000000000 : DotNet "'mscorlib'.System.Security.Cryptography.CipherMode");
+    BEGIN
+      DotNetCipherMode2 := DotNetCipherMode;
+    END;
+
+    PROCEDURE SetCipherMode@1000000007(VAR DotNetCipherMode2@1000000000 : DotNet "'mscorlib'.System.Security.Cryptography.CipherMode");
+    BEGIN
+      DotNetCipherMode := DotNetCipherMode2;
+    END;
+
+    BEGIN
+    END.
+  }
+}
+

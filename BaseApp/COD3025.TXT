@@ -39,6 +39,17 @@ OBJECT Codeunit 3025 DotNet_StreamWriter
     END;
 
     [External]
+    PROCEDURE StreamWriterFromDotNetStream@1000000001(VAR DotNet_Stream@1000 : Codeunit 3034;DotNet_Encoding@1001 : Codeunit 3026);
+    VAR
+      DotNetEncoding@1002 : DotNet "'mscorlib'.System.Text.Encoding";
+      DotNetStream@1000000000 : DotNet "'mscorlib'.System.IO.Stream";
+    BEGIN
+      DotNet_Stream.GetStream(DotNetStream);
+      DotNet_Encoding.GetEncoding(DotNetEncoding);
+      DotNetStreamWriter := DotNetStreamWriter.StreamWriter(DotNetStream,DotNetEncoding);
+    END;
+
+    [External]
     PROCEDURE StreamWriterWithDefaultEncoding@7(VAR OutStream@1000 : OutStream);
     BEGIN
       DotNetStreamWriter := DotNetStreamWriter.StreamWriter(OutStream);
@@ -60,6 +71,16 @@ OBJECT Codeunit 3025 DotNet_StreamWriter
     PROCEDURE Dispose@5();
     BEGIN
       DotNetStreamWriter.Dispose;
+    END;
+
+    PROCEDURE GetStreamWriter@1000000000(VAR DotNetStreamWriter2@1000000000 : DotNet "'mscorlib'.System.IO.StreamWriter");
+    BEGIN
+      DotNetStreamWriter2 := DotNetStreamWriter;
+    END;
+
+    PROCEDURE SetStreamWriter@1000000002(VAR DotNetStreamWriter2@1000000000 : DotNet "'mscorlib'.System.IO.StreamWriter");
+    BEGIN
+      DotNetStreamWriter := DotNetStreamWriter2;
     END;
 
     BEGIN

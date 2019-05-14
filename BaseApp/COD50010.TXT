@@ -1,0 +1,181 @@
+OBJECT Codeunit 50010 DotNet_SymmetricAlgorithm
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      DotNetSymmetricAlgorithm@1000000000 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Security.Cryptography.SymmetricAlgorithm";
+      E_INVALID_ALGORITHM@1000000001 : TextConst 'ENU=Invalid Algorithm';
+
+    [External]
+    PROCEDURE GetBlockSize@1000000000() : Integer;
+    BEGIN
+      EXIT(DotNetSymmetricAlgorithm.BlockSize);
+    END;
+
+    [External]
+    PROCEDURE SetBlockSize@1000000027(BlockSize@1000000000 : Integer);
+    BEGIN
+      DotNetSymmetricAlgorithm.BlockSize := BlockSize;
+    END;
+
+    [External]
+    PROCEDURE GetFeedbackSize@1000000007() : Integer;
+    BEGIN
+      EXIT(DotNetSymmetricAlgorithm.FeedbackSize);
+    END;
+
+    [External]
+    PROCEDURE SetFeedbackSize@1000000006(FeedbackSize@1000000000 : Integer);
+    BEGIN
+      DotNetSymmetricAlgorithm.FeedbackSize := FeedbackSize;
+    END;
+
+    [External]
+    PROCEDURE GetIV@1000000001(VAR DotNet_Array@1000000000 : Codeunit 3000);
+    VAR
+      DotNetArray@1000000001 : DotNet "'mscorlib'.System.Array";
+    BEGIN
+      DotNet_Array.GetArray(DotNetArray);
+      DotNetArray := DotNetSymmetricAlgorithm.IV.Clone();
+      DotNet_Array.SetArray(DotNetArray);
+    END;
+
+    [External]
+    PROCEDURE SetIV@1000000023(VAR DotNet_Array@1000000000 : Codeunit 3000);
+    VAR
+      DotNetArray@1000000001 : DotNet "'mscorlib'.System.Array";
+    BEGIN
+      DotNet_Array.GetArray(DotNetArray);
+      DotNetSymmetricAlgorithm.IV := DotNetArray.Clone();
+    END;
+
+    [External]
+    PROCEDURE GetKey@1000000002(VAR DotNet_Array@1000000000 : Codeunit 3000);
+    VAR
+      DotNetArray@1000000001 : DotNet "'mscorlib'.System.Array";
+    BEGIN
+      DotNet_Array.GetArray(DotNetArray);
+      DotNetArray := DotNetSymmetricAlgorithm.Key.Clone();
+      DotNet_Array.SetArray(DotNetArray);
+    END;
+
+    [External]
+    PROCEDURE SetKey@1000000021(VAR DotNet_Array@1000000000 : Codeunit 3000);
+    VAR
+      DotNetArray@1000000001 : DotNet "'mscorlib'.System.Array";
+    BEGIN
+      DotNet_Array.GetArray(DotNetArray);
+      DotNetSymmetricAlgorithm.Key := DotNetArray.Clone();
+    END;
+
+    [External]
+    PROCEDURE GetKeySize@1000000003() : Integer;
+    BEGIN
+      EXIT(DotNetSymmetricAlgorithm.KeySize);
+    END;
+
+    [External]
+    PROCEDURE SetKeySize@1000000018(KeySize@1000000000 : Integer);
+    BEGIN
+      DotNetSymmetricAlgorithm.KeySize := KeySize;
+    END;
+
+    [External]
+    PROCEDURE GetMode@1000000004(VAR DotNet_CipherMode@1000000000 : Codeunit 50015) : Integer;
+    VAR
+      DotNetCipherMode@1000000001 : DotNet "'mscorlib'.System.Security.Cryptography.CipherMode";
+    BEGIN
+      DotNetCipherMode := DotNetSymmetricAlgorithm.Mode;
+      DotNet_CipherMode.SetCipherMode(DotNetCipherMode);
+      EXIT(DotNetCipherMode);
+    END;
+
+    [External]
+    PROCEDURE SetMode@1000000020(VAR DotNet_CipherMode@1000000000 : Codeunit 50015);
+    VAR
+      DotNetCipherMode@1000000001 : DotNet "'mscorlib'.System.Security.Cryptography.CipherMode";
+    BEGIN
+      DotNet_CipherMode.GetCipherMode(DotNetCipherMode);
+      DotNetSymmetricAlgorithm.Mode := DotNetCipherMode;
+    END;
+
+    [External]
+    PROCEDURE GetPadding@1000000005(VAR DotNet_PaddingMode@1000000001 : Codeunit 50016) : Integer;
+    VAR
+      DotNetPaddingMode@1000000000 : DotNet "'mscorlib'.System.Security.Cryptography.PaddingMode";
+    BEGIN
+      DotNetPaddingMode := DotNetSymmetricAlgorithm.Padding;
+      DotNet_PaddingMode.SetPaddingMode(DotNetPaddingMode);
+      EXIT(DotNetPaddingMode);
+    END;
+
+    [External]
+    PROCEDURE SetPadding@1000000019(VAR DotNet_PaddingMode@1000000002 : Codeunit 50016);
+    VAR
+      DotNetPaddingMode@1000000001 : DotNet "'mscorlib'.System.Security.Cryptography.PaddingMode";
+    BEGIN
+      DotNet_PaddingMode.GetPaddingMode(DotNetPaddingMode);
+      DotNetSymmetricAlgorithm.Padding := DotNetPaddingMode;
+    END;
+
+    [External]
+    PROCEDURE Create@1000000028(Algorithm@1000000000 : Text);
+    BEGIN
+      IF NOT (UPPERCASE(Algorithm) IN ['AES','DES','RC2','RIJNDAEL','TRIPLEDES']) THEN
+        ERROR(E_INVALID_ALGORITHM);
+      Dispose();
+      DotNetSymmetricAlgorithm := DotNetSymmetricAlgorithm.Create(Algorithm);
+    END;
+
+    [External]
+    PROCEDURE Dispose@1000000008();
+    BEGIN
+      IF NOT ISNULL(DotNetSymmetricAlgorithm) THEN
+        DotNetSymmetricAlgorithm.Dispose();
+    END;
+
+    [External]
+    PROCEDURE CreateEncryptor@1000000009(VAR DotNet_ICryptoTransform@1000000000 : Codeunit 50013);
+    VAR
+      DotNetICryptoTransform@1000000001 : DotNet "'mscorlib'.System.Security.Cryptography.ICryptoTransform";
+    BEGIN
+      DotNetICryptoTransform := DotNetSymmetricAlgorithm.CreateEncryptor();
+      DotNet_ICryptoTransform.SetICryptoTransform(DotNetICryptoTransform);
+    END;
+
+    [External]
+    PROCEDURE CreateDecryptor@1000000015(VAR DotNet_ICryptoTransform@1000000000 : Codeunit 50013);
+    VAR
+      DotNetICryptoTransform@1000000001 : DotNet "'mscorlib'.System.Security.Cryptography.ICryptoTransform";
+    BEGIN
+      DotNetICryptoTransform := DotNetSymmetricAlgorithm.CreateDecryptor();
+      DotNet_ICryptoTransform.SetICryptoTransform(DotNetICryptoTransform);
+    END;
+
+    PROCEDURE GetSymmetricAlgorithm@1000000013(VAR DotNetSymmetricAlgorithm2@1000000000 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Security.Cryptography.SymmetricAlgorithm");
+    BEGIN
+      DotNetSymmetricAlgorithm2 := DotNetSymmetricAlgorithm;
+    END;
+
+    PROCEDURE SetSymmetricAlgorithm@1000000014(VAR DotNetSymmetricAlgorithm2@1000000000 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Security.Cryptography.SymmetricAlgorithm");
+    BEGIN
+      DotNetSymmetricAlgorithm := DotNetSymmetricAlgorithm2;
+    END;
+
+    BEGIN
+    END.
+  }
+}
+

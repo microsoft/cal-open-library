@@ -1,0 +1,399 @@
+OBJECT Codeunit 51020 Test_Symmetric_Encryption_Mgt
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    Subtype=Test;
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      Assert@1000000005 : Codeunit 130000;
+      LibraryUtility@1000000001 : Codeunit 131000;
+      LibraryRandom@1000000000 : Codeunit 130440;
+      E_ENCRYPT_FAILED@1000000009 : TextConst 'ENU=Encrypt failed';
+      E_DECRYPT_FAILED@1000000010 : TextConst 'ENU=Decrypt failed';
+      E_ENCRYPTDECRYPT_FAILED@1000000004 : TextConst 'ENU=Encrypt/Decrypt failed';
+      E_EXPECTED_FAILURE@1000000007 : TextConst 'ENU=Expected failure';
+      E_EXPECTED_SUCCESS@1000000008 : TextConst 'ENU=Expected success';
+
+    LOCAL PROCEDURE StringsAreEqual@1000000019(VAR Left@1000000001 : Text;VAR Right@1000000002 : Text) : Boolean;
+    VAR
+      DotNetString@1000000000 : DotNet "'mscorlib'.System.String";
+    BEGIN
+      EXIT(DotNetString.Compare(Left, Right) = 0);
+    END;
+
+    LOCAL PROCEDURE EncryptDecryptText@1000000007(VAR SymmetricEncryption@1000000003 : Codeunit 50020;VAR TextClear@1000000006 : Text;VAR TextEncrypted@1000000007 : Text;VAR TextDecrypted@1000000008 : Text);
+    BEGIN
+      SymmetricEncryption.EncryptTextBase64(TextClear, TextEncrypted);
+      SymmetricEncryption.DecryptTextBase64(TextEncrypted, TextDecrypted);
+    END;
+
+    [Test]
+    PROCEDURE AES_256_CBC_PKCS7_EncryptDecrypt@1000000004();
+    VAR
+      SymmetricEncryption@1000000003 : Codeunit 50020;
+      TextCipher@1000000004 : Text;
+      TextToEncrypt@1000000002 : Text;
+      TextEncrypted@1000000001 : Text;
+      TextDecrypted@1000000000 : Text;
+    BEGIN
+      TextCipher := LibraryUtility.GenerateRandomText(LibraryRandom.RandIntInRange(1,64));
+      TextToEncrypt := LibraryUtility.GenerateRandomText(LibraryRandom.RandIntInRange(1,1024));
+
+      SymmetricEncryption.SetCipher(TextCipher);
+      EncryptDecryptText(SymmetricEncryption, TextToEncrypt, TextEncrypted, TextDecrypted);
+      Assert.IsTrue(StringsAreEqual(TextToEncrypt, TextDecrypted), E_ENCRYPTDECRYPT_FAILED);
+    END;
+
+    [Test]
+    PROCEDURE AES_256_CBC_PKCS7_SetCipherFromBlob_EncryptDecrypt@1000000002();
+    VAR
+      SymmetricEncryption@1000000007 : Codeunit 50020;
+      TextToEncrypt@1000000008 : Text;
+      TextDecrypted@1000000009 : Text;
+      TextEncrypted@1000000014 : Text;
+      TextCipher@1000000011 : Text;
+      TempBlobCipher@1000000000 : Record 99008535;
+    BEGIN
+      TextCipher := LibraryUtility.GenerateRandomText(LibraryRandom.RandIntInRange(1,64));
+      TextToEncrypt := LibraryUtility.GenerateRandomText(100000); // to stress the read buffer
+
+      // Push password into tempblob
+      TempBlobCipher.WriteAsText(TextCipher, TEXTENCODING::UTF8);
+      SymmetricEncryption.SetCipherFromBlob(TempBlobCipher);
+
+      // Encrypt/decrypt
+      EncryptDecryptText(SymmetricEncryption, TextToEncrypt, TextEncrypted, TextDecrypted);
+      Assert.IsTrue(StringsAreEqual(TextToEncrypt, TextDecrypted), E_ENCRYPTDECRYPT_FAILED);
+    END;
+
+    [Test]
+    PROCEDURE AES_256_CBC_PKCS7_SetKeyIV_EncryptDecrypt@1000000018();
+    VAR
+      SymmetricEncryption@1000000007 : Codeunit 50020;
+      TextToEncrypt@1000000008 : Text;
+      TextDecrypted@1000000009 : Text;
+      TextEncrypted@1000000014 : Text;
+      TextEncryptedExpected@1000000001 : Text;
+      TextKey@1000000011 : Text;
+      TextIV@1000000003 : Text;
+      DotNet_ArrayKey@1000000000 : Codeunit 3000;
+      DotNet_ArrayIV@1000000004 : Codeunit 3000;
+      Convert@1000000002 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Convert";
+    BEGIN
+      TextToEncrypt := 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam';
+      TextEncryptedExpected := 'LTQUy/6qPc/hxX87etScoQKXDqrbuuCVsmbIEsB2kqzHVL282etankz2kkxZojacuxu3wv7Q6htZOnXq49SrGGSUBrbJo2hJ2op62GxSmgc=';
+
+      // Base64 representations of Key & IV generated when TrySetPassword is called with a password of 'password'
+      TextKey := 'qLZLq9CsqRpZvbt3YbQh1PK7OCgNOnW6DyHyvrxFWD0=';
+      TextIV  := 'RGxZhmDJTOaAxH0ZwweDpw==';
+
+      // Hex representations - in case you want to test against an online crypto interface
+      // TestKey := 'A8B64BABD0ACA91A59BDBB7761B421D4F2BB38280D3A75BA0F21F2BEBC45583D'
+      // TestIV  := '446C598660C94CE680C47D19C30783A7'
+
+      // Convert TestKey to byte[] & push into tempblob
+      DotNet_ArrayKey.SetArray(Convert.FromBase64String(TextKey));
+
+      // Convert TestIV to byte[] & push into tempblob
+      DotNet_ArrayIV.SetArray(Convert.FromBase64String(TextIV));
+
+      // Encrypt/decrypt
+      SymmetricEncryption.SetKey(DotNet_ArrayKey);
+      SymmetricEncryption.SetIV(DotNet_ArrayIV);
+      EncryptDecryptText(SymmetricEncryption, TextToEncrypt, TextEncrypted, TextDecrypted);
+      Assert.IsTrue(StringsAreEqual(TextToEncrypt, TextDecrypted), E_ENCRYPTDECRYPT_FAILED);
+      Assert.IsTrue(StringsAreEqual(TextEncrypted, TextEncryptedExpected), E_ENCRYPT_FAILED);
+    END;
+
+    [Test]
+    PROCEDURE AES_192_CBC_PKCS7_EncryptDecrypt@1000000027();
+    VAR
+      SymmetricEncryption@1000000003 : Codeunit 50020;
+      TextCipher@1000000004 : Text;
+      TextToEncrypt@1000000002 : Text;
+      TextEncrypted@1000000001 : Text;
+      TextDecrypted@1000000000 : Text;
+    BEGIN
+      TextCipher := LibraryUtility.GenerateRandomText(LibraryRandom.RandIntInRange(1,64));
+      TextToEncrypt := LibraryUtility.GenerateRandomText(LibraryRandom.RandIntInRange(1,1024));
+
+      SymmetricEncryption.SetKeySize(192);
+      SymmetricEncryption.SetCipher(TextCipher);
+      EncryptDecryptText(SymmetricEncryption, TextToEncrypt, TextEncrypted, TextDecrypted);
+      Assert.IsTrue(StringsAreEqual(TextToEncrypt, TextDecrypted), E_ENCRYPTDECRYPT_FAILED);
+    END;
+
+    [Test]
+    PROCEDURE AES_128_CBC_PKCS7_EncryptDecrypt@1000000005();
+    VAR
+      SymmetricEncryption@1000000003 : Codeunit 50020;
+      TextCipher@1000000004 : Text;
+      TextToEncrypt@1000000002 : Text;
+      TextEncrypted@1000000001 : Text;
+      TextDecrypted@1000000000 : Text;
+    BEGIN
+      TextCipher := LibraryUtility.GenerateRandomText(8);
+      TextToEncrypt := LibraryUtility.GenerateRandomText(LibraryRandom.RandIntInRange(1,1024));
+
+      SymmetricEncryption.SetKeySize(128);  // must set key size before cipher
+      SymmetricEncryption.SetCipher(TextCipher);
+      EncryptDecryptText(SymmetricEncryption, TextToEncrypt, TextEncrypted, TextDecrypted);
+      Assert.IsTrue(StringsAreEqual(TextToEncrypt, TextDecrypted), E_ENCRYPTDECRYPT_FAILED);
+    END;
+
+    [Test]
+    PROCEDURE AES_256_CFB_PKCS7_EncryptDecrypt@1000000010();
+    VAR
+      SymmetricEncryption@1000000003 : Codeunit 50020;
+      TextCipher@1000000004 : Text;
+      TextToEncrypt@1000000002 : Text;
+      TextEncrypted@1000000001 : Text;
+      TextDecrypted@1000000000 : Text;
+      DotNet_CipherMode@1000000005 : Codeunit 50015;
+    BEGIN
+      TextCipher := LibraryUtility.GenerateRandomText(LibraryRandom.RandIntInRange(1,64));
+      TextToEncrypt := LibraryUtility.GenerateRandomText(1);
+
+      DotNet_CipherMode.CFB;
+      SymmetricEncryption.SetMode(DotNet_CipherMode);
+      SymmetricEncryption.SetCipher(TextCipher);
+      EncryptDecryptText(SymmetricEncryption, TextToEncrypt, TextEncrypted, TextDecrypted);
+      Assert.IsTrue(StringsAreEqual(TextToEncrypt, TextDecrypted), E_ENCRYPTDECRYPT_FAILED);
+    END;
+
+    [Test]
+    PROCEDURE AES_256_CTS_PKCS7_EncryptDecrypt@1000000014();
+    VAR
+      SymmetricEncryption@1000000003 : Codeunit 50020;
+      TextCipher@1000000004 : Text;
+      TextToEncrypt@1000000002 : Text;
+      TextEncrypted@1000000001 : Text;
+      TextDecrypted@1000000000 : Text;
+    BEGIN
+      // DotNet AES does not support CTS mode
+    END;
+
+    [Test]
+    PROCEDURE AES_256_ECB_PKCS7_EncryptDecrypt@1000000012();
+    VAR
+      SymmetricEncryption@1000000003 : Codeunit 50020;
+      TextCipher@1000000004 : Text;
+      TextToEncrypt@1000000002 : Text;
+      TextEncrypted@1000000001 : Text;
+      TextDecrypted@1000000000 : Text;
+      DotNet_CipherMode@1000000005 : Codeunit 50015;
+    BEGIN
+      TextCipher := LibraryUtility.GenerateRandomText(LibraryRandom.RandIntInRange(1,64));
+      TextToEncrypt := LibraryUtility.GenerateRandomText(LibraryRandom.RandIntInRange(1,1024));
+
+      DotNet_CipherMode.ECB;
+      SymmetricEncryption.SetMode(DotNet_CipherMode);
+      SymmetricEncryption.SetCipher(TextCipher);
+      EncryptDecryptText(SymmetricEncryption, TextToEncrypt, TextEncrypted, TextDecrypted);
+      Assert.IsTrue(StringsAreEqual(TextToEncrypt, TextDecrypted), E_ENCRYPTDECRYPT_FAILED);
+    END;
+
+    [Test]
+    PROCEDURE AES_256_OFB_PKCS7_EncryptDecrypt@1000000015();
+    VAR
+      SymmetricEncryption@1000000003 : Codeunit 50020;
+      TextCipher@1000000004 : Text;
+      TextToEncrypt@1000000002 : Text;
+      TextEncrypted@1000000001 : Text;
+      TextDecrypted@1000000000 : Text;
+    BEGIN
+      // DotNet AES does not support OFB mode
+    END;
+
+    [Test]
+    PROCEDURE AES_256_CBC_ANSIX923_EncryptDecrypt@1000000008();
+    VAR
+      SymmetricEncryption@1000000007 : Codeunit 50020;
+      TextCipher@1000000001 : Text;
+      TextToEncrypt@1000000008 : Text;
+      TextEncrypted@1000000000 : Text;
+      TextDecrypted@1000000009 : Text;
+      DotNet_PaddingMode@1000000002 : Codeunit 50016;
+    BEGIN
+      TextCipher := LibraryUtility.GenerateRandomText(LibraryRandom.RandIntInRange(1,64));
+      TextToEncrypt := LibraryUtility.GenerateRandomText(LibraryRandom.RandIntInRange(1,1024));
+
+      DotNet_PaddingMode.ANSIX923;
+      SymmetricEncryption.SetPadding(DotNet_PaddingMode);
+      SymmetricEncryption.SetCipher(TextCipher);
+      EncryptDecryptText(SymmetricEncryption, TextToEncrypt, TextEncrypted, TextDecrypted);
+      Assert.IsTrue(StringsAreEqual(TextToEncrypt, TextDecrypted), E_ENCRYPTDECRYPT_FAILED);
+    END;
+
+    [Test]
+    PROCEDURE AES_256_CBC_ISO10126_EncryptDecrypt@1000000011();
+    VAR
+      SymmetricEncryption@1000000007 : Codeunit 50020;
+      TextCipher@1000000001 : Text;
+      TextToEncrypt@1000000008 : Text;
+      TextEncrypted@1000000000 : Text;
+      TextDecrypted@1000000009 : Text;
+      DotNet_PaddingMode@1000000002 : Codeunit 50016;
+    BEGIN
+      TextCipher := LibraryUtility.GenerateRandomText(LibraryRandom.RandIntInRange(1,64));
+      TextToEncrypt := LibraryUtility.GenerateRandomText(LibraryRandom.RandIntInRange(1,1024));
+
+      DotNet_PaddingMode.ISO10126;
+      SymmetricEncryption.SetPadding(DotNet_PaddingMode);
+      SymmetricEncryption.SetCipher(TextCipher);
+      EncryptDecryptText(SymmetricEncryption, TextToEncrypt, TextEncrypted, TextDecrypted);
+      Assert.IsTrue(StringsAreEqual(TextToEncrypt, TextDecrypted), E_ENCRYPTDECRYPT_FAILED);
+    END;
+
+    [Test]
+    PROCEDURE AES_256_CBC_Zeros_EncryptDecrypt@1000000013();
+    VAR
+      SymmetricEncryption@1000000007 : Codeunit 50020;
+      TextCipher@1000000001 : Text;
+      TextToEncrypt@1000000008 : Text;
+      TextEncrypted@1000000000 : Text;
+      TextDecrypted@1000000009 : Text;
+      DotNet_PaddingMode@1000000002 : Codeunit 50016;
+    BEGIN
+      TextCipher := LibraryUtility.GenerateRandomText(LibraryRandom.RandIntInRange(1,64));
+      TextToEncrypt := LibraryUtility.GenerateRandomText(LibraryRandom.RandIntInRange(1,1024));
+
+      DotNet_PaddingMode.Zeros;
+      SymmetricEncryption.SetPadding(DotNet_PaddingMode);
+      SymmetricEncryption.SetCipher(TextCipher);
+      EncryptDecryptText(SymmetricEncryption, TextToEncrypt, TextEncrypted, TextDecrypted);
+      Assert.IsTrue(StringsAreEqual(TextToEncrypt, TextDecrypted), E_ENCRYPTDECRYPT_FAILED);
+    END;
+
+    [Test]
+    PROCEDURE AES_256_CBC_PKCS7_EncryptStringFail@1000000016();
+    VAR
+      SymmetricEncryption@1000000003 : Codeunit 50020;
+      TextCipher@1000000004 : Text;
+      TextToEncrypt@1000000002 : Text;
+      TextEncrypted@1000000001 : Text;
+      TextDecrypted@1000000000 : Text;
+    BEGIN
+      TextCipher := '';
+      TextToEncrypt := '';
+      Assert.IsFalse(SymmetricEncryption.EncryptTextBase64(TextToEncrypt, TextEncrypted), E_EXPECTED_FAILURE);
+    END;
+
+    [Test]
+    PROCEDURE AES_256_CBC_PKCS7_DecryptStringFail@1000000017();
+    VAR
+      SymmetricEncryption@1000000003 : Codeunit 50020;
+      TextCipher@1000000004 : Text;
+      TextToEncrypt@1000000001 : Text;
+      TextToDecrypt@1000000002 : Text;
+      TextDecrypted@1000000000 : Text;
+      TextEncrypted@1000000005 : Text;
+    BEGIN
+      TextCipher := LibraryUtility.GenerateRandomText(LibraryRandom.RandIntInRange(1,64));
+      TextToEncrypt := LibraryUtility.GenerateRandomText(LibraryRandom.RandIntInRange(10,100));
+
+      // Encrypt string
+      SymmetricEncryption.SetCipher(TextCipher);
+      Assert.IsTrue(SymmetricEncryption.EncryptTextBase64(TextToEncrypt, TextEncrypted), E_EXPECTED_SUCCESS);
+
+      // Mangle encrypted string
+      TextEncrypted[STRLEN(TextEncrypted)-2] := '_';
+      TextEncrypted[STRLEN(TextEncrypted)-1] := '_';
+      Assert.IsFalse(SymmetricEncryption.DecryptTextBase64(TextEncrypted, TextDecrypted), E_EXPECTED_FAILURE);
+    END;
+
+    [Test]
+    PROCEDURE DES_EncryptDecrypt@1000000006();
+    VAR
+      SymmetricEncryption@1000000003 : Codeunit 50020;
+      TextCipher@1000000004 : Text;
+      TextToEncrypt@1000000002 : Text;
+      TextEncrypted@1000000001 : Text;
+      TextDecrypted@1000000000 : Text;
+    BEGIN
+      TextCipher := LibraryUtility.GenerateRandomText(LibraryRandom.RandIntInRange(1,64));
+      TextToEncrypt := LibraryUtility.GenerateRandomText(LibraryRandom.RandIntInRange(1,1024));
+
+      SymmetricEncryption.SetAlgorithm('DES');
+      SymmetricEncryption.SetCipher(TextCipher);
+      EncryptDecryptText(SymmetricEncryption, TextToEncrypt, TextEncrypted, TextDecrypted);
+      Assert.IsTrue(StringsAreEqual(TextToEncrypt, TextDecrypted), E_ENCRYPTDECRYPT_FAILED);
+    END;
+
+    [Test]
+    PROCEDURE RC2_EncryptDecrypt@1000000001();
+    VAR
+      SymmetricEncryption@1000000003 : Codeunit 50020;
+      TextCipher@1000000004 : Text;
+      TextToEncrypt@1000000002 : Text;
+      TextEncrypted@1000000001 : Text;
+      TextDecrypted@1000000000 : Text;
+    BEGIN
+      TextCipher := LibraryUtility.GenerateRandomText(LibraryRandom.RandIntInRange(1,64));
+      TextToEncrypt := LibraryUtility.GenerateRandomText(LibraryRandom.RandIntInRange(1,1024));
+
+      SymmetricEncryption.SetAlgorithm('RC2');
+      SymmetricEncryption.SetCipher(TextCipher);
+      EncryptDecryptText(SymmetricEncryption, TextToEncrypt, TextEncrypted, TextDecrypted);
+      Assert.IsTrue(StringsAreEqual(TextToEncrypt, TextDecrypted), E_ENCRYPTDECRYPT_FAILED);
+    END;
+
+    [Test]
+    PROCEDURE Rijndael_EncryptDecrypt@1000000003();
+    VAR
+      SymmetricEncryption@1000000003 : Codeunit 50020;
+      TextCipher@1000000004 : Text;
+      TextToEncrypt@1000000002 : Text;
+      TextEncrypted@1000000001 : Text;
+      TextDecrypted@1000000000 : Text;
+    BEGIN
+      TextCipher := LibraryUtility.GenerateRandomText(LibraryRandom.RandIntInRange(1,64));
+      TextToEncrypt := LibraryUtility.GenerateRandomText(LibraryRandom.RandIntInRange(1,1024));
+
+      SymmetricEncryption.SetAlgorithm('Rijndael');
+      SymmetricEncryption.SetCipher(TextCipher);
+      EncryptDecryptText(SymmetricEncryption, TextToEncrypt, TextEncrypted, TextDecrypted);
+      Assert.IsTrue(StringsAreEqual(TextToEncrypt, TextDecrypted), E_ENCRYPTDECRYPT_FAILED);
+    END;
+
+    [Test]
+    PROCEDURE TripleDES_EncryptDecrypt@1000000009();
+    VAR
+      SymmetricEncryption@1000000003 : Codeunit 50020;
+      TextCipher@1000000004 : Text;
+      TextToEncrypt@1000000002 : Text;
+      TextEncrypted@1000000001 : Text;
+      TextDecrypted@1000000000 : Text;
+    BEGIN
+      TextCipher := LibraryUtility.GenerateRandomText(LibraryRandom.RandIntInRange(1,64));
+      TextToEncrypt := LibraryUtility.GenerateRandomText(LibraryRandom.RandIntInRange(1,1024));
+
+      SymmetricEncryption.SetAlgorithm('TripleDES');
+      SymmetricEncryption.SetCipher(TextCipher);
+      EncryptDecryptText(SymmetricEncryption, TextToEncrypt, TextEncrypted, TextDecrypted);
+      Assert.IsTrue(StringsAreEqual(TextToEncrypt, TextDecrypted), E_ENCRYPTDECRYPT_FAILED);
+    END;
+
+    BEGIN
+    {
+
+      A good online tool for verifying encryption results is: http://www.txtwizard.net/crypto
+      (though it only supports 128 bit encryption)
+
+      NOTE: Exercising the EncrypText/DecryptText functions also exercises the *Blob/*Stream functions.
+    }
+    END.
+  }
+}
+
