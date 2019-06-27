@@ -15,7 +15,7 @@ OBJECT Codeunit 3021 DotNet_AppSource
   CODE
   {
     VAR
-      DotNetAppSource@1000 : DotNet "'Microsoft.Dynamics.Nav.ClientExtensions, Version=13.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.Microsoft.Dynamics.Nav.Client.Capabilities.AppSource" RUNONCLIENT;
+      DotNetAppSource@1000 : DotNet "'Microsoft.Dynamics.Nav.ClientExtensions, Version=14.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.Microsoft.Dynamics.Nav.Client.Capabilities.AppSource" RUNONCLIENT;
 
     PROCEDURE IsAvailable@2() : Boolean;
     BEGIN
@@ -35,12 +35,12 @@ OBJECT Codeunit 3021 DotNet_AppSource
       DotNetAppSource.ShowAppSource
     END;
 
-    PROCEDURE GetAppSource@1(VAR DotNetAppSource2@1000 : DotNet "'Microsoft.Dynamics.Nav.ClientExtensions, Version=13.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.Microsoft.Dynamics.Nav.Client.Capabilities.AppSource" RUNONCLIENT);
+    PROCEDURE GetAppSource@1(VAR DotNetAppSource2@1000 : DotNet "'Microsoft.Dynamics.Nav.ClientExtensions, Version=14.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.Microsoft.Dynamics.Nav.Client.Capabilities.AppSource" RUNONCLIENT);
     BEGIN
       DotNetAppSource2 := DotNetAppSource
     END;
 
-    PROCEDURE SetAppSource@5(DotNetAppSource2@1000 : DotNet "'Microsoft.Dynamics.Nav.ClientExtensions, Version=13.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.Microsoft.Dynamics.Nav.Client.Capabilities.AppSource" RUNONCLIENT);
+    PROCEDURE SetAppSource@5(DotNetAppSource2@1000 : DotNet "'Microsoft.Dynamics.Nav.ClientExtensions, Version=14.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.Microsoft.Dynamics.Nav.Client.Capabilities.AppSource" RUNONCLIENT);
     BEGIN
       DotNetAppSource := DotNetAppSource2
     END;

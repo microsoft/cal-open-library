@@ -110,7 +110,7 @@ OBJECT Codeunit 3000 DotNet_Array
     [External]
     PROCEDURE IsNull@107() : Boolean;
     BEGIN
-      EXIT(ISNULL(DotNetArray));
+      EXIT(SYSTEM.ISNULL(DotNetArray));
     END;
 
     BEGIN

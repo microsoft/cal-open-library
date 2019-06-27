@@ -15,7 +15,7 @@ OBJECT Codeunit 3019 DotNet_ALPacDeploymentSchedule
   CODE
   {
     VAR
-      DotNetALPackageDeploymentSchedule@1000 : DotNet "'Microsoft.Dynamics.Nav.Ncl, Version=13.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.Microsoft.Dynamics.Nav.Runtime.Apps.ALPackageDeploymentSchedule";
+      DotNetALPackageDeploymentSchedule@1000 : DotNet "'Microsoft.Dynamics.Nav.Ncl, Version=14.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.Microsoft.Dynamics.Nav.Runtime.Apps.ALPackageDeploymentSchedule";
 
     PROCEDURE Immediate@1();
     BEGIN
@@ -35,12 +35,12 @@ OBJECT Codeunit 3019 DotNet_ALPacDeploymentSchedule
       DotNetALPackageDeploymentSchedule := DotNetALPackageDeploymentSchedule.StageForNextMinorUpdate
     END;
 
-    PROCEDURE GetALPackageDeploymentSchedule@2(VAR DotNetALPackageDeploymentSchedule2@1001 : DotNet "'Microsoft.Dynamics.Nav.Ncl, Version=13.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.Microsoft.Dynamics.Nav.Runtime.Apps.ALPackageDeploymentSchedule");
+    PROCEDURE GetALPackageDeploymentSchedule@2(VAR DotNetALPackageDeploymentSchedule2@1001 : DotNet "'Microsoft.Dynamics.Nav.Ncl, Version=14.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.Microsoft.Dynamics.Nav.Runtime.Apps.ALPackageDeploymentSchedule");
     BEGIN
       DotNetALPackageDeploymentSchedule2 := DotNetALPackageDeploymentSchedule
     END;
 
-    PROCEDURE SetALPackageDeploymentSchedule@3(DotNetALPackageDeploymentSchedule2@1000 : DotNet "'Microsoft.Dynamics.Nav.Ncl, Version=13.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.Microsoft.Dynamics.Nav.Runtime.Apps.ALPackageDeploymentSchedule");
+    PROCEDURE SetALPackageDeploymentSchedule@3(DotNetALPackageDeploymentSchedule2@1000 : DotNet "'Microsoft.Dynamics.Nav.Ncl, Version=14.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.Microsoft.Dynamics.Nav.Runtime.Apps.ALPackageDeploymentSchedule");
     BEGIN
       DotNetALPackageDeploymentSchedule := DotNetALPackageDeploymentSchedule2
     END;

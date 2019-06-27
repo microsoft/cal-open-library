@@ -33,23 +33,24 @@ OBJECT Codeunit 3038 DotNet_XslCompiledTransform
     END;
 
     [External]
-    PROCEDURE Transform@3(VAR DotNet_XmlDocument@1000 : Codeunit 3013;VAR DestinationStream@1001 : OutStream);
+    PROCEDURE Transform@3(VAR DotNet_XmlDocument@1000 : Codeunit 3013;DotNet_XsltArgumentList@1004 : Codeunit 3040;VAR DestinationStream@1001 : OutStream);
     VAR
       DotNetXPathNavigatable@1002 : DotNet "'System.Xml,Version=4.0.0.0,Culture=neutral,PublicKeyToken=b77a5c561934e089'.System.Xml.XPath.IXPathNavigable";
       DotNetXsltArgumentList@1003 : DotNet "'System.Xml,Version=4.0.0.0,Culture=neutral,PublicKeyToken=b77a5c561934e089'.System.Xml.Xsl.XsltArgumentList";
     BEGIN
       DotNet_XmlDocument.GetXmlDocument(DotNetXPathNavigatable);
+      DotNet_XsltArgumentList.GetXsltArgumentList(DotNetXsltArgumentList);
       DotNetXslCompiledTransform.Transform(DotNetXPathNavigatable,DotNetXsltArgumentList,DestinationStream);
     END;
 
-    PROCEDURE GetXslCompiledTransform@4(VAR CurrentDotNetXslCompiledTransform@1000 : DotNet "'System.Xml,Version=4.0.0.0,Culture=neutral,PublicKeyToken=b77a5c561934e089'.System.Xml.Xsl.XslCompiledTransform");
+    PROCEDURE GetXslCompiledTransform@4(VAR DotNetXslCompiledTransform2@1000 : DotNet "'System.Xml,Version=4.0.0.0,Culture=neutral,PublicKeyToken=b77a5c561934e089'.System.Xml.Xsl.XslCompiledTransform");
     BEGIN
-      CurrentDotNetXslCompiledTransform := DotNetXslCompiledTransform;
+      DotNetXslCompiledTransform2 := DotNetXslCompiledTransform;
     END;
 
-    PROCEDURE SetXslCompiledTransform@5(NewDotNetXslCompiledTransform@1000 : DotNet "'System.Xml,Version=4.0.0.0,Culture=neutral,PublicKeyToken=b77a5c561934e089'.System.Xml.Xsl.XslCompiledTransform");
+    PROCEDURE SetXslCompiledTransform@5(DotNetXslCompiledTransform2@1000 : DotNet "'System.Xml,Version=4.0.0.0,Culture=neutral,PublicKeyToken=b77a5c561934e089'.System.Xml.Xsl.XslCompiledTransform");
     BEGIN
-      DotNetXslCompiledTransform := NewDotNetXslCompiledTransform;
+      DotNetXslCompiledTransform := DotNetXslCompiledTransform2;
     END;
 
     BEGIN

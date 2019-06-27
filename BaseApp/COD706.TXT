@@ -49,6 +49,23 @@ OBJECT Codeunit 706 Zip Stream Wrapper
     END;
 
     [External]
+    PROCEDURE OpenZipFromStreamWithEncoding@11(InputStream@1000 : InStream;ZipArchiveModeIsUpdate@1001 : Boolean;EncodingCodePageNumber@1004 : Integer);
+    VAR
+      Encoding@1003 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Text.Encoding";
+      OutputStream@1002 : OutStream;
+    BEGIN
+      Encoding := Encoding.GetEncoding(EncodingCodePageNumber);
+      CLEAR(ZipTempBlob);
+      ZipTempBlob.Blob.CREATEOUTSTREAM(OutputStream);
+      COPYSTREAM(OutputStream,InputStream);
+
+      IF ZipArchiveModeIsUpdate THEN
+        ZipArchive := ZipArchive.ZipArchive(OutputStream,ZipArchiveMode.Update,FALSE,Encoding)
+      ELSE
+        ZipArchive := ZipArchive.ZipArchive(OutputStream,ZipArchiveMode.Read,FALSE,Encoding);
+    END;
+
+    [External]
     PROCEDURE UploadZip@3(DialogTitle@1000 : Text;FromFolder@1001 : Text;FromFilter@1002 : Text;FromFile@1003 : Text) : Boolean;
     VAR
       InputStream@1004 : InStream;
