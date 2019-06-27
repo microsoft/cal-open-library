@@ -15,7 +15,7 @@ OBJECT Codeunit 3031 DotNet_SmtpMessage
   CODE
   {
     VAR
-      DotNetSmtpMessage@1000 : DotNet "'Microsoft.Dynamics.Nav.SMTP, Version=13.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.Microsoft.Dynamics.Nav.SMTP.SmtpMessage";
+      DotNetSmtpMessage@1000 : DotNet "'Microsoft.Dynamics.Nav.SMTP, Version=14.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.Microsoft.Dynamics.Nav.SMTP.SmtpMessage";
 
     [External]
     PROCEDURE CreateMessage@1();
@@ -107,12 +107,12 @@ OBJECT Codeunit 3031 DotNet_SmtpMessage
       EXIT(DotNetSmtpMessage.ConvertBase64ImagesToContentId());
     END;
 
-    PROCEDURE GetSmtpMessage@16(VAR DotNetSmtpMessage2@1000 : DotNet "'Microsoft.Dynamics.Nav.SMTP, Version=13.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.Microsoft.Dynamics.Nav.SMTP.SmtpMessage");
+    PROCEDURE GetSmtpMessage@16(VAR DotNetSmtpMessage2@1000 : DotNet "'Microsoft.Dynamics.Nav.SMTP, Version=14.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.Microsoft.Dynamics.Nav.SMTP.SmtpMessage");
     BEGIN
       DotNetSmtpMessage2 := DotNetSmtpMessage;
     END;
 
-    PROCEDURE SetSmtpMessage@17(DotNetSmtpMessage2@1000 : DotNet "'Microsoft.Dynamics.Nav.SMTP, Version=13.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.Microsoft.Dynamics.Nav.SMTP.SmtpMessage");
+    PROCEDURE SetSmtpMessage@17(DotNetSmtpMessage2@1000 : DotNet "'Microsoft.Dynamics.Nav.SMTP, Version=14.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.Microsoft.Dynamics.Nav.SMTP.SmtpMessage");
     BEGIN
       DotNetSmtpMessage := DotNetSmtpMessage2;
     END;

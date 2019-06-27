@@ -18,6 +18,15 @@ OBJECT Codeunit 3003 DotNet_DateTime
       DotNetDateTime@1000 : DotNet "'mscorlib'.System.DateTime";
 
     [External]
+    PROCEDURE CreateUTC@10(Year@1000 : Integer;Month@1001 : Integer;Day@1002 : Integer;Hour@1003 : Integer;Minute@1004 : Integer;Second@1005 : Integer);
+    VAR
+      DotNet_DateTimeKind@1006 : DotNet "'mscorlib'.System.DateTimeKind";
+    BEGIN
+      DotNet_DateTimeKind := DotNet_DateTimeKind.Utc;
+      DotNetDateTime := DotNetDateTime.DateTime(Year,Month,Day,Hour,Minute,Second,DotNet_DateTimeKind);
+    END;
+
+    [External]
     PROCEDURE TryParse@2(DateTimeText@1000 : Text;DotNet_CultureInfo@1001 : Codeunit 3002;DotNet_DateTimeStyles@1005 : Codeunit 3004) : Boolean;
     VAR
       DotNetCultureInfo@1003 : DotNet "'mscorlib'.System.Globalization.CultureInfo";
@@ -102,6 +111,12 @@ OBJECT Codeunit 3003 DotNet_DateTime
     BEGIN
       DotNet_DateTimeFormatInfo.GetDateTimeFormatInfo(DotNetDateTimeFormatInfo);
       EXIT(DotNetDateTime.ToString('d',DotNetDateTimeFormatInfo))
+    END;
+
+    [External]
+    PROCEDURE ToDateTime@16() : DateTime;
+    BEGIN
+      EXIT(DotNetDateTime);
     END;
 
     PROCEDURE GetDateTime@1(VAR DotNetDateTime2@1000 : DotNet "'mscorlib'.System.DateTime");

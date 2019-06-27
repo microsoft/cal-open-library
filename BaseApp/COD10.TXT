@@ -193,6 +193,34 @@ OBJECT Codeunit 10 Type Helper
     END;
 
     [External]
+    PROCEDURE FormatDateWithCurrentCulture@73(DateToFormat@1000 : Date) : Text;
+    VAR
+      DotNet_CultureInfo@1004 : Codeunit 3002;
+      DotNet_DateTimeFormatInfo@1007 : Codeunit 3022;
+      DotNet_DateTime@1001 : Codeunit 3003;
+    BEGIN
+      DotNet_CultureInfo.GetCultureInfoByName(GetCultureName);
+      DotNet_CultureInfo.DateTimeFormat(DotNet_DateTimeFormatInfo);
+      DotNet_DateTime.DateTimeFromYMD(DATE2DMY(DateToFormat,3),DATE2DMY(DateToFormat,2),DATE2DMY(DateToFormat,1));
+      EXIT(DotNet_DateTime.ToString(DotNet_DateTimeFormatInfo));
+    END;
+
+    [External]
+    PROCEDURE GetHMSFromTime@174(VAR Hour@1000 : Integer;VAR Minute@1001 : Integer;VAR Second@1002 : Integer;TimeSource@1003 : Time);
+    VAR
+      Milliseconds@1004 : Integer;
+    BEGIN
+      Milliseconds := TimeSource - 000000T;
+      Hour := Milliseconds DIV 1000 DIV 60 DIV 60;
+
+      Milliseconds -= (Hour * 1000 * 60 * 60);
+      Minute := Milliseconds DIV 1000 DIV 60;
+
+      Milliseconds -= (Minute * 1000 * 60);
+      Second := Milliseconds DIV 1000;
+    END;
+
+    [External]
     PROCEDURE IsLeapYear@46(Date@1001 : Date) : Boolean;
     VAR
       DateTime@1000 : DotNet "'mscorlib'.System.DateTime";
@@ -455,7 +483,7 @@ OBJECT Codeunit 10 Type Helper
       TempBlobPdf@1001 : Record 99008535;
       InStreamWordDoc@1002 : InStream;
       OutStreamPdfDoc@1003 : OutStream;
-      PdfWriter@1004 : DotNet "'Microsoft.Dynamics.Nav.PdfWriter, Version=13.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.Microsoft.Dynamics.Nav.PdfWriter.WordToPdf";
+      PdfWriter@1004 : DotNet "'Microsoft.Dynamics.Nav.PdfWriter, Version=14.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.Microsoft.Dynamics.Nav.PdfWriter.WordToPdf";
     BEGIN
       TempBlob.Blob.CREATEINSTREAM(InStreamWordDoc);
       TempBlobPdf.Blob.CREATEOUTSTREAM(OutStreamPdfDoc);
@@ -494,6 +522,12 @@ OBJECT Codeunit 10 Type Helper
     BEGIN
       AlphanumericRegEx := Regex.Regex(RegExExpression);
       EXIT(AlphanumericRegEx.IsMatch(Input));
+    END;
+
+    [External]
+    PROCEDURE IsAsciiLetter@74(Input@1000 : Text) : Boolean;
+    BEGIN
+      EXIT(IsMatch(Input,'^[a-zA-Z]*$'));
     END;
 
     [External]
@@ -950,6 +984,23 @@ OBJECT Codeunit 10 Type Helper
       EXIT(DotNetIntPtr.ToString('X'));
     END;
 
+    [External]
+    PROCEDURE Maximum@76(Value1@1001 : Decimal;Value2@1000 : Decimal) : Decimal;
+    BEGIN
+      IF Value1 > Value2 THEN
+        EXIT(Value1);
+      EXIT(Value2);
+    END;
+
+    [External]
+    PROCEDURE Minimum@75(Value1@1000 : Decimal;Value2@1001 : Decimal) : Decimal;
+    BEGIN
+      IF Value1 < Value2 THEN
+        EXIT(Value1);
+      EXIT(Value2);
+    END;
+
+    [External]
     PROCEDURE TransferFieldsWithValidate@39(VAR TempFieldBuffer@1000 : TEMPORARY Record 8450;RecordVariant@1001 : Variant;VAR TargetTableRecRef@1002 : RecordRef);
     VAR
       DataTypeManagement@1006 : Codeunit 701;
@@ -997,6 +1048,7 @@ OBJECT Codeunit 10 Type Helper
       EXIT(NewDateTime);
     END;
 
+    [External]
     PROCEDURE CalculateLog@54(Number@1000 : Decimal) : Decimal;
     VAR
       Math@1002 : DotNet "'mscorlib'.System.Math";
@@ -1048,6 +1100,18 @@ OBJECT Codeunit 10 Type Helper
         ELSE
           EXIT('<Precision,0:0><Standard Format,0>');
       END
+    END;
+
+    [External]
+    PROCEDURE GetXMLAmountFormatWithTwoDecimalPlaces@122() : Text;
+    BEGIN
+      EXIT('<Precision,2:2><Standard Format,9>');
+    END;
+
+    [External]
+    PROCEDURE GetXMLDateFormat@126() : Text;
+    BEGIN
+      EXIT('<Standard Format,9>');
     END;
 
     [TryFunction]

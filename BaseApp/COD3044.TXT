@@ -1,1 +1,46 @@
- 
+OBJECT Codeunit 3044 DotNet_SecureString
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      DotNetSecureString@1000 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Security.SecureString";
+
+    [External]
+    PROCEDURE SecureString@6();
+    BEGIN
+      DotNetSecureString := DotNetSecureString.SecureString;
+    END;
+
+    [External]
+    PROCEDURE AppendChar@9(C@1000 : Char);
+    BEGIN
+      DotNetSecureString.AppendChar(C);
+    END;
+
+    PROCEDURE GetSecureString@1(VAR DotNetSecureString2@1000 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Security.SecureString");
+    BEGIN
+      DotNetSecureString2 := DotNetSecureString;
+    END;
+
+    PROCEDURE SetSecureString@2(VAR DotNetSecureString2@1000 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Security.SecureString");
+    BEGIN
+      DotNetSecureString := DotNetSecureString2;
+    END;
+
+    BEGIN
+    END.
+  }
+}
+
