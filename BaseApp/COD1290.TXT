@@ -36,6 +36,8 @@ OBJECT Codeunit 1290 SOAP Web Service Request Mgt.
       GlobalPassword@1013 : Text;
       GlobalURL@1014 : Text;
       GlobalUsername@1008 : Text;
+      GlobalBasicUsername@50000 : Text;
+      GlobalBasicPassword@50001 : Text;
       TraceLogEnabled@1011 : Boolean;
       GlobalTimeout@1024 : Integer;
       InternalErr@1028 : TextConst 'ENU=The remote service has returned the following error message:\\';
@@ -58,6 +60,7 @@ OBJECT Codeunit 1290 SOAP Web Service Request Mgt.
       ResponseInStreamTempBlob.INIT;
       ResponseInStreamTempBlob.Blob.CREATEINSTREAM(ResponseInStream);
       CreateSoapRequest(HttpWebRequest.GetRequestStream,GlobalRequestBodyInStream,GlobalUsername,GlobalPassword);
+      AddBasicAuthorizationHeader(GlobalURL, GlobalBasicUsername, GlobalBasicPassword, HttpWebRequest);
       WebRequestHelper.GetWebResponse(HttpWebRequest,HttpWebResponse,ResponseInStream,
         HttpStatusCode,ResponseHeaders,GlobalProgressDialogEnabled);
       ExtractContentFromResponse(ResponseInStream,ResponseBodyTempBlob);
@@ -221,6 +224,13 @@ OBJECT Codeunit 1290 SOAP Web Service Request Mgt.
     END;
 
     [External]
+    PROCEDURE SetBasicCredentials@50002(Username@50003 : Text;Password@50004 : Text);
+    BEGIN
+      GlobalBasicUsername := Username;
+      GlobalBasicPassword := Password;
+    END;
+
+    [External]
     PROCEDURE SetTimeout@7(NewTimeout@1000 : Integer);
     BEGIN
       GlobalTimeout := NewTimeout;
@@ -258,6 +268,23 @@ OBJECT Codeunit 1290 SOAP Web Service Request Mgt.
     BEGIN
       IF TraceLogEnabled THEN
         Trace.LogXmlDocToTempFile(XmlDoc,Name);
+    END;
+
+    LOCAL PROCEDURE AddBasicAuthorizationHeader(Uri@50005 : Text;Username@50006 : Text;Password@50007 : Text;VAR DotNet_HttpWebRequest@50008 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Net.HttpWebRequest");
+    VAR
+      DotNet_Uri@50009 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Uri";
+      DotNet_CredentialCache@50010 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Net.CredentialCache";
+      DotNet_NetworkCredential@50011 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Net.NetworkCredential";
+    BEGIN
+      IF (Username = '') THEN
+        EXIT;
+
+      DotNet_Uri := DotNet_Uri.Uri(Uri);
+      DotNet_NetworkCredential := DotNet_NetworkCredential.NetworkCredential(Username, Password);
+      DotNet_CredentialCache := DotNet_CredentialCache.CredentialCache();
+      DotNet_CredentialCache.Add(DotNet_Uri, 'Basic', DotNet_NetworkCredential);
+
+      DotNet_HttpWebRequest.Credentials := DotNet_CredentialCache;
     END;
 
     [External]
