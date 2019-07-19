@@ -1,0 +1,275 @@
+OBJECT Codeunit 51112 Test_DotNet_Math
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    Subtype=Test;
+    TestPermissions=Disabled;
+    OnRun=BEGIN
+            // [FEATURE] [Math]
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      DotNetMath@1000 : Codeunit 51111;
+      Assert@1001 : Codeunit 130000;
+      LibraryUtility@1002 : Codeunit 131000;
+      ResultMustBeXTxt@1109900000 : TextConst 'ENU=Result must be %1';
+
+    [Test]
+    PROCEDURE TestPi@10();
+    VAR
+      Expected@1002 : Decimal;
+    BEGIN
+        Expected := 3.1415926535897931;
+        Assert.AreEqual(Expected, DotNetMath.Pi(), STRSUBSTNO(ResultMustBeXTxt, Expected));
+    END;
+
+    [Test]
+    PROCEDURE TestE@11();
+    VAR
+      Expected@1002 : Decimal;
+    BEGIN
+        Expected := 2.7182818284590451;
+        Assert.AreEqual(Expected, DotNetMath.E(), STRSUBSTNO(ResultMustBeXTxt, Expected));
+    END;
+
+    [Test]
+    PROCEDURE TestAbs@12();
+    VAR
+      Expected@1002 : Decimal;
+    BEGIN
+        Expected := 42.42;
+        Assert.AreEqual(Expected, DotNetMath.Abs(-42.42), STRSUBSTNO(ResultMustBeXTxt, Expected));
+    END;
+
+    [Test]
+    PROCEDURE TestAcos@13();
+    VAR
+      Expected@1002 : Decimal;
+    BEGIN
+        Expected := 1.13735100672501;
+        Assert.AreEqual(Expected, DotNetMath.Acos(0.42), STRSUBSTNO(ResultMustBeXTxt, Expected));
+    END;
+
+    [Test]
+    PROCEDURE TestAsin@14();
+    VAR
+      Expected@1002 : Decimal;
+    BEGIN
+        Expected := 0.433445320069886;
+        Assert.AreEqual(Expected, DotNetMath.Asin(0.42), STRSUBSTNO(ResultMustBeXTxt, Expected));
+    END;
+
+    [Test]
+    PROCEDURE TestAtan@15();
+    VAR
+      Expected@1002 : Decimal;
+    BEGIN
+        Expected := 1.5472269062241;
+        Assert.AreEqual(Expected, DotNetMath.Atan(42.42), STRSUBSTNO(ResultMustBeXTxt, Expected));
+    END;
+
+    [Test]
+    PROCEDURE TestAtan2@16();
+    VAR
+      Expected@1002 : Decimal;
+    BEGIN
+        Expected := 1.05165021254837;
+        Assert.AreEqual(Expected, DotNetMath.Atan2(42.42, 24.24), STRSUBSTNO(ResultMustBeXTxt, Expected));
+    END;
+
+    [Test]
+    PROCEDURE TestBigMul@17();
+    VAR
+      Expected@1002 : BigInteger;
+    BEGIN
+        Expected := 90194313174.0;
+        Assert.AreEqual(Expected, DotNetMath.BigMul(2147483647, 42), STRSUBSTNO(ResultMustBeXTxt, Expected));
+    END;
+
+    [Test]
+    PROCEDURE TestCeiling@18();
+    VAR
+      Expected@1002 : Decimal;
+    BEGIN
+        Expected := 43;
+        Assert.AreEqual(Expected, DotNetMath.Ceiling(42.42), STRSUBSTNO(ResultMustBeXTxt, Expected));
+    END;
+
+    [Test]
+    PROCEDURE TestCos@19();
+    VAR
+      Expected@1002 : Decimal;
+    BEGIN
+        Expected := 0.00849907421374058;
+        Assert.AreEqual(Expected, DotNetMath.Cos(42.42), STRSUBSTNO(ResultMustBeXTxt, Expected));
+    END;
+
+    [Test]
+    PROCEDURE TestCosh@20();
+    VAR
+      Expected@1002 : Decimal;
+    BEGIN
+        Expected := 1.08950418771685;
+        Assert.AreEqual(Expected, DotNetMath.Cosh(0.42), STRSUBSTNO(ResultMustBeXTxt, Expected));
+    END;
+
+    [Test]
+    PROCEDURE TestExp@21();
+    VAR
+      Expected@1002 : Decimal;
+    BEGIN
+        Expected := 1.52196155561863;
+        Assert.AreEqual(Expected, DotNetMath.Exp(0.42), STRSUBSTNO(ResultMustBeXTxt, Expected));
+    END;
+
+    [Test]
+    PROCEDURE TestFloor@22();
+    VAR
+      Expected@1002 : Decimal;
+    BEGIN
+        Expected := 42;
+        Assert.AreEqual(Expected, DotNetMath.Floor(42.42), STRSUBSTNO(ResultMustBeXTxt, Expected));
+    END;
+
+    [Test]
+    PROCEDURE TestIEEERemainder@23();
+    VAR
+      Expected@1002 : Decimal;
+    BEGIN
+        Expected := -6.06;
+        Assert.AreEqual(Expected, DotNetMath.IEEERemainder(42.42, 24.24), STRSUBSTNO(ResultMustBeXTxt, Expected));
+    END;
+
+    [Test]
+    PROCEDURE TestLog@24();
+    VAR
+      Expected@1002 : Decimal;
+    BEGIN
+        Expected := 1.17921852466742;
+        Assert.AreEqual(Expected, DotNetMath.Log(42.42, 24), STRSUBSTNO(ResultMustBeXTxt, Expected));
+    END;
+
+    [Test]
+    PROCEDURE TestLog2@25();
+    VAR
+      Expected@1002 : Decimal;
+    BEGIN
+        Expected := 3.74761994913654;
+        Assert.AreEqual(Expected, DotNetMath.Log2(42.42), STRSUBSTNO(ResultMustBeXTxt, Expected));
+    END;
+
+    [Test]
+    PROCEDURE TestLog10@26();
+    VAR
+      Expected@1002 : Decimal;
+    BEGIN
+        Expected := 1.62757066418054;
+        Assert.AreEqual(Expected, DotNetMath.Log10(42.42), STRSUBSTNO(ResultMustBeXTxt, Expected));
+    END;
+
+    [Test]
+    PROCEDURE TestMax@36();
+    VAR
+      Expected@1002 : Decimal;
+    BEGIN
+        Expected := 42.42;
+        Assert.AreEqual(Expected, DotNetMath.Max(42.42, 24.24), STRSUBSTNO(ResultMustBeXTxt, Expected));
+    END;
+
+    [Test]
+    PROCEDURE TestMin@27();
+    VAR
+      Expected@1002 : Decimal;
+    BEGIN
+        Expected := 24.24;
+        Assert.AreEqual(Expected, DotNetMath.Min(42.42, 24.24), STRSUBSTNO(ResultMustBeXTxt, Expected));
+    END;
+
+    [Test]
+    PROCEDURE TestPow@28();
+    VAR
+      Expected@1002 : Decimal;
+    BEGIN
+        Expected := 204.715319319533;
+        Assert.AreEqual(Expected, DotNetMath.Pow(42.42, 1.42), STRSUBSTNO(ResultMustBeXTxt, Expected));
+    END;
+
+    [Test]
+    PROCEDURE TestSign@29();
+    VAR
+      Expected@1002 : Decimal;
+    BEGIN
+        Expected := 1;
+        Assert.AreEqual(Expected, DotNetMath.Sign(42.42), STRSUBSTNO(ResultMustBeXTxt, Expected));
+        Expected := -1;
+        Assert.AreEqual(Expected, DotNetMath.Sign(-42.42), STRSUBSTNO(ResultMustBeXTxt, Expected));
+    END;
+
+    [Test]
+    PROCEDURE TestSinh@30();
+    VAR
+      Expected@1002 : Decimal;
+    BEGIN
+        Expected := 0.432457367901788;
+        Assert.AreEqual(Expected, DotNetMath.Sinh(0.42), STRSUBSTNO(ResultMustBeXTxt, Expected));
+    END;
+
+    [Test]
+    PROCEDURE TestSin@31();
+    VAR
+      Expected@1002 : Decimal;
+    BEGIN
+        Expected := -0.999963882216508;
+        Assert.AreEqual(Expected, DotNetMath.Sin(42.42), STRSUBSTNO(ResultMustBeXTxt, Expected));
+    END;
+
+    [Test]
+    PROCEDURE TestSqrt@32();
+    VAR
+      Expected@1002 : Decimal;
+    BEGIN
+        Expected := 42;
+        Assert.AreEqual(Expected, DotNetMath.Sqrt(1764), STRSUBSTNO(ResultMustBeXTxt, Expected));
+    END;
+
+    [Test]
+    PROCEDURE TestTan@33();
+    VAR
+      Expected@1002 : Decimal;
+    BEGIN
+        Expected := -117.655624256093;
+        Assert.AreEqual(Expected, DotNetMath.Tan(42.42), STRSUBSTNO(ResultMustBeXTxt, Expected));
+    END;
+
+    [Test]
+    PROCEDURE TestTanh@34();
+    VAR
+      Expected@1002 : Decimal;
+    BEGIN
+        Expected := 0.396930432005078;
+        Assert.AreEqual(Expected, DotNetMath.Tanh(0.42), STRSUBSTNO(ResultMustBeXTxt, Expected));
+    END;
+
+    [Test]
+    PROCEDURE TestTruncate@35();
+    VAR
+      Expected@1002 : Decimal;
+    BEGIN
+        Expected := 42;
+        Assert.AreEqual(Expected, DotNetMath.Truncate(42.42), STRSUBSTNO(ResultMustBeXTxt, Expected));
+    END;
+
+    BEGIN
+    END.
+  }
+}
+

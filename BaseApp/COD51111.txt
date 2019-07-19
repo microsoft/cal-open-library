@@ -1,0 +1,186 @@
+OBJECT Codeunit 51111 DotNet_Math
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      DotNetMath@1000 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Math";
+
+    [External]
+    PROCEDURE Pi@10() : Decimal;
+    BEGIN
+        EXIT(3.1415926535897931);
+    END;
+
+    [External]
+    PROCEDURE E@11() : Decimal;
+    BEGIN
+        EXIT(2.7182818284590451);
+    END;
+
+    [External]
+    PROCEDURE Abs@12(d@1000 : Decimal) : Decimal;
+    BEGIN
+        EXIT(DotNetMath.Abs(d));
+    END;
+
+    [External]
+    PROCEDURE Acos@13(d@1000 : Decimal) : Decimal;
+    BEGIN
+        EXIT(DotNetMath.Acos(d));
+    END;
+
+    [External]
+    PROCEDURE Asin@14(d@1000 : Decimal) : Decimal;
+    BEGIN
+        EXIT(DotNetMath.Asin(d));
+    END;
+
+    [External]
+    PROCEDURE Atan@15(d@1000 : Decimal) : Decimal;
+    BEGIN
+        EXIT(DotNetMath.Atan(d));
+    END;
+
+    [External]
+    PROCEDURE Atan2@16(y@1000 : Decimal;x@1001 : Decimal) : Decimal;
+    BEGIN
+        EXIT(DotNetMath.Atan2(y, x));
+    END;
+
+    [External]
+    PROCEDURE BigMul@17(a@1000 : Integer;b@1001 : Integer) : BigInteger;
+    BEGIN
+        EXIT(DotNetMath.BigMul(a, b));
+    END;
+
+    [External]
+    PROCEDURE Ceiling@18(d@1000 : Decimal) : Decimal;
+    BEGIN
+        EXIT(DotNetMath.Ceiling(d));
+    END;
+
+    [External]
+    PROCEDURE Cos@19(d@1000 : Decimal) : Decimal;
+    BEGIN
+        EXIT(DotNetMath.Cos(d));
+    END;
+
+    [External]
+    PROCEDURE Cosh@20(d@1000 : Decimal) : Decimal;
+    BEGIN
+        EXIT(DotNetMath.Cosh(d));
+    END;
+
+    [External]
+    PROCEDURE Exp@21(d@1000 : Decimal) : Decimal;
+    BEGIN
+        EXIT(DotNetMath.Exp(d));
+    END;
+
+    [External]
+    PROCEDURE Floor@22(d@1000 : Decimal) : Decimal;
+    BEGIN
+        EXIT(DotNetMath.Floor(d));
+    END;
+
+    [External]
+    PROCEDURE IEEERemainder@23(x@1000 : Decimal;y@1001 : Decimal) : Decimal;
+    BEGIN
+        EXIT(DotNetMath.IEEERemainder(x, y));
+    END;
+
+    [External]
+    PROCEDURE Log@24(a@1000 : Decimal;newBase@1001 : Decimal) : Decimal;
+    BEGIN
+        EXIT(DotNetMath.Log(a, newBase));
+    END;
+
+    [External]
+    PROCEDURE Log2@25(d@1000 : Decimal) : Decimal;
+    BEGIN
+        EXIT(DotNetMath.Log(d));
+    END;
+
+    [External]
+    PROCEDURE Log10@26(d@1000 : Decimal) : Decimal;
+    BEGIN
+        EXIT(DotNetMath.Log10(d));
+    END;
+
+    [External]
+    PROCEDURE Max@36(val1@1000 : Decimal;val2@1001 : Decimal) : Decimal;
+    BEGIN
+        EXIT(DotNetMath.Max(val1, val2));
+    END;
+
+    [External]
+    PROCEDURE Min@27(val1@1000 : Decimal;val2@1001 : Decimal) : Decimal;
+    BEGIN
+        EXIT(DotNetMath.Min(val1, val2));
+    END;
+
+    [External]
+    PROCEDURE Pow@28(x@1000 : Decimal;y@1001 : Decimal) : Decimal;
+    BEGIN
+        EXIT(DotNetMath.Pow(x, y));
+    END;
+
+    [External]
+    PROCEDURE Sign@29(d@1000 : Decimal) : Integer;
+    BEGIN
+        EXIT(DotNetMath.Sign(d));
+    END;
+
+    [External]
+    PROCEDURE Sinh@30(d@1000 : Decimal) : Decimal;
+    BEGIN
+        EXIT(DotNetMath.Sinh(d));
+    END;
+
+    [External]
+    PROCEDURE Sin@31(d@1000 : Decimal) : Decimal;
+    BEGIN
+        EXIT(DotNetMath.Sin(d));
+    END;
+
+    [External]
+    PROCEDURE Sqrt@32(d@1000 : Decimal) : Decimal;
+    BEGIN
+        EXIT(DotNetMath.Sqrt(d));
+    END;
+
+    [External]
+    PROCEDURE Tan@33(a@1000 : Decimal) : Decimal;
+    BEGIN
+        EXIT(DotNetMath.Tan(a));
+    END;
+
+    [External]
+    PROCEDURE Tanh@34(d@1000 : Decimal) : Decimal;
+    BEGIN
+        EXIT(DotNetMath.Tanh(d));
+    END;
+
+    [External]
+    PROCEDURE Truncate@35(d@1000 : Decimal) : Decimal;
+    BEGIN
+        EXIT(DotNetMath.Truncate(d));
+    END;
+
+    BEGIN
+    END.
+  }
+}
+
