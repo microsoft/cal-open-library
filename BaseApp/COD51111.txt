@@ -179,6 +179,16 @@ OBJECT Codeunit 51111 DotNet_Math
         EXIT(DotNetMath.Truncate(d));
     END;
 
+    PROCEDURE GetMath@2(VAR DotNetMath2@1000 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Math");
+    BEGIN
+      DotNetMath2 := DotNetMath;
+    END;
+
+    PROCEDURE SetMath@3(VAR DotNetMath2@1000 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Math");
+    BEGIN
+      DotNetMath := DotNetMath2;
+    END;
+
     BEGIN
     END.
   }
