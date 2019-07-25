@@ -38,6 +38,7 @@ OBJECT Codeunit 1290 SOAP Web Service Request Mgt.
       GlobalUsername@1008 : Text;
       GlobalBasicUsername@50000 : Text;
       GlobalBasicPassword@50001 : Text;
+      GlobalSoapAction@50015 : Text;
       TraceLogEnabled@1011 : Boolean;
       GlobalTimeout@1024 : Integer;
       InternalErr@1028 : TextConst 'ENU=The remote service has returned the following error message:\\';
@@ -61,6 +62,7 @@ OBJECT Codeunit 1290 SOAP Web Service Request Mgt.
       ResponseInStreamTempBlob.Blob.CREATEINSTREAM(ResponseInStream);
       CreateSoapRequest(HttpWebRequest.GetRequestStream,GlobalRequestBodyInStream,GlobalUsername,GlobalPassword);
       AddBasicAuthorizationHeader(GlobalURL, GlobalBasicUsername, GlobalBasicPassword, HttpWebRequest);
+      AddSoapActionHeader(GlobalSoapAction, HttpWebRequest);
       WebRequestHelper.GetWebResponse(HttpWebRequest,HttpWebResponse,ResponseInStream,
         HttpStatusCode,ResponseHeaders,GlobalProgressDialogEnabled);
       ExtractContentFromResponse(ResponseInStream,ResponseBodyTempBlob);
@@ -231,6 +233,12 @@ OBJECT Codeunit 1290 SOAP Web Service Request Mgt.
     END;
 
     [External]
+    PROCEDURE SetAction(SoapAction@50014 : Text);
+    BEGIN
+      GlobalSoapAction := SoapAction;
+    END;
+
+    [External]
     PROCEDURE SetTimeout@7(NewTimeout@1000 : Integer);
     BEGIN
       GlobalTimeout := NewTimeout;
@@ -285,6 +293,15 @@ OBJECT Codeunit 1290 SOAP Web Service Request Mgt.
       DotNet_CredentialCache.Add(DotNet_Uri, 'Basic', DotNet_NetworkCredential);
 
       DotNet_HttpWebRequest.Credentials := DotNet_CredentialCache;
+    END;
+
+    LOCAL PROCEDURE AddSoapActionHeader(SoapAction@50012 : Text;VAR DotNet_HttpWebRequest@50013 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Net.HttpWebRequest");
+    VAR
+    BEGIN
+      IF (SoapAction = '') THEN
+        EXIT;
+      
+      DotNet_HttpWebRequest.Headers.Add('SOAPAction', SoapAction);
     END;
 
     [External]
