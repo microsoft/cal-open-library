@@ -235,7 +235,7 @@ OBJECT Codeunit 1290 SOAP Web Service Request Mgt.
     [External]
     PROCEDURE SetAction(SoapAction@50014 : Text);
     BEGIN
-      GlobalSoapAction = SoapAction;
+      GlobalSoapAction := SoapAction;
     END;
 
     [External]
