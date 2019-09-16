@@ -39,6 +39,7 @@ OBJECT Codeunit 1290 SOAP Web Service Request Mgt.
       GlobalBasicUsername@50000 : Text;
       GlobalBasicPassword@50001 : Text;
       GlobalSoapAction@50015 : Text;
+      GlobalStreamEncoding@50016 : TextEncoding;
       TraceLogEnabled@1011 : Boolean;
       GlobalTimeout@1024 : Integer;
       InternalErr@1028 : TextConst 'ENU=The remote service has returned the following error message:\\';
@@ -59,7 +60,7 @@ OBJECT Codeunit 1290 SOAP Web Service Request Mgt.
       CheckGlobals;
       BuildWebRequest(GlobalURL,HttpWebRequest);
       ResponseInStreamTempBlob.INIT;
-      ResponseInStreamTempBlob.Blob.CREATEINSTREAM(ResponseInStream);
+      ResponseInStreamTempBlob.Blob.CREATEINSTREAM(ResponseInStream, GlobalStreamEncoding);
       CreateSoapRequest(HttpWebRequest.GetRequestStream,GlobalRequestBodyInStream,GlobalUsername,GlobalPassword);
       AddBasicAuthorizationHeader(GlobalURL, GlobalBasicUsername, GlobalBasicPassword, HttpWebRequest);
       AddSoapActionHeader(GlobalSoapAction, HttpWebRequest);
@@ -167,14 +168,14 @@ OBJECT Codeunit 1290 SOAP Web Service Request Mgt.
       ResponseBodyXMLDoc := ResponseBodyXMLDoc.XmlDocument;
       ResponseBodyXMLDoc.AppendChild(ResponseBodyXMLDoc.ImportNode(ResponseBodyXmlNode.FirstChild,TRUE));
 
-      BodyTempBlob.Blob.CREATEOUTSTREAM(BodyOutStream);
+      BodyTempBlob.Blob.CREATEOUTSTREAM(BodyOutStream, GlobalStreamEncoding);
       ResponseBodyXMLDoc.Save(BodyOutStream);
       TraceLogXmlDocToTempFile(ResponseBodyXMLDoc,'ResponseBodyContent');
     END;
 
     PROCEDURE GetResponseContent@22(VAR ResponseBodyInStream@1000 : InStream);
     BEGIN
-      ResponseBodyTempBlob.Blob.CREATEINSTREAM(ResponseBodyInStream);
+      ResponseBodyTempBlob.Blob.CREATEINSTREAM(ResponseBodyInStream, GlobalStreamEncoding);
     END;
 
     PROCEDURE ProcessFaultResponse@15(SupportInfo@1001 : Text);
@@ -220,6 +221,8 @@ OBJECT Codeunit 1290 SOAP Web Service Request Mgt.
       GlobalUsername := Username;
       GlobalPassword := Password;
 
+      GlobalStreamEncoding := TEXTENCODING::Windows;
+
       GlobalProgressDialogEnabled := TRUE;
 
       TraceLogEnabled := FALSE;
@@ -236,6 +239,12 @@ OBJECT Codeunit 1290 SOAP Web Service Request Mgt.
     PROCEDURE SetAction(SoapAction@50014 : Text);
     BEGIN
       GlobalSoapAction := SoapAction;
+    END;
+
+    [External]
+    PROCEDURE SetStreamEncoding(StreamEncoding@50017 : TextEncoding);
+    BEGIN
+      GlobalStreamEncoding := StreamEncoding;
     END;
 
     [External]
