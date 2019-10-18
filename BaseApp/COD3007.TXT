@@ -118,6 +118,12 @@ OBJECT Codeunit 3007 DotNet_String
     END;
 
     [External]
+    PROCEDURE LastIndexOfString@6010050(Value@1000 : Text) : Integer;
+    BEGIN
+      EXIT(DotNetString.LastIndexOf(Value));
+    END;
+
+    [External]
     PROCEDURE Substring@104(StartIndex@1000 : Integer;Length@1001 : Integer) : Text;
     BEGIN
       EXIT(DotNetString.Substring(StartIndex,Length));
