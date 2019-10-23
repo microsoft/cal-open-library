@@ -105,6 +105,12 @@ OBJECT Codeunit 3003 DotNet_DateTime
     END;
 
     [External]
+    PROCEDURE IsDaylightSavingTime@6010050() : Boolean;
+    BEGIN
+      EXIT(DotNetDateTime.IsDaylightSavingTime);
+    END;
+
+    [External]
     PROCEDURE ToString@11(DotNet_DateTimeFormatInfo@1001 : Codeunit 3022) : Text;
     VAR
       DotNetDateTimeFormatInfo@1002 : DotNet "'mscorlib'.System.Globalization.DateTimeFormatInfo";
