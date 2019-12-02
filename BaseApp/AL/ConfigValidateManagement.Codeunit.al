@@ -236,6 +236,8 @@ codeunit 8617 "Config. Validate Management"
                 exit(EvaluateValueToGuid(FieldRef, Value, Validate));
             FieldType::TableFilter:
                 exit(EvaluateValueToTableFilter(FieldRef, Value));
+            FieldType::RecordId:
+                exit(EvaluateValueToRecordID(FieldRef,Value,Validate));
         end;
     end;
 
@@ -441,6 +443,21 @@ codeunit 8617 "Config. Validate Management"
         Evaluate(FieldRef, TableFilter);
     end;
 
+    local procedure EvaluateValueToRecordID(var FieldRef: FieldRef; Value: Text[250]; Validate: Boolean): Text[250]
+    var
+        Field: Record Field;
+        RecordRef: RecordRef;
+        RecordID: RecordId;
+    begin
+        IF NOT EVALUATE(RecordID,Value) AND NOT EVALUATE(RecordID,Value,XMLFormat) THEN
+            EXIT(STRSUBSTNO(Text003,Value,FORMAT(Field.Type::RecordID)));
+
+        IF Validate THEN
+            FieldRef.VALIDATE(RecordID)
+        ELSE
+            FieldRef.VALUE := RecordID;
+    end;
+
     local procedure IsNormalField(FieldRef: FieldRef): Boolean
     begin
         exit(FieldRef.Class = FieldClass::Normal);
@@ -503,6 +520,8 @@ codeunit 8617 "Config. Validate Management"
                 exit(EvaluateTextToFieldRefDateFormula(InputText, FieldRef, ToValidate));
             FieldType::TableFilter:
                 exit(EvaluateTextToFieldRefTableFilter(InputText, FieldRef));
+            FieldType::RecordId:
+                exit(EvaluateTextToFieldRefRecordID(InputText,FieldRef,ToValidate));
             else
                 exit(false);
         end;
@@ -738,6 +757,24 @@ codeunit 8617 "Config. Validate Management"
     begin
         Evaluate(FieldRef, InputText);
         exit(true);
+    end;
+
+    local procedure EvaluateTextToFieldRefRecordID(InputText: Text[250]; var FieldRef: FieldRef; ToValidate: Boolean): Boolean
+    var
+        RecordIDVar: RecordId;
+        RecordIDVar1: RecordId;
+    begin
+        IF EVALUATE(RecordIDVar,InputText) THEN BEGIN
+            IF ToValidate THEN BEGIN
+                RecordIDVar1 := FieldRef.VALUE;
+                IF RecordIDVar1 <> RecordIDVar THEN
+                    FieldRef.VALIDATE(RecordIDVar);
+            END ELSE
+                FieldRef.VALUE := RecordIDVar;
+            EXIT(TRUE);
+        END;
+
+        EXIT(FALSE);
     end;
 
     procedure CheckName(FieldName: Text[250]): Text[250]
