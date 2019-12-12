@@ -23,6 +23,7 @@ OBJECT Codeunit 1297 Http Web Request Mgt.
       GlobalProgressDialogEnabled@1023 : Boolean;
       InternalErr@1001 : TextConst 'ENU=The remote service has returned the following error message:\\';
       NoCookieForYouErr@1040 : TextConst 'ENU=The web request has no cookies.';
+      ErrClientCertNotFound@1000000000 : TextConst 'ENU=Unable to retrieve requested Certificate using thumbprint %1. Please ensure it is stored in Personal Repository from either Service User or NAV Server.';
 
     PROCEDURE GetResponse@6(VAR ResponseInStream@1005 : InStream;VAR HttpStatusCode@1000 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Net.HttpStatusCode";VAR ResponseHeaders@1003 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Collections.Specialized.NameValueCollection") : Boolean;
     VAR
@@ -360,6 +361,48 @@ OBJECT Codeunit 1297 Http Web Request Mgt.
     PROCEDURE OnOverrideUrl@36(VAR Url@1000 : Text);
     BEGIN
       // Provides an option to rewrite URL in non SaaS environments.
+    END;
+
+    PROCEDURE AddClientCertificate@1000000000(ClientCertThumbprint@1000000000 : Text);
+    VAR
+      X509Store@1000000001 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Security.Cryptography.X509Certificates.X509Store";
+      OpenFlags@1000000002 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Security.Cryptography.X509Certificates.OpenFlags";
+      StoreName@1000000004 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Security.Cryptography.X509Certificates.StoreName";
+      StoreLocation@1000000005 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Security.Cryptography.X509Certificates.StoreLocation";
+      X509FindType@1000000006 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Security.Cryptography.X509Certificates.X509FindType";
+      X509Certificate2Collection@1000000003 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Security.Cryptography.X509Certificates.X509Certificate2Collection";
+    BEGIN
+      // ask for certicate Computer/Personal store
+      X509Store := X509Store.X509Store(StoreName.My, StoreLocation.LocalMachine);
+      
+      // open with read-only mode
+      X509Store.Open(OpenFlags.ReadOnly);
+      
+      // search for requested certificate
+      X509Certificate2Collection := X509Store.Certificates.Find(X509FindType.FindByThumbprint, ClientCertThumbprint, TRUE);
+      
+      // in case requested certificate cannot be found, attempt to retrieve it from Service User
+      IF (X509Certificate2Collection.Count < 1) THEN BEGIN
+        
+        // close opened store
+        X509Store.Close();
+        
+        // init Current User/Personal store
+        X509Store := X509Store.X509Store(StoreName.My, StoreLocation.CurrentUser);
+        
+        // open the store in read-only mode
+        X509Store.Open(OpenFlags.ReadOnly);
+        
+        // collect certificates matching the requested one
+        X509Certificate2Collection := X509Store.Certificates.Find(X509FindType.FindByThumbprint, ClientCertThumbprint, TRUE);
+        
+        // if we're still not able to retrieve the certificate - throw exception
+        IF (X509Certificate2Collection.Count < 1) THEN
+          ERROR(ErrClientCertNotFound, ClientCertThumbprint);
+      END;
+
+      // attach client certificate to HTTP Web Request
+      HttpWebRequest.ClientCertificates := X509Certificate2Collection;
     END;
 
     BEGIN
