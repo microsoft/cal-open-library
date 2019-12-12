@@ -29,9 +29,15 @@ OBJECT Codeunit 1297 Http Web Request Mgt.
     VAR
       WebRequestHelper@1001 : Codeunit 1299;
       HttpWebResponse@1006 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Net.HttpWebResponse";
+      TempReturnTempBlob@1000000000 : TEMPORARY Record 99008535;
     BEGIN
-      EXIT(WebRequestHelper.GetWebResponse(HttpWebRequest,HttpWebResponse,ResponseInStream,HttpStatusCode,
-          ResponseHeaders,GlobalProgressDialogEnabled));
+      IF (WebRequestHelper.GetWebResponse(HttpWebRequest,HttpWebResponse,ResponseInStream,HttpStatusCode,
+          ResponseHeaders,GlobalProgressDialogEnabled)) THEN BEGIN
+          TraceLogStreamToTempFile(ResponseInStream, 'ResponseBodyContent', TempReturnTempBlob);
+        EXIT(TRUE);
+      END;
+
+      EXIT(FALSE);
     END;
 
     PROCEDURE GetResponseStream@23(VAR ResponseInStream@1005 : InStream) : Boolean;
@@ -40,9 +46,15 @@ OBJECT Codeunit 1297 Http Web Request Mgt.
       HttpWebResponse@1006 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Net.HttpWebResponse";
       HttpStatusCode@1002 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Net.HttpStatusCode";
       ResponseHeaders@1000 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Collections.Specialized.NameValueCollection";
+      TempReturnTempBlob@1000000000 : TEMPORARY Record 99008535;
     BEGIN
-      EXIT(WebRequestHelper.GetWebResponse(HttpWebRequest,HttpWebResponse,ResponseInStream,HttpStatusCode,
-          ResponseHeaders,GlobalProgressDialogEnabled));
+      IF (WebRequestHelper.GetWebResponse(HttpWebRequest, HttpWebResponse, ResponseInStream, HttpStatusCode,
+          ResponseHeaders, GlobalProgressDialogEnabled)) THEN BEGIN
+        TraceLogStreamToTempFile(ResponseInStream, 'ResponseBodyContent', TempReturnTempBlob);
+        EXIT(TRUE);
+      END;
+
+      EXIT(FALSE);
     END;
 
     [TryFunction]
@@ -196,6 +208,10 @@ OBJECT Codeunit 1297 Http Web Request Mgt.
     VAR
       RequestStr@1004 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.IO.Stream";
       StreamWriter@1003 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.IO.StreamWriter";
+      TempBlob@1000000000 : TEMPORARY Record 99008535;
+      ReturnTempBlob@1000000003 : TEMPORARY Record 99008535;
+      InStr@1000000001 : InStream;
+      TxtEncoding@1000000002 : TextEncoding;
     BEGIN
       RequestStr := HttpWebRequest.GetRequestStream;
       StreamWriter := StreamWriter.StreamWriter(RequestStr,Encoding);
@@ -203,6 +219,14 @@ OBJECT Codeunit 1297 Http Web Request Mgt.
       StreamWriter.Flush;
       StreamWriter.Close;
       StreamWriter.Dispose;
+
+      TxtEncoding := TEXTENCODING::UTF8;
+      IF (FORMAT(Encoding) = FORMAT(Encoding.ASCII)) THEN
+        TxtEncoding := TEXTENCODING::Windows;
+      
+      TempBlob.WriteAsText(BodyText, TxtEncoding);
+      TempBlob.Blob.CREATEINSTREAM(InStr, TxtEncoding);
+      TraceLogStreamToTempFile(InStr, 'RequestBodyContent', ReturnTempBlob);
     END;
 
     PROCEDURE SetTimeout@7(NewTimeout@1000 : Integer);
@@ -285,6 +309,11 @@ OBJECT Codeunit 1297 Http Web Request Mgt.
       FileManagement@1001 : Codeunit 419;
       FileStream@1003 : DotNet "'mscorlib'.System.IO.FileStream";
       FileMode@1004 : DotNet "'mscorlib'.System.IO.FileMode";
+      SeekOrigin@1000000003 : DotNet "'mscorlib'.System.IO.SeekOrigin";
+      TempBlob@1000000000 : TEMPORARY Record 99008535;
+      ReturnTempBlob@1000000004 : TEMPORARY Record 99008535;
+      OutStr@1000000001 : OutStream;
+      InStr@1000000002 : InStream;
     BEGIN
       IF BodyFilePath = '' THEN
         EXIT;
@@ -293,12 +322,19 @@ OBJECT Codeunit 1297 Http Web Request Mgt.
 
       FileStream := FileStream.FileStream(BodyFilePath,FileMode.Open);
       FileStream.CopyTo(HttpWebRequest.GetRequestStream);
+
+      TempBlob.Blob.CREATEOUTSTREAM(OutStr);
+      FileStream.Seek(0, SeekOrigin."Begin");
+      FileStream.CopyTo(OutStr);
+      TempBlob.Blob.CREATEINSTREAM(InStr);
+      TraceLogStreamToTempFile(InStr, 'RequestBodyContent', ReturnTempBlob);
     END;
 
     PROCEDURE AddBodyBlob@19(VAR TempBlob@1000 : Record 99008535);
     VAR
       RequestStr@1002 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.IO.Stream";
       BlobStr@1001 : InStream;
+      ReturnTempBlob@1000000000 : TEMPORARY Record 99008535;
     BEGIN
       IF NOT TempBlob.Blob.HASVALUE THEN
         EXIT;
@@ -309,6 +345,8 @@ OBJECT Codeunit 1297 Http Web Request Mgt.
       RequestStr.Flush;
       RequestStr.Close;
       RequestStr.Dispose;
+
+      TraceLogStreamToTempFile(BlobStr, 'RequestBodyContent', ReturnTempBlob);
     END;
 
     [External]
