@@ -1,4 +1,9 @@
 
+# !!!C/AL Open Library getting archived!!!
+After the move to al, there is no use for the C/AL Open Library any longer. Any code contributions to Business Central should be delivered through the [AlAppExtensions](https://github.com/Microsoft/alappextensions) repository instead. Please also register any [issues with extensibility](https://github.com/Microsoft/alappextensions/issues) you may have in the new repository. Thank you for your contributions to the C/AL Open Library throughout its existance. We're looking forward to seeing your contributions in the AlAppExtensions repository going forward.
+
+---
+
 # C/AL Open Library
 
 The purpose of this repository is to build a C/AL library based on community contributions that will serve as an accelerator for adoption of the Extensions V2 technology. The source code from this library will be included in the base application of 'Dynamics 365 Business Central' on a monthly basis. 
