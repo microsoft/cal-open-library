@@ -1,0 +1,103 @@
+OBJECT Codeunit 50073 DotNet_Word.NumberingLevel
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      DotNetLevel@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.Level";
+
+    [External]
+    PROCEDURE Level@1();
+    BEGIN
+      DotNetLevel := DotNetLevel.Level;
+    END;
+
+    [External]
+    PROCEDURE LevelFromOuterXml@2(OuterXml@1000 : Text);
+    BEGIN
+      DotNetLevel := DotNetLevel.Level(OuterXml);
+    END;
+
+    [External]
+    PROCEDURE OuterXml@3() : Text;
+    BEGIN
+      EXIT(DotNetLevel.OuterXml);
+    END;
+
+    [External]
+    PROCEDURE InnerText@4() : Text;
+    BEGIN
+      EXIT(DotNetLevel.InnerText);
+    END;
+
+    [External]
+    PROCEDURE SetLevelText@5(NewLevelText@1000 : Text);
+    VAR
+      DotNetLevelText@1001 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.LevelText";
+      DotNetStringValue@1002 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.StringValue";
+    BEGIN
+      DotNetLevelText := DotNetLevelText.LevelText;
+      DotNetLevelText.Val := DotNetStringValue.FromString(NewLevelText);
+      DotNetLevel.LevelText := DotNetLevelText;
+    END;
+
+    [External]
+    PROCEDURE SetLevelIndex@6(NewLevelIndex@1000 : Integer);
+    VAR
+      DotNetInt32Value@1001 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Int32Value";
+    BEGIN
+      DotNetLevel.LevelIndex := DotNetInt32Value.FromInt32(NewLevelIndex);
+    END;
+
+    [External]
+    PROCEDURE SetNumberingFormatType@7(NewNumberingFormatType@1000 : Integer);
+    VAR
+      DotNetNumberFormat@1001 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.NumberingFormat";
+      DotNetNumberFormatValues@1002 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.NumberFormatValues";
+      DotNetEnumValue@1003 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.EnumValue`1";
+      OpenXmlDotNetHelper@1004 : Codeunit 50067;
+    BEGIN
+      //We need this to deal with .NET Generics:
+      OpenXmlDotNetHelper.CreateEnumValueGeneric(GETDOTNETTYPE(DotNetNumberFormatValues), NewNumberingFormatType, DotNetEnumValue);
+      DotNetNumberFormat := DotNetNumberFormat.NumberingFormat;
+      DotNetNumberFormat.Val := DotNetEnumValue;
+      DotNetLevel.NumberingFormat := DotNetNumberFormat;
+    END;
+
+    [External]
+    PROCEDURE NumberingFormatType@8() : Integer;
+    VAR
+      DotNetNumberFormatValues@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.NumberFormatValues";
+      DotNetEnumValue@1001 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.EnumValue`1";
+    BEGIN
+      DotNetEnumValue := DotNetLevel.NumberingFormat.Val;
+      DotNetNumberFormatValues := DotNetEnumValue.Value;
+      EXIT(DotNetNumberFormatValues);
+    END;
+
+    PROCEDURE SetLevel@9(VAR NewDotNetLevel@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.Level");
+    BEGIN
+      DotNetLevel := NewDotNetLevel;
+    END;
+
+    PROCEDURE GetLevel@10(VAR CurrentDotNetLevel@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.Level");
+    BEGIN
+      CurrentDotNetLevel := DotNetLevel;
+    END;
+
+    BEGIN
+    END.
+  }
+}
+

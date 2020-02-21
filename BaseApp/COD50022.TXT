@@ -1,0 +1,101 @@
+OBJECT Codeunit 50022 DotNet_Word.Paragraph
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      DotNetParagraph@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.Paragraph";
+      OpenXmlDotNetHelper@1001 : Codeunit 50067;
+
+    [External]
+    PROCEDURE Paragraph@1();
+    BEGIN
+      DotNetParagraph := DotNetParagraph.Paragraph;
+    END;
+
+    [External]
+    PROCEDURE ParagraphOuterXml@2(OuterXml@1000 : Text);
+    BEGIN
+      DotNetParagraph := DotNetParagraph.Paragraph(OuterXml);
+    END;
+
+    [External]
+    PROCEDURE OuterXml@3() : Text;
+    BEGIN
+      EXIT(DotNetParagraph.OuterXml);
+    END;
+
+    [External]
+    PROCEDURE InnerText@4() : Text;
+    BEGIN
+      EXIT(DotNetParagraph.InnerText);
+    END;
+
+    [External]
+    PROCEDURE AppendRun@5(VAR WordRun@1000 : Codeunit 50023);
+    VAR
+      DotNetRun@1001 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.Run";
+    BEGIN
+      WordRun.GetRun(DotNetRun);
+      //We need this to deal with .NET Generics:
+      OpenXmlDotNetHelper.AppendGeneric(DotNetParagraph, DotNetRun);
+    END;
+
+    [External]
+    PROCEDURE AppendHyperlink@6(VAR WordHyperlink@1000 : Codeunit 50035);
+    VAR
+      DotNetHyperlink@1001 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.Hyperlink";
+    BEGIN
+      WordHyperlink.GetHyperlink(DotNetHyperlink);
+      //We need this to deal with .NET Generics:
+      OpenXmlDotNetHelper.AppendGeneric(DotNetParagraph, DotNetHyperlink);
+    END;
+
+    [External]
+    PROCEDURE AppendProperties@7(VAR WordParagraphProperties@1000 : Codeunit 50026);
+    VAR
+      DotNetParagraphProperties@1001 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.ParagraphProperties";
+    BEGIN
+      WordParagraphProperties.GetParagraphProperties(DotNetParagraphProperties);
+      //We need this to deal with .NET Generics:
+      OpenXmlDotNetHelper.AppendGeneric(DotNetParagraph, DotNetParagraphProperties);
+    END;
+
+    [External]
+    PROCEDURE GetRunEnumerator@8(VAR WordRunEnumerator@1000 : Codeunit 50063);
+    VAR
+      EnumeratorHelper@1001 : Codeunit 50067;
+      DotNetRun@1002 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.Run";
+      DotNetEnumerator@1003 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Collections.IEnumerator";
+    BEGIN
+      //We need this to deal with .NET Generics:
+      EnumeratorHelper.GetEnumeratorOfTypeGeneric(DotNetParagraph.Elements, GETDOTNETTYPE(DotNetRun), DotNetEnumerator);
+      WordRunEnumerator.SetEnumerator(DotNetEnumerator);
+    END;
+
+    PROCEDURE SetParagraph@9(VAR NewDotNetParagraph@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.Paragraph");
+    BEGIN
+      DotNetParagraph := NewDotNetParagraph;
+    END;
+
+    PROCEDURE GetParagraph@10(VAR CurrentDotNetParagraph@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.Paragraph");
+    BEGIN
+      CurrentDotNetParagraph := DotNetParagraph;
+    END;
+
+    BEGIN
+    END.
+  }
+}
+

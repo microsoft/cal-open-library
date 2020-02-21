@@ -1,0 +1,88 @@
+OBJECT Codeunit 50024 DotNet_Word.Text
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      DotNetText@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.Text";
+
+    [External]
+    PROCEDURE TextConstructor@1();
+    VAR
+      DotNetType@1001 : DotNet "'mscorlib'.System.Type";
+      DotNetObject@1004 : DotNet "'mscorlib'.System.Object";
+      DotNetTypeArray@1002 : DotNet "'mscorlib'.System.Array";
+      DotNetParamsArray@1003 : DotNet "'mscorlib'.System.Array";
+    BEGIN
+      //So normally it should be a simple call like that:
+      //DotNetText := DotNetText.Text();
+      //but constructor name equals to property name (both "Text") and in NAV we have no way to handle it
+      //so I need to use some tricks here
+      //basically I get constructor using reflection and then call it
+      DotNetType := GETDOTNETTYPE(DotNetText);
+      DotNetTypeArray := DotNetTypeArray.CreateInstance(GETDOTNETTYPE(DotNetType), 0);
+      DotNetParamsArray := DotNetParamsArray.CreateInstance(GETDOTNETTYPE(DotNetObject), 0);
+      DotNetText := DotNetType.GetConstructor(DotNetTypeArray).Invoke(DotNetParamsArray);
+    END;
+
+    [External]
+    PROCEDURE OuterXml@2() : Text;
+    BEGIN
+      EXIT(DotNetText.OuterXml);
+    END;
+
+    [External]
+    PROCEDURE InnerText@3() : Text;
+    BEGIN
+      EXIT(DotNetText.InnerText);
+    END;
+
+    [External]
+    PROCEDURE SetText@4(NewText@1000 : Text);
+    BEGIN
+      DotNetText.Text := NewText;
+    END;
+
+    [External]
+    PROCEDURE Text@5() : Text;
+    BEGIN
+      EXIT(DotNetText.Text);
+    END;
+
+    [External]
+    PROCEDURE SetSpacePreserveOption@6(VAR PreserveSpace@1000 : Codeunit 50079);
+    VAR
+      DotNet_OpenXmlEnumValue@1001 : Codeunit 50080;
+      DotNetEnumValue@1002 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.EnumValue`1";
+    BEGIN
+      PreserveSpace.ToOpenXmlEnumValue(DotNet_OpenXmlEnumValue);
+      DotNet_OpenXmlEnumValue.GetEnumValue(DotNetEnumValue);
+      DotNetText.Space := DotNetEnumValue;
+    END;
+
+    PROCEDURE SetTextObject@7(VAR NewDotNetText@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.Text");
+    BEGIN
+      DotNetText := NewDotNetText;
+    END;
+
+    PROCEDURE GetTextObject@8(VAR CurrentDotNetText@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.Text");
+    BEGIN
+      CurrentDotNetText := DotNetText;
+    END;
+
+    BEGIN
+    END.
+  }
+}
+

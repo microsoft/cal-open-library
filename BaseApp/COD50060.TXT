@@ -1,0 +1,109 @@
+OBJECT Codeunit 50060 DotNet_Word.Transform2D
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      DotNetTransform2D@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Drawing.Transform2D";
+      OpenXmlDotNetHelper@1001 : Codeunit 50067;
+
+    [External]
+    PROCEDURE Transform2D@1();
+    BEGIN
+      DotNetTransform2D := DotNetTransform2D.Transform2D;
+    END;
+
+    [External]
+    PROCEDURE Transform2DFromOuterXml@2(OuterXml@1000 : Text);
+    BEGIN
+      DotNetTransform2D := DotNetTransform2D.Transform2D;
+    END;
+
+    [External]
+    PROCEDURE OuterXml@3() : Text;
+    BEGIN
+      EXIT(DotNetTransform2D.OuterXml);
+    END;
+
+    [External]
+    PROCEDURE InnerText@4() : Text;
+    BEGIN
+      EXIT(DotNetTransform2D.InnerText);
+    END;
+
+    [External]
+    PROCEDURE SetHorizontalFlip@5(NewHorizontalFlip@1000 : Boolean);
+    VAR
+      DotNetBooleanValue@1001 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.BooleanValue";
+    BEGIN
+      DotNetTransform2D.HorizontalFlip := DotNetBooleanValue.FromBoolean(NewHorizontalFlip);
+    END;
+
+    [External]
+    PROCEDURE SetVerticallFlip@6(NewVerticalFlip@1000 : Boolean);
+    VAR
+      DotNetBooleanValue@1001 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.BooleanValue";
+    BEGIN
+      DotNetTransform2D.VerticalFlip := DotNetBooleanValue.FromBoolean(NewVerticalFlip);
+    END;
+
+    [External]
+    PROCEDURE SetRotation@7(NewRotation@1000 : Integer);
+    VAR
+      DotNetUInt32Value@1001 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.UInt32Value";
+    BEGIN
+      DotNetTransform2D.Rotation := DotNetUInt32Value.FromUInt32(NewRotation);
+    END;
+
+    [External]
+    PROCEDURE AppendExtent@8(Cx@1000 : Integer;Cy@1001 : Integer);
+    VAR
+      DotNetInt64Value@1002 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Int64Value";
+      DotNetExtent@1003 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Drawing.Extents";
+    BEGIN
+      DotNetExtent := DotNetExtent.Extents;
+      DotNetExtent.Cx := DotNetInt64Value.FromInt64(Cx);
+      DotNetExtent.Cy := DotNetInt64Value.FromInt64(Cy);
+      //We need this to deal with .NET Generics:
+      OpenXmlDotNetHelper.AppendGeneric(DotNetTransform2D, DotNetExtent);
+    END;
+
+    [External]
+    PROCEDURE AppendOffset@9(X@1000 : Integer;Y@1001 : Integer);
+    VAR
+      DotNetInt64Value@1002 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Int64Value";
+      DotNetOffset@1003 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Drawing.Offset";
+    BEGIN
+      DotNetOffset := DotNetOffset.Offset;
+      DotNetOffset.X := DotNetInt64Value.FromInt64(X);
+      DotNetOffset.Y := DotNetInt64Value.FromInt64(Y);
+      //We need this to deal with .NET Generics:
+      OpenXmlDotNetHelper.AppendGeneric(DotNetTransform2D, DotNetOffset);
+    END;
+
+    PROCEDURE SetTransform2D@101(VAR NewDotNetTransform2D@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Drawing.Transform2D");
+    BEGIN
+      DotNetTransform2D := NewDotNetTransform2D;
+    END;
+
+    PROCEDURE GetTransform2D@11(VAR CurrentDotNetTransform2D@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Drawing.Transform2D");
+    BEGIN
+      CurrentDotNetTransform2D := DotNetTransform2D;
+    END;
+
+    BEGIN
+    END.
+  }
+}
+

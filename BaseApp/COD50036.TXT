@@ -1,0 +1,72 @@
+OBJECT Codeunit 50036 DotNet_Word.Color
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      DotNetColor@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.Color";
+
+    [External]
+    PROCEDURE Color@1();
+    BEGIN
+      DotNetColor := DotNetColor.Color;
+    END;
+
+    [External]
+    PROCEDURE OuterXml@2() : Text;
+    BEGIN
+      EXIT(DotNetColor.OuterXml);
+    END;
+
+    [External]
+    PROCEDURE InnerText@3() : Text;
+    BEGIN
+      EXIT(DotNetColor.InnerText);
+    END;
+
+    [External]
+    PROCEDURE SetColorValue@4(NewColorArgb@1000 : Text);
+    VAR
+      DotNetStringValue@1001 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.StringValue";
+    BEGIN
+      DotNetColor.Val := DotNetStringValue.StringValue(NewColorArgb);
+    END;
+
+    [External]
+    PROCEDURE SetColorTheme@5(NewColorTheme@1000 : 'Dark1,Light1,Dark2,Light2,Accent1,Accent2,Accent3,Accent4,Accent5,Accent6,Hyperlink,FollowedHyperlink,None,Background1,Text1,Background2,Text2');
+    VAR
+      DotNetThemeColorValues@1001 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.ThemeColorValues";
+      DotNetEnumValue@1003 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.EnumValue`1";
+      OpenXmlDotNetHelper@1002 : Codeunit 50067;
+    BEGIN
+      //We need this to deal with .NET Generics:
+      OpenXmlDotNetHelper.CreateEnumValueGeneric(GETDOTNETTYPE(DotNetThemeColorValues), NewColorTheme, DotNetEnumValue);
+      DotNetColor.ThemeColor := DotNetEnumValue;
+    END;
+
+    PROCEDURE SetColor@6(VAR NewDotNetColor@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.Color");
+    BEGIN
+      DotNetColor := NewDotNetColor;
+    END;
+
+    PROCEDURE GetColor@7(VAR CurrentDotNetColor@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.Color");
+    BEGIN
+      CurrentDotNetColor := DotNetColor;
+    END;
+
+    BEGIN
+    END.
+  }
+}
+

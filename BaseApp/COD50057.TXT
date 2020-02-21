@@ -1,0 +1,89 @@
+OBJECT Codeunit 50057 DotNet_Word.Blip
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      DotNetBlip@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Drawing.Blip";
+
+    [External]
+    PROCEDURE Blip@1();
+    BEGIN
+      DotNetBlip := DotNetBlip.Blip;
+    END;
+
+    [External]
+    PROCEDURE BlipFromOuterXml@2(OuterXml@1000 : Text);
+    BEGIN
+      DotNetBlip := DotNetBlip.Blip(OuterXml);
+    END;
+
+    [External]
+    PROCEDURE OuterXml@3() : Text;
+    BEGIN
+      EXIT(DotNetBlip.OuterXml);
+    END;
+
+    [External]
+    PROCEDURE InnerText@4() : Text;
+    BEGIN
+      EXIT(DotNetBlip.InnerText);
+    END;
+
+    [External]
+    PROCEDURE SetEmbed@5(NewEmbed@1000 : Text);
+    VAR
+      DotNetStringValue@1001 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.StringValue";
+    BEGIN
+      DotNetBlip.Embed := DotNetStringValue.FromString(NewEmbed);
+    END;
+
+    [External]
+    PROCEDURE SetCompressionState@6(NewCompressionState@1000 : 'Email,Screen,Print,HighQualityPrint,None');
+    VAR
+      DotNetBlipCompressionValues@1001 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Drawing.BlipCompressionValues";
+      DotNetEnumValue@1002 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.EnumValue`1";
+      OpenXmlDotNetHelper@1003 : Codeunit 50067;
+    BEGIN
+      //We need this to deal with .NET Generics:
+      OpenXmlDotNetHelper.CreateEnumValueGeneric(GETDOTNETTYPE(DotNetBlipCompressionValues), NewCompressionState, DotNetEnumValue);
+      DotNetBlip.CompressionState := DotNetEnumValue;
+    END;
+
+    [External]
+    PROCEDURE AppendBlipExtensionList@7(VAR WordBlipExtensionList@1000 : Codeunit 50059);
+    VAR
+      DotNetBlipExtensionList@1001 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Drawing.BlipExtensionList";
+      OpenXmlDotNetHelper@1002 : Codeunit 50067;
+    BEGIN
+      WordBlipExtensionList.GetBlipExtensionList(DotNetBlipExtensionList);
+      //We need this to deal with .NET Generics:
+      OpenXmlDotNetHelper.AppendGeneric(DotNetBlip, DotNetBlipExtensionList);
+    END;
+
+    PROCEDURE SetBlip@8(VAR NewDotNetBlip@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Drawing.Blip");
+    BEGIN
+      DotNetBlip := NewDotNetBlip;
+    END;
+
+    PROCEDURE GetBlip@9(VAR CurrentDotNetBlip@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Drawing.Blip");
+    BEGIN
+      CurrentDotNetBlip := DotNetBlip;
+    END;
+
+    BEGIN
+    END.
+  }
+}
+

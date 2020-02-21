@@ -1,0 +1,34 @@
+OBJECT Codeunit 50080 DotNet_OpenXml.EnumValue
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      DotNetEnumValue@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.EnumValue`1";
+
+    PROCEDURE SetEnumValue@1(VAR NewDotNetEnumValue@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.EnumValue`1");
+    BEGIN
+      DotNetEnumValue := NewDotNetEnumValue;
+    END;
+
+    PROCEDURE GetEnumValue@2(VAR CurrentDotNetEnumValue@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.EnumValue`1");
+    BEGIN
+      CurrentDotNetEnumValue := DotNetEnumValue;
+    END;
+
+    BEGIN
+    END.
+  }
+}
+

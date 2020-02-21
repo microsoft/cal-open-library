@@ -1,0 +1,69 @@
+OBJECT Codeunit 50043 DotNet_Word.Drawing
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      DotNetDrawing@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.Drawing";
+
+    [External]
+    PROCEDURE Drawing@1();
+    BEGIN
+      DotNetDrawing := DotNetDrawing.Drawing;
+    END;
+
+    [External]
+    PROCEDURE DrawingFromOuterXml@2(OuterXml@1000 : Text);
+    BEGIN
+      DotNetDrawing := DotNetDrawing.Drawing(OuterXml);
+    END;
+
+    [External]
+    PROCEDURE OuterXml@3() : Text;
+    BEGIN
+      EXIT(DotNetDrawing.OuterXml);
+    END;
+
+    [External]
+    PROCEDURE InnerText@4() : Text;
+    BEGIN
+      EXIT(DotNetDrawing.InnerText);
+    END;
+
+    [External]
+    PROCEDURE AppendAnchor@5(VAR WordAnchor@1000 : Codeunit 50044);
+    VAR
+      DotNetAnchor@1001 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Drawing.Wordprocessing.Anchor";
+      OpenXmlDotNetHelper@1002 : Codeunit 50067;
+    BEGIN
+      WordAnchor.GetAnchor(DotNetAnchor);
+      //We need this to deal with .NET Generics:
+      OpenXmlDotNetHelper.AppendGeneric(DotNetDrawing, DotNetAnchor);
+    END;
+
+    PROCEDURE SetDrawing@6(VAR NewDotNetDrawing@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.Drawing");
+    BEGIN
+      DotNetDrawing := NewDotNetDrawing;
+    END;
+
+    PROCEDURE GetDrawing@7(VAR CurrentDotNetDrawing@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.Drawing");
+    BEGIN
+      CurrentDotNetDrawing := DotNetDrawing;
+    END;
+
+    BEGIN
+    END.
+  }
+}
+

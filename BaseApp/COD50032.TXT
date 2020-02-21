@@ -1,0 +1,80 @@
+OBJECT Codeunit 50032 DotNet_Word.NumberingPropertie
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      DotNetNumberingProperties@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.NumberingProperties";
+
+    [External]
+    PROCEDURE NumberingProperties@1();
+    BEGIN
+      DotNetNumberingProperties := DotNetNumberingProperties.NumberingProperties;
+    END;
+
+    [External]
+    PROCEDURE NumberingPropertiesFromOuterXml@2(OuterXml@1000 : Text);
+    BEGIN
+      DotNetNumberingProperties := DotNetNumberingProperties.NumberingProperties(OuterXml);
+    END;
+
+    [External]
+    PROCEDURE OuterXml@3() : Text;
+    BEGIN
+      EXIT(DotNetNumberingProperties.OuterXml);
+    END;
+
+    [External]
+    PROCEDURE InnerText@4() : Text;
+    BEGIN
+      EXIT(DotNetNumberingProperties.InnerText);
+    END;
+
+    [External]
+    PROCEDURE SetNumberingLevelReference@5(NewNumberingLevelReference@1000 : Integer);
+    VAR
+      DotNetInt32Value@1001 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Int32Value";
+      DotNetNumberingLevelReference@1002 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.NumberingLevelReference";
+    BEGIN
+      DotNetNumberingLevelReference := DotNetNumberingLevelReference.NumberingLevelReference;
+      DotNetNumberingLevelReference.Val := DotNetInt32Value.FromInt32(NewNumberingLevelReference);
+      DotNetNumberingProperties.NumberingLevelReference := DotNetNumberingLevelReference;
+    END;
+
+    [External]
+    PROCEDURE SetNumberingId@6(NewNumberingId@1000 : Integer);
+    VAR
+      DotNetInt32Value@1001 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Int32Value";
+      DotNetNumberingId@1002 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.NumberingId";
+    BEGIN
+      DotNetNumberingId := DotNetNumberingId.NumberingId;
+      DotNetNumberingId.Val := DotNetInt32Value.FromInt32(NewNumberingId);
+      DotNetNumberingProperties.NumberingId := DotNetNumberingId;
+    END;
+
+    PROCEDURE SetNumberingProperties@7(VAR NewDotNetNumberingProperties@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.NumberingProperties");
+    BEGIN
+      DotNetNumberingProperties := NewDotNetNumberingProperties;
+    END;
+
+    PROCEDURE GetNumberingProperties@8(VAR CurrentDotNetNumberingProperties@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.NumberingProperties");
+    BEGIN
+      CurrentDotNetNumberingProperties := DotNetNumberingProperties;
+    END;
+
+    BEGIN
+    END.
+  }
+}
+

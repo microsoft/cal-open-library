@@ -1,0 +1,106 @@
+OBJECT Codeunit 50050 DotNet_Word.GraphicFrameLocks
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      DotNetGraphicFrameLocks@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Drawing.GraphicFrameLocks";
+
+    [External]
+    PROCEDURE GraphicFrameLocks@1();
+    BEGIN
+      DotNetGraphicFrameLocks := DotNetGraphicFrameLocks.GraphicFrameLocks;
+    END;
+
+    [External]
+    PROCEDURE GraphicFrameLocksFromOuterXml@2(OuterXml@1000 : Text);
+    BEGIN
+      DotNetGraphicFrameLocks := DotNetGraphicFrameLocks.GraphicFrameLocks(OuterXml);
+    END;
+
+    [External]
+    PROCEDURE OuterXml@3() : Text;
+    BEGIN
+      EXIT(DotNetGraphicFrameLocks.OuterXml);
+    END;
+
+    [External]
+    PROCEDURE InnerText@4() : Text;
+    BEGIN
+      EXIT(DotNetGraphicFrameLocks.InnerText);
+    END;
+
+    [External]
+    PROCEDURE SetNoGrouping@5(NewNoGrouping@1000 : Boolean);
+    VAR
+      DotNetBooleanValue@1001 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.BooleanValue";
+    BEGIN
+      DotNetGraphicFrameLocks.NoGrouping := DotNetBooleanValue.FromBoolean(NewNoGrouping);
+    END;
+
+    [External]
+    PROCEDURE SetNoDrilldown@6(NewNoDrillDown@1000 : Boolean);
+    VAR
+      DotNetBooleanValue@1001 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.BooleanValue";
+    BEGIN
+      DotNetGraphicFrameLocks.NoDrilldown := DotNetBooleanValue.FromBoolean(NewNoDrillDown);
+    END;
+
+    [External]
+    PROCEDURE SetNoSelection@7(NewNoSelection@1000 : Boolean);
+    VAR
+      DotNetBooleanValue@1001 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.BooleanValue";
+    BEGIN
+      DotNetGraphicFrameLocks.NoSelection := DotNetBooleanValue.FromBoolean(NewNoSelection);
+    END;
+
+    [External]
+    PROCEDURE SetNoChangeAspect@8(NewNoChangeAspect@1000 : Boolean);
+    VAR
+      DotNetBooleanValue@1001 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.BooleanValue";
+    BEGIN
+      DotNetGraphicFrameLocks.NoChangeAspect := DotNetBooleanValue.FromBoolean(NewNoChangeAspect);
+    END;
+
+    [External]
+    PROCEDURE SetNoMove@9(NewNoMove@1000 : Boolean);
+    VAR
+      DotNetBooleanValue@1001 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.BooleanValue";
+    BEGIN
+      DotNetGraphicFrameLocks.NoMove := DotNetBooleanValue.FromBoolean(NewNoMove);
+    END;
+
+    [External]
+    PROCEDURE SetNoResize@10(NewNoResize@1000 : Boolean);
+    VAR
+      DotNetBooleanValue@1001 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.BooleanValue";
+    BEGIN
+      DotNetGraphicFrameLocks.NoResize := DotNetBooleanValue.FromBoolean(NewNoResize);
+    END;
+
+    PROCEDURE SetGraphicFrameLocks@11(VAR NewDotNetGraphicFrameLocks@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Drawing.GraphicFrameLocks");
+    BEGIN
+      DotNetGraphicFrameLocks := NewDotNetGraphicFrameLocks;
+    END;
+
+    PROCEDURE GetGraphicFrameLocks@12(VAR CurrentDotNetGraphicFrameLocks@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Drawing.GraphicFrameLocks");
+    BEGIN
+      CurrentDotNetGraphicFrameLocks := DotNetGraphicFrameLocks;
+    END;
+
+    BEGIN
+    END.
+  }
+}
+

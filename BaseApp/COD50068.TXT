@@ -1,0 +1,417 @@
+OBJECT Codeunit 50068 OpenXml WordProcessing Helper
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+
+    [External]
+    PROCEDURE CloneStyleRunProperties@1(VAR OriginalWordStyleRunProperties@1000 : Codeunit 50037;VAR ClonedWordStyleRunProperties@1001 : Codeunit 50037);
+    BEGIN
+      ClonedWordStyleRunProperties.StyleRunPropertiesFromOuterXml(OriginalWordStyleRunProperties.OuterXml);
+    END;
+
+    [External]
+    PROCEDURE CloneParagraphProperties@2(VAR OriginalWordParagraphProperties@1000 : Codeunit 50026;VAR ClonedWordParagraphProperties@1001 : Codeunit 50026);
+    BEGIN
+      ClonedWordParagraphProperties.ParagraphPropertiesFromOuterXml(OriginalWordParagraphProperties.OuterXml);
+    END;
+
+    [External]
+    PROCEDURE CreateEmptyDocument@3(DocumentType@1000 : 'Document,Template,MacroEnabledDocument,MacroEnabledTemplate';VAR CreatedWordprocessingDocument@1001 : Codeunit 50018;VAR MainDocumentPart@1002 : Codeunit 50019;VAR WordBody@1003 : Codeunit 50021);
+    VAR
+      WordDocument@1004 : Codeunit 50020;
+      WordProcessingDocumentType@1005 : Codeunit 50077;
+    BEGIN
+      //Helper for creating an empty document and initiating required parts
+      WordProcessingDocumentType.WordprocessingDocumentType(DocumentType);
+      CreatedWordprocessingDocument.Create(WordProcessingDocumentType, TRUE);
+      CreatedWordprocessingDocument.AddMainDocumentPart(MainDocumentPart);
+      WordDocument.Document;
+      MainDocumentPart.SetDocument(WordDocument);
+      WordBody.Body;
+      WordDocument.SetBody(WordBody);
+    END;
+
+    [External]
+    PROCEDURE CreateHyperLink@4(Url@1000 : Text;TextValue@1001 : Text;VAR MainDocumentPart@1002 : Codeunit 50019;VAR CreatedWordHyperlink@1003 : Codeunit 50035) : Text;
+    VAR
+      HyperlinkRelationship@1004 : Codeunit 50034;
+      HrContactId@1005 : Text;
+      WordProofError@1006 : Codeunit 50033;
+      WordRunProperties@1007 : Codeunit 50025;
+      WordColor@1008 : Codeunit 50036;
+      WordText@1009 : Codeunit 50024;
+      WordRun@1010 : Codeunit 50023;
+      DotNet_Uri@1011 : Codeunit 3024;
+      DotNet_OpenXmlSpaceProcessing@1012 : Codeunit 50079;
+    BEGIN
+      //Helper for creating new hyperlink element
+      DotNet_Uri.Init(Url);
+      MainDocumentPart.AddHyperlinkRelationship(DotNet_Uri, TRUE, HyperlinkRelationship);
+      HrContactId := HyperlinkRelationship.Id;
+      WordProofError.ProofError;
+      WordProofError.SetType(2); //Type = GrammarStart
+      WordRunProperties.RunProperties;
+      WordRunProperties.SetRunStyle('Hyperlink');
+      WordColor.Color;
+      WordColor.SetColorTheme(10); //Theme = Hyperlink
+      WordRunProperties.SetColor(WordColor);
+      WordText.TextConstructor;
+      WordText.SetText(TextValue);
+      DotNet_OpenXmlSpaceProcessing.SpaceProcessingModeValues(1); //Preserve
+      WordText.SetSpacePreserveOption(DotNet_OpenXmlSpaceProcessing);
+      WordRun.Run;
+      WordRun.AppendProperties(WordRunProperties);
+      WordRun.AppendText(WordText);
+      CreatedWordHyperlink.Hyperlink;
+      CreatedWordHyperlink.SetId(HrContactId);
+      CreatedWordHyperlink.SetHistory(TRUE);
+      CreatedWordHyperlink.AppendProofError(WordProofError);
+      CreatedWordHyperlink.AppendRun(WordRun);
+      EXIT(HrContactId);
+    END;
+
+    [External]
+    PROCEDURE AddParagraphStyleToDocument@5(VAR MainDocumentPart@1000 : Codeunit 50019;StyleId@1001 : Text;StyleName@1002 : Text;VAR WordStyleRunProperties@1003 : Codeunit 50037) ActualStyleId : Text;
+    VAR
+      WordStyleDefinitionPart@1004 : Codeunit 50041;
+      StyleIdFromName@1005 : Text;
+      WordStyles@1006 : Codeunit 50039;
+    BEGIN
+      //Helper for adding new paragraph style
+      //Based on: https://msdn.microsoft.com/en-us/library/cc850838.aspx
+      IF NOT MainDocumentPartHasStyleDefinitionsPart(MainDocumentPart) THEN
+        BEGIN
+          MainDocumentPart.AddStyleDefinitionsPart(WordStyleDefinitionPart);
+          WordStyles.Styles;
+          WordStyleDefinitionPart.SetStyles(WordStyles);
+        END
+      ELSE
+        MainDocumentPart.StyleDefinitionsPart(WordStyleDefinitionPart);
+
+      IF NOT IsParagraphStyleIdInDocument(WordStyleDefinitionPart, StyleId) THEN
+        BEGIN
+          StyleIdFromName := GetParagraphStyleIdFromStyleName(WordStyleDefinitionPart, StyleName);
+          IF StyleIdFromName = '' THEN
+            AddNewParagraphStyle(WordStyleDefinitionPart, StyleId, StyleName, WordStyleRunProperties)
+          ELSE
+            StyleId := StyleIdFromName;
+        END;
+
+      EXIT(StyleId);
+    END;
+
+    [External]
+    PROCEDURE AddNumberingTypeToDocument@6(VAR MainDocumentPart@1000 : Codeunit 50019;NumberingId@1001 : Integer;FormatType@1002 : Integer;FormatText@1003 : Text);
+    VAR
+      WordNumberingDefinitionsPart@1004 : Codeunit 50070;
+      WordNumbering@1005 : Codeunit 50071;
+    BEGIN
+      //Helper for adding new numbering type
+      IF NOT MainDocumentPartHasNumberingDefinitionsPart(MainDocumentPart) THEN
+        BEGIN
+          MainDocumentPart.AddNumberingDefinitionsPart(WordNumberingDefinitionsPart);
+          WordNumbering.Numbering;
+          WordNumberingDefinitionsPart.SetNumbering(WordNumbering);
+        END
+      ELSE
+        MainDocumentPart.NumberingDefinitionsPart(WordNumberingDefinitionsPart);
+
+
+      IF NOT IsNumberingTypeIdInDocument(WordNumberingDefinitionsPart, NumberingId) THEN
+        AddNewNumberingType(WordNumberingDefinitionsPart, NumberingId, FormatType, FormatText);
+    END;
+
+    [External]
+    PROCEDURE CreateBulletListProperties@7(VAR MainDocumentPart@1000 : Codeunit 50019;VAR WordParagraphProperties@1001 : Codeunit 50026;LeftIndentation@1002 : Text);
+    BEGIN
+      //Helper for creating bullet list paragraph properties
+      AddNumberingTypeToDocument(MainDocumentPart, 0, 23, 'o');
+      CreateParagraphPropertiesForList(WordParagraphProperties, LeftIndentation, 0, 1);
+    END;
+
+    [External]
+    PROCEDURE CreateOrderedListProperties@8(VAR MainDocumentPart@1000 : Codeunit 50019;VAR WordParagraphProperties@1001 : Codeunit 50026;LeftIndentation@1002 : Text);
+    BEGIN
+      //Helper for creating ordered list paragraph properties
+      AddNumberingTypeToDocument(MainDocumentPart, 1, 0, '%1.');
+      CreateParagraphPropertiesForList(WordParagraphProperties, LeftIndentation, 0, 2);
+    END;
+
+    [External]
+    PROCEDURE CreateDrawingFromStream@9(VAR MainDocumentPart@1000 : Codeunit 50019;ImagePartType@1001 : 'Bmp,Gif,Png,Tiff,Icon,Pcx,Jpeg,Emf,Wmf';ImageStream@1002 : InStream;Name@1003 : Text;Width@1004 : Integer;Height@1005 : Integer;VAR CreatedWordDrawing@1006 : Codeunit 50043) : Text;
+    VAR
+      WordImagePart@1007 : Codeunit 50042;
+      RelationshipId@1008 : Text;
+      DotNet_ImagePartType@1009 : Codeunit 50078;
+    BEGIN
+      //Helper for adding picture from stream to document
+      //Based on: https://msdn.microsoft.com/en-us/library/office/bb497430.aspx
+      DotNet_ImagePartType.ImagePartType(ImagePartType);
+      MainDocumentPart.AddImagePart(DotNet_ImagePartType, WordImagePart);
+      WordImagePart.FeedData(ImageStream);
+      RelationshipId := MainDocumentPart.GetIdOfImagePart(WordImagePart);
+      CreateDrawing(RelationshipId, Name + '.' + FORMAT(ImagePartType), Width, Height, '', CreatedWordDrawing);
+      EXIT(RelationshipId);
+    END;
+
+    LOCAL PROCEDURE CreateDrawing@10(RelationshipId@1000 : Text;Name@1001 : Text;Cx@1002 : Integer;Cy@1003 : Integer;Position@1004 : Text;VAR CreatedWordDrawing@1005 : Codeunit 50043);
+    VAR
+      WordAnchor@1006 : Codeunit 50044;
+      ActualPosition@1007 : Text;
+      WordHorizontalPosition@1008 : Codeunit 50046;
+      WordVerticalPosition@1009 : Codeunit 50045;
+      WordWrapSquare@1010 : Codeunit 50047;
+      WordWrapTopBottom@1011 : Codeunit 50048;
+      WordDocProperties@1012 : Codeunit 50049;
+      WordGraphicFrameLocks@1013 : Codeunit 50050;
+      WordPicture@1014 : Codeunit 50051;
+    BEGIN
+      ActualPosition := Position;
+      IF ActualPosition = '' THEN
+        ActualPosition := 'left';
+
+      WordAnchor.Anchor;
+      WordAnchor.AppendSimplePosition(0, 0);
+      WordHorizontalPosition.HorizontalPosition;
+      WordHorizontalPosition.SetRelativeFrom(0); //Type = Margin
+      WordHorizontalPosition.SetHorizontalAlignment(ActualPosition);
+      WordAnchor.AppendHorizontalPosition(WordHorizontalPosition);
+      WordVerticalPosition.VerticalPosition;
+      WordVerticalPosition.SetPositionOffset('0');
+      WordVerticalPosition.SetRelativeFrom(2); // Type = Paragraph
+      WordAnchor.AppendVerticalPosition(WordVerticalPosition);
+      WordAnchor.AppendExtent(Cx, Cy);
+      WordAnchor.AppendEffectExtent(0, 0, 0, 0);
+      IF Position <> '' THEN
+        BEGIN
+          WordWrapSquare.WrapSquare;
+          WordWrapSquare.SetWrapText(0); // Type = BothSides
+          WordAnchor.AppendWrapSquare(WordWrapSquare);
+        END
+      ELSE
+        BEGIN
+          WordWrapTopBottom.WrapTopBottom;
+          WordAnchor.AppendWrapTopBottom(WordWrapTopBottom);
+        END;
+
+      WordDocProperties.DocProperties;
+      WordDocProperties.SetId(1);
+      WordDocProperties.SetName(Name);
+      WordAnchor.AppendDocProperties(WordDocProperties);
+      WordGraphicFrameLocks.GraphicFrameLocks;
+      WordGraphicFrameLocks.SetNoChangeAspect(TRUE);
+      WordAnchor.AppendGraphicFrameLocks(WordGraphicFrameLocks);
+      CreatePicture(RelationshipId, Name, Cx, Cy, WordPicture);
+      WordAnchor.AppendPicture(WordPicture);
+      WordAnchor.SetDistanceFromTop(0);
+      WordAnchor.SetDistanceFromBottom(0);
+      WordAnchor.SetDistanceFromLeft(114300);
+      WordAnchor.SetDistanceFromRight(114300);
+      WordAnchor.SetSimplePos(FALSE);
+      WordAnchor.SetRelativeHeight(251658240);
+      WordAnchor.SetBehindDoc(TRUE);
+      WordAnchor.SetLocked(FALSE);
+      WordAnchor.SetLayoutInCell(TRUE);
+      WordAnchor.SetAllowOverlap(TRUE);
+      CreatedWordDrawing.Drawing;
+      CreatedWordDrawing.AppendAnchor(WordAnchor);
+    END;
+
+    LOCAL PROCEDURE CreatePicture@11(RelationshipId@1000 : Text;Name@1001 : Text;Cx@1002 : Integer;Cy@1003 : Integer;VAR WordPicture@1004 : Codeunit 50051);
+    VAR
+      WordBlipFill@1005 : Codeunit 50054;
+      WordShapeProperties@1006 : Codeunit 50053;
+      WordNonVisualPictureProperties@1007 : Codeunit 50052;
+      WordPresetGeometry@1008 : Codeunit 50061;
+      WordTransform2D@1009 : Codeunit 50060;
+      WordNonVisualDrawingProperties@1010 : Codeunit 50055;
+      WordNonVisualPictureDrawingProperties@1011 : Codeunit 50056;
+      WordBlip@1012 : Codeunit 50057;
+      WordStretch@1013 : Codeunit 50058;
+      WordBlipExtensionList@1014 : Codeunit 50059;
+    BEGIN
+      WordPicture.Picture;
+      WordBlipFill.BlipFill;
+      WordBlip.Blip;
+      WordBlip.SetEmbed(RelationshipId);
+      WordBlip.SetCompressionState(2); //Type = Print
+      WordBlipExtensionList.BlipExtensionList;
+      WordBlipExtensionList.AppendBlipExtension('{28A0092B-C50C-407E-A947-70E740481C1C}');
+      WordBlip.AppendBlipExtensionList(WordBlipExtensionList);
+      WordBlipFill.SetBlip(WordBlip);
+      WordStretch.Stretch;
+      WordStretch.AppendFillRectangle;
+      WordBlipFill.AppendStretch(WordStretch);
+      WordPicture.SetBlipFill(WordBlipFill);
+      WordNonVisualPictureProperties.NonVisualPictureProperties;
+      WordNonVisualDrawingProperties.NonVisualDrawingProperties;
+      WordNonVisualDrawingProperties.SetId(0);
+      WordNonVisualDrawingProperties.SetName(Name);
+      WordNonVisualPictureProperties.SetNonVisualDrawingProperties(WordNonVisualDrawingProperties);
+      WordNonVisualPictureDrawingProperties.NonVisualPictureDrawingProperties;
+      WordNonVisualPictureProperties.SetNonVisualPictureDrawingProperties(WordNonVisualPictureDrawingProperties);
+      WordPicture.SetNonVisualPictureProperties(WordNonVisualPictureProperties);
+      WordShapeProperties.ShapeProperties;
+      WordPresetGeometry.PresetGeometry;
+      WordPresetGeometry.AppendAdjustValueList;
+      WordPresetGeometry.SetPreset(4); //Type = Rectangle
+      WordShapeProperties.AppendPresetGeometry(WordPresetGeometry);
+      WordTransform2D.Transform2D;
+      WordTransform2D.AppendOffset(0, 0);
+      WordTransform2D.AppendExtent(Cx, Cy);
+      WordShapeProperties.SetTransform2D(WordTransform2D);
+      WordPicture.SetShapeProperties(WordShapeProperties);
+    END;
+
+    LOCAL PROCEDURE AddNewParagraphStyle@12(VAR WordStyleDefinitionPart@1000 : Codeunit 50041;StyleId@1001 : Text;StyleName@1002 : Text;VAR WordStyleRunProperties@1003 : Codeunit 50037);
+    VAR
+      WordStyles@1004 : Codeunit 50039;
+      WordStyle@1005 : Codeunit 50038;
+      ClonedWordStyleRunProperties@1006 : Codeunit 50037;
+    BEGIN
+      WordStyleDefinitionPart.Styles(WordStyles);
+      WordStyle.Style;
+      WordStyle.SetStyleType(0); //Type = Paragraph
+      WordStyle.SetStyleId(StyleId);
+      WordStyle.SetCustomStyle(TRUE);
+      WordStyle.SetStyleName(StyleName);
+      WordStyle.SetBasedOn('Normal');
+      WordStyle.SetNextParagraphStyle('Normal');
+      WordStyle.SetUIPriority(900);
+      CloneStyleRunProperties(WordStyleRunProperties, ClonedWordStyleRunProperties);
+      WordStyle.AppendStyleRunProperties(ClonedWordStyleRunProperties);
+      WordStyles.AppendStyle(WordStyle);
+    END;
+
+    LOCAL PROCEDURE AddNewNumberingType@13(VAR WordNumberingDefinitionPart@1000 : Codeunit 50070;Id@1001 : Integer;Type@1002 : Integer;Text@1003 : Text);
+    VAR
+      WordNumbering@1004 : Codeunit 50071;
+      WordAbstractNum@1005 : Codeunit 50072;
+      WordNumberingLevel@1006 : Codeunit 50073;
+      WordNumberingInstance@1007 : Codeunit 50074;
+    BEGIN
+      WordNumberingDefinitionPart.Numbering(WordNumbering);
+      WordAbstractNum.AbstractNum;
+      WordAbstractNum.SetAbstractNumberId(Id);
+      WordNumberingLevel.Level;
+      WordNumberingLevel.SetLevelIndex(0);
+      WordNumberingLevel.SetNumberingFormatType(Type);
+      WordNumberingLevel.SetLevelText(Text);
+      WordAbstractNum.AppendLevel(WordNumberingLevel);
+      WordNumbering.AppendAbstractNum(WordAbstractNum);
+      WordNumberingInstance.NumberingInstance;
+      WordNumberingInstance.SetAbstractNumId(Id);
+      WordNumberingInstance.SetNumberID(Id + 1);
+      WordNumbering.AppendNumberingInstance(WordNumberingInstance);
+    END;
+
+    LOCAL PROCEDURE CreateParagraphPropertiesForList@14(VAR WordParagraphProperties@1000 : Codeunit 50026;LeftIndentation@1001 : Text;NumberingLevelReference@1002 : Integer;NumberingId@1003 : Integer);
+    VAR
+      WordSpacingBetweenLines@1004 : Codeunit 50030;
+      WordIndentation@1005 : Codeunit 50031;
+      WordNumberingProperties@1006 : Codeunit 50032;
+    BEGIN
+      WordParagraphProperties.ParagraphProperties;
+      WordSpacingBetweenLines.SpacingBetweenLines;
+      WordSpacingBetweenLines.SetAfter('0');
+      WordParagraphProperties.SetSpacingBetweenLines(WordSpacingBetweenLines);
+      WordIndentation.Indentation;
+      WordIndentation.SetLeft(LeftIndentation);
+      WordIndentation.SetHanging('360');
+      WordParagraphProperties.SetIndentation(WordIndentation);
+      WordNumberingProperties.NumberingProperties;
+      WordNumberingProperties.SetNumberingId(NumberingId);
+      WordNumberingProperties.SetNumberingLevelReference(NumberingLevelReference);
+      WordParagraphProperties.SetNumberingProperties(WordNumberingProperties);
+      WordParagraphProperties.SetParagraphStyleId('ListParagraph');
+    END;
+
+    LOCAL PROCEDURE IsParagraphStyleIdInDocument@15(VAR WordStyleDefinitionPart@1000 : Codeunit 50041;StyleId@1001 : Text) : Boolean;
+    VAR
+      WordStyles@1002 : Codeunit 50039;
+      WordStyle@1003 : Codeunit 50038;
+      WordStylesEnumerator@1004 : Codeunit 50040;
+    BEGIN
+      WordStyleDefinitionPart.Styles(WordStyles);
+      WordStyles.GetStyleEnumerator(WordStylesEnumerator);
+      WHILE WordStylesEnumerator.MoveNext DO
+        BEGIN
+          WordStylesEnumerator.Current(WordStyle);
+          IF (WordStyle.StyleId = StyleId) AND (WordStyle.StyleType = 0) THEN //Type = Paragraph
+            EXIT(TRUE);
+        END;
+
+      EXIT(FALSE);
+    END;
+
+    LOCAL PROCEDURE GetParagraphStyleIdFromStyleName@16(VAR WordStyleDefinitionPart@1000 : Codeunit 50041;StyleName@1001 : Text) : Text;
+    VAR
+      WordStyles@1002 : Codeunit 50039;
+      WordStyle@1003 : Codeunit 50038;
+      WordStylesEnumerator@1004 : Codeunit 50040;
+    BEGIN
+      WordStyleDefinitionPart.Styles(WordStyles);
+      WordStyles.GetStyleEnumerator(WordStylesEnumerator);
+      WHILE WordStylesEnumerator.MoveNext DO
+        BEGIN
+          WordStylesEnumerator.Current(WordStyle);
+          IF (WordStyle.StyleName = StyleName) AND (WordStyle.StyleType = 0) THEN //Type = Paragraph
+            EXIT(WordStyle.StyleId);
+        END;
+
+      EXIT('');
+    END;
+
+    LOCAL PROCEDURE IsNumberingTypeIdInDocument@17(VAR WordNumberingDefinitionPart@1000 : Codeunit 50070;Id@1001 : Integer) : Boolean;
+    VAR
+      WordNumbering@1002 : Codeunit 50071;
+      WordAbstractNum@1003 : Codeunit 50072;
+      WordAbstractNumEnumerator@1004 : Codeunit 50075;
+    BEGIN
+      WordNumberingDefinitionPart.Numbering(WordNumbering);
+      WordNumbering.GetAbstractNumEnumerator(WordAbstractNumEnumerator);
+      WHILE WordAbstractNumEnumerator.MoveNext DO
+        BEGIN
+          WordAbstractNumEnumerator.Current(WordAbstractNum);
+          IF WordAbstractNum.AbstractNumberId = Id THEN
+            EXIT(TRUE);
+        END;
+
+      EXIT(FALSE);
+    END;
+
+    [External]
+    PROCEDURE MainDocumentPartHasNumberingDefinitionsPart@18(VAR DotNet_WordMainDocumentPart@1000 : Codeunit 50019) : Boolean;
+    VAR
+      DotNet_WordNumberingDefinitionPart@1001 : Codeunit 50070;
+    BEGIN
+      DotNet_WordMainDocumentPart.NumberingDefinitionsPart(DotNet_WordNumberingDefinitionPart);
+      EXIT(NOT DotNet_WordNumberingDefinitionPart.IsDotNetNull);
+    END;
+
+    [External]
+    PROCEDURE MainDocumentPartHasStyleDefinitionsPart@19(VAR DotNet_WordMainDocumentPart@1000 : Codeunit 50019) : Boolean;
+    VAR
+      DotNet_WordStyleDefinitionPart@1001 : Codeunit 50041;
+    BEGIN
+      DotNet_WordMainDocumentPart.StyleDefinitionsPart(DotNet_WordStyleDefinitionPart);
+      EXIT(NOT DotNet_WordStyleDefinitionPart.IsDotNetNull);
+    END;
+
+    BEGIN
+    END.
+  }
+}
+

@@ -1,0 +1,1028 @@
+OBJECT Codeunit 50069 Text_OpenXml.WordProcessing
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    Subtype=Test;
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      Assert@1001 : Codeunit 130000;
+      LibraryLowerPermissions@1000 : Codeunit 132217;
+      OpenXmlWordProcessingHelper@1002 : Codeunit 50068;
+      WordprocessingDocument@1003 : Codeunit 50018;
+      MainDocumentPart@1004 : Codeunit 50019;
+      WordDocument@1005 : Codeunit 50020;
+      WordBody@1006 : Codeunit 50021;
+      WordParagraph@1007 : Codeunit 50022;
+      WordRun@1008 : Codeunit 50023;
+      WordText@1009 : Codeunit 50024;
+      WordRunProperties@1010 : Codeunit 50025;
+      WordColor@1011 : Codeunit 50036;
+      WordParagraphProperties@1012 : Codeunit 50026;
+      WordStyleRunProperties@1013 : Codeunit 50037;
+      WordSpacingBetweenLines@1014 : Codeunit 50030;
+      WordTable@1015 : Codeunit 50027;
+      WordTableRow@1016 : Codeunit 50028;
+      WordTableCell@1017 : Codeunit 50029;
+      WordHyperlink@1018 : Codeunit 50035;
+      WordStyleDefinitionPart@1019 : Codeunit 50041;
+      WordStyles@1020 : Codeunit 50039;
+      WordDrawing@1021 : Codeunit 50043;
+      WordParagraphEnumerator@1022 : Codeunit 50062;
+      WordRunEnumerator@1023 : Codeunit 50063;
+      WordTextEnumerator@1024 : Codeunit 50076;
+      TestFile@1025 : File;
+      FileOutStream@1026 : OutStream;
+
+    [Test]
+    PROCEDURE TestCreateSimpleDocument@1();
+    VAR
+      Expected@1000 : Text;
+      Actual@1001 : Text;
+    BEGIN
+      LibraryLowerPermissions.SetO365Basic;
+      //[WHEN] Empty Word document is created
+      CreateSampleDocument;
+      Actual := FinalizeAndGetDocumentOuterXml;
+      //[THEN] Expected document outer XML is:
+      Expected :=
+          '<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body /></w:d'
+        + 'ocument>';
+      Assert.AreEqual(Expected, Actual, 'Simple document creation failed');
+    END;
+
+    [Test]
+    PROCEDURE TestCreateParagraph@2();
+    VAR
+      Expected@1000 : Text;
+      Actual@1001 : Text;
+    BEGIN
+      LibraryLowerPermissions.SetO365Basic;
+      //[WHEN] One paragraph is added to an empty document
+      CreateSampleDocument;
+      CreateSampleParagraph;
+      Actual := FinalizeAndGetDocumentOuterXml;
+      //[THEN] Expected document outer XML is:
+      Expected :=
+          '<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body><w:p><w:'
+        + 'r><w:t>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent quam augue, tempus id metu'
+        + 's in, laoreet viverra quam. Sed vulputate risus lacus, et dapibus orci porttitor non.</w:t></w:r></'
+        + 'w:p></w:body></w:document>';
+      Assert.AreEqual(Expected, Actual, 'Paragraph creation failed');
+    END;
+
+    [Test]
+    PROCEDURE TestCreateParagraphWithStyles@3();
+    VAR
+      Expected@1000 : Text;
+      Actual@1001 : Text;
+    BEGIN
+      LibraryLowerPermissions.SetO365Basic;
+      //[WHEN] One paragraph with formating styles is added to an empty document
+      CreateSampleDocument;
+      CreateSampleParagraphWithFormating;
+      Actual := FinalizeAndGetDocumentOuterXml;
+      //[THEN] Expected document outer XML is:
+      Expected :=
+          '<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body><w:p><w:'
+        + 'r><w:t xml:space="preserve">Pellentesque </w:t></w:r><w:r><w:rPr><w:b /></w:rPr><w:t xml:space="pre'
+        + 'serve">commodo </w:t></w:r><w:r><w:t xml:space="preserve">rhoncus </w:t></w:r><w:r><w:rPr><w:i /></'
+        + 'w:rPr><w:t xml:space="preserve">mauris</w:t></w:r><w:r><w:t xml:space="preserve">, sit </w:t></w:r>'
+        + '<w:r><w:rPr><w:b /><w:i /><w:u /></w:rPr><w:t xml:space="preserve">amet </w:t></w:r><w:r><w:t xml:s'
+        + 'pace="preserve">faucibus arcu </w:t></w:r><w:r><w:rPr><w:color w:val="FF0000" /></w:rPr><w:t xml:sp'
+        + 'ace="preserve">porttitor </w:t></w:r><w:r><w:t xml:space="preserve">pharetra. Maecenas quis erat qu'
+        + 'is eros iaculis placerat ut at mauris.</w:t></w:r></w:p></w:body></w:document>';
+      Assert.AreEqual(Expected, Actual, 'Paragraph with styles creation failed');
+    END;
+
+    [Test]
+    PROCEDURE TestCreateParagraphJustification@4();
+    VAR
+      Expected@1000 : Text;
+      Actual@1001 : Text;
+    BEGIN
+      LibraryLowerPermissions.SetO365Basic;
+      //[WHEN] One paragraph with justified text is added to an empty document
+      CreateSampleDocument;
+      CreateSampleParagraphJustified;
+      Actual := FinalizeAndGetDocumentOuterXml;
+      //[THEN] Expected document outer XML is:
+      Expected :=
+          '<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body><w:p><w:'
+        + 'pPr><w:jc w:val="center" /></w:pPr><w:r><w:t xml:space="preserve">Nam eu tortor ut mi euismod eleif'
+        + 'end in ut ante. Donec a ligula ante. Sed rutrum ex quam. Nunc id mi ultricies, vestibulum sapien ve'
+        + 'l, posuere dui.</w:t></w:r></w:p></w:body></w:document>';
+      Assert.AreEqual(Expected, Actual, 'Paragraph with justification creation failed');
+    END;
+
+    [Test]
+    PROCEDURE TestCreateHeadings@5();
+    VAR
+      Expected@1000 : Text;
+      Actual@1001 : Text;
+    BEGIN
+      LibraryLowerPermissions.SetO365Basic;
+      //[WHEN] Heading1 and Heading2 styles are added to an empty document
+      CreateSampleDocument;
+      CreateSampleHeadings;
+      Actual := FinalizeAndGetDocumentOuterXml;
+      //[THEN] Expected document outer XML is:
+      Expected :=
+          '<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body><w:p><w:'
+        + 'pPr><w:pStyle w:val="heading1" /><w:spacing w:after="0" /></w:pPr><w:r><w:t xml:space="preserve">Fi'
+        + 'rst Heading</w:t></w:r></w:p><w:p><w:pPr><w:pStyle w:val="heading2" /><w:spacing w:after="0" /></w:'
+        + 'pPr><w:r><w:t xml:space="preserve">Second Heading</w:t></w:r></w:p></w:body></w:document>';
+      Assert.AreEqual(Expected, Actual, 'Headings creation failed');
+      //[THEN] Styles definition part must be not empty
+      Assert.AreEqual(TRUE, OpenXmlWordProcessingHelper.MainDocumentPartHasStyleDefinitionsPart(MainDocumentPart), 'Style definitions check failed');
+      MainDocumentPart.StyleDefinitionsPart(WordStyleDefinitionPart);
+      WordStyleDefinitionPart.Styles(WordStyles);
+      Actual := WordStyles.OuterXml;
+      //[THEN] and expected styles outer xml is:
+      Expected :=
+          '<w:styles xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:style w:type="p'
+        + 'aragraph" w:styleId="heading1" w:customStyle="true"><w:name w:val="heading 1" /><w:basedOn w:val="N'
+        + 'ormal" /><w:next w:val="Normal" /><w:uiPriority w:val="900" /><w:rPr xmlns:w="http://schemas.openxm'
+        + 'lformats.org/wordprocessingml/2006/main"><w:color w:val="2F5496" /><w:sz w:val="32" /></w:rPr></w:s'
+        + 'tyle><w:style w:type="paragraph" w:styleId="heading2" w:customStyle="true"><w:name w:val="heading 2'
+        + '" /><w:basedOn w:val="Normal" /><w:next w:val="Normal" /><w:uiPriority w:val="900" /><w:rPr xmlns:w'
+        + '="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:color w:val="2F5496" /><w:sz w:v'
+        + 'al="26" /></w:rPr></w:style></w:styles>';
+      Assert.AreEqual(Expected, Actual, 'Styles check failed');
+    END;
+
+    [Test]
+    PROCEDURE TestCreateTable@6();
+    VAR
+      Expected@1000 : Text;
+      Actual@1001 : Text;
+    BEGIN
+      LibraryLowerPermissions.SetO365Basic;
+      //[WHEN] Table is added to an empty document
+      CreateSampleDocument;
+      CreateSampleTable;
+      Actual := FinalizeAndGetDocumentOuterXml;
+      //[THEN] Expected document outer XML is:
+      Expected :=
+          '<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body><w:tbl><'
+        + 'w:tr><w:tc><w:p><w:r><w:t>A</w:t></w:r></w:p></w:tc><w:tc><w:p><w:r><w:rPr><w:b /></w:rPr><w:t>Nice'
+        + '</w:t></w:r></w:p></w:tc></w:tr><w:tr><w:tc><w:p><w:r><w:t>Little</w:t></w:r></w:p></w:tc><w:tc><w:'
+        + 'p><w:pPr><w:jc w:val="center" /></w:pPr><w:r><w:t>Table</w:t></w:r></w:p></w:tc></w:tr></w:tbl></w:'
+        + 'body></w:document>';
+      Assert.AreEqual(Expected, Actual, 'Table creation failed');
+    END;
+
+    [Test]
+    PROCEDURE TestCreateLists@7();
+    VAR
+      Expected@1000 : Text;
+      Actual@1001 : Text;
+    BEGIN
+      LibraryLowerPermissions.SetO365Basic;
+      //[WHEN] Sample lists are added to an empty document
+      CreateSampleDocument;
+      CreateSampleLists;
+      Actual := FinalizeAndGetDocumentOuterXml;
+      //[THEN] Expected document outer XML is:
+      Expected :=
+          '<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body><w:p><w:'
+        + 'pPr xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:pStyle w:val="ListPar'
+        + 'agraph" /><w:numPr><w:ilvl w:val="0" /><w:numId w:val="1" /></w:numPr><w:spacing w:after="0" /><w:i'
+        + 'nd w:start="5" w:hanging="360" /></w:pPr><w:r><w:t>A</w:t></w:r></w:p><w:p><w:pPr xmlns:w="http://s'
+        + 'chemas.openxmlformats.org/wordprocessingml/2006/main"><w:pStyle w:val="ListParagraph" /><w:numPr><w'
+        + ':ilvl w:val="0" /><w:numId w:val="1" /></w:numPr><w:spacing w:after="0" /><w:ind w:start="5" w:hang'
+        + 'ing="360" /></w:pPr><w:r><w:t>Unordered</w:t></w:r></w:p><w:p><w:pPr xmlns:w="http://schemas.openxm'
+        + 'lformats.org/wordprocessingml/2006/main"><w:pStyle w:val="ListParagraph" /><w:numPr><w:ilvl w:val="'
+        + '0" /><w:numId w:val="1" /></w:numPr><w:spacing w:after="0" /><w:ind w:start="5" w:hanging="360" /><'
+        + '/w:pPr><w:r><w:t>List</w:t></w:r></w:p><w:p /><w:p><w:pPr xmlns:w="http://schemas.openxmlformats.or'
+        + 'g/wordprocessingml/2006/main"><w:pStyle w:val="ListParagraph" /><w:numPr><w:ilvl w:val="0" /><w:num'
+        + 'Id w:val="2" /></w:numPr><w:spacing w:after="0" /><w:ind w:start="10" w:hanging="360" /></w:pPr><w:'
+        + 'r><w:t>A</w:t></w:r></w:p><w:p><w:pPr xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2'
+        + '006/main"><w:pStyle w:val="ListParagraph" /><w:numPr><w:ilvl w:val="0" /><w:numId w:val="2" /></w:n'
+        + 'umPr><w:spacing w:after="0" /><w:ind w:start="10" w:hanging="360" /></w:pPr><w:r><w:t>Ordered</w:t>'
+        + '</w:r></w:p><w:p><w:pPr xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:p'
+        + 'Style w:val="ListParagraph" /><w:numPr><w:ilvl w:val="0" /><w:numId w:val="2" /></w:numPr><w:spacin'
+        + 'g w:after="0" /><w:ind w:start="10" w:hanging="360" /></w:pPr><w:r><w:t>List</w:t></w:r></w:p></w:b'
+        + 'ody></w:document>';
+      Assert.AreEqual(Expected, Actual, 'Lists creation failed');
+    END;
+
+    [Test]
+    PROCEDURE TestCreatePicture@8();
+    VAR
+      Expected@1000 : Text;
+      PartId@1001 : Text;
+      Actual@1002 : Text;
+    BEGIN
+      LibraryLowerPermissions.SetO365Basic;
+      //[WHEN] Picture is added to an empty document
+      CreateSampleDocument;
+      PartId := CreateSamplePicture;
+      Actual := FinalizeAndGetDocumentOuterXml;
+      //[THEN] Expected document outer XML is:
+      Expected :=
+          '<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body><w:p><w:'
+        + 'r><w:drawing><wp:anchor distT="0" distB="0" distL="114300" distR="114300" simplePos="0" relativeHei'
+        + 'ght="251658240" behindDoc="1" locked="0" layoutInCell="1" allowOverlap="1" xmlns:wp="http://schemas'
+        + '.openxmlformats.org/drawingml/2006/wordprocessingDrawing"><wp:simplePos x="0" y="0" /><wp:positionH'
+        + ' relativeFrom="margin"><wp:align>left</wp:align></wp:positionH><wp:positionV relativeFrom="paragrap'
+        + 'h"><wp:posOffset>0</wp:posOffset></wp:positionV><wp:extent cx="209550" cy="209550" /><wp:effectExte'
+        + 'nt l="0" t="0" r="0" b="0" /><wp:wrapTopAndBottom /><wp:docPr id="1" name="someimage.Jpeg" /><wp:cN'
+        + 'vGraphicFramePr><a:graphicFrameLocks noChangeAspect="1" xmlns:a="http://schemas.openxmlformats.org/'
+        + 'drawingml/2006/main" /></wp:cNvGraphicFramePr><a:graphic xmlns:a="http://schemas.openxmlformats.org'
+        + '/drawingml/2006/main"><a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/picture"'
+        + '><pic:pic xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture"><pic:nvPicPr><pic:cN'
+        + 'vPr id="0" name="someimage.Jpeg" /><pic:cNvPicPr /></pic:nvPicPr><pic:blipFill><a:blip r:embed="'
+        + PartId + '"'
+        + ' cstate="print" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><a:ex'
+        + 'tLst><a:ext uri="{28A0092B-C50C-407E-A947-70E740481C1C}" /></a:extLst></a:blip><a:stretch><a:fillRe'
+        + 'ct /></a:stretch></pic:blipFill><pic:spPr><a:xfrm><a:off x="0" y="0" /><a:ext cx="209550" cy="20955'
+        + '0" /></a:xfrm><a:prstGeom prst="rect"><a:avLst /></a:prstGeom></pic:spPr></pic:pic></a:graphicData>'
+        + '</a:graphic></wp:anchor></w:drawing></w:r></w:p></w:body></w:document>';
+      Assert.AreEqual(Expected, Actual, 'Paragraph creation failed');
+    END;
+
+    [Test]
+    PROCEDURE TestCreateHyperlink@9();
+    VAR
+      Expected@1000 : Text;
+      PartId@1001 : Text;
+      Actual@1002 : Text;
+    BEGIN
+      LibraryLowerPermissions.SetO365Basic;
+      //[WHEN] Hyperlink is added to an empty document
+      CreateSampleDocument;
+      PartId := CreateSampleHyperlink;
+      Actual := FinalizeAndGetDocumentOuterXml;
+      //[THEN] Expected document outer XML is:
+      Expected :=
+          '<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body><w:p><w:'
+        + 'hyperlink w:history="true" r:id="'
+        + PartId + '" xmlns:r="http://schemas.openxmlformats.org/offi'
+        + 'ceDocument/2006/relationships"><w:proofErr w:type="gramStart" /><w:r><w:rPr><w:rStyle w:val="Hyperl'
+        + 'ink" /><w:color w:themeColor="hyperlink" /></w:rPr><w:t xml:space="preserve">My awesome link</w:t><'
+        + '/w:r></w:hyperlink></w:p></w:body></w:document>';
+      Assert.AreEqual(Expected, Actual, 'Paragraph creation failed');
+    END;
+
+    [Test]
+    PROCEDURE TestCreateFullDocumentNonEmpty@10();
+    VAR
+      Expected@1000 : Text;
+      PictureBase64@1001 : Text;
+      TempBlob@1002 : TEMPORARY Record 99008535;
+      ImageStream@1003 : InStream;
+      ExistingFileStream@1004 : InStream;
+      SaveStream@1005 : OutStream;
+    BEGIN
+      LibraryLowerPermissions.SetO365Basic;
+      //[WHEN] All elements from previous tests are added to an empty document
+      CreateSampleDocument;
+      CreateSampleParagraph;
+      CreateSampleParagraphWithFormating;
+      CreateSampleParagraphJustified;
+      CreateSampleHeadings;
+      CreateSampleTable;
+      CreateSampleLists;
+      CreateSamplePicture;
+      CreateSampleHyperlink;
+      FinalizeAndGetDocumentOuterXml;
+      //[WHEN] document is saved to TempBlob stream
+      TempBlob.Blob.CREATEOUTSTREAM(SaveStream);
+      WordprocessingDocument.Save(SaveStream);
+      //[WHEN] and then reopened again
+      TempBlob.Blob.CREATEINSTREAM(ExistingFileStream);
+      WordprocessingDocument.Open(ExistingFileStream, FALSE);
+      WordprocessingDocument.MainDocumentPart(MainDocumentPart);
+      MainDocumentPart.Document(WordDocument);
+      //[THEN] document outer XML must not be empty
+      Assert.AreNotEqual('', WordDocument.OuterXml, 'Reopen check failed');
+    END;
+
+    [Test]
+    PROCEDURE TestFullDocumentIsSameOnReopen@11();
+    VAR
+      Expected@1000 : Text;
+      ExistingFileStream@1001 : InStream;
+      SaveStream@1002 : OutStream;
+      TempBlob@1003 : TEMPORARY Record 99008535;
+    BEGIN
+      LibraryLowerPermissions.SetO365Basic;
+      //[WHEN] All elements from previous tests are added to an empty document
+      CreateSampleDocument;
+      CreateSampleParagraph;
+      CreateSampleParagraphWithFormating;
+      CreateSampleParagraphJustified;
+      CreateSampleHeadings;
+      CreateSampleTable;
+      CreateSampleLists;
+      Expected := FinalizeAndGetDocumentOuterXml;
+      //[WHEN] document is saved to TempBlob stream and reopened
+      TempBlob.Blob.CREATEOUTSTREAM(SaveStream);
+      WordprocessingDocument.Save(SaveStream);
+      TempBlob.Blob.CREATEINSTREAM(ExistingFileStream);
+      WordprocessingDocument.Open(ExistingFileStream, FALSE);
+      WordprocessingDocument.MainDocumentPart(MainDocumentPart);
+      MainDocumentPart.Document(WordDocument);
+      //[THEN] reopened stream document outer XML must be the same as original
+      Assert.AreEqual(Expected, WordDocument.OuterXml, 'Reopen check failed');
+    END;
+
+    [Test]
+    PROCEDURE TestExistingDocumentOpen@12();
+    VAR
+      DocumentBase64@1000 : Text;
+      Expected@1001 : Text;
+      ExistingFileStream@1002 : InStream;
+      SaveStream@1003 : OutStream;
+      TempBlob@1004 : TEMPORARY Record 99008535;
+    BEGIN
+      LibraryLowerPermissions.SetO365Basic;
+      //[GIVEN] Sample document stream as base64 text
+      DocumentBase64 := GetExampleDocxFileContentAsBase64;
+      //[WHEN] Sample document is opened
+      TempBlob.FromBase64String(DocumentBase64);
+      TempBlob.Blob.CREATEINSTREAM(ExistingFileStream);
+      WordprocessingDocument.Open(ExistingFileStream, FALSE);
+      WordprocessingDocument.MainDocumentPart(MainDocumentPart);
+      MainDocumentPart.Document(WordDocument);
+      //[THEN] Expected document outer XML is:
+      Expected :=
+          '<w:document xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing" xmlns'
+        + ':a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:pic="http://schemas.openxmlformats'
+        + '.org/drawingml/2006/picture" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relatio'
+        + 'nships" xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body><w:p><w:r><w'
+        + ':t>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent quam augue, tempus id metus in'
+        + ', laoreet viverra quam. Sed vulputate risus lacus, et dapibus orci porttitor non.</w:t></w:r></w:p>'
+        + '<w:p><w:r><w:t xml:space="preserve">Pellentesque </w:t></w:r><w:r><w:rPr><w:b /></w:rPr><w:t xml:sp'
+        + 'ace="preserve">commodo </w:t></w:r><w:r><w:t xml:space="preserve">rhoncus </w:t></w:r><w:r><w:rPr><'
+        + 'w:i /></w:rPr><w:t xml:space="preserve">mauris</w:t></w:r><w:r><w:t xml:space="preserve">, sit </w:'
+        + 't></w:r><w:r><w:rPr><w:b /><w:i /><w:u /></w:rPr><w:t xml:space="preserve">amet </w:t></w:r><w:r><w'
+        + ':t xml:space="preserve">faucibus arcu </w:t></w:r><w:r><w:rPr><w:color w:val="FF0000" /></w:rPr><w:'
+        + 't xml:space="preserve">porttitor </w:t></w:r><w:r><w:t xml:space="preserve">pharetra. Maecenas quis'
+        + ' erat quis eros iaculis placerat ut at mauris.</w:t></w:r></w:p><w:p><w:pPr><w:jc w:val="center" />'
+        + '</w:pPr><w:r><w:t xml:space="preserve">Nam eu tortor ut mi euismod eleifend in ut ante. Donec a lig'
+        + 'ula ante. Sed rutrum ex quam. Nunc id mi ultricies, vestibulum sapien vel, posuere dui.</w:t></w:r>'
+        + '</w:p><w:p><w:pPr><w:pStyle w:val="heading1" /><w:spacing w:after="0" /></w:pPr><w:r><w:t xml:space'
+        + '="preserve">First Heading</w:t></w:r></w:p><w:p><w:pPr><w:pStyle w:val="heading2" /><w:spacing w:af'
+        + 'ter="0" /></w:pPr><w:r><w:t xml:space="preserve">Second Heading</w:t></w:r></w:p><w:tbl><w:tr><w:tc'
+        + '><w:p><w:r><w:t>A</w:t></w:r></w:p></w:tc><w:tc><w:p><w:r><w:rPr><w:b /></w:rPr><w:t>Nice</w:t></w:'
+        + 'r></w:p></w:tc></w:tr><w:tr><w:tc><w:p><w:r><w:t>Little</w:t></w:r></w:p></w:tc><w:tc><w:p><w:pPr><'
+        + 'w:jc w:val="center" /></w:pPr><w:r><w:t>Table</w:t></w:r></w:p></w:tc></w:tr></w:tbl><w:p><w:pPr xm'
+        + 'lns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:pStyle w:val="ListParagraph'
+        + '" /><w:numPr><w:ilvl w:val="0" /><w:numId w:val="1" /></w:numPr><w:spacing w:after="0" /><w:ind w:s'
+        + 'tart="5" w:hanging="360" /></w:pPr><w:r><w:t>A</w:t></w:r></w:p><w:p><w:pPr xmlns:w="http://schemas'
+        + '.openxmlformats.org/wordprocessingml/2006/main"><w:pStyle w:val="ListParagraph" /><w:numPr><w:ilvl '
+        + 'w:val="0" /><w:numId w:val="1" /></w:numPr><w:spacing w:after="0" /><w:ind w:start="5" w:hanging="3'
+        + '60" /></w:pPr><w:r><w:t>Unordered</w:t></w:r></w:p><w:p><w:pPr xmlns:w="http://schemas.openxmlforma'
+        + 'ts.org/wordprocessingml/2006/main"><w:pStyle w:val="ListParagraph" /><w:numPr><w:ilvl w:val="0" /><'
+        + 'w:numId w:val="1" /></w:numPr><w:spacing w:after="0" /><w:ind w:start="5" w:hanging="360" /></w:pPr'
+        + '><w:r><w:t>List</w:t></w:r></w:p><w:p /><w:p><w:pPr xmlns:w="http://schemas.openxmlformats.org/word'
+        + 'processingml/2006/main"><w:pStyle w:val="ListParagraph" /><w:numPr><w:ilvl w:val="0" /><w:numId w:v'
+        + 'al="2" /></w:numPr><w:spacing w:after="0" /><w:ind w:start="10" w:hanging="360" /></w:pPr><w:r><w:t'
+        + '>A</w:t></w:r></w:p><w:p><w:pPr xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/ma'
+        + 'in"><w:pStyle w:val="ListParagraph" /><w:numPr><w:ilvl w:val="0" /><w:numId w:val="2" /></w:numPr><'
+        + 'w:spacing w:after="0" /><w:ind w:start="10" w:hanging="360" /></w:pPr><w:r><w:t>Ordered</w:t></w:r>'
+        + '</w:p><w:p><w:pPr xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:pStyle '
+        + 'w:val="ListParagraph" /><w:numPr><w:ilvl w:val="0" /><w:numId w:val="2" /></w:numPr><w:spacing w:af'
+        + 'ter="0" /><w:ind w:start="10" w:hanging="360" /></w:pPr><w:r><w:t>List</w:t></w:r></w:p><w:p><w:r><'
+        + 'w:drawing><wp:anchor xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawi'
+        + 'ng" distT="0" distB="0" distL="114300" distR="114300" simplePos="0" relativeHeight="251658240" behi'
+        + 'ndDoc="1" locked="0" layoutInCell="1" allowOverlap="1"><wp:simplePos x="0" y="0" /><wp:positionH re'
+        + 'lativeFrom="margin"><wp:align>left</wp:align></wp:positionH><wp:positionV relativeFrom="paragraph">'
+        + '<wp:posOffset>0</wp:posOffset></wp:positionV><wp:extent cx="209550" cy="209550" /><wp:effectExtent '
+        + 'l="0" t="0" r="0" b="0" /><wp:wrapTopAndBottom /><wp:docPr id="1" name="someimage.Jpeg" /><wp:cNvGr'
+        + 'aphicFramePr><a:graphicFrameLocks xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" n'
+        + 'oChangeAspect="1" /></wp:cNvGraphicFramePr><a:graphic xmlns:a="http://schemas.openxmlformats.org/dr'
+        + 'awingml/2006/main"><a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/picture"><p'
+        + 'ic:pic xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture"><pic:nvPicPr><pic:cNvPr'
+        + ' id="0" name="someimage.Jpeg" /><pic:cNvPicPr /></pic:nvPicPr><pic:blipFill><a:blip xmlns:r="http:/'
+        + '/schemas.openxmlformats.org/officeDocument/2006/relationships" r:embed="R8348b073f4c5403c" cstate="'
+        + 'print"><a:extLst><a:ext uri="{28A0092B-C50C-407E-A947-70E740481C1C}" /></a:extLst></a:blip><a:stret'
+        + 'ch><a:fillRect /></a:stretch></pic:blipFill><pic:spPr><a:xfrm><a:off x="0" y="0" /><a:ext cx="20955'
+        + '0" cy="209550" /></a:xfrm><a:prstGeom prst="rect"><a:avLst /></a:prstGeom></pic:spPr></pic:pic></a:'
+        + 'graphicData></a:graphic></wp:anchor></w:drawing></w:r></w:p><w:p><w:hyperlink xmlns:r="http://schem'
+        + 'as.openxmlformats.org/officeDocument/2006/relationships" w:history="true" r:id="Ra2bda11c9d7f4e65">'
+        + '<w:proofErr w:type="gramStart" /><w:r><w:rPr><w:rStyle w:val="Hyperlink" /><w:color w:themeColor="h'
+        + 'yperlink" /></w:rPr><w:t xml:space="preserve">My awesome link</w:t></w:r></w:hyperlink></w:p></w:bo'
+        + 'dy></w:document>';
+      Assert.AreEqual(Expected, WordDocument.OuterXml, 'Existing file open check failed');
+    END;
+
+    [Test]
+    PROCEDURE TestExistingDocumentInspection@13();
+    VAR
+      DocumentBase64@1000 : Text;
+      Expected@1001 : Text;
+      ExistingFileStream@1002 : InStream;
+      SaveStream@1003 : OutStream;
+      TempBlob@1004 : TEMPORARY Record 99008535;
+      ParagraphCount@1005 : Integer;
+      RunCount@1006 : Integer;
+      TextCount@1007 : Integer;
+      FullText@1008 : Text;
+    BEGIN
+      LibraryLowerPermissions.SetO365Basic;
+      //[GIVEN] Sample document stream as base64 text
+      DocumentBase64 := GetExampleDocxFileContentAsBase64;
+      //[WHEN] Sample document is opened
+      TempBlob.FromBase64String(DocumentBase64);
+      TempBlob.Blob.CREATEINSTREAM(ExistingFileStream);
+      WordprocessingDocument.Open(ExistingFileStream, FALSE);
+      WordprocessingDocument.MainDocumentPart(MainDocumentPart);
+      MainDocumentPart.Document(WordDocument);
+      WordDocument.Body(WordBody);
+      //[WHEN] and iteration through all elements is performed
+      WordBody.GetParagraphEnumerator(WordParagraphEnumerator);
+      WHILE WordParagraphEnumerator.MoveNext DO
+        BEGIN
+          ParagraphCount += 1;
+          WordParagraphEnumerator.Current(WordParagraph);
+          WordParagraph.GetRunEnumerator(WordRunEnumerator);
+          WHILE WordRunEnumerator.MoveNext DO
+            BEGIN
+              RunCount += 1;
+              WordRunEnumerator.Current(WordRun);
+              WordRun.GetTextEnumerator(WordTextEnumerator);
+              WHILE WordTextEnumerator.MoveNext DO
+                BEGIN
+                  TextCount += 1;
+                  WordTextEnumerator.Current(WordText);
+                  FullText += WordText.InnerText;
+                END;
+            END;
+        END;
+
+      //[THEN] Expected paragraph element count is 14
+      Assert.AreEqual(14, ParagraphCount, 'Paragraph count check failed');
+      //[THEN] Expected run element count is 20
+      Assert.AreEqual(20, RunCount, 'Run count check failed');
+      //[THEN] Expected text element count is 19
+      Assert.AreEqual(19, TextCount, 'Text count check failed');
+      //[THEN] Expected concatenation of whole document text is:
+      Expected :=
+          'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent quam augue, tempus id metus in, l'
+        + 'aoreet viverra quam. Sed vulputate risus lacus, et dapibus orci porttitor non.Pellentesque commodo '
+        + 'rhoncus mauris, sit amet faucibus arcu porttitor pharetra. Maecenas quis erat quis eros iaculis pla'
+        + 'cerat ut at mauris.Nam eu tortor ut mi euismod eleifend in ut ante. Donec a ligula ante. Sed rutrum'
+        + ' ex quam. Nunc id mi ultricies, vestibulum sapien vel, posuere dui.First HeadingSecond HeadingAUnor'
+        + 'deredListAOrderedList';
+      Assert.AreEqual(Expected, FullText, 'Full document text check failed');
+    END;
+
+    [Test]
+    PROCEDURE TestExistingDocumentModification@14();
+    VAR
+      DocumentBase64@1000 : Text;
+      Expected@1001 : Text;
+      ExistingFileStream@1002 : InStream;
+      SaveStream@1003 : OutStream;
+      TempBlob@1004 : TEMPORARY Record 99008535;
+      Actual@1005 : Text;
+    BEGIN
+      LibraryLowerPermissions.SetO365Basic;
+      //[GIVEN] Sample document stream as base64 text
+      DocumentBase64 := GetExampleDocxFileContentAsBase64;
+      //[WHEN] Sample document is opened
+      TempBlob.FromBase64String(DocumentBase64);
+      TempBlob.Blob.CREATEINSTREAM(ExistingFileStream);
+      WordprocessingDocument.Open(ExistingFileStream, TRUE);
+      WordprocessingDocument.MainDocumentPart(MainDocumentPart);
+      MainDocumentPart.Document(WordDocument);
+      WordDocument.Body(WordBody);
+      //[WHEN] and '|>><<|' is added to every text element value
+      WordBody.GetParagraphEnumerator(WordParagraphEnumerator);
+      WHILE WordParagraphEnumerator.MoveNext DO
+        BEGIN
+          WordParagraphEnumerator.Current(WordParagraph);
+          WordParagraph.GetRunEnumerator(WordRunEnumerator);
+          WHILE WordRunEnumerator.MoveNext DO
+            BEGIN
+              WordRunEnumerator.Current(WordRun);
+              WordRun.GetTextEnumerator(WordTextEnumerator);
+              WHILE WordTextEnumerator.MoveNext DO
+                BEGIN
+                  WordTextEnumerator.Current(WordText);
+                  WordText.SetText(WordText.Text + '|>><<|');
+                END;
+            END;
+        END;
+
+      Actual := FinalizeAndGetDocumentOuterXml;
+      //[THEN] Expected modified document outer xml is:
+      Expected :=
+          '<w:document xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing" xmlns'
+        + ':a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:pic="http://schemas.openxmlformats'
+        + '.org/drawingml/2006/picture" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relatio'
+        + 'nships" xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body><w:p><w:r><w'
+        + ':t>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent quam augue, tempus id metus in'
+        + ', laoreet viverra quam. Sed vulputate risus lacus, et dapibus orci porttitor non.|&gt;&gt;&lt;&lt;|'
+        + '</w:t></w:r></w:p><w:p><w:r><w:t xml:space="preserve">Pellentesque |&gt;&gt;&lt;&lt;|</w:t></w:r><w'
+        + ':r><w:rPr><w:b /></w:rPr><w:t xml:space="preserve">commodo |&gt;&gt;&lt;&lt;|</w:t></w:r><w:r><w:t '
+        + 'xml:space="preserve">rhoncus |&gt;&gt;&lt;&lt;|</w:t></w:r><w:r><w:rPr><w:i /></w:rPr><w:t xml:spac'
+        + 'e="preserve">mauris|&gt;&gt;&lt;&lt;|</w:t></w:r><w:r><w:t xml:space="preserve">, sit |&gt;&gt;&lt;'
+        + '&lt;|</w:t></w:r><w:r><w:rPr><w:b /><w:i /><w:u /></w:rPr><w:t xml:space="preserve">amet |&gt;&gt;&'
+        + 'lt;&lt;|</w:t></w:r><w:r><w:t xml:space="preserve">faucibus arcu |&gt;&gt;&lt;&lt;|</w:t></w:r><w:r'
+        + '><w:rPr><w:color w:val="FF0000" /></w:rPr><w:t xml:space="preserve">porttitor |&gt;&gt;&lt;&lt;|</w'
+        + ':t></w:r><w:r><w:t xml:space="preserve">pharetra. Maecenas quis erat quis eros iaculis placerat ut '
+        + 'at mauris.|&gt;&gt;&lt;&lt;|</w:t></w:r></w:p><w:p><w:pPr><w:jc w:val="center" /></w:pPr><w:r><w:t '
+        + 'xml:space="preserve">Nam eu tortor ut mi euismod eleifend in ut ante. Donec a ligula ante. Sed rutr'
+        + 'um ex quam. Nunc id mi ultricies, vestibulum sapien vel, posuere dui.|&gt;&gt;&lt;&lt;|</w:t></w:r>'
+        + '</w:p><w:p><w:pPr><w:pStyle w:val="heading1" /><w:spacing w:after="0" /></w:pPr><w:r><w:t xml:space'
+        + '="preserve">First Heading|&gt;&gt;&lt;&lt;|</w:t></w:r></w:p><w:p><w:pPr><w:pStyle w:val="heading2"'
+        + ' /><w:spacing w:after="0" /></w:pPr><w:r><w:t xml:space="preserve">Second Heading|&gt;&gt;&lt;&lt;|'
+        + '</w:t></w:r></w:p><w:tbl><w:tr><w:tc><w:p><w:r><w:t>A</w:t></w:r></w:p></w:tc><w:tc><w:p><w:r><w:rP'
+        + 'r><w:b /></w:rPr><w:t>Nice</w:t></w:r></w:p></w:tc></w:tr><w:tr><w:tc><w:p><w:r><w:t>Little</w:t></'
+        + 'w:r></w:p></w:tc><w:tc><w:p><w:pPr><w:jc w:val="center" /></w:pPr><w:r><w:t>Table</w:t></w:r></w:p>'
+        + '</w:tc></w:tr></w:tbl><w:p><w:pPr xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/'
+        + 'main"><w:pStyle w:val="ListParagraph" /><w:numPr><w:ilvl w:val="0" /><w:numId w:val="1" /></w:numPr'
+        + '><w:spacing w:after="0" /><w:ind w:start="5" w:hanging="360" /></w:pPr><w:r><w:t>A|&gt;&gt;&lt;&lt;'
+        + '|</w:t></w:r></w:p><w:p><w:pPr xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/mai'
+        + 'n"><w:pStyle w:val="ListParagraph" /><w:numPr><w:ilvl w:val="0" /><w:numId w:val="1" /></w:numPr><w'
+        + ':spacing w:after="0" /><w:ind w:start="5" w:hanging="360" /></w:pPr><w:r><w:t>Unordered|&gt;&gt;&lt'
+        + ';&lt;|</w:t></w:r></w:p><w:p><w:pPr xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/200'
+        + '6/main"><w:pStyle w:val="ListParagraph" /><w:numPr><w:ilvl w:val="0" /><w:numId w:val="1" /></w:num'
+        + 'Pr><w:spacing w:after="0" /><w:ind w:start="5" w:hanging="360" /></w:pPr><w:r><w:t>List|&gt;&gt;&lt'
+        + ';&lt;|</w:t></w:r></w:p><w:p /><w:p><w:pPr xmlns:w="http://schemas.openxmlformats.org/wordprocessin'
+        + 'gml/2006/main"><w:pStyle w:val="ListParagraph" /><w:numPr><w:ilvl w:val="0" /><w:numId w:val="2" />'
+        + '</w:numPr><w:spacing w:after="0" /><w:ind w:start="10" w:hanging="360" /></w:pPr><w:r><w:t>A|&gt;&g'
+        + 't;&lt;&lt;|</w:t></w:r></w:p><w:p><w:pPr xmlns:w="http://schemas.openxmlformats.org/wordprocessingm'
+        + 'l/2006/main"><w:pStyle w:val="ListParagraph" /><w:numPr><w:ilvl w:val="0" /><w:numId w:val="2" /></'
+        + 'w:numPr><w:spacing w:after="0" /><w:ind w:start="10" w:hanging="360" /></w:pPr><w:r><w:t>Ordered|&g'
+        + 't;&gt;&lt;&lt;|</w:t></w:r></w:p><w:p><w:pPr xmlns:w="http://schemas.openxmlformats.org/wordprocess'
+        + 'ingml/2006/main"><w:pStyle w:val="ListParagraph" /><w:numPr><w:ilvl w:val="0" /><w:numId w:val="2" '
+        + '/></w:numPr><w:spacing w:after="0" /><w:ind w:start="10" w:hanging="360" /></w:pPr><w:r><w:t>List|&'
+        + 'gt;&gt;&lt;&lt;|</w:t></w:r></w:p><w:p><w:r><w:drawing><wp:anchor xmlns:wp="http://schemas.openxmlf'
+        + 'ormats.org/drawingml/2006/wordprocessingDrawing" distT="0" distB="0" distL="114300" distR="114300" '
+        + 'simplePos="0" relativeHeight="251658240" behindDoc="1" locked="0" layoutInCell="1" allowOverlap="1"'
+        + '><wp:simplePos x="0" y="0" /><wp:positionH relativeFrom="margin"><wp:align>left</wp:align></wp:posi'
+        + 'tionH><wp:positionV relativeFrom="paragraph"><wp:posOffset>0</wp:posOffset></wp:positionV><wp:exten'
+        + 't cx="209550" cy="209550" /><wp:effectExtent l="0" t="0" r="0" b="0" /><wp:wrapTopAndBottom /><wp:d'
+        + 'ocPr id="1" name="someimage.Jpeg" /><wp:cNvGraphicFramePr><a:graphicFrameLocks xmlns:a="http://sche'
+        + 'mas.openxmlformats.org/drawingml/2006/main" noChangeAspect="1" /></wp:cNvGraphicFramePr><a:graphic '
+        + 'xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main"><a:graphicData uri="http://schemas.'
+        + 'openxmlformats.org/drawingml/2006/picture"><pic:pic xmlns:pic="http://schemas.openxmlformats.org/dr'
+        + 'awingml/2006/picture"><pic:nvPicPr><pic:cNvPr id="0" name="someimage.Jpeg" /><pic:cNvPicPr /></pic:'
+        + 'nvPicPr><pic:blipFill><a:blip xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relati'
+        + 'onships" r:embed="R8348b073f4c5403c" cstate="print"><a:extLst><a:ext uri="{28A0092B-C50C-407E-A947-'
+        + '70E740481C1C}" /></a:extLst></a:blip><a:stretch><a:fillRect /></a:stretch></pic:blipFill><pic:spPr>'
+        + '<a:xfrm><a:off x="0" y="0" /><a:ext cx="209550" cy="209550" /></a:xfrm><a:prstGeom prst="rect"><a:a'
+        + 'vLst /></a:prstGeom></pic:spPr></pic:pic></a:graphicData></a:graphic></wp:anchor></w:drawing></w:r>'
+        + '</w:p><w:p><w:hyperlink xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationship'
+        + 's" w:history="true" r:id="Ra2bda11c9d7f4e65"><w:proofErr w:type="gramStart" /><w:r><w:rPr><w:rStyle'
+        + ' w:val="Hyperlink" /><w:color w:themeColor="hyperlink" /></w:rPr><w:t xml:space="preserve">My aweso'
+        + 'me link</w:t></w:r></w:hyperlink></w:p></w:body></w:document>';
+
+      Assert.AreEqual(Expected, Actual, 'Full document text check failed');
+    END;
+
+    LOCAL PROCEDURE CreateSampleDocument@15();
+    BEGIN
+      OpenXmlWordProcessingHelper.CreateEmptyDocument(0, WordprocessingDocument, MainDocumentPart, WordBody);
+      MainDocumentPart.Document(WordDocument);
+    END;
+
+    LOCAL PROCEDURE CreateSampleParagraph@16();
+    BEGIN
+      WordText.TextConstructor;
+      WordText.SetText('Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent quam augue, tempus id metus in, laoreet viverra quam. Sed vulputate risus lacus, et dapibus orci porttitor non.');
+      WordRun.Run;
+      WordRun.AppendText(WordText);
+      WordParagraph.Paragraph;
+      WordParagraph.AppendRun(WordRun);
+      WordBody.AppendParagraph(WordParagraph);
+    END;
+
+    LOCAL PROCEDURE CreateSampleParagraphWithFormating@17();
+    VAR
+      DotNet_OpenXmlSpaceProcessing@1000 : Codeunit 50079;
+    BEGIN
+      WordParagraph.Paragraph;
+
+      WordRun.Run;
+      WordText.TextConstructor;
+      WordText.SetText('Pellentesque ');
+      DotNet_OpenXmlSpaceProcessing.SpaceProcessingModeValues(1); //Preserve
+      WordText.SetSpacePreserveOption(DotNet_OpenXmlSpaceProcessing);
+      WordRun.AppendText(WordText);
+      WordParagraph.AppendRun(WordRun);
+
+      WordRun.Run;
+      WordRunProperties.RunProperties;
+      WordRunProperties.SetBold(TRUE);
+      WordRun.AppendProperties(WordRunProperties);
+      WordText.TextConstructor;
+      WordText.SetText('commodo ');
+      DotNet_OpenXmlSpaceProcessing.SpaceProcessingModeValues(1); //Preserve
+      WordText.SetSpacePreserveOption(DotNet_OpenXmlSpaceProcessing);
+      WordRun.AppendText(WordText);
+      WordParagraph.AppendRun(WordRun);
+
+      WordRun.Run;
+      WordText.TextConstructor;
+      WordText.SetText('rhoncus ');
+      DotNet_OpenXmlSpaceProcessing.SpaceProcessingModeValues(1); //Preserve
+      WordText.SetSpacePreserveOption(DotNet_OpenXmlSpaceProcessing);
+      WordRun.AppendText(WordText);
+      WordParagraph.AppendRun(WordRun);
+
+      WordRun.Run;
+      WordRunProperties.RunProperties;
+      WordRunProperties.SetItalic(TRUE);
+      WordRun.AppendProperties(WordRunProperties);
+      WordText.TextConstructor;
+      WordText.SetText('mauris');
+      DotNet_OpenXmlSpaceProcessing.SpaceProcessingModeValues(1); //Preserve
+      WordText.SetSpacePreserveOption(DotNet_OpenXmlSpaceProcessing);
+      WordRun.AppendText(WordText);
+      WordParagraph.AppendRun(WordRun);
+
+      WordRun.Run;
+      WordText.TextConstructor;
+      WordText.SetText(', sit ');
+      DotNet_OpenXmlSpaceProcessing.SpaceProcessingModeValues(1); //Preserve
+      WordText.SetSpacePreserveOption(DotNet_OpenXmlSpaceProcessing);
+      WordRun.AppendText(WordText);
+      WordParagraph.AppendRun(WordRun);
+
+      WordRun.Run;
+      WordRunProperties.RunProperties;
+      WordRunProperties.SetBold(TRUE);
+      WordRunProperties.SetItalic(TRUE);
+      WordRunProperties.SetUnderline(TRUE);
+      WordRun.AppendProperties(WordRunProperties);
+      WordText.TextConstructor;
+      WordText.SetText('amet ');
+      DotNet_OpenXmlSpaceProcessing.SpaceProcessingModeValues(1); //Preserve
+      WordText.SetSpacePreserveOption(DotNet_OpenXmlSpaceProcessing);
+      WordRun.AppendText(WordText);
+      WordParagraph.AppendRun(WordRun);
+
+      WordRun.Run;
+      WordText.TextConstructor;
+      WordText.SetText('faucibus arcu ');
+      DotNet_OpenXmlSpaceProcessing.SpaceProcessingModeValues(1); //Preserve
+      WordText.SetSpacePreserveOption(DotNet_OpenXmlSpaceProcessing);
+      WordRun.AppendText(WordText);
+      WordParagraph.AppendRun(WordRun);
+
+      WordRun.Run;
+      WordRunProperties.RunProperties;
+      WordColor.Color;
+      WordColor.SetColorValue('FF0000');
+      WordRunProperties.SetColor(WordColor);
+      WordRun.AppendProperties(WordRunProperties);
+      WordText.TextConstructor;
+      WordText.SetText('porttitor ');
+      DotNet_OpenXmlSpaceProcessing.SpaceProcessingModeValues(1); //Preserve
+      WordText.SetSpacePreserveOption(DotNet_OpenXmlSpaceProcessing);
+      WordRun.AppendText(WordText);
+      WordParagraph.AppendRun(WordRun);
+
+      WordRun.Run;
+      WordText.TextConstructor;
+      WordText.SetText('pharetra. Maecenas quis erat quis eros iaculis placerat ut at mauris.');
+      DotNet_OpenXmlSpaceProcessing.SpaceProcessingModeValues(1); //Preserve
+      WordText.SetSpacePreserveOption(DotNet_OpenXmlSpaceProcessing);
+      WordRun.AppendText(WordText);
+      WordParagraph.AppendRun(WordRun);
+
+      WordBody.AppendParagraph(WordParagraph);
+    END;
+
+    LOCAL PROCEDURE CreateSampleParagraphJustified@18();
+    VAR
+      DotNet_OpenXmlSpaceProcessing@1000 : Codeunit 50079;
+    BEGIN
+      WordParagraph.Paragraph;
+      WordParagraphProperties.ParagraphProperties;
+      WordParagraphProperties.SetJustification(2); //Type = Center
+      WordParagraph.AppendProperties(WordParagraphProperties);
+      WordRun.Run;
+      WordText.TextConstructor;
+      DotNet_OpenXmlSpaceProcessing.SpaceProcessingModeValues(1); //Preserve
+      WordText.SetSpacePreserveOption(DotNet_OpenXmlSpaceProcessing);
+      WordText.SetText('Nam eu tortor ut mi euismod eleifend in ut ante. Donec a ligula ante. Sed rutrum ex quam. Nunc id mi ultricies, vestibulum sapien vel, posuere dui.');
+      WordRun.AppendText(WordText);
+      WordParagraph.AppendRun(WordRun);
+      WordBody.AppendParagraph(WordParagraph);
+    END;
+
+    LOCAL PROCEDURE CreateSampleHeadings@19();
+    VAR
+      DotNet_OpenXmlSpaceProcessing@1000 : Codeunit 50079;
+    BEGIN
+      WordStyleRunProperties.StyleRunProperties;
+      WordColor.Color;
+      WordColor.SetColorValue('2F5496');
+      WordStyleRunProperties.SetColor(WordColor);
+      WordStyleRunProperties.SetFontSize('32');
+      OpenXmlWordProcessingHelper.AddParagraphStyleToDocument(MainDocumentPart, 'heading1', 'heading 1', WordStyleRunProperties);
+
+      WordStyleRunProperties.StyleRunProperties;
+      WordColor.Color;
+      WordColor.SetColorValue('2F5496');
+      WordStyleRunProperties.SetColor(WordColor);
+      WordStyleRunProperties.SetFontSize('26');
+      OpenXmlWordProcessingHelper.AddParagraphStyleToDocument(MainDocumentPart, 'heading2', 'heading 2', WordStyleRunProperties);
+
+      WordParagraph.Paragraph;
+      WordParagraphProperties.ParagraphProperties;
+      WordParagraphProperties.SetParagraphStyleId('heading1');
+      WordSpacingBetweenLines.SpacingBetweenLines;
+      WordSpacingBetweenLines.SetAfter('0');
+      WordParagraphProperties.SetSpacingBetweenLines(WordSpacingBetweenLines);
+      WordParagraph.AppendProperties(WordParagraphProperties);
+      WordRun.Run;
+      WordText.TextConstructor;
+      DotNet_OpenXmlSpaceProcessing.SpaceProcessingModeValues(1); //Preserve
+      WordText.SetSpacePreserveOption(DotNet_OpenXmlSpaceProcessing);
+      WordText.SetText('First Heading');
+      WordRun.AppendText(WordText);
+      WordParagraph.AppendRun(WordRun);
+      WordBody.AppendParagraph(WordParagraph);
+
+      WordParagraph.Paragraph;
+      WordParagraphProperties.ParagraphProperties;
+      WordParagraphProperties.SetParagraphStyleId('heading2');
+      WordSpacingBetweenLines.SpacingBetweenLines;
+      WordSpacingBetweenLines.SetAfter('0');
+      WordParagraphProperties.SetSpacingBetweenLines(WordSpacingBetweenLines);
+      WordParagraph.AppendProperties(WordParagraphProperties);
+      WordRun.Run;
+      WordText.TextConstructor;
+      DotNet_OpenXmlSpaceProcessing.SpaceProcessingModeValues(1); //Preserve
+      WordText.SetSpacePreserveOption(DotNet_OpenXmlSpaceProcessing);
+      WordText.SetText('Second Heading');
+      WordRun.AppendText(WordText);
+      WordParagraph.AppendRun(WordRun);
+      WordBody.AppendParagraph(WordParagraph);
+    END;
+
+    LOCAL PROCEDURE CreateSampleTable@20();
+    BEGIN
+      WordTable.Table;
+      WordTableRow.TableRow;
+      WordTableCell.TableCell;
+      WordParagraph.Paragraph;
+      WordRun.Run;
+      WordText.TextConstructor;
+      WordText.SetText('A');
+      WordRun.AppendText(WordText);
+      WordParagraph.AppendRun(WordRun);
+      WordTableCell.AppendParagraph(WordParagraph);
+      WordTableRow.AppendCell(WordTableCell);
+
+      WordTableCell.TableCell;
+      WordParagraph.Paragraph;
+      WordRun.Run;
+      WordRunProperties.RunProperties;
+      WordRunProperties.SetBold(TRUE);
+      WordRun.AppendProperties(WordRunProperties);
+      WordText.TextConstructor;
+      WordText.SetText('Nice');
+      WordRun.AppendText(WordText);
+      WordParagraph.AppendRun(WordRun);
+      WordTableCell.AppendParagraph(WordParagraph);
+      WordTableRow.AppendCell(WordTableCell);
+
+      WordTable.AppendRow(WordTableRow);
+
+      WordTableRow.TableRow;
+      WordTableCell.TableCell;
+      WordParagraph.Paragraph;
+      WordRun.Run;
+      WordText.TextConstructor;
+      WordText.SetText('Little');
+      WordRun.AppendText(WordText);
+      WordParagraph.AppendRun(WordRun);
+      WordTableCell.AppendParagraph(WordParagraph);
+      WordTableRow.AppendCell(WordTableCell);
+
+      WordTableCell.TableCell;
+      WordParagraph.Paragraph;
+      WordParagraphProperties.ParagraphProperties;
+      WordParagraphProperties.SetJustification(2);
+      WordParagraph.AppendProperties(WordParagraphProperties);
+      WordRun.Run;
+      WordText.TextConstructor;
+      WordText.SetText('Table');
+      WordRun.AppendText(WordText);
+      WordParagraph.AppendRun(WordRun);
+      WordTableCell.AppendParagraph(WordParagraph);
+      WordTableRow.AppendCell(WordTableCell);
+
+      WordTable.AppendRow(WordTableRow);
+      WordBody.AppendTable(WordTable);
+    END;
+
+    LOCAL PROCEDURE CreateSampleLists@21();
+    BEGIN
+      OpenXmlWordProcessingHelper.CreateBulletListProperties(MainDocumentPart, WordParagraphProperties, '5');
+      WordParagraph.Paragraph;
+      WordParagraphProperties.ParagraphPropertiesFromOuterXml(WordParagraphProperties.OuterXml);
+      WordParagraph.AppendProperties(WordParagraphProperties);
+      WordRun.Run;
+      WordText.TextConstructor;
+      WordText.SetText('A');
+      WordRun.AppendText(WordText);
+      WordParagraph.AppendRun(WordRun);
+      WordBody.AppendParagraph(WordParagraph);
+      WordParagraph.Paragraph;
+      WordParagraphProperties.ParagraphPropertiesFromOuterXml(WordParagraphProperties.OuterXml);
+      WordParagraph.AppendProperties(WordParagraphProperties);
+      WordRun.Run;
+      WordText.TextConstructor;
+      WordText.SetText('Unordered');
+      WordRun.AppendText(WordText);
+      WordParagraph.AppendRun(WordRun);
+      WordBody.AppendParagraph(WordParagraph);
+      WordParagraph.Paragraph;
+      WordParagraphProperties.ParagraphPropertiesFromOuterXml(WordParagraphProperties.OuterXml);
+      WordParagraph.AppendProperties(WordParagraphProperties);
+      WordRun.Run;
+      WordText.TextConstructor;
+      WordText.SetText('List');
+      WordRun.AppendText(WordText);
+      WordParagraph.AppendRun(WordRun);
+      WordBody.AppendParagraph(WordParagraph);
+      WordParagraph.Paragraph;
+      WordBody.AppendParagraph(WordParagraph);
+      OpenXmlWordProcessingHelper.CreateOrderedListProperties(MainDocumentPart, WordParagraphProperties, '10');
+      WordParagraph.Paragraph;
+      WordParagraphProperties.ParagraphPropertiesFromOuterXml(WordParagraphProperties.OuterXml);
+      WordParagraph.AppendProperties(WordParagraphProperties);
+      WordRun.Run;
+      WordText.TextConstructor;
+      WordText.SetText('A');
+      WordRun.AppendText(WordText);
+      WordParagraph.AppendRun(WordRun);
+      WordBody.AppendParagraph(WordParagraph);
+      WordParagraph.Paragraph;
+      WordParagraphProperties.ParagraphPropertiesFromOuterXml(WordParagraphProperties.OuterXml);
+      WordParagraph.AppendProperties(WordParagraphProperties);
+      WordRun.Run;
+      WordText.TextConstructor;
+      WordText.SetText('Ordered');
+      WordRun.AppendText(WordText);
+      WordParagraph.AppendRun(WordRun);
+      WordBody.AppendParagraph(WordParagraph);
+      WordParagraph.Paragraph;
+      WordParagraphProperties.ParagraphPropertiesFromOuterXml(WordParagraphProperties.OuterXml);
+      WordParagraph.AppendProperties(WordParagraphProperties);
+      WordRun.Run;
+      WordText.TextConstructor;
+      WordText.SetText('List');
+      WordRun.AppendText(WordText);
+      WordParagraph.AppendRun(WordRun);
+      WordBody.AppendParagraph(WordParagraph);
+    END;
+
+    LOCAL PROCEDURE CreateSamplePicture@22() : Text;
+    VAR
+      PictureBase64@1000 : Text;
+      TempBlob@1001 : TEMPORARY Record 99008535;
+      ImageStream@1002 : InStream;
+      PartId@1003 : Text;
+    BEGIN
+      PictureBase64 :=
+          '/9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAIBAQIBAQICAgICAgICAwUDAwMDAwYEBAMF'
+        + 'BwYHBwcGBwcICQsJCAgKCAcHCg0KCgsMDAwMBwkODw0MDgsMDAz/2wBDAQICAgMDAwYD'
+        + 'AwYMCAcIDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwM'
+        + 'DAwMDAz/wAARCAAVABYDASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQF'
+        + 'BgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEI'
+        + 'I0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNk'
+        + 'ZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLD'
+        + 'xMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEB'
+        + 'AQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJB'
+        + 'UQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZH'
+        + 'SElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaan'
+        + 'qKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oA'
+        + 'DAMBAAIRAxEAPwD6B/bw/wCClPxO/bC/actPhV8Bb3X9P07T9VksLK48O6j5V54nuk3o'
+        + '9x9phcKtkqh2T5xGUBmlb7qw8X45/wCCSn7SP7EPgnWPH/hrxVpcX9l2Mz6rN4R8R3Nj'
+        + 'e29hHG1xNI7SJb74l8lSURmctswhxkYPwS8ceIP+CK//AAUH1a38U6BdaxpJgm0ieUwi'
+        + 'CfVNHluEePULP94Y95NujbGdhlZYWZHBdPvb4/f8F1Pgn4J+F+p3XgjX7rxf4qkgli0y'
+        + 'zj0S7igiuDFIYpbgziAfZxIqBxG5kw/yqeSPzmjHDYpVa2ZVnGqm9L25fRdfl/wT+681'
+        + 'r59w7LL8q4CyyGIy6rCLdTkc1Wbd26s18G905aau2i5Yn/BGj/gofrH7ZHw+8QeHvHeq'
+        + 'Wt/4+8Lzi5E6wQWj6np8p+WQRxkBnik3I7JEiKsltnc7sSV88/8ABuf8ANTm8beOPinL'
+        + 'J5Oj29ifCtqm1G+2XEkkF1Mc79yeUscHVMP9p4bMbCivrOHq9atgITr766vdq+j/AK9T'
+        + '+bfG/KMqyzjLF4TKEo01ytxirRhJxTlFW0snrZaRvy6WsfoD+1N+wz8Mf2xtEaDxv4at'
+        + 'bvUUgMFprNt/o+qWICyhNk6/Myo0zuIpN8RcgtG2K+efBX/Bv18CfC3ia2v7678e+JLW'
+        + 'Ddv03UtWhjtrnKFRvNtBDKNpIYbZF5UZyMglFddfK8JWn7SrTTfp/Vz5jKPEPibK8I8D'
+        + 'l+Oq06X8qk7K/wDL/L/27bXXc+zfBXgbRfht4ZttF8O6PpegaPZbvs9hptpHa20G5y7b'
+        + 'I0AVcuzMcDksT1NFFFdySSsj5CpUnUm6lRtybu29W29233P/2Q==';
+      TempBlob.FromBase64String(PictureBase64);
+      TempBlob.Blob.CREATEINSTREAM(ImageStream);
+      PartId := OpenXmlWordProcessingHelper.CreateDrawingFromStream(MainDocumentPart, 6, ImageStream, 'someimage', 209550, 209550, WordDrawing);
+      WordParagraph.Paragraph;
+      WordRun.Run;
+      WordRun.AppendDrawing(WordDrawing);
+      WordParagraph.AppendRun(WordRun);
+      WordBody.AppendParagraph(WordParagraph);
+      EXIT(PartId);
+    END;
+
+    LOCAL PROCEDURE CreateSampleHyperlink@23() : Text;
+    VAR
+      PartId@1000 : Text;
+    BEGIN
+      PartId := OpenXmlWordProcessingHelper.CreateHyperLink('http://microsoft.com', 'My awesome link', MainDocumentPart, WordHyperlink);
+      WordParagraph.Paragraph;
+      WordParagraph.AppendHyperlink(WordHyperlink);
+      WordBody.AppendParagraph(WordParagraph);
+      EXIT(PartId);
+    END;
+
+    LOCAL PROCEDURE FinalizeAndGetDocumentOuterXml@24() : Text;
+    BEGIN
+      MainDocumentPart.Document(WordDocument);
+      WordprocessingDocument.Close;
+      EXIT(WordDocument.OuterXml);
+    END;
+
+    LOCAL PROCEDURE GetExampleDocxFileContentAsBase64@25() : Text;
+    BEGIN
+      EXIT(
+          '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'
+        + 'Mub3BlbnhtbGZvcm1hdHMub3JnL3BhY2thZ2UvMjAwNi9yZWxhdGlvbnNoaXBzIj48UmVsYXRpb25zaGlwIFR5cGU9Imh0dHA6L'
+        + 'y9zY2hlbWFzLm9wZW54bWxmb3JtYXRzLm9yZy9vZmZpY2VEb2N1bWVudC8yMDA2L3JlbGF0aW9uc2hpcHMvb2ZmaWNlRG9jdW1l'
+        + 'bnQiIFRhcmdldD0iL3dvcmQvZG9jdW1lbnQueG1sIiBJZD0iUjE3Njg2MDlhYTI1YTQzZDIiIC8+PC9SZWxhdGlvbnNoaXBzPlB'
+        + 'LAwQUAAAACAD7VfJMpS2y0QABAAAFAwAADwAcAHdvcmQvc3R5bGVzLnhtbCCiGAAooBQAAAAAAAAAAAAAAAAAAAAAAAAAAADdkE'
+        + '1OwzAQha9ieU+dGohoVLc7JDZQiROYxE0s+U8zTtNwNRYciStgR0lXsKjEipXH7xu9N3pfH5/b/dkaclKA2jtB16uCEuVq32jXC'
+        + 'trH480D3e+2Q4VxNApJ2nZYDYJ2MYaKMaw7ZSWufFAusaMHK2P6QssGD00AXyvEZGYN40VRMiu1oxdDMlRxDErQIEG2IENHyYye'
+        + 'mhSiZD5kncW6x+jta0aCRujV5OKkzSYnaS7bJK2zzN4kqubFLfg532Zm5tQ5/gh6fQDtQcdxwZuimBkc4A8LqL3xsITwx/u7TTn'
+        + 'n4Psi3/JJYlP29E7dXNkfv64//n/64+Uv/S0T7r4BUEsDBBQAAAAIAPtV8kzPbDdeIwEAAPsCAAAcABwAd29yZC9fcmVscy9kb2'
+        + 'N1bWVudC54bWwucmVscyCiGAAooBQAAAAAAAAAAAAAAAAAAAAAAAAAAAC1krFSAyEQhl/lht7jCCSXOLmk0cLCJpMXIMtyhzngB'
+        + 'ogmz2bhI/kKMppo4ljYpGR/9uObZd9f3+bLve2LZwzReNcQVlakQAdeGdc2ZJf0zZQsF/MV9jLlG7EzQyxyi4sN6VIabimN0KGV'
+        + 'sfQDupxoH6xM+RhaOkjYyhbpqKomNJwzyCWzWB8G/A/Ra20A7zzsLLr0B5jGdOgxkmItQ4upIfTFB3WslplGigfVkFUNrAYNHBS'
+        + 'vBR9NSEGvpuR2doMhT/S31XdwJqaFqhnjgLxiAmbymmLG5t85k7KojPyqlk9DezSacjHdVDXXAsai4nBNoy6TQm/c9sfqiLUGgo'
+        + '9epxK8PaWPXuWH7/cJg5OnCcrRRknGYKZqLXAy/vSlFyu8+ABQSwMEFAAAAAgA+1XyTNORs9DlAAAA/AEAABIAHAB3b3JkL251b'
+        + 'WJlcmluZy54bWwgohgAKKAUAAAAAAAAAAAAAAAAAAAAAAAAAAAAlZHBbgIhEIZfhZB47AIemmbj6s3ES0++AAuoJAxsgN313Tz0'
+        + 'kfoKHanbaKNNvTCZ/5/550v4PH0sVkdwZDAx2eAbKipOifEqaOv3De3z7uWNrpaLsfY9tCaiSnDBp3ps6CHnrmYsqYMBmarQGY/'
+        + 'eLkSQGdu4Z2OIuotBmZRwExybc/7KQFpPz5myTTlKld97IDfdRjeUlxE3OLQslklBkDVkFAeJWts7ZzIl7DK8NccfLxSZFb3Uqw'
+        + 'uXJFLe8znxm2ijpxw+5fjvvT+xxb+wtVEWpLvPPRPVM+Tzx+Tihpxd/eLyC1BLAwQUAAAACAD7VfJM33A5ZD4EAADtBAAADwAcA'
+        + 'G1lZGlhL2ltYWdlLmpwZyCiGAAooBQAAAAAAAAAAAAAAAAAAAAAAAAAAAD7f+P/AwYBLzdPNwZGRkaGBCBk+H+bwZmBiZERhKCA'
+        + 'mZUZBNhYWJhZ2dnY2UGYg5Obk4ODi4OdnYuXi4ubBwjYOfn4eXn4QGyQISDtIF1AxMPBzsFDMvh/gEGQg0GUQYyZUYmBSZCRWZD'
+        + 'x/xEGeQYGRlZGMGCAAkYmZhZWNqCTuLiBCrYKAJ3PzMwEdCwrCwtQthYoz8AiyCqkaOjIJhyYyK5UKGLUOHEhh7LTxoOiQRc/qB'
+        + 'gnFTVxcomJS0hKqaqpa2hqmZiamVtYWjm7uLq5e3h6BYeEhoVHREYlp6SmpWdkZhWXlJaVV1RWNbe0trV3dHZNmjxl6rTpM2bOW'
+        + 'rR4ydJly1esXLVp85at27bv2Lnr0OEjR48dP3Hy1KXLV65eu37j5q2Hjx4/efrs+YuXrz5++vzl67fvP37+AvmLkYGZEQaw+ksQ'
+        + '6C8mYBywsIP8xchUDlIgyMKqaMgm5BjInlgorGTUyCHiNHHhxoOcysZBH0STii5yiamYPFT9CPIa2GfEeayJLJ/BPYbw1y0GHmZ'
+        + 'GYOQxCzLYM/xi//bhP0PTlD9+fzfszzzt3xrPmF/6197v8tdIHZ11NtYrfobPU9/l++K7fGbrobWTVpT5z3ELkFyav2vDxzpLoE'
+        + 'avukv2G/mbSvvlf2QfjYqJv1lmbLfavKXGvTi5Oj9RJrfQpO+S6r4f008GBUrO2XZG8Zgb/0F9mYrmfxzr/zOwsl9d+yd4QWy2l'
+        + 'GdTrlKljxLnV1+56JaKr9z29yS+T87r3Ti3LSwicuLBkt+3H3//Ix78YH5Tnfir8jiO6+/2xD9aqTBN1+icrdA7DaUdhh5J0x6c'
+        + 'U5BPF9JiF9w5mf/Tyif95zKO83aFZqeFzsla9mXvzlrx+Ol/hH+vN10/v+DNpj+rGzadSDJ6taG71FLmatrd26tNP+SXPF227pZ'
+        + 'exPwPbv0/NOo2/k6psfvI3r6nfFXU/R+/D33unmh1kHXxq6qa5U8nuEsyztM0V97k0rFadVu59UbVms//Gdie/2G48uzj9j47zd'
+        + 'PqkxffvjGf69ayK/nbYjxVxINl3t+ZF3ScPeTw3+VtZ3I01q95+Orr6gRFq9+vV99d/eI/w/rgn9uP/VmsddritHjLKaFe01N3k'
+        + 'tZKeB61dI32Vl87beJ+vWkbfzH/Dq47bM9Tn5MruODj/ra1eV9FGg5mrrldv/jVNAWdhWZ++421TM490jQ/EtN0cZv28/ms9Qf3'
+        + 'xzPV6D7Kzv79er/cj0nXeG9/uesd1madPWdh4J7bjjyLMxXbbopPlTxxQlX0erz2obD5W1b7mr/8G/OzZ/ERO7VTH/qZpz9edXn'
+        + 'pn1V+p/4znP6z/9vbrdeL39xnrZB2/ZH7cHau+OFddtMXZHyL3nc+cdkt9+xctud6t5UdRIvenCmw1PEPdhUJL/LUVn6iFTLXc9'
+        + 'dU6aK8t3uj88vuF/+/CQBQSwMEFAAAAAgA+1XyTAV9750IAQAAlAIAABMAHABbQ29udGVudF9UeXBlc10ueG1sIKIYACigFAAAA'
+        + 'AAAAAAAAAAAAAAAAAAAAAAAAK2SPU7EMBCFr2K5RbEDBUIoyRZACxRcwDiTxLv+k8dZds9GwZG4ApMEpVgBEtKW9rz3vueRP98/'
+        + 'qs3BWbaHhCb4ml+KkjPwOrTG9zUfc1fc8E1TvRwjICOpx5oPOcdbKVEP4BSKEMHTpAvJqUzH1Muo9E71IK/K8lrq4DP4XOQpgzf'
+        + 'VPXRqtJk9HOh6wZKds7tFN6FqrmK0RqtMY7n37QmkCF1nNLRBj44s4i2kNqagAZF6OyvWiVPGX8zx8kdyAov/Q3+/TZBz1uBgIv'
+        + '6F2Mb+hGDctJxthH72PNH6k2mBPauUH5UjhZxeJDEfLaA4+3aW3LXzr3w/uldI5Dl/hTV6bSHnP9Z8AVBLAQItABQAAAAIAPtV8'
+        + 'kwiRWpBhQUAAB8VAAARAAAAAAAAAAAAAAAAAAAAAAB3b3JkL2RvY3VtZW50LnhtbFBLAQItAAoAAAAAAPtV8kzdvdDvKgEAACoB'
+        + 'AAALAAAAAAAAAAAAAAAAANAFAABfcmVscy8ucmVsc1BLAQItABQAAAAIAPtV8kylLbLRAAEAAAUDAAAPAAAAAAAAAAAAAAAAAD8'
+        + 'HAAB3b3JkL3N0eWxlcy54bWxQSwECLQAUAAAACAD7VfJMz2w3XiMBAAD7AgAAHAAAAAAAAAAAAAAAAACICAAAd29yZC9fcmVscy'
+        + '9kb2N1bWVudC54bWwucmVsc1BLAQItABQAAAAIAPtV8kzTkbPQ5QAAAPwBAAASAAAAAAAAAAAAAAAAAAEKAAB3b3JkL251bWJlc'
+        + 'mluZy54bWxQSwECLQAUAAAACAD7VfJM33A5ZD4EAADtBAAADwAAAAAAAAAAAAAAAAAyCwAAbWVkaWEvaW1hZ2UuanBnUEsBAi0A'
+        + 'FAAAAAgA+1XyTAV9750IAQAAlAIAABMAAAAAAAAAAAAAAAAAuQ8AAFtDb250ZW50X1R5cGVzXS54bWxQSwUGAAAAAAcABwC9AQA'
+        + 'ADhEAAAAA');
+    END;
+
+    BEGIN
+    END.
+  }
+}
+

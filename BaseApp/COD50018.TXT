@@ -1,0 +1,84 @@
+OBJECT Codeunit 50018 DotNet_WordprocessingDocument
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      DotNetWordprocessingDocument@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Packaging.WordprocessingDocument";
+      DotNetMemoryStream@1001 : DotNet "'mscorlib'.System.IO.MemoryStream";
+
+    [External]
+    PROCEDURE Create@1(DocumentType@1001 : Codeunit 50077;AutoSave@1002 : Boolean);
+    VAR
+      DotNetWordprocessingDocumentType@1003 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.WordprocessingDocumentType";
+    BEGIN
+      DotNetMemoryStream := DotNetMemoryStream.MemoryStream;
+      DocumentType.GetWordProcessingDocumentType(DotNetWordprocessingDocumentType);
+      DotNetWordprocessingDocument := DotNetWordprocessingDocument.Create(DotNetMemoryStream, DotNetWordprocessingDocumentType, AutoSave);
+    END;
+
+    [External]
+    PROCEDURE Open@2(DocumentStream@1000 : InStream;Editable@1001 : Boolean);
+    BEGIN
+      DotNetMemoryStream := DotNetMemoryStream.MemoryStream;
+      COPYSTREAM(DotNetMemoryStream, DocumentStream);
+      DotNetMemoryStream.Position := 0;
+      DotNetWordprocessingDocument := DotNetWordprocessingDocument.Open(DotNetMemoryStream, Editable);
+    END;
+
+    [External]
+    PROCEDURE Close@3();
+    BEGIN
+      DotNetWordprocessingDocument.Close;
+    END;
+
+    [External]
+    PROCEDURE Save@4(ResultStream@1000 : OutStream);
+    BEGIN
+      COPYSTREAM(ResultStream, DotNetMemoryStream);
+    END;
+
+    [External]
+    PROCEDURE AddMainDocumentPart@5(VAR MainDocumentPart@1000 : Codeunit 50019);
+    VAR
+      DotNetMainDocumentPart@1001 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Packaging.MainDocumentPart";
+    BEGIN
+      DotNetMainDocumentPart := DotNetWordprocessingDocument.AddMainDocumentPart;
+      MainDocumentPart.SetMainDocumentPart(DotNetMainDocumentPart);
+    END;
+
+    [External]
+    PROCEDURE MainDocumentPart@6(VAR MainDocumentPart@1000 : Codeunit 50019);
+    VAR
+      DotNetMainDocumentPart@1001 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Packaging.MainDocumentPart";
+    BEGIN
+      DotNetMainDocumentPart := DotNetWordprocessingDocument.MainDocumentPart;
+      MainDocumentPart.SetMainDocumentPart(DotNetMainDocumentPart);
+    END;
+
+    PROCEDURE SetWordProcessingDocument@7(VAR NewWordprocessingDocument@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Packaging.WordprocessingDocument");
+    BEGIN
+      DotNetWordprocessingDocument := NewWordprocessingDocument;
+    END;
+
+    PROCEDURE GetWordProcessingDocument@8(VAR CurrentWordprocessingDocument@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Packaging.WordprocessingDocument");
+    BEGIN
+      CurrentWordprocessingDocument := DotNetWordprocessingDocument;
+    END;
+
+    BEGIN
+    END.
+  }
+}
+

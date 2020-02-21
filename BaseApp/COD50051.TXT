@@ -1,0 +1,85 @@
+OBJECT Codeunit 50051 DotNet_Word.Picture
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      DotNetPicture@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Drawing.Pictures.Picture";
+
+    [External]
+    PROCEDURE Picture@1();
+    BEGIN
+      DotNetPicture := DotNetPicture.Picture;
+    END;
+
+    [External]
+    PROCEDURE PictureFromOuterXml@2(OuterXml@1000 : Text);
+    BEGIN
+      DotNetPicture := DotNetPicture.Picture(OuterXml);
+    END;
+
+    [External]
+    PROCEDURE OuterXml@3() : Text;
+    BEGIN
+      EXIT(DotNetPicture.OuterXml);
+    END;
+
+    [External]
+    PROCEDURE InnerText@4() : Text;
+    BEGIN
+      EXIT(DotNetPicture.InnerText);
+    END;
+
+    [External]
+    PROCEDURE SetNonVisualPictureProperties@5(VAR WordNonVisualPictureProperties@1000 : Codeunit 50052);
+    VAR
+      DotNetNonVisualPictureProperties@1001 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Drawing.Pictures.NonVisualPictureProperties";
+    BEGIN
+      WordNonVisualPictureProperties.GetNonVisualPictureProperties(DotNetNonVisualPictureProperties);
+      DotNetPicture.NonVisualPictureProperties := DotNetNonVisualPictureProperties;
+    END;
+
+    [External]
+    PROCEDURE SetShapeProperties@6(VAR WordShapeProperties@1000 : Codeunit 50053);
+    VAR
+      DotNetShapeProperties@1001 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Drawing.Pictures.ShapeProperties";
+    BEGIN
+      WordShapeProperties.GetShapeProperties(DotNetShapeProperties);
+      DotNetPicture.ShapeProperties := DotNetShapeProperties;
+    END;
+
+    [External]
+    PROCEDURE SetBlipFill@7(VAR WordBlipFill@1000 : Codeunit 50054);
+    VAR
+      DotNetBlipFill@1001 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Drawing.Pictures.BlipFill";
+    BEGIN
+      WordBlipFill.GetBlipFill(DotNetBlipFill);
+      DotNetPicture.BlipFill := DotNetBlipFill;
+    END;
+
+    PROCEDURE SetPicture@8(VAR NewDotNetPicture@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Drawing.Pictures.Picture");
+    BEGIN
+      DotNetPicture := NewDotNetPicture;
+    END;
+
+    PROCEDURE GetPicture@9(VAR CurrentDotNetPicture@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Drawing.Pictures.Picture");
+    BEGIN
+      CurrentDotNetPicture := DotNetPicture;
+    END;
+
+    BEGIN
+    END.
+  }
+}
+

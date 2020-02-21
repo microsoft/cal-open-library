@@ -1,0 +1,72 @@
+OBJECT Codeunit 50031 DotNet_Word.Indentation
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      DotNetIndentation@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.Indentation";
+
+    [External]
+    PROCEDURE Indentation@1();
+    BEGIN
+      DotNetIndentation := DotNetIndentation.Indentation;
+    END;
+
+    [External]
+    PROCEDURE OuterXml@2() : Text;
+    BEGIN
+      EXIT(DotNetIndentation.OuterXml);
+    END;
+
+    [External]
+    PROCEDURE InnerText@3() : Text;
+    BEGIN
+      EXIT(DotNetIndentation.InnerText);
+    END;
+
+    [External]
+    PROCEDURE SetLeft@4(NewLeftValue@1000 : Text);
+    VAR
+      DotNetStringValue@1001 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.StringValue";
+    BEGIN
+      DotNetStringValue := DotNetStringValue.StringValue;
+      DotNetStringValue.Value := NewLeftValue;
+      DotNetIndentation.Left := DotNetStringValue;
+    END;
+
+    [External]
+    PROCEDURE SetHanging@5(NewHangingValue@1000 : Text);
+    VAR
+      DotNetStringValue@1001 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.StringValue";
+    BEGIN
+      DotNetStringValue := DotNetStringValue.StringValue;
+      DotNetStringValue.Value := NewHangingValue;
+      DotNetIndentation.Hanging := DotNetStringValue;
+    END;
+
+    PROCEDURE SetIndentation@6(VAR NewDotNetIndentation@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.Indentation");
+    BEGIN
+      DotNetIndentation := NewDotNetIndentation;
+    END;
+
+    PROCEDURE GetIndentation@7(VAR CurrentDotNetIndentation@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.Indentation");
+    BEGIN
+      CurrentDotNetIndentation := DotNetIndentation;
+    END;
+
+    BEGIN
+    END.
+  }
+}
+

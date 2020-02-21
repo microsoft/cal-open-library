@@ -1,0 +1,117 @@
+OBJECT Codeunit 50047 DotNet_Word.WrapSquare
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      DotNetWrapSquare@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Drawing.Wordprocessing.WrapSquare";
+      OpenXmlDotNetHelper@1001 : Codeunit 50067;
+
+    [External]
+    PROCEDURE WrapSquare@1();
+    BEGIN
+      DotNetWrapSquare := DotNetWrapSquare.WrapSquare;
+    END;
+
+    [External]
+    PROCEDURE WrapSquareFromOuterXml@2(OuterXml@1000 : Text);
+    BEGIN
+      DotNetWrapSquare := DotNetWrapSquare.WrapSquare(OuterXml);
+    END;
+
+    [External]
+    PROCEDURE OuterXml@3() : Text;
+    BEGIN
+      EXIT(DotNetWrapSquare.OuterXml);
+    END;
+
+    [External]
+    PROCEDURE InnerText@4() : Text;
+    BEGIN
+      EXIT(DotNetWrapSquare.InnerText);
+    END;
+
+    [External]
+    PROCEDURE SetDistanceFromRight@5(NewDistance@1000 : Integer);
+    VAR
+      DotNetUInt32Value@1001 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.UInt32Value";
+    BEGIN
+      DotNetWrapSquare.DistanceFromRight := DotNetUInt32Value.FromUInt32(NewDistance);
+    END;
+
+    [External]
+    PROCEDURE SetDistanceFromLeft@6(NewDistance@1000 : Integer);
+    VAR
+      DotNetUInt32Value@1001 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.UInt32Value";
+    BEGIN
+      DotNetWrapSquare.DistanceFromLeft := DotNetUInt32Value.FromUInt32(NewDistance);
+    END;
+
+    [External]
+    PROCEDURE SetDistanceFromTop@7(NewDistance@1000 : Integer);
+    VAR
+      DotNetUInt32Value@1001 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.UInt32Value";
+    BEGIN
+      DotNetWrapSquare.DistanceFromTop := DotNetUInt32Value.FromUInt32(NewDistance);
+    END;
+
+    [External]
+    PROCEDURE SetDistanceFromBottom@8(NewDistance@1000 : Integer);
+    VAR
+      DotNetUInt32Value@1001 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.UInt32Value";
+    BEGIN
+      DotNetWrapSquare.DistanceFromBottom := DotNetUInt32Value.FromUInt32(NewDistance);
+    END;
+
+    [External]
+    PROCEDURE SetWrapText@9(NewWrapText@1000 : 'BothSides,Left,Right,Largest');
+    VAR
+      DotNetWrapTextValues@1001 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Drawing.Wordprocessing.WrapTextValues";
+      DotNetEnumValue@1002 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.EnumValue`1";
+    BEGIN
+      //We need this to deal with .NET Generics:
+      OpenXmlDotNetHelper.CreateEnumValueGeneric(GETDOTNETTYPE(DotNetWrapTextValues), NewWrapText, DotNetEnumValue);
+      DotNetWrapSquare.WrapText := DotNetEnumValue;
+    END;
+
+    [External]
+    PROCEDURE AppendEffectExtent@10(LeftEdge@1000 : Integer;TopEdge@1001 : Integer;RightEdge@1002 : Integer;BottomEdge@1003 : Integer);
+    VAR
+      DotNetInt64Value@1004 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Int64Value";
+      DotNetEffectExtent@1005 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Drawing.Wordprocessing.EffectExtent";
+    BEGIN
+      DotNetEffectExtent := DotNetEffectExtent.EffectExtent;
+      DotNetEffectExtent.LeftEdge := DotNetInt64Value.FromInt64(LeftEdge);
+      DotNetEffectExtent.TopEdge := DotNetInt64Value.FromInt64(TopEdge);
+      DotNetEffectExtent.RightEdge := DotNetInt64Value.FromInt64(RightEdge);
+      DotNetEffectExtent.BottomEdge := DotNetInt64Value.FromInt64(BottomEdge);
+      //We need this to deal with .NET Generics:
+      OpenXmlDotNetHelper.AppendGeneric(DotNetWrapSquare, DotNetEffectExtent);
+    END;
+
+    PROCEDURE SetWrapSquare@11(VAR NewDotNetWrapSquare@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Drawing.Wordprocessing.WrapSquare");
+    BEGIN
+      DotNetWrapSquare := NewDotNetWrapSquare;
+    END;
+
+    PROCEDURE GetWrapSquare@12(VAR CurrentDotNetWrapSquare@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Drawing.Wordprocessing.WrapSquare");
+    BEGIN
+      CurrentDotNetWrapSquare := DotNetWrapSquare;
+    END;
+
+    BEGIN
+    END.
+  }
+}
+

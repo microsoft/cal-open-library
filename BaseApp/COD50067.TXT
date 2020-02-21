@@ -1,0 +1,111 @@
+OBJECT Codeunit 50067 OpenXml DotNet Helper
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+
+    PROCEDURE CreateEnumValueGeneric@1(DotNetEnumType@1000 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Type";IntegerValue@1001 : Integer;VAR CreatedDotNetEnumValue@1002 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.EnumValue`1");
+    VAR
+      DotNetEnum@1003 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Enum";
+      DotNetType@1004 : DotNet "'mscorlib'.System.Type";
+      DotNetObject@1005 : DotNet "'mscorlib'.System.Object";
+      DotNetTypeArray@1006 : DotNet "'mscorlib'.System.Array";
+      DotNetParamsArray@1007 : DotNet "'mscorlib'.System.Array";
+    BEGIN
+      //Must never be made External. Used only internally
+
+      //This ugly code below is in fact
+      //CreatedDotNetEnumValue = new OpenXmlEnum<DotNetEnumType>(IntegerValue)
+      //But since generics are not supported we get this:
+      DotNetType := GETDOTNETTYPE(CreatedDotNetEnumValue);
+      DotNetTypeArray := DotNetTypeArray.CreateInstance(GETDOTNETTYPE(DotNetType), 1);
+      DotNetTypeArray.SetValue(DotNetEnumType, 0);
+      DotNetType := DotNetType.MakeGenericType(DotNetTypeArray);
+      DotNetTypeArray := DotNetTypeArray.CreateInstance(GETDOTNETTYPE(DotNetType), 0);
+      DotNetParamsArray := DotNetParamsArray.CreateInstance(GETDOTNETTYPE(DotNetObject), 0);
+      CreatedDotNetEnumValue := DotNetType.GetConstructor(DotNetTypeArray).Invoke(DotNetParamsArray);
+      CreatedDotNetEnumValue.Value := DotNetEnum.GetValues(DotNetEnumType).GetValue(IntegerValue);
+    END;
+
+    [Internal]
+    PROCEDURE GetEnumeratorOfTypeGeneric@2(OriginalOpenXmlElementList@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.OpenXmlElementList";FilterType@1001 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Type";VAR FilteredDotNetEnumerator@1002 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Collections.IEnumerator");
+    VAR
+      FilteredDotNetEnumerable@1003 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Collections.IEnumerable";
+    BEGIN
+      //Must never be made External. Used only internally
+      //Helper for calling method: IEnumerator OpenXmlElement.OfType<T>()
+      OfType(OriginalOpenXmlElementList, FilterType, FilteredDotNetEnumerable);
+      FilteredDotNetEnumerator := FilteredDotNetEnumerable.GetEnumerator;
+    END;
+
+    PROCEDURE AppendGeneric@3(DotNetParent@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.OpenXmlElement";DotNetChild@1001 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.OpenXmlElement");
+    VAR
+      DotNetArray@1002 : DotNet "'mscorlib'.System.Array";
+    BEGIN
+      //Must never be made External. Used only internally
+      //Helper for calling method: void OpenXmlElement.Append(params OpenXmlElement[] childs)
+      DotNetArray := DotNetArray.CreateInstance(GETDOTNETTYPE(DotNetChild), 1);
+      DotNetArray.SetValue(DotNetChild, 0);
+      DotNetParent.Append(DotNetArray);
+    END;
+
+    PROCEDURE AddPartGeneric@4(VAR DotNetMainDocumentPart@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Packaging.MainDocumentPart";DotNetPartType@1001 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Type";VAR DotNetCreatedPart@1002 : DotNet "'mscorlib'.System.Object");
+    VAR
+      DotNetNumberingDefinitionsPart@1003 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Packaging.NumberingDefinitionsPart";
+      DotNetType@1004 : DotNet "'mscorlib'.System.Type";
+      DotNetObject@1005 : DotNet "'mscorlib'.System.Object";
+      DotNetTypeArrayForGenericTypeResolution@1006 : DotNet "'mscorlib'.System.Array";
+      DotNetTypeArrayForMethodLookup@1007 : DotNet "'mscorlib'.System.Array";
+      DotNetParamsArray@1008 : DotNet "'mscorlib'.System.Array";
+    BEGIN
+      //Must never be made External. Used only internally
+      //Normally is should have been something as simple as:
+      //DotNetCreatedPart := DotNetMainDocumentPart.AddNewPart<DotNetPartType>();
+      //But since NAV have no such thing as generics support, I need to fallback to reflection calls:
+      //C# view: Type[] DotNetTypeArray = new Type[] { typeof(DotNetPartType) };
+      DotNetTypeArrayForGenericTypeResolution := DotNetTypeArrayForGenericTypeResolution.CreateInstance(GETDOTNETTYPE(DotNetType), 1);
+      DotNetTypeArrayForGenericTypeResolution.SetValue(DotNetPartType, 0);
+      DotNetTypeArrayForMethodLookup := DotNetTypeArrayForMethodLookup.CreateInstance(GETDOTNETTYPE(DotNetType), 0);
+      //C# view: Object[] DotNetParamsArray = new Object[] {};
+      DotNetParamsArray := DotNetParamsArray.CreateInstance(GETDOTNETTYPE(DotNetObject), 0);
+
+      DotNetType := GETDOTNETTYPE(DotNetMainDocumentPart);
+      DotNetCreatedPart := DotNetType.GetMethod('AddNewPart', DotNetTypeArrayForMethodLookup).MakeGenericMethod(DotNetTypeArrayForGenericTypeResolution).Invoke(DotNetMainDocumentPart, DotNetParamsArray);
+    END;
+
+    LOCAL PROCEDURE OfType@5(OriginalOpenXmlElementList@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.OpenXmlElementList";FilterType@1001 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Type";VAR FilteredDotNetEnumerable@1002 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Collections.IEnumerable");
+    VAR
+      EnumerableType@1003 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Type";
+      DotNetObject@1004 : DotNet "'mscorlib'.System.Object";
+      DotNetTypeArray@1005 : DotNet "'mscorlib'.System.Array";
+      DotNetParamsArray@1006 : DotNet "'mscorlib'.System.Array";
+    BEGIN
+      //Normally is should have been something as simple as:
+      //FilteredDotNetEnumerable = OriginalOpenXmlElementList.OfType<FilteredType>();
+      //But since NAV have no such thing as generics support, I need to fallback to reflection calls:
+      //C# view: Type[] DotNetTypeArray = new Type[] { typeof(DotNetStyleDefinitionsPart) };
+      DotNetTypeArray := DotNetTypeArray.CreateInstance(GETDOTNETTYPE(FilterType), 1);
+      DotNetTypeArray.SetValue(FilterType, 0);
+      //C# view: Object[] DotNetParamsArray = new Object[] {};
+      DotNetParamsArray := DotNetParamsArray.CreateInstance(GETDOTNETTYPE(DotNetObject), 0);
+      EnumerableType := GETDOTNETTYPE(OriginalOpenXmlElementList);
+      //C# view: FilteredDotNetEnumerable = OriginalOpenXmlElementList.OfType<FilteredType>()
+      FilteredDotNetEnumerable := EnumerableType.GetMethod('OfType').MakeGenericMethod(DotNetTypeArray).Invoke(OriginalOpenXmlElementList, DotNetParamsArray);
+    END;
+
+    BEGIN
+    END.
+  }
+}
+

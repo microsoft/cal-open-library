@@ -1,0 +1,50 @@
+OBJECT Codeunit 50078 DotNet_OpenXml.ImagePartType
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      DotNetImagePartType@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Packaging.ImagePartType";
+
+    [External]
+    PROCEDURE ImagePartType@1(ImagePartType@1000 : 'Bmp,Gif,Png,Tiff,Icon,Pcx,Jpeg,Emf,Wmf');
+    BEGIN
+      CASE ImagePartType OF
+        ImagePartType::Bmp: DotNetImagePartType := DotNetImagePartType.Bmp;
+        ImagePartType::Gif: DotNetImagePartType := DotNetImagePartType.Gif;
+        ImagePartType::Png: DotNetImagePartType := DotNetImagePartType.Png;
+        ImagePartType::Tiff: DotNetImagePartType := DotNetImagePartType.Tiff;
+        ImagePartType::Icon: DotNetImagePartType := DotNetImagePartType.Icon;
+        ImagePartType::Pcx: DotNetImagePartType := DotNetImagePartType.Pcx;
+        ImagePartType::Jpeg: DotNetImagePartType := DotNetImagePartType.Jpeg;
+        ImagePartType::Emf: DotNetImagePartType := DotNetImagePartType.Emf;
+        ImagePartType::Wmf: DotNetImagePartType := DotNetImagePartType.Wmf;
+      END;
+    END;
+
+    PROCEDURE SetImagePartType@2(VAR NewDotNetImagePartType@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Packaging.ImagePartType");
+    BEGIN
+      DotNetImagePartType := NewDotNetImagePartType;
+    END;
+
+    PROCEDURE GetImagePartType@3(VAR CurrentDotNetImagePartType@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Packaging.ImagePartType");
+    BEGIN
+      CurrentDotNetImagePartType := DotNetImagePartType;
+    END;
+
+    BEGIN
+    END.
+  }
+}
+

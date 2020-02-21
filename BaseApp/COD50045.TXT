@@ -1,0 +1,93 @@
+OBJECT Codeunit 50045 DotNet_Word.VerticalPosition
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      DotNetVerticalPosition@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Drawing.Wordprocessing.VerticalPosition";
+
+    [External]
+    PROCEDURE VerticalPosition@1();
+    BEGIN
+      DotNetVerticalPosition := DotNetVerticalPosition.VerticalPosition;
+    END;
+
+    [External]
+    PROCEDURE VerticalPositionFromOuterXml@2(OuterXml@1000 : Text);
+    BEGIN
+      DotNetVerticalPosition := DotNetVerticalPosition.VerticalPosition(OuterXml);
+    END;
+
+    [External]
+    PROCEDURE OuterXml@3() : Text;
+    BEGIN
+      EXIT(DotNetVerticalPosition.OuterXml);
+    END;
+
+    [External]
+    PROCEDURE InnerText@4() : Text;
+    BEGIN
+      EXIT(DotNetVerticalPosition.InnerText);
+    END;
+
+    [External]
+    PROCEDURE SetPositionOffset@5(NewPositionOffset@1000 : Text);
+    VAR
+      DotNetPositionOffset@1001 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Drawing.Wordprocessing.PositionOffset";
+    BEGIN
+      DotNetVerticalPosition.PositionOffset := DotNetPositionOffset.PositionOffset(NewPositionOffset);
+    END;
+
+    [External]
+    PROCEDURE SetRelativeFrom@6(NewRelativeFrom@1000 : 'Margin,Page,Paragraph,Line,TopMargin,BottomMargin,InsideMargin,OutsideMargin');
+    VAR
+      DotNetVerticalRelativePositionValues@1001 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Drawing.Wordprocessing.VerticalRelativePositionValues";
+      DotNetEnumValue@1002 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.EnumValue`1";
+      OpenXmlDotNetHelper@1003 : Codeunit 50067;
+    BEGIN
+      OpenXmlDotNetHelper.CreateEnumValueGeneric(GETDOTNETTYPE(DotNetVerticalRelativePositionValues), NewRelativeFrom, DotNetEnumValue);
+      DotNetVerticalPosition.RelativeFrom := DotNetEnumValue;
+    END;
+
+    [External]
+    PROCEDURE SetVerticalAlignment@7(NewVerticalAlignment@1000 : Text);
+    VAR
+      DotNetVerticalAlignment@1001 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Drawing.Wordprocessing.VerticalAlignment";
+    BEGIN
+      DotNetVerticalPosition.VerticalAlignment := DotNetVerticalAlignment.VerticalAlignment(NewVerticalAlignment);
+    END;
+
+    [External]
+    PROCEDURE SetPercentagePositionVerticalOffset@8(NewPercentagePositionVerticalOffset@1000 : Text);
+    VAR
+      DotNetPercentagePositionVerticalOffset@1001 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Office2010.Word.Drawing.PercentagePositionVerticalOffset";
+    BEGIN
+      DotNetVerticalPosition.PercentagePositionVerticalOffset := DotNetPercentagePositionVerticalOffset.PercentagePositionVerticalOffset(NewPercentagePositionVerticalOffset);
+    END;
+
+    PROCEDURE SetVerticalPosition@9(VAR NewDotNetVerticalPosition@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Drawing.Wordprocessing.VerticalPosition");
+    BEGIN
+      DotNetVerticalPosition := NewDotNetVerticalPosition;
+    END;
+
+    PROCEDURE GetVerticalPosition@10(VAR CurrentDotNetVerticalPosition@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Drawing.Wordprocessing.VerticalPosition");
+    BEGIN
+      CurrentDotNetVerticalPosition := DotNetVerticalPosition;
+    END;
+
+    BEGIN
+    END.
+  }
+}
+

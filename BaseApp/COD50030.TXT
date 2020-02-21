@@ -1,0 +1,62 @@
+OBJECT Codeunit 50030 DotNet_Word.SpacingBetweenLine
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      DotNetSpacingBetweenLines@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.SpacingBetweenLines";
+
+    [External]
+    PROCEDURE SpacingBetweenLines@1();
+    BEGIN
+      DotNetSpacingBetweenLines := DotNetSpacingBetweenLines.SpacingBetweenLines;
+    END;
+
+    [External]
+    PROCEDURE OuterXml@2() : Text;
+    BEGIN
+      EXIT(DotNetSpacingBetweenLines.OuterXml);
+    END;
+
+    [External]
+    PROCEDURE InnerText@3() : Text;
+    BEGIN
+      EXIT(DotNetSpacingBetweenLines.InnerText);
+    END;
+
+    [External]
+    PROCEDURE SetAfter@4(NewAfterValue@1000 : Text);
+    VAR
+      DotNetStringValue@1001 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.StringValue";
+    BEGIN
+      DotNetStringValue := DotNetStringValue.StringValue;
+      DotNetStringValue.Value := NewAfterValue;
+      DotNetSpacingBetweenLines.After := DotNetStringValue;
+    END;
+
+    PROCEDURE SetSpacingBetweenLines@5(VAR NewDotNetSpacingBetweenLines@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.SpacingBetweenLines");
+    BEGIN
+      DotNetSpacingBetweenLines := NewDotNetSpacingBetweenLines;
+    END;
+
+    PROCEDURE GetSpacingBetweenLines@6(VAR CurrentDotNetSpacingBetweenLines@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.SpacingBetweenLines");
+    BEGIN
+      CurrentDotNetSpacingBetweenLines := DotNetSpacingBetweenLines;
+    END;
+
+    BEGIN
+    END.
+  }
+}
+

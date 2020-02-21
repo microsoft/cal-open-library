@@ -1,0 +1,55 @@
+OBJECT Codeunit 50075 DotNet_Word.AbstractNumEnumera
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      DotNetEnumerator@1000 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Collections.IEnumerator";
+
+    PROCEDURE SetEnumerator@1(VAR NewEnumerator@1000 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Collections.IEnumerator");
+    BEGIN
+      DotNetEnumerator := NewEnumerator;
+    END;
+
+    PROCEDURE GetEnumerator@2(VAR CurrentEnumerator@1000 : DotNet "'mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Collections.IEnumerator");
+    BEGIN
+      CurrentEnumerator := DotNetEnumerator;
+    END;
+
+    [External]
+    PROCEDURE Reset@3();
+    BEGIN
+      DotNetEnumerator.Reset;
+    END;
+
+    [External]
+    PROCEDURE MoveNext@4() : Boolean;
+    BEGIN
+      EXIT(DotNetEnumerator.MoveNext);
+    END;
+
+    [External]
+    PROCEDURE Current@5(VAR CurrentAbstractNum@1000 : Codeunit 50072);
+    VAR
+      DotNetAbstractNum@1001 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.AbstractNum";
+    BEGIN
+      DotNetAbstractNum := DotNetEnumerator.Current;
+      CurrentAbstractNum.SetAbstractNum(DotNetAbstractNum);
+    END;
+
+    BEGIN
+    END.
+  }
+}
+

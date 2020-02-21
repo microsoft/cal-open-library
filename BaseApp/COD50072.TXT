@@ -1,0 +1,83 @@
+OBJECT Codeunit 50072 DotNet_Word.AbstractNum
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      DotNetAbstractNum@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.AbstractNum";
+
+    [External]
+    PROCEDURE AbstractNum@1();
+    BEGIN
+      DotNetAbstractNum := DotNetAbstractNum.AbstractNum;
+    END;
+
+    [External]
+    PROCEDURE AbstractNumFromOuterXml@2(OuterXml@1000 : Text);
+    BEGIN
+      DotNetAbstractNum := DotNetAbstractNum.AbstractNum(OuterXml);
+    END;
+
+    [External]
+    PROCEDURE OuterXml@3() : Text;
+    BEGIN
+      EXIT(DotNetAbstractNum.OuterXml);
+    END;
+
+    [External]
+    PROCEDURE InnerText@4() : Text;
+    BEGIN
+      EXIT(DotNetAbstractNum.InnerText);
+    END;
+
+    [External]
+    PROCEDURE SetAbstractNumberId@5(NewNumId@1000 : Integer);
+    VAR
+      DotNetInt32Value@1001 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Int32Value";
+    BEGIN
+      DotNetAbstractNum.AbstractNumberId := DotNetInt32Value.FromInt32(NewNumId);
+    END;
+
+    [External]
+    PROCEDURE AbstractNumberId@6() : Integer;
+    BEGIN
+      EXIT(DotNetAbstractNum.AbstractNumberId.Value);
+    END;
+
+    [External]
+    PROCEDURE AppendLevel@7(VAR WordNumberingLevel@1000 : Codeunit 50073);
+    VAR
+      DotNetLevel@1001 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.Level";
+      OpenXmlDotNetHelper@1002 : Codeunit 50067;
+    BEGIN
+      WordNumberingLevel.GetLevel(DotNetLevel);
+      //We need this to deal with .NET Generics:
+      OpenXmlDotNetHelper.AppendGeneric(DotNetAbstractNum, DotNetLevel);
+    END;
+
+    PROCEDURE SetAbstractNum@8(VAR NewDotNetAbstractNum@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.AbstractNum");
+    BEGIN
+      DotNetAbstractNum := NewDotNetAbstractNum;
+    END;
+
+    PROCEDURE GetAbstractNum@9(VAR CurrentDotNetAbstractNum@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.AbstractNum");
+    BEGIN
+      CurrentDotNetAbstractNum := DotNetAbstractNum;
+    END;
+
+    BEGIN
+    END.
+  }
+}
+

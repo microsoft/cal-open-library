@@ -1,0 +1,122 @@
+OBJECT Codeunit 50019 DotNet_Word.MainDocumentPart
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      DotNetMainDocumentPart@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Packaging.MainDocumentPart";
+      OpenXmlDotNetHelper@1001 : Codeunit 50067;
+
+    PROCEDURE SetMainDocumentPart@1(VAR NewMainDocumentPart@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Packaging.MainDocumentPart");
+    BEGIN
+      DotNetMainDocumentPart := NewMainDocumentPart;
+    END;
+
+    PROCEDURE GetMainDocumentPart@2(VAR CurrentMainDocumentPart@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Packaging.MainDocumentPart");
+    BEGIN
+      CurrentMainDocumentPart := DotNetMainDocumentPart;
+    END;
+
+    [External]
+    PROCEDURE AddHyperlinkRelationship@3(VAR Uri@1000 : Codeunit 3024;IsExternal@1001 : Boolean;VAR CreatedHyperlinkRelationship@1002 : Codeunit 50034);
+    VAR
+      DotNetUri@1003 : DotNet "'System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089'.System.Uri";
+      DotNetHyperlinkRelationship@1004 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Packaging.HyperlinkRelationship";
+    BEGIN
+      Uri.GetUri(DotNetUri);
+      DotNetHyperlinkRelationship := DotNetMainDocumentPart.AddHyperlinkRelationship(DotNetUri, IsExternal);
+      CreatedHyperlinkRelationship.SetHyperlinkRelationship(DotNetHyperlinkRelationship);
+    END;
+
+    [External]
+    PROCEDURE AddNumberingDefinitionsPart@4(VAR CreatedNumberingDefinitionsPart@1000 : Codeunit 50070);
+    VAR
+      DotNetNumberingDefinitionsPart@1001 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Packaging.NumberingDefinitionsPart";
+      DotNetObject@1002 : DotNet "'mscorlib'.System.Object";
+    BEGIN
+      //Normally is should have been something as simple as:
+      //DotNetNumberingDefinitionsPart := DotNetMainDocumentPart.AddNewPart<NumberingDefinitionsPart>();
+      //But since NAV have no such thing as generics support, I need to fallback to reflection calls:
+      OpenXmlDotNetHelper.AddPartGeneric(DotNetMainDocumentPart, GETDOTNETTYPE(DotNetNumberingDefinitionsPart), DotNetObject);
+      CreatedNumberingDefinitionsPart.SetNumberingDefinitionsPart(DotNetObject);
+    END;
+
+    [External]
+    PROCEDURE NumberingDefinitionsPart@6(VAR WordNumberingDefinitionPart@1000 : Codeunit 50070);
+    BEGIN
+      WordNumberingDefinitionPart.SetNumberingDefinitionsPart(DotNetMainDocumentPart.NumberingDefinitionsPart);
+    END;
+
+    [External]
+    PROCEDURE AddStyleDefinitionsPart@7(VAR CreatedStyleDefinitionsPart@1000 : Codeunit 50041);
+    VAR
+      DotNetStyleDefinitionsPart@1001 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Packaging.StyleDefinitionsPart";
+      DotNetObject@1002 : DotNet "'mscorlib'.System.Object";
+    BEGIN
+      //Normally is should have been something as simple as:
+      //DotNetStyleDefinitionsPart := DotNetMainDocumentPart.AddNewPart<StyleDefinitionsPart>();
+      //But since NAV have no such thing as generics support, I need to fallback to reflection calls:
+      OpenXmlDotNetHelper.AddPartGeneric(DotNetMainDocumentPart, GETDOTNETTYPE(DotNetStyleDefinitionsPart), DotNetObject);
+      CreatedStyleDefinitionsPart.SetStyleDefinitionsPart(DotNetObject);
+    END;
+
+    [External]
+    PROCEDURE StyleDefinitionsPart@9(VAR WordStyleDefinitionPart@1000 : Codeunit 50041);
+    BEGIN
+      WordStyleDefinitionPart.SetStyleDefinitionsPart(DotNetMainDocumentPart.StyleDefinitionsPart);
+    END;
+
+    [External]
+    PROCEDURE AddImagePart@10(VAR ImagePartType@1000 : Codeunit 50078;VAR CreatedImagePart@1001 : Codeunit 50042);
+    VAR
+      DotNetImagePartType@1002 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Packaging.ImagePartType";
+      DotNetImagePart@1003 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Packaging.ImagePart";
+    BEGIN
+      ImagePartType.GetImagePartType(DotNetImagePartType);
+      DotNetImagePart := DotNetMainDocumentPart.AddImagePart(DotNetImagePartType);
+      CreatedImagePart.SetImagePart(DotNetImagePart);
+    END;
+
+    [External]
+    PROCEDURE GetIdOfImagePart@11(VAR ImagePart@1000 : Codeunit 50042) : Text;
+    VAR
+      DotNetImagePart@1001 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Packaging.ImagePart";
+    BEGIN
+      ImagePart.GetImagePart(DotNetImagePart);
+      EXIT(DotNetMainDocumentPart.GetIdOfPart(DotNetImagePart));
+    END;
+
+    [External]
+    PROCEDURE SetDocument@12(VAR WordDocument@1000 : Codeunit 50020);
+    VAR
+      DotNetDocument@1001 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.Document";
+    BEGIN
+      WordDocument.GetDocument(DotNetDocument);
+      DotNetMainDocumentPart.Document := DotNetDocument;
+    END;
+
+    [External]
+    PROCEDURE Document@13(VAR DotNetWordDocument@1000 : Codeunit 50020);
+    VAR
+      DotNetDocument@1001 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.Document";
+    BEGIN
+      DotNetDocument := DotNetMainDocumentPart.Document;
+      DotNetWordDocument.SetDocument(DotNetDocument);
+    END;
+
+    BEGIN
+    END.
+  }
+}
+

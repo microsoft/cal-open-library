@@ -1,0 +1,58 @@
+OBJECT Codeunit 50070 DotNet_Word.NumberingDefinitio
+{
+  OBJECT-PROPERTIES
+  {
+    Date=;
+    Time=;
+    Version List=;
+  }
+  PROPERTIES
+  {
+    OnRun=BEGIN
+          END;
+
+  }
+  CODE
+  {
+    VAR
+      DotNetNumberingDefinitionsPart@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Packaging.NumberingDefinitionsPart";
+
+    [External]
+    PROCEDURE SetNumbering@1(VAR WordNumbering@1000 : Codeunit 50071);
+    VAR
+      DotNetNumbering@1001 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.Numbering";
+    BEGIN
+      WordNumbering.GetNumbering(DotNetNumbering);
+      DotNetNumberingDefinitionsPart.Numbering := DotNetNumbering;
+    END;
+
+    [External]
+    PROCEDURE Numbering@2(VAR WordNumbering@1000 : Codeunit 50071);
+    VAR
+      DotNetNumbering@1001 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Wordprocessing.Numbering";
+    BEGIN
+      DotNetNumbering := DotNetNumberingDefinitionsPart.Numbering;
+      WordNumbering.SetNumbering(DotNetNumbering);
+    END;
+
+    [External]
+    PROCEDURE IsDotNetNull@3() : Boolean;
+    BEGIN
+      EXIT(ISNULL(DotNetNumberingDefinitionsPart));
+    END;
+
+    PROCEDURE SetNumberingDefinitionsPart@4(NewDotNetNumberingDefinitionsPart@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Packaging.NumberingDefinitionsPart");
+    BEGIN
+      DotNetNumberingDefinitionsPart := NewDotNetNumberingDefinitionsPart;
+    END;
+
+    PROCEDURE GetNumberingDefinitionsPart@5(VAR CurrentDotNetNumberingDefinitionsPart@1000 : DotNet "'DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35'.DocumentFormat.OpenXml.Packaging.NumberingDefinitionsPart");
+    BEGIN
+      CurrentDotNetNumberingDefinitionsPart := DotNetNumberingDefinitionsPart;
+    END;
+
+    BEGIN
+    END.
+  }
+}
+
